@@ -3,11 +3,12 @@
 // Server-verified transaction tracking and payment auditing
 // ==============================================================================
 
+import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Badge, StatusBadge } from "@/components/ui/badge";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { CreditCard, CheckCircle2, AlertCircle } from "lucide-react";
+import { CreditCard, CheckCircle2, AlertCircle, BarChart3 } from "lucide-react";
 
 export default function AdminPaymentsPage() {
   const payments = [
@@ -48,14 +49,23 @@ export default function AdminPaymentsPage() {
 
   return (
     <div className="space-y-6 max-w-6xl">
-      <div>
-        <h2 className="text-xl font-bold uppercase tracking-wide text-white flex items-center gap-2">
-          <CreditCard className="h-5 w-5 text-emerald-400" />
-          <span>Payment Ledger & Gateway Audit</span>
-        </h2>
-        <p className="text-xs text-slate-400 mt-1">
-          Strict server-side payment verification. Frontend payment callbacks are never trusted blindly without cryptographic gateway confirmation.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-xl font-bold uppercase tracking-wide text-white flex items-center gap-2">
+            <CreditCard className="h-5 w-5 text-emerald-400" />
+            <span>Payment Ledger & Gateway Audit</span>
+          </h2>
+          <p className="text-xs text-slate-400 mt-1">
+            Strict server-side payment verification. Frontend payment callbacks are never trusted blindly without cryptographic gateway confirmation.
+          </p>
+        </div>
+
+        <Link href="/admin/reconciliation">
+          <Button variant="primary" size="sm" className="text-xs font-bold uppercase">
+            <BarChart3 className="h-4 w-4 mr-1.5" />
+            <span>Financial Reconciliation</span>
+          </Button>
+        </Link>
       </div>
 
       <Card className="border-slate-800 bg-slate-900/60 p-0 overflow-hidden">

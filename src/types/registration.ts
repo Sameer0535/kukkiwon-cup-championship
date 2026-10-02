@@ -220,5 +220,8 @@ export interface RegistrationWithDetails extends Registration {
   category?: Category | null;
   academy?: Academy | null;
   documentReadiness?: import('./document').DocumentReadinessSummary;
+  paymentStatus?: import('./payment').PaymentOrderStatus;
+  paymentAmountFormatted?: string;
+  hasInvoice?: boolean;
 }
 

@@ -32,6 +32,8 @@ import {
   LogOut,
   X,
   FileText,
+  CreditCard,
+  Receipt,
 } from "lucide-react";
 
 export default function MyRegistrationDashboardPage() {
@@ -159,6 +161,21 @@ export default function MyRegistrationDashboardPage() {
         return <Badge variant="cyan">{readiness.uploaded}/{readiness.required} In Review</Badge>;
       default:
         return <Badge variant="outline">{readiness.uploaded}/{readiness.required} Uploaded</Badge>;
+    }
+  };
+
+  const getPaymentStatusBadge = (status?: string) => {
+    switch (status) {
+      case "PAID":
+        return <Badge variant="gold">Paid & Verified</Badge>;
+      case "REFUNDED":
+        return <Badge variant="outline">Fee Refunded</Badge>;
+      case "PARTIALLY_REFUNDED":
+        return <Badge variant="outline">Partially Refunded</Badge>;
+      case "FAILED":
+        return <Badge variant="danger">Payment Failed</Badge>;
+      default:
+        return <Badge variant="cyan">Unpaid / Pending</Badge>;
     }
   };
 
@@ -322,6 +339,7 @@ export default function MyRegistrationDashboardPage() {
                       <th className="py-4 px-4">Discipline / Category</th>
                       <th className="py-4 px-4">Registration</th>
                       <th className="py-4 px-4">Document Readiness</th>
+                      <th className="py-4 px-4">Payment Status</th>
                       <th className="py-4 px-6 text-right">Actions</th>
                     </tr>
                   </thead>
@@ -371,8 +389,50 @@ export default function MyRegistrationDashboardPage() {
                               </Link>
                             </div>
                           </td>
+                          <td className="py-4 px-4">
+                            <div className="flex flex-col gap-1 items-start">
+                              {getPaymentStatusBadge(reg.paymentStatus)}
+                              <Link
+                                href={`/my-registration/${reg.id}/payment`}
+                                className="text-[11px] text-[#D4AF37] hover:text-[#E5BF42] font-semibold flex items-center gap-1 transition-colors"
+                              >
+                                {reg.paymentStatus === "PAID" ? (
+                                  <>
+                                    <Receipt className="w-3 h-3" />
+                                    <span>Receipt</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <CreditCard className="w-3 h-3" />
+                                    <span>Pay Fee</span>
+                                  </>
+                                )}
+                              </Link>
+                            </div>
+                          </td>
                           <td className="py-4 px-6 text-right">
                             <div className="flex items-center justify-end gap-2">
+                              {!isDraft && (
+                                <Link href={`/my-registration/${reg.id}/payment`}>
+                                  <Button
+                                    variant={reg.paymentStatus === "PAID" ? "outline" : "primary"}
+                                    size="sm"
+                                    className="text-[11px] uppercase font-bold py-1 h-8"
+                                  >
+                                    {reg.paymentStatus === "PAID" ? (
+                                      <>
+                                        <Receipt className="h-3.5 w-3.5 mr-1 text-[#D4AF37]" />
+                                        <span>Receipt</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <CreditCard className="h-3.5 w-3.5 mr-1" />
+                                        <span>Pay Fee</span>
+                                      </>
+                                    )}
+                                  </Button>
+                                </Link>
+                              )}
                               <Link href={`/my-registration/${reg.id}/documents`}>
                                 <Button
                                   variant="outline"
@@ -562,6 +622,10 @@ export default function MyRegistrationDashboardPage() {
                 <span className="text-slate-400">Document Readiness:</span>
                 <div>{getDocReadinessBadge(selectedReg.documentReadiness)}</div>
               </div>
+              <div className="py-2 flex justify-between items-center">
+                <span className="text-slate-400">Payment Status:</span>
+                <div>{getPaymentStatusBadge(selectedReg.paymentStatus)}</div>
+              </div>
               <div className="pt-2 flex justify-between">
                 <span className="text-slate-400">Registered At:</span>
                 <span className="text-slate-300">{formatDateTime(selectedReg.registered_at)}</span>
@@ -569,16 +633,37 @@ export default function MyRegistrationDashboardPage() {
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-              <Link href={`/my-registration/${selectedReg.id}/documents`}>
-                <Button
-                  variant="primary"
-                  size="md"
-                  className="text-xs uppercase font-bold"
-                >
-                  <FileText className="h-4 w-4 mr-1.5" />
-                  <span>Manage Documents</span>
-                </Button>
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link href={`/my-registration/${selectedReg.id}/payment`}>
+                  <Button
+                    variant={selectedReg.paymentStatus === "PAID" ? "outline" : "primary"}
+                    size="md"
+                    className="text-xs uppercase font-bold"
+                  >
+                    {selectedReg.paymentStatus === "PAID" ? (
+                      <>
+                        <Receipt className="h-4 w-4 mr-1.5 text-[#D4AF37]" />
+                        <span>View Receipt</span>
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="h-4 w-4 mr-1.5" />
+                        <span>Pay Registration Fee</span>
+                      </>
+                    )}
+                  </Button>
+                </Link>
+                <Link href={`/my-registration/${selectedReg.id}/documents`}>
+                  <Button
+                    variant="outline"
+                    size="md"
+                    className="text-xs uppercase font-bold border-slate-700"
+                  >
+                    <FileText className="h-4 w-4 mr-1.5" />
+                    <span>Documents</span>
+                  </Button>
+                </Link>
+              </div>
               <Button
                 variant="outline"
                 size="md"

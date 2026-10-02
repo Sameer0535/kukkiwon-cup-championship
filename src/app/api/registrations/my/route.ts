@@ -7,6 +7,7 @@ import { NextResponse } from "next/server";
 import { getRegistrantSession } from "@/lib/server-auth";
 import { RegistrationFlowService } from "@/server/services/registration-flow.service";
 import { DocumentManagementService } from "@/server/services/document-management.service";
+import { PaymentService } from "@/server/services/payment.service";
 
 export async function GET(request: Request) {
   try {
@@ -20,12 +21,22 @@ export async function GET(request: Request) {
 
     const registrations = await RegistrationFlowService.listUserRegistrations(session.userId);
 
-    // Requirement 11: Calculate document readiness for each registration
+    // Requirement 11 & Phase 5: Calculate document readiness & payment status for each registration
     const enriched = await Promise.all(
       registrations.map(async (r) => {
         try {
-          const readiness = await DocumentManagementService.calculateDocumentReadiness(r.id, session.userId);
-          return { ...r, documentReadiness: readiness };
+          const [readiness, paymentInfo] = await Promise.all([
+            DocumentManagementService.calculateDocumentReadiness(r.id, session.userId).catch(() => undefined),
+            PaymentService.getPaymentStatus(r.id, session.userId).catch(() => undefined),
+          ]);
+
+          return {
+            ...r,
+            documentReadiness: readiness,
+            paymentStatus: paymentInfo?.paymentStatus || (r.status === "PAID" ? "PAID" : "PENDING"),
+            paymentAmountFormatted: paymentInfo?.feeCalculation?.formattedTotal,
+            hasInvoice: !!paymentInfo?.invoice,
+          };
         } catch {
           return r;
         }
