@@ -40,6 +40,61 @@ export function generateRegistrationNumber(shortCode = "KC26"): string {
 }
 
 /**
+ * Generates human-readable athlete registration reference
+ * Format: KKC26-ATH-[6-DIGIT-RANDOM], e.g. KKC26-ATH-049812
+ */
+export function generateAthleteRegNumber(prefix = "KKC26"): string {
+  const chars = "0123456789";
+  let random = "";
+  for (let i = 0; i < 6; i++) {
+    random += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return `${prefix}-ATH-${random}`;
+}
+
+/**
+ * Generates human-readable coach registration reference
+ * Format: KKC26-COA-[6-DIGIT-RANDOM], e.g. KKC26-COA-012938
+ */
+export function generateCoachRegNumber(prefix = "KKC26"): string {
+  const chars = "0123456789";
+  let random = "";
+  for (let i = 0; i < 6; i++) {
+    random += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return `${prefix}-COA-${random}`;
+}
+
+/**
+ * Generates human-readable academy code
+ * Format: KKC26-ACA-[6-DIGIT-RANDOM], e.g. KKC26-ACA-001042
+ */
+export function generateAcademyCode(prefix = "KKC26"): string {
+  const chars = "0123456789";
+  let random = "";
+  for (let i = 0; i < 6; i++) {
+    random += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return `${prefix}-ACA-${random}`;
+}
+
+/**
+ * Calculates current age from a Date or ISO string
+ */
+export function calculateAge(dob: Date | string): number {
+  const birthDate = new Date(dob);
+  if (isNaN(birthDate.getTime())) return 0;
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return Math.max(0, age);
+}
+
+
+/**
  * Formats currency values in INR or USD
  */
 export function formatCurrency(amount: number | string, currency = "INR"): string {

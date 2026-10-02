@@ -158,6 +158,88 @@ async function main() {
     },
   });
 
+  // 6. Seed Initial Recognized Academies (Requirement 8 & 9)
+  console.log("➡️ Seeding initial recognized academies...");
+  const { INITIAL_ACADEMIES } = await import("../src/config/academies");
+  for (const aca of INITIAL_ACADEMIES) {
+    await prisma.academy.upsert({
+      where: { code: aca.code },
+      update: {
+        name: aca.name,
+        short_name: aca.short_name,
+        country: aca.country,
+        state: aca.state,
+        city: aca.city,
+        address: aca.address,
+        email: aca.email,
+        phone: aca.phone,
+        website: aca.website,
+        head_coach_name: aca.head_coach_name,
+        status: aca.status,
+      },
+      create: {
+        code: aca.code,
+        name: aca.name,
+        short_name: aca.short_name,
+        country: aca.country,
+        state: aca.state,
+        city: aca.city,
+        address: aca.address,
+        email: aca.email,
+        phone: aca.phone,
+        website: aca.website,
+        head_coach_name: aca.head_coach_name,
+        status: aca.status,
+      },
+    });
+  }
+
+  // 7. Seed Initial Championship Categories (Requirement 4 & 5)
+  console.log("➡️ Seeding championship competition categories...");
+  const { INITIAL_CATEGORIES } = await import("../src/config/categories");
+  for (const cat of INITIAL_CATEGORIES) {
+    await prisma.category.upsert({
+      where: {
+        championship_id_code: {
+          championship_id: championship.id,
+          code: cat.code,
+        },
+      },
+      update: {
+        name: cat.name,
+        discipline: cat.discipline,
+        division: cat.division,
+        gender: cat.gender as any,
+        min_age: cat.min_age,
+        max_age: cat.max_age,
+        min_weight: cat.min_weight,
+        max_weight: cat.max_weight,
+        belt_requirement: cat.belt_requirement,
+        registration_fee: cat.registration_fee,
+        max_participants: cat.max_participants,
+        display_order: cat.display_order,
+        is_active: cat.is_active,
+      },
+      create: {
+        championship_id: championship.id,
+        code: cat.code,
+        name: cat.name,
+        discipline: cat.discipline,
+        division: cat.division,
+        gender: cat.gender as any,
+        min_age: cat.min_age,
+        max_age: cat.max_age,
+        min_weight: cat.min_weight,
+        max_weight: cat.max_weight,
+        belt_requirement: cat.belt_requirement,
+        registration_fee: cat.registration_fee,
+        max_participants: cat.max_participants,
+        display_order: cat.display_order,
+        is_active: cat.is_active,
+      },
+    });
+  }
+
   console.log("✅ [Kukkiwon Cup] Seeding completed successfully!");
 }
 

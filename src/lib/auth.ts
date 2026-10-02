@@ -95,3 +95,57 @@ export async function verifyAdminToken(token: string): Promise<AdminSession | nu
 }
 
 export { SESSION_COOKIE_NAME };
+
+export const REGISTRANT_COOKIE_NAME = "kukkiwon_user_token";
+
+export interface UserSession {
+  userId: string;
+  email: string;
+  fullName: string;
+  phone?: string | null;
+  role: string;
+  expiresAt: number;
+}
+
+/**
+ * Creates a signed JWT session token for authenticated registrants
+ */
+export async function createUserToken(user: {
+  id: string;
+  email: string;
+  full_name: string;
+  phone?: string | null;
+  role?: string;
+}): Promise<string> {
+  return new SignJWT({
+    userId: user.id,
+    email: user.email,
+    fullName: user.full_name,
+    phone: user.phone || null,
+    role: user.role || "REGISTRANT",
+  })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("30d")
+    .sign(JWT_KEY);
+}
+
+/**
+ * Verifies and decodes a registrant user session token
+ */
+export async function verifyUserToken(token: string): Promise<UserSession | null> {
+  try {
+    const { payload } = await jwtVerify(token, JWT_KEY);
+    return {
+      userId: payload.userId as string,
+      email: payload.email as string,
+      fullName: payload.fullName as string,
+      phone: (payload.phone as string) || null,
+      role: (payload.role as string) || "REGISTRANT",
+      expiresAt: (payload.exp as number) * 1000,
+    };
+  } catch {
+    return null;
+  }
+}
+

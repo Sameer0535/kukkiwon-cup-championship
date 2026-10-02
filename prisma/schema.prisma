@@ -34,6 +34,12 @@ enum Gender {
   OTHER
 }
 
+enum ParticipantType {
+  ATHLETE
+  COACH
+  ACADEMY_TEAM
+}
+
 enum ParticipantStatus {
   ACTIVE
   INACTIVE
@@ -42,11 +48,13 @@ enum ParticipantStatus {
 
 enum RegistrationStatus {
   DRAFT
+  SUBMITTED
+  UNDER_REVIEW
   PENDING_PAYMENT
   PAYMENT_FAILED
   PAID
-  UNDER_REVIEW
   CONFIRMED
+  APPROVED
   REJECTED
   CANCELLED
 }
@@ -85,7 +93,29 @@ enum AdminRole {
 }
 
 // ------------------------------------------------------------------------------
-// 1. CHAMPIONSHIPS (Multi-Championship Scalable Architecture)
+// 1. REGISTRANT / USER ACCOUNTS (Phase 3 Authentication)
+// ------------------------------------------------------------------------------
+model User {
+  id            String         @id @default(uuid()) @db.Uuid
+  email         String         @unique @db.VarChar(255)
+  password_hash String         @db.VarChar(255)
+  full_name     String         @db.VarChar(255)
+  phone         String?        @db.VarChar(50)
+  role          String         @default("REGISTRANT") @db.VarChar(50)
+  created_at    DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime       @updatedAt @db.Timestamptz(6)
+
+  // Relationships
+  registrations Registration[]
+  academies     Academy[]      @relation("AcademyManager")
+  participants  Participant[]
+
+  @@index([email])
+  @@map("users")
+}
+
+// ------------------------------------------------------------------------------
+// 2. CHAMPIONSHIPS (Multi-Championship Scalable Architecture)
 // ------------------------------------------------------------------------------
 model Championship {
   id                 String             @id @default(uuid()) @db.Uuid
@@ -120,6 +150,7 @@ model Championship {
 
   // Relationships
   registrations      Registration[]
+  categories         Category[]
   site_settings      SiteSetting?
   terms_versions     TermsVersion[]
 
@@ -130,10 +161,85 @@ model Championship {
 }
 
 // ------------------------------------------------------------------------------
-// 2. PARTICIPANTS (Master Participant Profile)
+// 3. ACADEMIES / TEAMS (Organization Directory)
+// ------------------------------------------------------------------------------
+model Academy {
+  id                     String         @id @default(uuid()) @db.Uuid
+  code                   String         @unique @db.VarChar(60) // e.g. KKC26-ACA-0001
+  name                   String         @db.VarChar(255)
+  short_name             String?        @db.VarChar(50)
+  country                String         @default("India") @db.VarChar(100)
+  state                  String         @db.VarChar(100)
+  city                   String         @db.VarChar(100)
+  address                String?        @db.Text
+  email                  String?        @db.VarChar(255)
+  phone                  String?        @db.VarChar(50)
+  website                String?        @db.VarChar(255)
+  logo_url               String?        @db.Text
+  head_coach_name        String?        @db.VarChar(255)
+  
+  // Representative details
+  representative_name    String?        @db.VarChar(255)
+  representative_email   String?        @db.VarChar(255)
+  representative_phone   String?        @db.VarChar(50)
+  representative_role    String?        @db.VarChar(100)
+  
+  status                 String         @default("APPROVED") @db.VarChar(50) // APPROVED, PENDING_REVIEW
+  manager_user_id        String?        @db.Uuid
+  created_at             DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime       @updatedAt @db.Timestamptz(6)
+
+  // Relationships
+  manager                User?          @relation("AcademyManager", fields: [manager_user_id], references: [id], onDelete: SetNull)
+  participants           Participant[]
+  registrations          Registration[]
+
+  @@index([code])
+  @@index([name])
+  @@index([city, state])
+  @@map("academies")
+}
+
+// ------------------------------------------------------------------------------
+// 4. CATEGORIES (Discipline, Division & Weight Rules)
+// ------------------------------------------------------------------------------
+model Category {
+  id                 String         @id @default(uuid()) @db.Uuid
+  championship_id    String         @db.Uuid
+  code               String         @db.VarChar(60) // e.g. KY-SEN-M-U58
+  name               String         @db.VarChar(255) // e.g. Senior Male -58kg
+  discipline         String         @db.VarChar(50)  // KYORUGI, POOMSAE, DEMO
+  division           String         @db.VarChar(50)  // SENIOR, JUNIOR, CADET, SUB_JUNIOR
+  gender             Gender
+  min_age            Int?
+  max_age            Int?
+  min_weight         Decimal?       @db.Decimal(5, 2)
+  max_weight         Decimal?       @db.Decimal(5, 2)
+  belt_requirement   String?        @db.VarChar(100) // e.g. 1ST_DAN_ABOVE, COLOR_BELT, ANY
+  registration_fee   Decimal?       @db.Decimal(10, 2)
+  max_participants   Int?
+  display_order      Int            @default(0)
+  is_active          Boolean        @default(true)
+  created_at         DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime       @updatedAt @db.Timestamptz(6)
+
+  // Relationships
+  championship       Championship   @relation(fields: [championship_id], references: [id], onDelete: Cascade)
+  registrations      Registration[]
+
+  @@unique([championship_id, code])
+  @@index([championship_id, discipline, division])
+  @@index([is_active])
+  @@map("categories")
+}
+
+// ------------------------------------------------------------------------------
+// 5. PARTICIPANTS (Master Participant Profile)
 // ------------------------------------------------------------------------------
 model Participant {
   id                  String            @id @default(uuid()) @db.Uuid
+  user_id             String?           @db.Uuid
+  academy_id          String?           @db.Uuid
   public_id           String            @unique @db.VarChar(50) // Non-guessable public ID, e.g. KUKKI-2026-X8F9Q
   full_name           String            @db.VarChar(255)
   date_of_birth       DateTime          @db.Date
@@ -162,6 +268,8 @@ model Participant {
   updated_at          DateTime          @updatedAt @db.Timestamptz(6)
 
   // Relationships
+  user                User?             @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  academy             Academy?          @relation(fields: [academy_id], references: [id], onDelete: SetNull)
   registrations       Registration[]
   documents           Document[]
   id_cards            IdCard[]
@@ -174,41 +282,64 @@ model Participant {
 }
 
 // ------------------------------------------------------------------------------
-// 3. REGISTRATIONS (Championship <-> Participant Linkage)
+// 6. REGISTRATIONS (Championship <-> Participant Linkage)
 // ------------------------------------------------------------------------------
 model Registration {
   id                  String             @id @default(uuid()) @db.Uuid
-  registration_number String             @unique @db.VarChar(60) // e.g. REG-KC26-A1098
+  user_id             String?            @db.Uuid
+  registration_number String             @unique @db.VarChar(60) // e.g. KKC26-ATH-000001
   championship_id     String             @db.Uuid
   participant_id      String             @db.Uuid
+  participant_type    ParticipantType    @default(ATHLETE)
   status              RegistrationStatus @default(DRAFT)
+  
+  // Discipline & Category Linkage
+  discipline          String?            @db.VarChar(50)  // KYORUGI, POOMSAE, DEMO
+  category_id         String?            @db.Uuid
+  academy_id          String?            @db.Uuid
+  weight_kg           Decimal?           @db.Decimal(5, 2)
+  belt_rank           String?            @db.VarChar(100)
+  
+  // Coach specific
+  coach_role          String?            @db.VarChar(100)
+  coach_qualification String?            @db.Text
+
+  // Multi-step Draft State (JSON serialized draft for save & resume later)
+  draft_data          String?            @db.Text
+
   registered_at       DateTime           @default(now()) @db.Timestamptz(6)
+  submitted_at        DateTime?          @db.Timestamptz(6)
   confirmed_at        DateTime?          @db.Timestamptz(6)
   
   // Legal & Terms compliance tracking
-  terms_version       String             @db.VarChar(20)
-  terms_accepted_at   DateTime           @db.Timestamptz(6)
+  terms_version       String             @default("v1.0") @db.VarChar(20)
+  terms_accepted_at   DateTime           @default(now()) @db.Timestamptz(6)
   
   notes               String?            @db.Text
   created_at          DateTime           @default(now()) @db.Timestamptz(6)
   updated_at          DateTime           @updatedAt @db.Timestamptz(6)
 
   // Relationships
+  user                User?              @relation(fields: [user_id], references: [id], onDelete: SetNull)
   championship        Championship       @relation(fields: [championship_id], references: [id], onDelete: Restrict)
   participant         Participant        @relation(fields: [participant_id], references: [id], onDelete: Cascade)
+  category            Category?          @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  academy             Academy?           @relation(fields: [academy_id], references: [id], onDelete: SetNull)
   payments            Payment[]
   documents           Document[]
   id_card             IdCard?
 
+  @@index([user_id])
   @@index([championship_id])
   @@index([participant_id])
+  @@index([participant_type])
   @@index([status])
   @@index([registration_number])
   @@map("registrations")
 }
 
 // ------------------------------------------------------------------------------
-// 4. DESIGNATIONS (Configurable Role Table - Admin Managed)
+// 7. DESIGNATIONS (Configurable Role Table - Admin Managed)
 // ------------------------------------------------------------------------------
 model Designation {
   id                   String   @id @default(uuid()) @db.Uuid
@@ -227,7 +358,7 @@ model Designation {
 }
 
 // ------------------------------------------------------------------------------
-// 5. NATIONALITIES (Standardized Country & Flag Mapping)
+// 8. NATIONALITIES (Standardized Country & Flag Mapping)
 // ------------------------------------------------------------------------------
 model Nationality {
   id              String   @id @default(uuid()) @db.Uuid
@@ -246,7 +377,7 @@ model Nationality {
 }
 
 // ------------------------------------------------------------------------------
-// 6. DOCUMENTS (Private Secure Storage for Verification)
+// 9. DOCUMENTS (Private Secure Storage for Verification)
 // ------------------------------------------------------------------------------
 model Document {
   id                  String                     @id @default(uuid()) @db.Uuid
@@ -276,7 +407,7 @@ model Document {
 }
 
 // ------------------------------------------------------------------------------
-// 7. PAYMENTS (Secure Payment Records & Gateway Verification)
+// 10. PAYMENTS (Secure Payment Records & Gateway Verification)
 // ------------------------------------------------------------------------------
 model Payment {
   id              String        @id @default(uuid()) @db.Uuid
@@ -306,7 +437,7 @@ model Payment {
 }
 
 // ------------------------------------------------------------------------------
-// 8. ID CARDS (Accreditation & Badge Generation)
+// 11. ID CARDS (Accreditation & Badge Generation)
 // ------------------------------------------------------------------------------
 model IdCard {
   id                String       @id @default(uuid()) @db.Uuid
@@ -333,7 +464,7 @@ model IdCard {
 }
 
 // ------------------------------------------------------------------------------
-// 9. ADMIN USERS (Role-Based Access Control)
+// 12. ADMIN USERS (Role-Based Access Control)
 // ------------------------------------------------------------------------------
 model AdminUser {
   id            String      @id @default(uuid()) @db.Uuid
@@ -355,7 +486,7 @@ model AdminUser {
 }
 
 // ------------------------------------------------------------------------------
-// 10. AUDIT LOGS (Immutable Traceability of Admin Operations)
+// 13. AUDIT LOGS (Immutable Traceability of Admin Operations)
 // ------------------------------------------------------------------------------
 model AuditLog {
   id            String     @id @default(uuid()) @db.Uuid
@@ -380,7 +511,7 @@ model AuditLog {
 }
 
 // ------------------------------------------------------------------------------
-// 11. SITE SETTINGS & CONTENT ARCHITECTURE (CMS Model)
+// 14. SITE SETTINGS & CONTENT ARCHITECTURE (CMS Model)
 // ------------------------------------------------------------------------------
 model SiteSetting {
   id               String        @id @default(uuid()) @db.Uuid
@@ -409,7 +540,7 @@ model SiteSetting {
 }
 
 // ------------------------------------------------------------------------------
-// 12. TERMS VERSIONS (Auditable Versioning for Legal Terms Acceptance)
+// 15. TERMS VERSIONS (Auditable Versioning for Legal Terms Acceptance)
 // ------------------------------------------------------------------------------
 model TermsVersion {
   id              String        @id @default(uuid()) @db.Uuid

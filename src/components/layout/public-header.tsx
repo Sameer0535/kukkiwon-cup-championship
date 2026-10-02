@@ -104,6 +104,12 @@ export function PublicHeader() {
 
           {/* DESKTOP REGISTER CTA (Prominent) */}
           <div className="hidden sm:flex items-center gap-4">
+            <Link
+              href="/my-registration"
+              className="text-xs uppercase font-bold tracking-wider text-slate-300 hover:text-white transition-colors"
+            >
+              My Registrations
+            </Link>
             <Link href="/register">
               <Button
                 variant="gold"
@@ -190,7 +196,7 @@ export function PublicHeader() {
             </div>
 
             {/* Bottom Actions */}
-            <div className="space-y-4 pt-6 border-t border-slate-800">
+            <div className="space-y-3 pt-6 border-t border-slate-800">
               <Link
                 href="/register"
                 onClick={() => setMobileMenuOpen(false)}
@@ -200,6 +206,14 @@ export function PublicHeader() {
                   <span>Register Now</span>
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
+              </Link>
+
+              <Link
+                href="/my-registration"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block w-full text-center py-2 text-xs uppercase font-bold text-slate-300 hover:text-white"
+              >
+                My Registrations
               </Link>
 
               <div className="flex items-center justify-center gap-2 text-[11px] text-slate-500">
