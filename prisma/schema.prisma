@@ -1,0 +1,432 @@
+// ==============================================================================
+// KUKKIWON CUP CHAMPIONSHIP - DATABASE SCHEMA
+// Standalone relational architecture for Kukkiwon North India x Kyorix Sports Technology
+// Database: PostgreSQL / Supabase PostgreSQL
+// ==============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ------------------------------------------------------------------------------
+// ENUMS
+// ------------------------------------------------------------------------------
+
+enum ChampionshipStatus {
+  DRAFT
+  UPCOMING
+  REGISTRATION_OPEN
+  REGISTRATION_CLOSED
+  ONGOING
+  COMPLETED
+  ARCHIVED
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum ParticipantStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum RegistrationStatus {
+  DRAFT
+  PENDING_PAYMENT
+  PAYMENT_FAILED
+  PAID
+  UNDER_REVIEW
+  CONFIRMED
+  REJECTED
+  CANCELLED
+}
+
+enum DocumentVerificationStatus {
+  NOT_REQUIRED
+  PENDING
+  UPLOADED
+  VERIFIED
+  REJECTED
+}
+
+enum PaymentStatus {
+  CREATED
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum IdCardStatus {
+  NOT_GENERATED
+  GENERATED
+  REVOKED
+  REISSUED
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  EVENT_ADMIN
+  REGISTRATION_ADMIN
+  FINANCE_ADMIN
+  DOCUMENT_ADMIN
+  CONTENT_ADMIN
+  VIEWER
+}
+
+// ------------------------------------------------------------------------------
+// 1. CHAMPIONSHIPS (Multi-Championship Scalable Architecture)
+// ------------------------------------------------------------------------------
+model Championship {
+  id                 String             @id @default(uuid()) @db.Uuid
+  slug               String             @unique @db.VarChar(100)
+  name               String             @db.VarChar(255)
+  short_name         String?            @db.VarChar(50)
+  subtitle           String?            @db.VarChar(255)
+  description        String?            @db.Text
+  status             ChampionshipStatus @default(DRAFT)
+  start_date         DateTime           @db.Timestamptz(6)
+  end_date           DateTime           @db.Timestamptz(6)
+  venue              String             @db.VarChar(255)
+  city               String             @db.VarChar(100)
+  state              String             @db.VarChar(100)
+  country            String             @default("India") @db.VarChar(100)
+  registration_open  DateTime           @db.Timestamptz(6)
+  registration_close DateTime           @db.Timestamptz(6)
+  
+  // Financial & Registration Rules
+  currency           String             @default("INR") @db.VarChar(10)
+  entry_fee_athlete  Decimal            @default(0.00) @db.Decimal(10, 2)
+  entry_fee_coach    Decimal            @default(0.00) @db.Decimal(10, 2)
+  entry_fee_official Decimal            @default(0.00) @db.Decimal(10, 2)
+  
+  // Media & Assets
+  banner_url         String?            @db.Text
+  poster_url         String?            @db.Text
+  rules_document_url String?            @db.Text
+  
+  created_at         DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime           @updatedAt @db.Timestamptz(6)
+
+  // Relationships
+  registrations      Registration[]
+  site_settings      SiteSetting?
+  terms_versions     TermsVersion[]
+
+  @@index([slug])
+  @@index([status])
+  @@index([start_date, end_date])
+  @@map("championships")
+}
+
+// ------------------------------------------------------------------------------
+// 2. PARTICIPANTS (Master Participant Profile)
+// ------------------------------------------------------------------------------
+model Participant {
+  id                  String            @id @default(uuid()) @db.Uuid
+  public_id           String            @unique @db.VarChar(50) // Non-guessable public ID, e.g. KUKKI-2026-X8F9Q
+  full_name           String            @db.VarChar(255)
+  date_of_birth       DateTime          @db.Date
+  gender              Gender
+  nationality         String            @db.VarChar(50) // ISO code or Country Name reference
+  designation         String            @db.VarChar(100) // Configurable designation (e.g. Athlete, Coach)
+  
+  // Academy / Club affiliation
+  academy_name        String?           @db.VarChar(255)
+  academy_country     String?           @db.VarChar(100)
+  academy_state       String?           @db.VarChar(100)
+  academy_city        String?           @db.VarChar(100)
+  
+  // Kukkiwon credentials
+  kukkiwon_id         String?           @db.VarChar(100) // Dan/Poom Certificate Number
+  
+  // Controlled photo access (stored in participant-photos bucket)
+  photo_url           String?           @db.Text
+  
+  // Contact & Status
+  email               String?           @db.VarChar(255)
+  phone               String?           @db.VarChar(50)
+  registration_status ParticipantStatus @default(ACTIVE)
+  
+  created_at          DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime          @updatedAt @db.Timestamptz(6)
+
+  // Relationships
+  registrations       Registration[]
+  documents           Document[]
+  id_cards            IdCard[]
+
+  @@index([public_id])
+  @@index([full_name])
+  @@index([designation])
+  @@index([nationality])
+  @@map("participants")
+}
+
+// ------------------------------------------------------------------------------
+// 3. REGISTRATIONS (Championship <-> Participant Linkage)
+// ------------------------------------------------------------------------------
+model Registration {
+  id                  String             @id @default(uuid()) @db.Uuid
+  registration_number String             @unique @db.VarChar(60) // e.g. REG-KC26-A1098
+  championship_id     String             @db.Uuid
+  participant_id      String             @db.Uuid
+  status              RegistrationStatus @default(DRAFT)
+  registered_at       DateTime           @default(now()) @db.Timestamptz(6)
+  confirmed_at        DateTime?          @db.Timestamptz(6)
+  
+  // Legal & Terms compliance tracking
+  terms_version       String             @db.VarChar(20)
+  terms_accepted_at   DateTime           @db.Timestamptz(6)
+  
+  notes               String?            @db.Text
+  created_at          DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime           @updatedAt @db.Timestamptz(6)
+
+  // Relationships
+  championship        Championship       @relation(fields: [championship_id], references: [id], onDelete: Restrict)
+  participant         Participant        @relation(fields: [participant_id], references: [id], onDelete: Cascade)
+  payments            Payment[]
+  documents           Document[]
+  id_card             IdCard?
+
+  @@index([championship_id])
+  @@index([participant_id])
+  @@index([status])
+  @@index([registration_number])
+  @@map("registrations")
+}
+
+// ------------------------------------------------------------------------------
+// 4. DESIGNATIONS (Configurable Role Table - Admin Managed)
+// ------------------------------------------------------------------------------
+model Designation {
+  id                   String   @id @default(uuid()) @db.Uuid
+  code                 String   @unique @db.VarChar(50) // ATHLETE, COACH, TECHNICAL_OFFICIAL, etc.
+  label                String   @db.VarChar(100)
+  description          String?  @db.Text
+  requires_kukkiwon_id Boolean  @default(false)
+  requires_documents   Boolean  @default(false)
+  display_order        Int      @default(0)
+  is_active            Boolean  @default(true)
+  created_at           DateTime @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime @updatedAt @db.Timestamptz(6)
+
+  @@index([is_active, display_order])
+  @@map("designations")
+}
+
+// ------------------------------------------------------------------------------
+// 5. NATIONALITIES (Standardized Country & Flag Mapping)
+// ------------------------------------------------------------------------------
+model Nationality {
+  id              String   @id @default(uuid()) @db.Uuid
+  name            String   @unique @db.VarChar(100) // e.g. "India", "South Korea"
+  iso_code        String   @unique @db.VarChar(3)   // e.g. "IND", "KOR"
+  iso_alpha2      String   @unique @db.VarChar(2)   // e.g. "IN", "KR"
+  flag_identifier String?  @db.VarChar(50)          // Emoji flag (🇮🇳) or svg asset path
+  display_order   Int      @default(0)
+  is_active       Boolean  @default(true)
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([iso_code])
+  @@index([iso_alpha2])
+  @@index([is_active, display_order])
+  @@map("nationalities")
+}
+
+// ------------------------------------------------------------------------------
+// 6. DOCUMENTS (Private Secure Storage for Verification)
+// ------------------------------------------------------------------------------
+model Document {
+  id                  String                     @id @default(uuid()) @db.Uuid
+  participant_id      String                     @db.Uuid
+  registration_id     String?                    @db.Uuid
+  document_type       String                     @db.VarChar(100) // e.g. AADHAAR_PASSPORT, KUKKIWON_CERTIFICATE
+  file_path           String                     @db.Text // Private path in participant-documents bucket
+  file_name           String                     @db.VarChar(255)
+  mime_type           String                     @db.VarChar(100)
+  file_size           Int                        // Size in bytes
+  verification_status DocumentVerificationStatus @default(PENDING)
+  rejection_reason    String?                    @db.Text
+  uploaded_at         DateTime                   @default(now()) @db.Timestamptz(6)
+  verified_at         DateTime?                  @db.Timestamptz(6)
+  verified_by         String?                    @db.Uuid // AdminUser ID who reviewed
+  created_at          DateTime                   @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime                   @updatedAt @db.Timestamptz(6)
+
+  // Relationships
+  participant         Participant                @relation(fields: [participant_id], references: [id], onDelete: Cascade)
+  registration        Registration?              @relation(fields: [registration_id], references: [id], onDelete: SetNull)
+
+  @@index([participant_id])
+  @@index([registration_id])
+  @@index([verification_status])
+  @@map("documents")
+}
+
+// ------------------------------------------------------------------------------
+// 7. PAYMENTS (Secure Payment Records & Gateway Verification)
+// ------------------------------------------------------------------------------
+model Payment {
+  id              String        @id @default(uuid()) @db.Uuid
+  registration_id String        @db.Uuid
+  provider        String        @default("RAZORPAY") @db.VarChar(50) // RAZORPAY, STRIPE, MANUAL
+  order_id        String?       @db.VarChar(100) // Provider order identifier
+  payment_id      String?       @db.VarChar(100) // Provider transaction/payment ID
+  signature       String?       @db.Text         // Server verification signature
+  amount          Decimal       @db.Decimal(10, 2)
+  currency        String        @default("INR") @db.VarChar(10)
+  status          PaymentStatus @default(CREATED)
+  payment_method  String?       @db.VarChar(50)  // UPI, CARD, NETBANKING
+  paid_at         DateTime?     @db.Timestamptz(6)
+  receipt_url     String?       @db.Text
+  raw_response    String?       @db.Text         // Serialized gateway payload for audit
+  created_at      DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime      @updatedAt @db.Timestamptz(6)
+
+  // Relationships
+  registration    Registration  @relation(fields: [registration_id], references: [id], onDelete: Restrict)
+
+  @@index([registration_id])
+  @@index([order_id])
+  @@index([payment_id])
+  @@index([status])
+  @@map("payments")
+}
+
+// ------------------------------------------------------------------------------
+// 8. ID CARDS (Accreditation & Badge Generation)
+// ------------------------------------------------------------------------------
+model IdCard {
+  id                String       @id @default(uuid()) @db.Uuid
+  participant_id    String       @db.Uuid
+  registration_id   String       @unique @db.Uuid
+  card_number       String       @unique @db.VarChar(60) // e.g. CARD-KC26-0089
+  qr_token          String       @unique @db.VarChar(128) // High-entropy secure cryptographic token
+  card_status       IdCardStatus @default(NOT_GENERATED)
+  generated_at      DateTime?    @db.Timestamptz(6)
+  revoked_at        DateTime?    @db.Timestamptz(6)
+  revocation_reason String?      @db.Text
+  pdf_path          String?      @db.Text
+  created_at        DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime     @updatedAt @db.Timestamptz(6)
+
+  // Relationships
+  participant       Participant  @relation(fields: [participant_id], references: [id], onDelete: Cascade)
+  registration      Registration @relation(fields: [registration_id], references: [id], onDelete: Cascade)
+
+  @@index([card_number])
+  @@index([qr_token])
+  @@index([card_status])
+  @@map("id_cards")
+}
+
+// ------------------------------------------------------------------------------
+// 9. ADMIN USERS (Role-Based Access Control)
+// ------------------------------------------------------------------------------
+model AdminUser {
+  id            String      @id @default(uuid()) @db.Uuid
+  email         String      @unique @db.VarChar(255)
+  password_hash String      @db.VarChar(255)
+  full_name     String      @db.VarChar(255)
+  role          AdminRole   @default(VIEWER)
+  is_active     Boolean     @default(true)
+  last_login_at DateTime?   @db.Timestamptz(6)
+  created_at    DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime    @updatedAt @db.Timestamptz(6)
+
+  // Relationships
+  audit_logs    AuditLog[]
+
+  @@index([email])
+  @@index([role])
+  @@map("admin_users")
+}
+
+// ------------------------------------------------------------------------------
+// 10. AUDIT LOGS (Immutable Traceability of Admin Operations)
+// ------------------------------------------------------------------------------
+model AuditLog {
+  id            String     @id @default(uuid()) @db.Uuid
+  admin_user_id String?    @db.Uuid
+  action        String     @db.VarChar(100) // PARTICIPANT_EDITED, PAYMENT_VERIFIED, etc.
+  entity_type   String     @db.VarChar(100) // Participant, Registration, Payment, IdCard
+  entity_id     String     @db.VarChar(100)
+  old_value     String?    @db.Text         // JSON representation before change
+  new_value     String?    @db.Text         // JSON representation after change
+  ip_address    String?    @db.VarChar(45)
+  user_agent    String?    @db.Text
+  created_at    DateTime   @default(now()) @db.Timestamptz(6)
+
+  // Relationships
+  admin_user    AdminUser? @relation(fields: [admin_user_id], references: [id], onDelete: SetNull)
+
+  @@index([admin_user_id])
+  @@index([action])
+  @@index([entity_type, entity_id])
+  @@index([created_at])
+  @@map("audit_logs")
+}
+
+// ------------------------------------------------------------------------------
+// 11. SITE SETTINGS & CONTENT ARCHITECTURE (CMS Model)
+// ------------------------------------------------------------------------------
+model SiteSetting {
+  id               String        @id @default(uuid()) @db.Uuid
+  championship_id  String?       @unique @db.Uuid
+  title            String        @default("Kukkiwon Cup Championship") @db.VarChar(255)
+  subtitle         String?       @default("Presented by Kukkiwon North India & Kyorix Sports Technology") @db.VarChar(255)
+  hero_headline    String?       @db.VarChar(255)
+  hero_description String?       @db.Text
+  about_content    String?       @db.Text
+  poster_url       String?       @db.Text
+  contact_email    String?       @db.VarChar(255)
+  contact_phone    String?       @db.VarChar(50)
+  contact_address  String?       @db.Text
+  footer_text      String?       @db.Text
+  social_links     String?       @db.Text // JSON: { "instagram": "", "facebook": "", "youtube": "" }
+  rules_content    String?       @db.Text
+  privacy_policy   String?       @db.Text
+  is_published     Boolean       @default(true)
+  created_at       DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime      @updatedAt @db.Timestamptz(6)
+
+  // Relationships
+  championship     Championship? @relation(fields: [championship_id], references: [id], onDelete: Cascade)
+
+  @@map("site_settings")
+}
+
+// ------------------------------------------------------------------------------
+// 12. TERMS VERSIONS (Auditable Versioning for Legal Terms Acceptance)
+// ------------------------------------------------------------------------------
+model TermsVersion {
+  id              String        @id @default(uuid()) @db.Uuid
+  championship_id String?       @db.Uuid
+  version         String        @db.VarChar(20) // e.g. "v1.0"
+  title           String        @default("Official Championship Registration Terms") @db.VarChar(255)
+  content         String        @db.Text
+  published_at    DateTime      @default(now()) @db.Timestamptz(6)
+  is_active       Boolean       @default(true)
+  created_at      DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime      @updatedAt @db.Timestamptz(6)
+
+  // Relationships
+  championship    Championship? @relation(fields: [championship_id], references: [id], onDelete: Cascade)
+
+  @@unique([championship_id, version])
+  @@index([version])
+  @@index([is_active])
+  @@map("terms_versions")
+}
