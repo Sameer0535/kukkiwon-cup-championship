@@ -36,3 +36,19 @@ export interface PublicParticipantCard {
   kukkiwon_id?: string | null;
   photo_url?: string | null;
 }
+
+export interface QrVerificationResult {
+  is_valid: boolean;
+  card_status: 'NOT_GENERATED' | 'GENERATED' | 'REVOKED' | 'REISSUED';
+  card_number?: string;
+  participant_name?: string;
+  designation?: string;
+  nationality?: string;
+  flag_identifier?: string;
+  championship_name?: string;
+  registration_number?: string;
+  photo_url?: string;
+  verified_at: string;
+  message: string;
+}
+

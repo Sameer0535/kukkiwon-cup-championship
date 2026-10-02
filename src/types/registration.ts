@@ -219,5 +219,6 @@ export interface RegistrationWithDetails extends Registration {
   };
   category?: Category | null;
   academy?: Academy | null;
+  documentReadiness?: import('./document').DocumentReadinessSummary;
 }
 

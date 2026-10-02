@@ -31,6 +31,7 @@ import {
   LogIn,
   LogOut,
   X,
+  FileText,
 } from "lucide-react";
 
 export default function MyRegistrationDashboardPage() {
@@ -144,6 +145,20 @@ export default function MyRegistrationDashboardPage() {
         return <Badge variant="danger">Rejected</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
+  const getDocReadinessBadge = (readiness?: any) => {
+    if (!readiness) return null;
+    switch (readiness.readinessStatus) {
+      case "DOCUMENTS_VERIFIED":
+        return <Badge variant="gold">{readiness.verified}/{readiness.required} Verified</Badge>;
+      case "ACTION_REQUIRED":
+        return <Badge variant="danger">Action Required ({readiness.rejected} Rejected)</Badge>;
+      case "DOCUMENTS_IN_REVIEW":
+        return <Badge variant="cyan">{readiness.uploaded}/{readiness.required} In Review</Badge>;
+      default:
+        return <Badge variant="outline">{readiness.uploaded}/{readiness.required} Uploaded</Badge>;
     }
   };
 
@@ -305,8 +320,8 @@ export default function MyRegistrationDashboardPage() {
                       <th className="py-4 px-4">Participant</th>
                       <th className="py-4 px-4">Type</th>
                       <th className="py-4 px-4">Discipline / Category</th>
-                      <th className="py-4 px-4">Status</th>
-                      <th className="py-4 px-4">Last Updated</th>
+                      <th className="py-4 px-4">Registration</th>
+                      <th className="py-4 px-4">Document Readiness</th>
                       <th className="py-4 px-6 text-right">Actions</th>
                     </tr>
                   </thead>
@@ -344,11 +359,30 @@ export default function MyRegistrationDashboardPage() {
                           <td className="py-4 px-4">
                             {getStatusBadge(reg.status)}
                           </td>
-                          <td className="py-4 px-4 text-slate-400">
-                            {formatDateTime(reg.updated_at)}
+                          <td className="py-4 px-4">
+                            <div className="flex flex-col gap-1 items-start">
+                              {getDocReadinessBadge(reg.documentReadiness)}
+                              <Link
+                                href={`/my-registration/${reg.id}/documents`}
+                                className="text-[11px] text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1 transition-colors"
+                              >
+                                <FileText className="w-3 h-3" />
+                                <span>Upload / View</span>
+                              </Link>
+                            </div>
                           </td>
                           <td className="py-4 px-6 text-right">
                             <div className="flex items-center justify-end gap-2">
+                              <Link href={`/my-registration/${reg.id}/documents`}>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-[11px] uppercase font-bold py-1 h-8 border-slate-700 hover:border-amber-500/50"
+                                >
+                                  <FileText className="h-3.5 w-3.5 mr-1 text-amber-400" />
+                                  <span>Documents</span>
+                                </Button>
+                              </Link>
                               {isDraft ? (
                                 <Link href={continueUrl}>
                                   <Button
@@ -368,7 +402,7 @@ export default function MyRegistrationDashboardPage() {
                                   className="text-[11px] uppercase font-bold py-1 h-8 border-slate-700"
                                 >
                                   <Eye className="h-3.5 w-3.5 mr-1" />
-                                  <span>View Details</span>
+                                  <span>Details</span>
                                 </Button>
                               )}
                             </div>
@@ -415,6 +449,28 @@ export default function MyRegistrationDashboardPage() {
                           )}
                           <div>Last Updated: {formatDate(reg.updated_at)}</div>
                         </div>
+                      </div>
+
+                      {/* Document Readiness on Mobile */}
+                      <div className="p-3 bg-slate-900/60 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
+                        <div>
+                          <span className="text-[10px] text-slate-500 block uppercase font-bold tracking-wider">
+                            Accreditation Media
+                          </span>
+                          <div className="mt-1">
+                            {getDocReadinessBadge(reg.documentReadiness)}
+                          </div>
+                        </div>
+                        <Link href={`/my-registration/${reg.id}/documents`}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-[11px] h-7 px-3 border-amber-500/30 text-amber-400 hover:bg-amber-500/10 font-bold uppercase"
+                          >
+                            <FileText className="w-3 h-3 mr-1" />
+                            Manage
+                          </Button>
+                        </Link>
                       </div>
 
                       <div className="pt-2 border-t border-slate-800 flex justify-end">
@@ -502,13 +558,27 @@ export default function MyRegistrationDashboardPage() {
                 <span className="text-slate-400">Accreditation Status:</span>
                 {getStatusBadge(selectedReg.status)}
               </div>
+              <div className="py-2 flex justify-between items-center">
+                <span className="text-slate-400">Document Readiness:</span>
+                <div>{getDocReadinessBadge(selectedReg.documentReadiness)}</div>
+              </div>
               <div className="pt-2 flex justify-between">
                 <span className="text-slate-400">Registered At:</span>
                 <span className="text-slate-300">{formatDateTime(selectedReg.registered_at)}</span>
               </div>
             </div>
 
-            <div className="flex justify-end pt-2">
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+              <Link href={`/my-registration/${selectedReg.id}/documents`}>
+                <Button
+                  variant="primary"
+                  size="md"
+                  className="text-xs uppercase font-bold"
+                >
+                  <FileText className="h-4 w-4 mr-1.5" />
+                  <span>Manage Documents</span>
+                </Button>
+              </Link>
               <Button
                 variant="outline"
                 size="md"

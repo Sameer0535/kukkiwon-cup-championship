@@ -240,6 +240,48 @@ async function main() {
     });
   }
 
+  // 8. Seed Document Requirements (Phase 4 Requirement 18)
+  console.log("➡️ Seeding championship document requirements...");
+  const { DEFAULT_DOCUMENT_REQUIREMENTS } = await import("../src/config/document-requirements");
+  for (const docReq of DEFAULT_DOCUMENT_REQUIREMENTS) {
+    await prisma.documentRequirement.upsert({
+      where: { id: docReq.id },
+      update: {
+        championship_id: championship.id,
+        participant_type: docReq.participant_type as any,
+        discipline: docReq.discipline,
+        document_type: docReq.document_type,
+        title: docReq.title,
+        description: docReq.description,
+        is_required: docReq.is_required,
+        requires_dan: docReq.requires_dan,
+        min_age: docReq.min_age,
+        max_age: docReq.max_age,
+        allowed_file_types: docReq.allowed_file_types,
+        max_file_size: docReq.max_file_size,
+        display_order: docReq.display_order,
+        is_active: docReq.is_active,
+      },
+      create: {
+        id: docReq.id,
+        championship_id: championship.id,
+        participant_type: docReq.participant_type as any,
+        discipline: docReq.discipline,
+        document_type: docReq.document_type,
+        title: docReq.title,
+        description: docReq.description,
+        is_required: docReq.is_required,
+        requires_dan: docReq.requires_dan,
+        min_age: docReq.min_age,
+        max_age: docReq.max_age,
+        allowed_file_types: docReq.allowed_file_types,
+        max_file_size: docReq.max_file_size,
+        display_order: docReq.display_order,
+        is_active: docReq.is_active,
+      },
+    });
+  }
+
   console.log("✅ [Kukkiwon Cup] Seeding completed successfully!");
 }
 

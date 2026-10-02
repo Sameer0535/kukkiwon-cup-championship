@@ -1,15 +1,16 @@
 // ==============================================================================
 // USER REGISTRATIONS DASHBOARD API (GET /api/registrations/my)
-// REQUIREMENT 12: Private endpoint listing only the current user's registrations
+// Lists user's registrations enriched with server-side document readiness (Requirement 11)
 // ==============================================================================
 
 import { NextResponse } from "next/server";
 import { getRegistrantSession } from "@/lib/server-auth";
 import { RegistrationFlowService } from "@/server/services/registration-flow.service";
+import { DocumentManagementService } from "@/server/services/document-management.service";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const session = await getRegistrantSession();
+    const session = await getRegistrantSession(request);
     if (!session) {
       return NextResponse.json(
         { error: "Authentication required." },
@@ -19,7 +20,19 @@ export async function GET() {
 
     const registrations = await RegistrationFlowService.listUserRegistrations(session.userId);
 
-    return NextResponse.json({ success: true, registrations });
+    // Requirement 11: Calculate document readiness for each registration
+    const enriched = await Promise.all(
+      registrations.map(async (r) => {
+        try {
+          const readiness = await DocumentManagementService.calculateDocumentReadiness(r.id, session.userId);
+          return { ...r, documentReadiness: readiness };
+        } catch {
+          return r;
+        }
+      })
+    );
+
+    return NextResponse.json({ success: true, registrations: enriched });
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || "Failed to load registrations." },

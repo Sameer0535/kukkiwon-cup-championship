@@ -61,8 +61,10 @@ enum RegistrationStatus {
 
 enum DocumentVerificationStatus {
   NOT_REQUIRED
+  NOT_UPLOADED
   PENDING
   UPLOADED
+  UNDER_REVIEW
   VERIFIED
   REJECTED
 }
@@ -109,6 +111,7 @@ model User {
   registrations Registration[]
   academies     Academy[]      @relation("AcademyManager")
   participants  Participant[]
+  audit_logs    AuditLog[]
 
   @@index([email])
   @@map("users")
@@ -149,10 +152,11 @@ model Championship {
   updated_at         DateTime           @updatedAt @db.Timestamptz(6)
 
   // Relationships
-  registrations      Registration[]
-  categories         Category[]
-  site_settings      SiteSetting?
-  terms_versions     TermsVersion[]
+  registrations         Registration[]
+  categories            Category[]
+  document_requirements DocumentRequirement[]
+  site_settings         SiteSetting?
+  terms_versions        TermsVersion[]
 
   @@index([slug])
   @@index([status])
@@ -320,14 +324,15 @@ model Registration {
   updated_at          DateTime           @updatedAt @db.Timestamptz(6)
 
   // Relationships
-  user                User?              @relation(fields: [user_id], references: [id], onDelete: SetNull)
-  championship        Championship       @relation(fields: [championship_id], references: [id], onDelete: Restrict)
-  participant         Participant        @relation(fields: [participant_id], references: [id], onDelete: Cascade)
-  category            Category?          @relation(fields: [category_id], references: [id], onDelete: SetNull)
-  academy             Academy?           @relation(fields: [academy_id], references: [id], onDelete: SetNull)
-  payments            Payment[]
-  documents           Document[]
-  id_card             IdCard?
+  user                  User?                 @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  championship          Championship          @relation(fields: [championship_id], references: [id], onDelete: Restrict)
+  participant           Participant           @relation(fields: [participant_id], references: [id], onDelete: Cascade)
+  category              Category?             @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  academy               Academy?              @relation(fields: [academy_id], references: [id], onDelete: SetNull)
+  payments              Payment[]
+  documents             Document[]
+  participant_documents ParticipantDocument[]
+  id_card               IdCard?
 
   @@index([user_id])
   @@index([championship_id])
@@ -404,6 +409,70 @@ model Document {
   @@index([registration_id])
   @@index([verification_status])
   @@map("documents")
+}
+
+// ------------------------------------------------------------------------------
+// 9b. DOCUMENT REQUIREMENTS (Championship Configurable Architecture - Phase 4)
+// ------------------------------------------------------------------------------
+model DocumentRequirement {
+  id                 String                @id @default(uuid()) @db.Uuid
+  championship_id    String                @db.Uuid
+  participant_type   ParticipantType
+  discipline         String?               @db.VarChar(50)
+  document_type      String                @db.VarChar(100) // PHOTOGRAPH, GOVERNMENT_ID, PASSPORT, PROOF_OF_AGE, DAN_CERTIFICATE, MEDICAL_CERTIFICATE, etc.
+  title              String                @db.VarChar(255)
+  description        String?               @db.Text
+  is_required        Boolean               @default(true)
+  requires_dan       Boolean               @default(false)
+  min_age            Int?
+  max_age            Int?
+  allowed_file_types String                @default("image/jpeg,image/png,application/pdf") @db.VarChar(255)
+  max_file_size      Int                   @default(5242880) // 5MB in bytes
+  display_order      Int                   @default(0)
+  is_active          Boolean               @default(true)
+  created_at         DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime              @updatedAt @db.Timestamptz(6)
+
+  // Relationships
+  championship       Championship          @relation(fields: [championship_id], references: [id], onDelete: Cascade)
+  documents          ParticipantDocument[]
+
+  @@index([championship_id, participant_type])
+  @@index([is_active, display_order])
+  @@map("document_requirements")
+}
+
+// ------------------------------------------------------------------------------
+// 9c. PARTICIPANT DOCUMENTS (Secure, Versioned Document Uploads - Phase 4)
+// ------------------------------------------------------------------------------
+model ParticipantDocument {
+  id                      String                     @id @default(uuid()) @db.Uuid
+  registration_id         String                     @db.Uuid
+  document_requirement_id String                     @db.Uuid
+  original_filename       String                     @db.VarChar(255)
+  storage_key             String                     @db.Text
+  mime_type               String                     @db.VarChar(100)
+  file_size               Int
+  checksum                String                     @db.VarChar(64) // SHA-256
+  version                 Int                        @default(1)
+  is_current              Boolean                    @default(true)
+  verification_status     DocumentVerificationStatus @default(UPLOADED)
+  rejection_reason        String?                    @db.Text
+  uploaded_at             DateTime                   @default(now()) @db.Timestamptz(6)
+  verified_at             DateTime?                  @db.Timestamptz(6)
+  verified_by             String?                    @db.VarChar(255)
+  created_at              DateTime                   @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime                   @updatedAt @db.Timestamptz(6)
+
+  // Relationships
+  registration            Registration               @relation(fields: [registration_id], references: [id], onDelete: Cascade)
+  requirement             DocumentRequirement        @relation(fields: [document_requirement_id], references: [id], onDelete: Cascade)
+
+  @@index([registration_id])
+  @@index([document_requirement_id])
+  @@index([verification_status])
+  @@index([is_current])
+  @@map("participant_documents")
 }
 
 // ------------------------------------------------------------------------------
@@ -491,8 +560,9 @@ model AdminUser {
 model AuditLog {
   id            String     @id @default(uuid()) @db.Uuid
   admin_user_id String?    @db.Uuid
-  action        String     @db.VarChar(100) // PARTICIPANT_EDITED, PAYMENT_VERIFIED, etc.
-  entity_type   String     @db.VarChar(100) // Participant, Registration, Payment, IdCard
+  user_id       String?    @db.Uuid
+  action        String     @db.VarChar(100) // PARTICIPANT_EDITED, PAYMENT_VERIFIED, DOCUMENT_UPLOADED, etc.
+  entity_type   String     @db.VarChar(100) // Participant, Registration, Payment, IdCard, ParticipantDocument
   entity_id     String     @db.VarChar(100)
   old_value     String?    @db.Text         // JSON representation before change
   new_value     String?    @db.Text         // JSON representation after change
@@ -502,8 +572,10 @@ model AuditLog {
 
   // Relationships
   admin_user    AdminUser? @relation(fields: [admin_user_id], references: [id], onDelete: SetNull)
+  user          User?      @relation(fields: [user_id], references: [id], onDelete: SetNull)
 
   @@index([admin_user_id])
+  @@index([user_id])
   @@index([action])
   @@index([entity_type, entity_id])
   @@index([created_at])

@@ -36,7 +36,14 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const fullPath = path.join(process.cwd(), "storage", filePath);
+    const basePath = path.resolve(process.cwd(), "storage");
+    const fullPath = path.resolve(basePath, filePath);
+
+    // Prevent path traversal attacks
+    if (!fullPath.startsWith(basePath)) {
+      return new NextResponse("Forbidden: Invalid path", { status: 403 });
+    }
+
     const fileBuffer = await fs.readFile(fullPath);
     const ext = path.extname(filePath).toLowerCase();
 
