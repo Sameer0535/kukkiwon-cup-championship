@@ -1,106 +1,111 @@
 // ==============================================================================
-// ADMIN DASHBOARD OVERVIEW
-// High-level operational metrics, entity counters, and architecture controls
+// ADMIN DASHBOARD OVERVIEW (Phase 8 Server Component)
+// Operational metrics, entity counters, and navigation controls
 // ==============================================================================
 
 import Link from "next/link";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { AdminService } from "@/server/services/admin.service";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
-  Trophy,
   Users,
-  ClipboardCheck,
   CreditCard,
   FileCheck,
   IdCard,
   ShieldCheck,
   ArrowRight,
-  Database,
-  Activity,
-  Lock,
+  Clock,
+  CheckCircle2,
+  AlertTriangle,
+  XCircle,
+  ShieldAlert,
 } from "lucide-react";
 
-export default function AdminDashboardPage() {
-  const stats = [
+export default async function AdminDashboardPage() {
+  const metrics = await AdminService.getDashboardMetrics();
+
+  const cards = [
     {
-      title: "Championships",
-      value: "1 Active",
-      subtitle: "Kukkiwon Cup 2026",
-      icon: Trophy,
-      href: "/admin/championships",
-      color: "text-amber-400",
-      bgColor: "bg-amber-400/10",
-    },
-    {
-      title: "Participants",
-      value: "Master DB Ready",
-      subtitle: "Non-guessable Public IDs",
+      title: "Total Athletes",
+      value: String(metrics.totalAthletes || metrics.totalRegistrations),
+      subtitle: `${metrics.totalRegistrations} Total Registrations`,
       icon: Users,
-      href: "/admin/participants",
+      href: "/admin/registrations",
       color: "text-sky-400",
       bgColor: "bg-sky-400/10",
+      borderColor: "border-sky-500/20",
     },
     {
-      title: "Document Reviews",
-      value: "Private Storage",
-      subtitle: "Signed URL stream",
-      icon: FileCheck,
-      href: "/admin/documents",
+      title: "Paid Registrations",
+      value: String(metrics.paidRegistrations),
+      subtitle: `${metrics.pendingPayments} Pending Payment`,
+      icon: CreditCard,
+      href: "/admin/payments",
       color: "text-emerald-400",
       bgColor: "bg-emerald-400/10",
+      borderColor: "border-emerald-500/20",
     },
     {
-      title: "ID & QR Accreditation",
-      value: "Engine Online",
-      subtitle: "Cryptographic URL-safe",
+      title: "Documents Pending",
+      value: String(metrics.documentsPending),
+      subtitle: `${metrics.documentsApproved} Verified • ${metrics.documentsRejected} Rejected`,
+      icon: FileCheck,
+      href: "/admin/documents",
+      color: "text-amber-400",
+      bgColor: "bg-amber-400/10",
+      borderColor: "border-amber-500/20",
+    },
+    {
+      title: "ID Cards Issued",
+      value: String(metrics.idCardsGenerated),
+      subtitle: `${metrics.idCardsPending} Ready • ${metrics.idCardsRevoked} Revoked`,
       icon: IdCard,
       href: "/admin/id-cards",
-      color: "text-cyan-400",
-      bgColor: "bg-cyan-400/10",
+      color: "text-[#D4AF37]",
+      bgColor: "bg-[#D4AF37]/10",
+      borderColor: "border-[#D4AF37]/20",
     },
   ];
 
   return (
-    <div className="space-y-8 max-w-6xl">
+    <div className="space-y-8 max-w-7xl">
       {/* Welcome Banner */}
-      <div className="rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-950 via-[#0B1426] to-slate-950 p-6 sm:p-8 space-y-3">
+      <div className="rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-950 via-[#0A192F] to-slate-950 p-6 sm:p-8 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <Badge variant="gold">Phase 1 Foundation Operational</Badge>
+          <Badge variant="gold">Official Championship Operations</Badge>
           <span className="text-xs font-mono text-slate-400">
-            Auth: <strong className="text-emerald-400">SUPER_ADMIN</strong>
+            Kukkiwon Cup 2026 Registry • <strong className="text-emerald-400">ACTIVE</strong>
           </span>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight uppercase">
-          Administration & Operations Center
+        <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight uppercase">
+          Tournament Administration Overview
         </h1>
         <p className="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
-          Centralized management for tournament editions, registrations, document verification,
-          accreditation ID issuance, and real-time QR validation.
+          Real-time monitoring and administrative workflow management for athlete registration intake, fee reconciliation, document verification, and accreditation credential issuance.
         </p>
       </div>
 
-      {/* Primary KPI Grid */}
+      {/* Primary Operational Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
+        {cards.map((c) => {
+          const Icon = c.icon;
           return (
-            <Link key={stat.title} href={stat.href} className="group">
-              <Card className="border-slate-800 bg-slate-900/60 p-5 group-hover:border-slate-700 transition-all h-full flex flex-col justify-between">
+            <Link key={c.title} href={c.href} className="group">
+              <Card className={`border ${c.borderColor} bg-slate-900/60 p-5 group-hover:border-slate-600 transition-all h-full flex flex-col justify-between`}>
                 <div className="flex items-center justify-between pb-3">
-                  <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">
-                    {stat.title}
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                    {c.title}
                   </span>
-                  <div className={`p-2 rounded-lg ${stat.bgColor} ${stat.color}`}>
-                    <Icon className="h-4 w-4" />
+                  <div className={`p-2.5 rounded-xl ${c.bgColor} ${c.color}`}>
+                    <Icon className="h-5 w-5" />
                   </div>
                 </div>
                 <div>
-                  <div className="text-lg font-bold text-white tracking-tight">
-                    {stat.value}
+                  <div className="text-3xl font-black text-white tracking-tight font-mono">
+                    {c.value}
                   </div>
-                  <div className="text-[11px] text-slate-400 pt-0.5">
-                    {stat.subtitle}
+                  <div className="text-xs text-slate-400 mt-1 font-medium">
+                    {c.subtitle}
                   </div>
                 </div>
               </Card>
@@ -109,101 +114,130 @@ export default function AdminDashboardPage() {
         })}
       </div>
 
-      {/* Subsystem Readiness Matrix */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Core Systems */}
-        <Card className="border-slate-800 bg-slate-900/60 p-6 space-y-4">
-          <CardHeader className="p-0 pb-3 border-b border-slate-800 flex flex-row items-center justify-between">
-            <CardTitle className="text-sm font-bold flex items-center gap-2">
-              <Database className="h-4 w-4 text-sky-400" />
-              <span>Relational Database Architecture</span>
-            </CardTitle>
-            <Badge variant="info">Prisma v6 + PostgreSQL</Badge>
-          </CardHeader>
-          <CardContent className="p-0 space-y-2.5 pt-2 text-xs text-slate-300">
-            <div className="flex justify-between items-center py-1.5 border-b border-slate-800/80">
-              <span>Championships Model</span>
-              <span className="text-emerald-400 font-mono font-semibold">Ready</span>
+      {/* Grid: Recent Registrations & Audit Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Recent Registrations Table */}
+        <div className="lg:col-span-2 rounded-2xl border border-slate-800 bg-slate-900/50 p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-bold uppercase tracking-wider text-white">
+                Recent Athlete Registrations
+              </h2>
+              <p className="text-xs text-slate-400">Latest entries received across categories</p>
             </div>
-            <div className="flex justify-between items-center py-1.5 border-b border-slate-800/80">
-              <span>Participants (Decoupled Public ID)</span>
-              <span className="text-emerald-400 font-mono font-semibold">Ready</span>
-            </div>
-            <div className="flex justify-between items-center py-1.5 border-b border-slate-800/80">
-              <span>Registrations & Terms v1.0</span>
-              <span className="text-emerald-400 font-mono font-semibold">Ready</span>
-            </div>
-            <div className="flex justify-between items-center py-1.5 border-b border-slate-800/80">
-              <span>Documents (Private Storage)</span>
-              <span className="text-emerald-400 font-mono font-semibold">Ready</span>
-            </div>
-            <div className="flex justify-between items-center py-1.5">
-              <span>Payments & ID Cards</span>
-              <span className="text-emerald-400 font-mono font-semibold">Ready</span>
-            </div>
-          </CardContent>
-        </Card>
+            <Link
+              href="/admin/registrations"
+              className="inline-flex items-center gap-1 text-xs font-bold text-[#D4AF37] hover:text-amber-300 transition"
+            >
+              <span>View All</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
 
-        {/* Security & Access Management */}
-        <Card className="border-slate-800 bg-slate-900/60 p-6 space-y-4">
-          <CardHeader className="p-0 pb-3 border-b border-slate-800 flex flex-row items-center justify-between">
-            <CardTitle className="text-sm font-bold flex items-center gap-2">
-              <Lock className="h-4 w-4 text-purple-400" />
-              <span>Role-Based Access Control (RBAC)</span>
-            </CardTitle>
-            <Badge variant="warning">7 Distinct Roles</Badge>
-          </CardHeader>
-          <CardContent className="p-0 space-y-2.5 pt-2 text-xs text-slate-300">
-            <div className="flex justify-between items-center py-1.5 border-b border-slate-800/80">
-              <span>SUPER_ADMIN & EVENT_ADMIN</span>
-              <span className="text-purple-400 font-semibold">Full Authority</span>
-            </div>
-            <div className="flex justify-between items-center py-1.5 border-b border-slate-800/80">
-              <span>REGISTRATION_ADMIN</span>
-              <span className="text-sky-400 font-semibold">Participant Review</span>
-            </div>
-            <div className="flex justify-between items-center py-1.5 border-b border-slate-800/80">
-              <span>FINANCE_ADMIN & DOCUMENT_ADMIN</span>
-              <span className="text-amber-400 font-semibold">Targeted Scope</span>
-            </div>
-            <div className="flex justify-between items-center py-1.5">
-              <span>CONTENT_ADMIN & VIEWER</span>
-              <span className="text-slate-400 font-semibold">CMS / Read-only</span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="border-b border-slate-800 text-[11px] uppercase tracking-wider text-slate-400 font-bold">
+                <tr>
+                  <th className="pb-3">Athlete</th>
+                  <th className="pb-3">Category</th>
+                  <th className="pb-3">Status</th>
+                  <th className="pb-3">Payment</th>
+                  <th className="pb-3 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60 text-slate-300">
+                {(metrics.recentRegistrations || []).map((reg) => (
+                  <tr key={reg.id} className="hover:bg-slate-800/30 transition-colors">
+                    <td className="py-3">
+                      <div className="font-bold text-white uppercase">{reg.athleteName}</div>
+                      <div className="text-[10px] font-mono text-slate-400">{reg.athleteId}</div>
+                    </td>
+                    <td className="py-3">
+                      <span className="text-slate-300 font-medium">{reg.categoryName}</span>
+                    </td>
+                    <td className="py-3">
+                      <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${
+                        reg.registrationStatus === "APPROVED" || reg.registrationStatus === "CONFIRMED"
+                          ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                          : reg.registrationStatus === "SUBMITTED"
+                          ? "bg-sky-500/10 text-sky-400 border border-sky-500/20"
+                          : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                      }`}>
+                        {reg.registrationStatus}
+                      </span>
+                    </td>
+                    <td className="py-3">
+                      <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${
+                        reg.paymentStatus === "PAID"
+                          ? "bg-emerald-500/10 text-emerald-400"
+                          : "bg-amber-500/10 text-amber-400"
+                      }`}>
+                        {reg.paymentStatus}
+                      </span>
+                    </td>
+                    <td className="py-3 text-right">
+                      <Link
+                        href={`/admin/registrations/${reg.id}`}
+                        className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-semibold transition"
+                      >
+                        Inspect
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+                {(!metrics.recentRegistrations || metrics.recentRegistrations.length === 0) && (
+                  <tr>
+                    <td colSpan={5} className="py-6 text-center text-slate-500">
+                      No registrations recorded yet.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-      {/* Quick Action Navigation Grid */}
-      <div className="rounded-xl border border-slate-800 bg-slate-950 p-6 space-y-4">
-        <h3 className="text-xs uppercase font-bold tracking-wider text-slate-400">
-          Module Direct Access
-        </h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-          <Link
-            href="/admin/championships"
-            className="p-3 rounded-lg border border-slate-800 bg-slate-900/70 hover:border-slate-700 hover:text-sky-400 transition-all text-center block"
-          >
-            Championships
-          </Link>
-          <Link
-            href="/admin/registrations"
-            className="p-3 rounded-lg border border-slate-800 bg-slate-900/70 hover:border-slate-700 hover:text-sky-400 transition-all text-center block"
-          >
-            Registrations
-          </Link>
-          <Link
-            href="/admin/documents"
-            className="p-3 rounded-lg border border-slate-800 bg-slate-900/70 hover:border-slate-700 hover:text-sky-400 transition-all text-center block"
-          >
-            Documents
-          </Link>
-          <Link
-            href="/admin/id-cards"
-            className="p-3 rounded-lg border border-slate-800 bg-slate-900/70 hover:border-slate-700 hover:text-sky-400 transition-all text-center block"
-          >
-            ID Cards & QR
-          </Link>
+        {/* Security & Audit Trail Feed */}
+        <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-bold uppercase tracking-wider text-white">
+                Recent Audit Trail
+              </h2>
+              <p className="text-xs text-slate-400">Security event traceability</p>
+            </div>
+            <Link
+              href="/admin/audit"
+              className="inline-flex items-center gap-1 text-xs font-bold text-[#D4AF37] hover:text-amber-300 transition"
+            >
+              <span>View Logs</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+
+          <div className="space-y-3">
+            {(metrics.recentAuditLogs || []).map((log) => (
+              <div
+                key={log.id}
+                className="p-3 rounded-xl border border-slate-800/80 bg-slate-950/40 text-xs space-y-1"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[10px] font-bold text-sky-400">
+                    {log.action}
+                  </span>
+                  <span className="text-[10px] text-slate-500 font-mono">
+                    {new Date(log.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                </div>
+                <div className="text-[11px] text-slate-300 font-medium">
+                  {log.adminName || "System Admin"} ({log.adminRole || "SUPER_ADMIN"})
+                </div>
+                <div className="text-[10px] text-slate-400 font-mono truncate">
+                  {log.entityType}: {log.entityId}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

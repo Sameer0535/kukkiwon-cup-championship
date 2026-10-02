@@ -1,125 +1,363 @@
 // ==============================================================================
-// ADMIN REGISTRATIONS MANAGER (Requirement 8)
-// Registration review, status state machine, and terms tracking
+// ADMIN REGISTRATIONS MANAGEMENT PAGE (Phase 8 Implementation)
+// Complete registration table with search, multifaceted filtering, sorting & pagination
 // ==============================================================================
 
-import { Card } from "@/components/ui/card";
-import { Badge, StatusBadge } from "@/components/ui/badge";
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { ClipboardCheck, Filter, Download } from "lucide-react";
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import {
+  ClipboardCheck,
+  Search,
+  Filter,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  ExternalLink,
+  Loader2,
+  RefreshCw,
+} from "lucide-react";
+import type { AdminRegistrationSummary } from "@/types/admin";
 
 export default function AdminRegistrationsPage() {
-  const registrations = [
-    {
-      id: "reg-01",
-      regNumber: "REG-KC26-A1001",
-      participant: "Master Rahul Sharma",
-      publicId: "KUKKI-2026-X8F9Q",
-      designation: "Athlete",
-      championship: "Kukkiwon Cup 2026",
-      status: "CONFIRMED",
-      termsVersion: "v1.0",
-      registeredAt: "02 Oct 2026",
-    },
-    {
-      id: "reg-02",
-      regNumber: "REG-KC26-C2044",
-      participant: "Coach Arvind Rana",
-      publicId: "KUKKI-2026-B3J7M",
-      designation: "Coach",
-      championship: "Kukkiwon Cup 2026",
-      status: "UNDER_REVIEW",
-      termsVersion: "v1.0",
-      registeredAt: "02 Oct 2026",
-    },
-    {
-      id: "reg-03",
-      regNumber: "REG-KC26-A1099",
-      participant: "Priya Chauhan",
-      publicId: "KUKKI-2026-K9P2W",
-      designation: "Athlete",
-      championship: "Kukkiwon Cup 2026",
-      status: "PENDING_PAYMENT",
-      termsVersion: "v1.0",
-      registeredAt: "01 Oct 2026",
-    },
-  ];
+  const [registrations, setRegistrations] = React.useState<AdminRegistrationSummary[]>([]);
+  const [total, setTotal] = React.useState(0);
+  const [page, setPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(25);
+  const [totalPages, setTotalPages] = React.useState(1);
+  const [loading, setLoading] = React.useState(true);
+
+  // Filters & Search
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [statusFilter, setStatusFilter] = React.useState("");
+  const [paymentFilter, setPaymentFilter] = React.useState("");
+  const [docFilter, setDocFilter] = React.useState("");
+  const [cardFilter, setCardFilter] = React.useState("");
+
+  const loadRegistrations = React.useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({
+        page: String(page),
+        pageSize: String(pageSize),
+      });
+
+      if (searchQuery.trim()) params.set("q", searchQuery.trim());
+      if (statusFilter) params.set("status", statusFilter);
+      if (paymentFilter) params.set("paymentStatus", paymentFilter);
+      if (docFilter) params.set("documentStatus", docFilter);
+      if (cardFilter) params.set("idCardStatus", cardFilter);
+
+      const bearer = sessionStorage.getItem("kukkiwon_admin_bearer");
+      const headers: Record<string, string> = {};
+      if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
+
+      const res = await fetch(`/api/admin/registrations?${params.toString()}`, { headers });
+      const data = await res.json();
+
+      if (data.items) {
+        setRegistrations(data.items);
+        setTotal(data.total || 0);
+        setTotalPages(data.totalPages || 1);
+      }
+    } catch {
+      // Error handling
+    } finally {
+      setLoading(false);
+    }
+  }, [page, pageSize, searchQuery, statusFilter, paymentFilter, docFilter, cardFilter]);
+
+  React.useEffect(() => {
+    loadRegistrations();
+  }, [loadRegistrations]);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPage(1);
+    loadRegistrations();
+  };
 
   return (
-    <div className="space-y-6 max-w-6xl">
+    <div className="space-y-6 max-w-7xl">
+      {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold uppercase tracking-wide text-white flex items-center gap-2">
-            <ClipboardCheck className="h-5 w-5 text-sky-400" />
-            <span>Registration Intake & Status</span>
-          </h2>
+          <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white flex items-center gap-2.5">
+            <ClipboardCheck className="h-6 w-6 text-[#D4AF37]" />
+            <span>Athlete Registration Intake</span>
+          </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Track participant entries through the 8-stage state machine (Draft, Pending Payment, Paid, Under Review, Confirmed, Rejected).
+            Authoritative directory of championship registrations, state machine transitions, and accreditation readiness
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button variant="secondary" size="sm">
-            <Filter className="h-4 w-4 mr-1.5" />
-            <span>Filter</span>
-          </Button>
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-1.5" />
-            <span>Export CSV</span>
-          </Button>
+        <button
+          onClick={() => loadRegistrations()}
+          disabled={loading}
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs font-semibold text-slate-200 hover:bg-slate-800 transition disabled:opacity-50 self-start sm:self-auto"
+        >
+          <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+          <span>Refresh</span>
+        </button>
+      </div>
+
+      {/* Search & Multifaceted Filter Bar */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 space-y-3">
+        <form onSubmit={handleSearchSubmit} className="flex flex-col sm:flex-row gap-2.5">
+          <div className="relative flex-1">
+            <Search className="h-4 w-4 text-slate-500 absolute left-3 top-3 pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by Athlete Name, Athlete ID, Registration ID, or Academy..."
+              className="w-full pl-9 pr-3.5 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#D4AF37]"
+            />
+          </div>
+          <button
+            type="submit"
+            className="px-4 py-2 rounded-lg bg-[#D4AF37] text-slate-950 text-xs font-bold uppercase tracking-wider hover:bg-[#b89528] transition shrink-0"
+          >
+            Search
+          </button>
+        </form>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+          {/* Registration Status */}
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPage(1);
+            }}
+            className="px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-slate-300 focus:outline-none focus:border-amber-400"
+          >
+            <option value="">All Reg Statuses</option>
+            <option value="SUBMITTED">Submitted</option>
+            <option value="UNDER_REVIEW">Under Review</option>
+            <option value="APPROVED">Approved</option>
+            <option value="CONFIRMED">Confirmed</option>
+            <option value="PENDING_PAYMENT">Pending Payment</option>
+            <option value="REJECTED">Rejected</option>
+          </select>
+
+          {/* Payment Status */}
+          <select
+            value={paymentFilter}
+            onChange={(e) => {
+              setPaymentFilter(e.target.value);
+              setPage(1);
+            }}
+            className="px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-slate-300 focus:outline-none focus:border-amber-400"
+          >
+            <option value="">All Payment Statuses</option>
+            <option value="PAID">Paid</option>
+            <option value="PENDING">Pending</option>
+            <option value="FAILED">Failed</option>
+            <option value="REFUNDED">Refunded</option>
+          </select>
+
+          {/* Document Status */}
+          <select
+            value={docFilter}
+            onChange={(e) => {
+              setDocFilter(e.target.value);
+              setPage(1);
+            }}
+            className="px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-slate-300 focus:outline-none focus:border-amber-400"
+          >
+            <option value="">All Document Statuses</option>
+            <option value="VERIFIED">Verified</option>
+            <option value="UNDER_REVIEW">Under Review</option>
+            <option value="UPLOADED">Uploaded</option>
+            <option value="REJECTED">Rejected</option>
+            <option value="PENDING">Pending</option>
+          </select>
+
+          {/* ID Card Status */}
+          <select
+            value={cardFilter}
+            onChange={(e) => {
+              setCardFilter(e.target.value);
+              setPage(1);
+            }}
+            className="px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-slate-300 focus:outline-none focus:border-amber-400"
+          >
+            <option value="">All ID Card Statuses</option>
+            <option value="GENERATED">Generated</option>
+            <option value="READY">Ready</option>
+            <option value="REISSUED">Reissued</option>
+            <option value="REVOKED">Revoked</option>
+            <option value="NOT_ELIGIBLE">Not Eligible</option>
+          </select>
         </div>
       </div>
 
-      <Card className="border-slate-800 bg-slate-900/60 p-0 overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Reg Number</TableHead>
-              <TableHead>Participant</TableHead>
-              <TableHead>Designation</TableHead>
-              <TableHead>Terms Version</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead className="text-right">Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {registrations.map((r) => (
-              <TableRow key={r.id}>
-                <TableCell>
-                  <span className="font-mono text-xs font-bold text-sky-400">
-                    {r.regNumber}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <div className="font-bold text-white text-xs">{r.participant}</div>
-                  <div className="text-[10px] font-mono text-slate-400">{r.publicId}</div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="gold">{r.designation}</Badge>
-                </TableCell>
-                <TableCell>
-                  <span className="text-xs font-mono text-slate-300 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
-                    {r.termsVersion}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <StatusBadge status={r.status} />
-                </TableCell>
-                <TableCell className="text-xs text-slate-400">
-                  {r.registeredAt}
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button variant="ghost" size="sm" className="text-xs text-sky-400">
-                    Manage
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Card>
+      {/* Main Registrations Table */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 overflow-hidden shadow-2xl">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="border-b border-slate-800 bg-slate-950/80 text-[11px] uppercase tracking-wider text-slate-400 font-bold">
+              <tr>
+                <th className="p-3.5">Athlete ID</th>
+                <th className="p-3.5">Athlete Name</th>
+                <th className="p-3.5">Academy / Club</th>
+                <th className="p-3.5">Category</th>
+                <th className="p-3.5">Registration</th>
+                <th className="p-3.5">Payment</th>
+                <th className="p-3.5">Documents</th>
+                <th className="p-3.5">ID Card</th>
+                <th className="p-3.5">Date</th>
+                <th className="p-3.5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800/60 text-slate-300">
+              {loading ? (
+                <tr>
+                  <td colSpan={10} className="p-8 text-center text-slate-400">
+                    <Loader2 className="h-6 w-6 animate-spin mx-auto text-[#D4AF37] mb-2" />
+                    <span>Loading registration records...</span>
+                  </td>
+                </tr>
+              ) : registrations.length === 0 ? (
+                <tr>
+                  <td colSpan={10} className="p-8 text-center text-slate-400">
+                    <p className="font-semibold text-white">No registrations found.</p>
+                    <p className="text-xs text-slate-500 mt-1">
+                      No participant registrations match your current search query or active filters.
+                    </p>
+                  </td>
+                </tr>
+              ) : (
+                registrations.map((r) => (
+                  <tr key={r.id} className="hover:bg-slate-800/40 transition-colors">
+                    <td className="p-3.5 font-mono font-bold text-[#D4AF37] whitespace-nowrap">
+                      {r.athleteId}
+                    </td>
+                    <td className="p-3.5 font-bold text-white uppercase whitespace-nowrap">
+                      {r.athleteName}
+                    </td>
+                    <td className="p-3.5 text-slate-300 whitespace-nowrap">
+                      {r.academyName}
+                    </td>
+                    <td className="p-3.5 text-slate-300 whitespace-nowrap">
+                      {r.categoryName}
+                    </td>
+                    <td className="p-3.5 whitespace-nowrap">
+                      <span
+                        className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${
+                          r.registrationStatus === "APPROVED" || r.registrationStatus === "CONFIRMED"
+                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                            : r.registrationStatus === "SUBMITTED"
+                            ? "bg-sky-500/10 text-sky-400 border border-sky-500/20"
+                            : r.registrationStatus === "UNDER_REVIEW"
+                            ? "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
+                            : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                        }`}
+                      >
+                        {r.registrationStatus}
+                      </span>
+                    </td>
+                    <td className="p-3.5 whitespace-nowrap">
+                      <span
+                        className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${
+                          r.paymentStatus === "PAID"
+                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                            : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                        }`}
+                      >
+                        {r.paymentStatus}
+                      </span>
+                    </td>
+                    <td className="p-3.5 whitespace-nowrap">
+                      <span
+                        className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${
+                          r.documentStatus === "VERIFIED"
+                            ? "bg-emerald-500/10 text-emerald-400"
+                            : r.documentStatus === "UNDER_REVIEW" || r.documentStatus === "UPLOADED"
+                            ? "bg-amber-500/10 text-amber-400"
+                            : "bg-slate-800 text-slate-400"
+                        }`}
+                      >
+                        {r.documentStatus}
+                      </span>
+                    </td>
+                    <td className="p-3.5 whitespace-nowrap">
+                      <span
+                        className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${
+                          r.idCardStatus === "GENERATED" || r.idCardStatus === "REISSUED"
+                            ? "bg-emerald-500/10 text-emerald-300 border border-emerald-500/20"
+                            : r.idCardStatus === "REVOKED"
+                            ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                            : "bg-slate-800 text-slate-400"
+                        }`}
+                      >
+                        {r.idCardStatus}
+                      </span>
+                    </td>
+                    <td className="p-3.5 text-slate-400 whitespace-nowrap font-mono text-[11px]">
+                      {new Date(r.registeredAt).toLocaleDateString()}
+                    </td>
+                    <td className="p-3.5 text-right whitespace-nowrap">
+                      <Link
+                        href={`/admin/registrations/${r.id}`}
+                        className="inline-flex items-center gap-1 px-3 py-1 rounded bg-[#D4AF37]/20 hover:bg-[#D4AF37]/30 text-[#D4AF37] border border-[#D4AF37]/30 text-xs font-bold uppercase transition"
+                      >
+                        <span>Manage</span>
+                      </Link>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Server-Side Pagination Bar */}
+        <div className="flex flex-col sm:flex-row items-center justify-between p-4 border-t border-slate-800 text-xs text-slate-400 gap-3">
+          <div>
+            Showing <strong className="text-white">{registrations.length}</strong> of{" "}
+            <strong className="text-white">{total}</strong> total registrations
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 mr-2">
+              <span className="text-[11px]">Per page:</span>
+              <select
+                value={pageSize}
+                onChange={(e) => {
+                  setPageSize(parseInt(e.target.value, 10));
+                  setPage(1);
+                }}
+                className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-white"
+              >
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+            </div>
+
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1 || loading}
+              className="p-1.5 rounded border border-slate-700 bg-slate-900 text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-800"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <span className="px-2 font-mono text-white">
+              Page {page} of {totalPages}
+            </span>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages || loading}
+              className="p-1.5 rounded border border-slate-700 bg-slate-900 text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-800"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

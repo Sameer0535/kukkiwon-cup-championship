@@ -82,11 +82,15 @@ export async function createAdminToken(session: Omit<AdminSession, "expires_at">
 export async function verifyAdminToken(token: string): Promise<AdminSession | null> {
   try {
     const { payload } = await jwtVerify(token, JWT_KEY);
+    const role = payload.role as string;
+    if (!role || role === "REGISTRANT" || !(role in ROLE_HIERARCHY)) {
+      return null;
+    }
     return {
       user_id: payload.userId as string,
       email: payload.email as string,
       full_name: payload.fullName as string,
-      role: payload.role as AdminRole,
+      role: role as AdminRole,
       expires_at: (payload.exp as number) * 1000,
     };
   } catch {
