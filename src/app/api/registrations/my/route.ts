@@ -1,6 +1,7 @@
 // ==============================================================================
 // USER REGISTRATIONS DASHBOARD API (GET /api/registrations/my)
-// Lists user's registrations enriched with server-side document readiness (Requirement 11)
+// Lists user's registrations enriched with server-side document readiness,
+// payment status, and athlete ID card eligibility (Phases 4, 5, 6)
 // ==============================================================================
 
 import { NextResponse } from "next/server";
@@ -8,6 +9,7 @@ import { getRegistrantSession } from "@/lib/server-auth";
 import { RegistrationFlowService } from "@/server/services/registration-flow.service";
 import { DocumentManagementService } from "@/server/services/document-management.service";
 import { PaymentService } from "@/server/services/payment.service";
+import { IdCardService } from "@/server/services/id-card.service";
 
 export async function GET(request: Request) {
   try {
@@ -21,17 +23,21 @@ export async function GET(request: Request) {
 
     const registrations = await RegistrationFlowService.listUserRegistrations(session.userId);
 
-    // Requirement 11 & Phase 5: Calculate document readiness & payment status for each registration
+    // Enriched with documents, payments, and Phase 6 athlete ID card status
     const enriched = await Promise.all(
       registrations.map(async (r) => {
         try {
-          const [readiness, paymentInfo] = await Promise.all([
+          const [readiness, paymentInfo, cardInfo] = await Promise.all([
             DocumentManagementService.calculateDocumentReadiness(r.id, session.userId).catch(() => undefined),
             PaymentService.getPaymentStatus(r.id, session.userId).catch(() => undefined),
+            IdCardService.canGenerateAthleteIdCard(r.id, session.userId).catch(() => undefined),
           ]);
 
           return {
             ...r,
+            athlete_id: r.athlete_id || cardInfo?.athleteId || null,
+            idCardStatus: cardInfo?.status || "NOT_ELIGIBLE",
+            idCardEligible: cardInfo?.isEligible || false,
             documentReadiness: readiness,
             paymentStatus: paymentInfo?.paymentStatus || (r.status === "PAID" ? "PAID" : "PENDING"),
             paymentAmountFormatted: paymentInfo?.feeCalculation?.formattedTotal,

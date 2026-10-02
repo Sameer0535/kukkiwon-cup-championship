@@ -293,6 +293,7 @@ export class RegistrationFlowService {
           id: r.id,
           user_id: r.user_id,
           registration_number: r.registration_number,
+          athlete_id: r.athlete_id || null,
           championship_id: r.championship_id,
           participant_id: r.participant_id,
           participant_type: r.participant_type as ParticipantType,

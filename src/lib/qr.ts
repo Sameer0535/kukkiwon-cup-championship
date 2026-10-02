@@ -1,10 +1,11 @@
 // ==============================================================================
-// QR VERIFICATION ARCHITECTURE (Requirements 13 & 14)
+// QR VERIFICATION ARCHITECTURE (Phase 6 Requirements 4 & 5)
 // High-entropy token generation & privacy-preserving accreditation verification
 // ==============================================================================
 
 import crypto from "crypto";
-import { QrVerificationResult } from "@/types";
+import QRCode from "qrcode";
+import { QrVerificationResult, PublicAthleteVerification } from "@/types";
 
 /**
  * Generates a secure, non-guessable, URL-safe QR verification token
@@ -16,12 +17,33 @@ export function generateSecureQrToken(): string {
 
 /**
  * Builds the canonical public verification URL
- * Points to: ${SITE_URL}/verify/${token}
+ * Points to: ${SITE_URL}/verify/athlete/${token}
  * Domain is configurable via NEXT_PUBLIC_SITE_URL environment variable
  */
 export function buildVerificationUrl(qrToken: string): string {
   const baseUrl = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
-  return `${baseUrl}/verify/${encodeURIComponent(qrToken)}`;
+  return `${baseUrl}/verify/athlete/${encodeURIComponent(qrToken)}`;
+}
+
+/**
+ * Generates a high-contrast, scannable QR Code Data URL (PNG)
+ */
+export async function generateQrCodeDataUrl(textOrUrl: string): Promise<string> {
+  try {
+    return await QRCode.toDataURL(textOrUrl, {
+      errorCorrectionLevel: "H",
+      margin: 1,
+      width: 400,
+      color: {
+        dark: "#0A192F", // Kukkiwon Deep Navy
+        light: "#FFFFFF",
+      },
+    });
+  } catch (error) {
+    console.error("[QR] Failed to generate QR code data URL:", error);
+    // Fallback simple QR
+    return QRCode.toDataURL(textOrUrl);
+  }
 }
 
 /**
@@ -62,5 +84,48 @@ export function formatPublicVerificationPayload(data: {
     message: isValid
       ? "Official Kukkiwon Cup accreditation verified."
       : `Accreditation status is ${data.cardStatus}. Access not authorized.`,
+  };
+}
+
+/**
+ * Formats public athlete verification payload strictly adhering to Phase 6 scope
+ * Guaranteed to NEVER leak DOB, phone, email, address, or payment data
+ */
+export function formatPublicAthleteVerification(data: {
+  cardStatus: string;
+  athleteId?: string;
+  athleteName?: string;
+  academyName?: string | null;
+  country?: string;
+  categoryName?: string | null;
+  discipline?: string | null;
+  championshipName?: string;
+  registrationStatus?: string;
+  version?: number;
+  photoUrl?: string | null;
+}): PublicAthleteVerification {
+  const isValid = isCredentialActive(data.cardStatus);
+  const status: "VERIFIED" | "REVOKED" | "NOT_FOUND" = 
+    isValid ? "VERIFIED" : data.cardStatus === "REVOKED" ? "REVOKED" : "NOT_FOUND";
+
+  return {
+    isValid,
+    status,
+    athleteId: data.athleteId,
+    athleteName: data.athleteName,
+    academyName: data.academyName,
+    country: data.country || "India",
+    categoryName: data.categoryName,
+    discipline: data.discipline,
+    championshipName: data.championshipName || "Kukkiwon Cup Championship 2026",
+    registrationStatus: data.registrationStatus || (isValid ? "REGISTERED" : "UNVERIFIED"),
+    version: data.version || 1,
+    photoUrl: data.photoUrl,
+    verifiedAt: new Date().toISOString(),
+    message: isValid
+      ? "Official Kukkiwon Cup accreditation verified."
+      : data.cardStatus === "REVOKED"
+      ? "ID CARD REVOKED. This credential is no longer valid."
+      : `Accreditation status is ${data.cardStatus}. Verification failed.`,
   };
 }

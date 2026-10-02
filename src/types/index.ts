@@ -8,3 +8,4 @@ export * from './registration';
 export * from './designation';
 export * from './document';
 export * from './admin';
+export * from './id-card';

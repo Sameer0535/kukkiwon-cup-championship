@@ -171,6 +171,7 @@ export interface Registration {
   id: string;
   user_id?: string | null;
   registration_number: string;
+  athlete_id?: string | null;
   championship_id: string;
   participant_id: string;
   participant_type: ParticipantType;

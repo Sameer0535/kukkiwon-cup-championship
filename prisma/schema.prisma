@@ -97,6 +97,8 @@ enum RefundStatus {
 }
 
 enum IdCardStatus {
+  NOT_ELIGIBLE
+  READY
   NOT_GENERATED
   GENERATED
   REVOKED
@@ -315,6 +317,7 @@ model Registration {
   id                  String             @id @default(uuid()) @db.Uuid
   user_id             String?            @db.Uuid
   registration_number String             @unique @db.VarChar(60) // e.g. KKC26-ATH-000001
+  athlete_id          String?            @unique @db.VarChar(60) // Persistent unique athlete identifier
   championship_id     String             @db.Uuid
   participant_id      String             @db.Uuid
   participant_type    ParticipantType    @default(ATHLETE)
@@ -715,8 +718,10 @@ model IdCard {
   id                String       @id @default(uuid()) @db.Uuid
   participant_id    String       @db.Uuid
   registration_id   String       @unique @db.Uuid
-  card_number       String       @unique @db.VarChar(60) // e.g. CARD-KC26-0089
+  athlete_id        String?      @unique @db.VarChar(60)
+  card_number       String       @unique @db.VarChar(60) // e.g. KKC26-ATH-000001
   qr_token          String       @unique @db.VarChar(128) // High-entropy secure cryptographic token
+  version           Int          @default(1)
   card_status       IdCardStatus @default(NOT_GENERATED)
   generated_at      DateTime?    @db.Timestamptz(6)
   revoked_at        DateTime?    @db.Timestamptz(6)
@@ -730,6 +735,7 @@ model IdCard {
   registration      Registration @relation(fields: [registration_id], references: [id], onDelete: Cascade)
 
   @@index([card_number])
+  @@index([athlete_id])
   @@index([qr_token])
   @@index([card_status])
   @@map("id_cards")

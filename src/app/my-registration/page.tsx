@@ -34,7 +34,9 @@ import {
   FileText,
   CreditCard,
   Receipt,
+  Printer,
 } from "lucide-react";
+import { IdCardModal } from "@/components/registration/id-card-modal";
 
 export default function MyRegistrationDashboardPage() {
   const router = useRouter();
@@ -60,6 +62,10 @@ export default function MyRegistrationDashboardPage() {
 
   // View Details Modal
   const [selectedReg, setSelectedReg] = React.useState<RegistrationWithDetails | null>(null);
+
+  // Phase 6 Athlete ID Card Modal State
+  const [cardModalRegId, setCardModalRegId] = React.useState<string | null>(null);
+  const [cardModalOpen, setCardModalOpen] = React.useState(false);
 
   React.useEffect(() => {
     checkSession();
@@ -177,6 +183,20 @@ export default function MyRegistrationDashboardPage() {
       default:
         return <Badge variant="cyan">Unpaid / Pending</Badge>;
     }
+  };
+
+  const getIdCardBadge = (status?: string, athleteId?: string | null, isPaid?: boolean) => {
+    if (status === "REVOKED") {
+      return <Badge variant="danger">ID Card Revoked</Badge>;
+    }
+    if (isPaid || status === "GENERATED" || status === "READY") {
+      return (
+        <Badge variant="gold">
+          {athleteId ? `✓ ${athleteId}` : "✓ ID Ready"}
+        </Badge>
+      );
+    }
+    return <Badge variant="outline">🔒 Pending Payment</Badge>;
   };
 
   // ----------------------------------------------------------------------------
@@ -340,12 +360,14 @@ export default function MyRegistrationDashboardPage() {
                       <th className="py-4 px-4">Registration</th>
                       <th className="py-4 px-4">Document Readiness</th>
                       <th className="py-4 px-4">Payment Status</th>
+                      <th className="py-4 px-4">Accreditation ID</th>
                       <th className="py-4 px-6 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/80 text-slate-300">
                     {registrations.map((reg) => {
                       const isDraft = reg.status === "DRAFT";
+                      const isPaid = reg.paymentStatus === "PAID" || reg.status === "PAID" || reg.status === "CONFIRMED";
                       const continueUrl =
                         reg.participant_type === "COACH"
                           ? `/register/coach?draftId=${reg.id}`
@@ -410,9 +432,57 @@ export default function MyRegistrationDashboardPage() {
                               </Link>
                             </div>
                           </td>
+                          <td className="py-4 px-4">
+                            <div className="flex flex-col gap-1 items-start">
+                              {getIdCardBadge(
+                                (reg as any).idCardStatus,
+                                reg.athlete_id,
+                                isPaid
+                              )}
+                              {isPaid ? (
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => {
+                                      setCardModalRegId(reg.id);
+                                      setCardModalOpen(true);
+                                    }}
+                                    className="text-[11px] text-[#D4AF37] hover:text-[#E5BF42] font-semibold flex items-center gap-1 transition-colors"
+                                  >
+                                    <Award className="w-3 h-3" />
+                                    <span>View Card</span>
+                                  </button>
+                                  <a
+                                    href={`/api/registrations/${reg.id}/id-card/download?autoprint=1`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-[11px] text-slate-400 hover:text-white font-medium flex items-center gap-0.5"
+                                    title="Print or Save PDF"
+                                  >
+                                    <Printer className="w-3 h-3" />
+                                  </a>
+                                </div>
+                              ) : (
+                                <span className="text-[10px] text-slate-500">Unlocks upon payment</span>
+                              )}
+                            </div>
+                          </td>
                           <td className="py-4 px-6 text-right">
                             <div className="flex items-center justify-end gap-2">
-                              {!isDraft && (
+                              {isPaid && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setCardModalRegId(reg.id);
+                                    setCardModalOpen(true);
+                                  }}
+                                  className="text-[11px] uppercase font-bold py-1 h-8 border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10"
+                                >
+                                  <Award className="h-3.5 w-3.5 mr-1" />
+                                  <span>ID Card</span>
+                                </Button>
+                              )}
+                              {!isDraft && !isPaid && (
                                 <Link href={`/my-registration/${reg.id}/payment`}>
                                   <Button
                                     variant={reg.paymentStatus === "PAID" ? "outline" : "primary"}
@@ -533,6 +603,47 @@ export default function MyRegistrationDashboardPage() {
                         </Link>
                       </div>
 
+                      {/* Phase 6 ID Card Accreditation on Mobile */}
+                      <div className="p-3 bg-slate-900/60 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
+                        <div>
+                          <span className="text-[10px] text-slate-500 block uppercase font-bold tracking-wider">
+                            Accreditation Card
+                          </span>
+                          <div className="mt-1">
+                            {getIdCardBadge(
+                              (reg as any).idCardStatus,
+                              reg.athlete_id,
+                              reg.paymentStatus === "PAID" || reg.status === "PAID" || reg.status === "CONFIRMED"
+                            )}
+                          </div>
+                        </div>
+                        {(reg.paymentStatus === "PAID" || reg.status === "PAID" || reg.status === "CONFIRMED") && (
+                          <div className="flex items-center gap-1.5">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setCardModalRegId(reg.id);
+                                setCardModalOpen(true);
+                              }}
+                              className="text-[11px] h-7 px-3 border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10 font-bold uppercase"
+                            >
+                              <Award className="w-3 h-3 mr-1" />
+                              Card
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => window.open(`/api/registrations/${reg.id}/id-card/download?autoprint=1`, "_blank")}
+                              className="text-[11px] h-7 px-2 border-slate-700 text-slate-300"
+                              title="Print / Save PDF"
+                            >
+                              <Printer className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+
                       <div className="pt-2 border-t border-slate-800 flex justify-end">
                         {isDraft ? (
                           <Link href={continueUrl} className="w-full">
@@ -626,6 +737,16 @@ export default function MyRegistrationDashboardPage() {
                 <span className="text-slate-400">Payment Status:</span>
                 <div>{getPaymentStatusBadge(selectedReg.paymentStatus)}</div>
               </div>
+              <div className="py-2 flex justify-between items-center">
+                <span className="text-slate-400">Accreditation Card:</span>
+                <div>
+                  {getIdCardBadge(
+                    (selectedReg as any).idCardStatus,
+                    selectedReg.athlete_id,
+                    selectedReg.paymentStatus === "PAID" || selectedReg.status === "PAID" || selectedReg.status === "CONFIRMED"
+                  )}
+                </div>
+              </div>
               <div className="pt-2 flex justify-between">
                 <span className="text-slate-400">Registered At:</span>
                 <span className="text-slate-300">{formatDateTime(selectedReg.registered_at)}</span>
@@ -634,6 +755,20 @@ export default function MyRegistrationDashboardPage() {
 
             <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
               <div className="flex items-center gap-2">
+                {(selectedReg.paymentStatus === "PAID" || selectedReg.status === "PAID" || selectedReg.status === "CONFIRMED") && (
+                  <Button
+                    variant="outline"
+                    size="md"
+                    onClick={() => {
+                      setCardModalRegId(selectedReg.id);
+                      setCardModalOpen(true);
+                    }}
+                    className="text-xs uppercase font-bold border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10"
+                  >
+                    <Award className="h-4 w-4 mr-1.5" />
+                    <span>View ID Card</span>
+                  </Button>
+                )}
                 <Link href={`/my-registration/${selectedReg.id}/payment`}>
                   <Button
                     variant={selectedReg.paymentStatus === "PAID" ? "outline" : "primary"}
@@ -676,6 +811,13 @@ export default function MyRegistrationDashboardPage() {
           </div>
         </div>
       )}
+
+      {/* PHASE 6 DIGITAL ID CARD MODAL */}
+      <IdCardModal
+        registrationId={cardModalRegId}
+        isOpen={cardModalOpen}
+        onClose={() => setCardModalOpen(false)}
+      />
     </div>
   );
 }
