@@ -50,6 +50,30 @@ export interface IdCardEligibilityResult {
 export interface PublicAthleteVerification {
   isValid: boolean;
   status: 'VERIFIED' | 'REVOKED' | 'NOT_FOUND';
+  message: string;
+  verifiedAt: string;
+
+  // Phase 7 Structured Public Response DTO
+  athlete?: {
+    athleteId: string;
+    name: string;
+    academy: string | null;
+    category: string | null;
+    discipline: string | null;
+    country: string;
+    photoUrl: string | null;
+    status?: string;
+  };
+  championship?: {
+    name: string;
+    year: string;
+  };
+  card?: {
+    version: number;
+    issuedAt?: string | null;
+  };
+
+  // Top-level convenience properties preserved for backwards compatibility
   athleteId?: string;
   athleteName?: string;
   academyName?: string | null;
@@ -59,9 +83,7 @@ export interface PublicAthleteVerification {
   championshipName?: string;
   registrationStatus?: string;
   version?: number;
-  verifiedAt: string;
   photoUrl?: string | null;
-  message: string;
 }
 
 export interface IdCardPrintConfig {

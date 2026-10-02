@@ -88,7 +88,7 @@ export function formatPublicVerificationPayload(data: {
 }
 
 /**
- * Formats public athlete verification payload strictly adhering to Phase 6 scope
+ * Formats public athlete verification payload adhering strictly to Phase 7 DTO specification
  * Guaranteed to NEVER leak DOB, phone, email, address, or payment data
  */
 export function formatPublicAthleteVerification(data: {
@@ -102,30 +102,62 @@ export function formatPublicAthleteVerification(data: {
   championshipName?: string;
   registrationStatus?: string;
   version?: number;
+  issuedAt?: string | null;
   photoUrl?: string | null;
 }): PublicAthleteVerification {
   const isValid = isCredentialActive(data.cardStatus);
   const status: "VERIFIED" | "REVOKED" | "NOT_FOUND" = 
     isValid ? "VERIFIED" : data.cardStatus === "REVOKED" ? "REVOKED" : "NOT_FOUND";
 
+  const champName = data.championshipName || "Kukkiwon Cup Championship 2026";
+  const athleteStatus = data.registrationStatus || (isValid ? "REGISTERED" : "UNVERIFIED");
+
   return {
     isValid,
     status,
+    message: isValid
+      ? "Official Kukkiwon Cup accreditation verified."
+      : data.cardStatus === "REVOKED"
+      ? "ID CARD REVOKED. This credential is no longer valid."
+      : "ACCREDITATION NOT FOUND",
+    verifiedAt: new Date().toISOString(),
+
+    // Phase 7 Structured DTO
+    athlete: data.athleteId
+      ? {
+          athleteId: data.athleteId,
+          name: data.athleteName || "Competitor",
+          academy: data.academyName || null,
+          category: data.categoryName || null,
+          discipline: data.discipline || null,
+          country: data.country || "India",
+          photoUrl: data.photoUrl || null,
+          status: athleteStatus,
+        }
+      : undefined,
+
+    championship: {
+      name: champName,
+      year: "2026",
+    },
+
+    card: data.athleteId
+      ? {
+          version: data.version || 1,
+          issuedAt: data.issuedAt || null,
+        }
+      : undefined,
+
+    // Top-level properties preserved for backwards compatibility
     athleteId: data.athleteId,
     athleteName: data.athleteName,
     academyName: data.academyName,
     country: data.country || "India",
     categoryName: data.categoryName,
     discipline: data.discipline,
-    championshipName: data.championshipName || "Kukkiwon Cup Championship 2026",
-    registrationStatus: data.registrationStatus || (isValid ? "REGISTERED" : "UNVERIFIED"),
+    championshipName: champName,
+    registrationStatus: athleteStatus,
     version: data.version || 1,
     photoUrl: data.photoUrl,
-    verifiedAt: new Date().toISOString(),
-    message: isValid
-      ? "Official Kukkiwon Cup accreditation verified."
-      : data.cardStatus === "REVOKED"
-      ? "ID CARD REVOKED. This credential is no longer valid."
-      : `Accreditation status is ${data.cardStatus}. Verification failed.`,
   };
 }

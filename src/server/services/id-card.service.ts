@@ -673,6 +673,7 @@ export class IdCardService {
           championshipName: idCard.registration.championship.name,
           registrationStatus: idCard.registration.status === "PAID" || idCard.registration.status === "CONFIRMED" ? "REGISTERED" : idCard.registration.status,
           version: idCard.version,
+          issuedAt: idCard.generated_at?.toISOString() || null,
           photoUrl: idCard.participant.photo_url || null,
         });
       } catch (error) {
@@ -694,6 +695,86 @@ export class IdCardService {
           championshipName: card.championship_name,
           registrationStatus: "REGISTERED",
           version: card.version,
+          issuedAt: card.generated_at?.toISOString() || null,
+          photoUrl: card.photo_url,
+        });
+      }
+    }
+
+    return formatPublicAthleteVerification({ cardStatus: "NOT_FOUND" });
+  }
+
+  /**
+   * Manual verification by Athlete ID reference (Phase 7 Requirement 14)
+   * Strictly for secondary manual lookup; zero private PII returned
+   */
+  static async verifyByAthleteId(athleteId: string): Promise<PublicAthleteVerification> {
+    if (!athleteId || athleteId.trim().length === 0) {
+      return formatPublicAthleteVerification({ cardStatus: "NOT_FOUND" });
+    }
+
+    const trimmed = athleteId.trim().toUpperCase();
+    const online = await isDbOnline();
+
+    if (online) {
+      try {
+        const idCard = await prisma.idCard.findFirst({
+          where: {
+            OR: [{ athlete_id: trimmed }, { card_number: trimmed }],
+          },
+          include: {
+            participant: true,
+            registration: {
+              include: {
+                championship: true,
+                category: true,
+                academy: true,
+              },
+            },
+          },
+        });
+
+        if (!idCard) {
+          return formatPublicAthleteVerification({ cardStatus: "NOT_FOUND" });
+        }
+
+        return formatPublicAthleteVerification({
+          cardStatus: idCard.card_status,
+          athleteId: idCard.athlete_id || idCard.card_number,
+          athleteName: idCard.participant.full_name,
+          academyName: idCard.registration.academy?.name || idCard.participant.academy_name,
+          country: idCard.participant.nationality,
+          categoryName: idCard.registration.category?.name,
+          discipline: idCard.registration.discipline || undefined,
+          championshipName: idCard.registration.championship.name,
+          registrationStatus:
+            idCard.registration.status === "PAID" || idCard.registration.status === "CONFIRMED"
+              ? "REGISTERED"
+              : idCard.registration.status,
+          version: idCard.version,
+          issuedAt: idCard.generated_at?.toISOString() || null,
+          photoUrl: idCard.participant.photo_url || null,
+        });
+      } catch (error) {
+        console.error("[IdCardService.verifyByAthleteId] DB error:", error);
+      }
+    }
+
+    // Fallback lookup
+    for (const card of FALLBACK_ID_CARDS.values()) {
+      if (card.athlete_id.toUpperCase() === trimmed || card.card_number.toUpperCase() === trimmed) {
+        return formatPublicAthleteVerification({
+          cardStatus: card.card_status,
+          athleteId: card.athlete_id,
+          athleteName: card.athlete_name,
+          academyName: card.academy_name,
+          country: card.nationality,
+          categoryName: card.category_name,
+          discipline: card.discipline,
+          championshipName: card.championship_name,
+          registrationStatus: "REGISTERED",
+          version: card.version,
+          issuedAt: card.generated_at?.toISOString() || null,
           photoUrl: card.photo_url,
         });
       }
