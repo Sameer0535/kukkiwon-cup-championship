@@ -1,155 +1,230 @@
 // ==============================================================================
-// DYNAMIC CHAMPIONSHIP ROUTE (Requirements 22 & 23)
-// Multi-event slug lookup: /championship/[slug]
+// DYNAMIC CHAMPIONSHIP DETAILS PAGE (Requirements 5, 11, 22 & 23)
+// Full technical outline, division breakdown, and schedule: /championship/[slug]
 // ==============================================================================
 
 import Link from "next/link";
 import { PublicHeader } from "@/components/layout/public-header";
 import { PublicFooter } from "@/components/layout/public-footer";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { getPublicChampionshipData } from "@/lib/cms";
+import { formatDate, formatCurrency } from "@/lib/utils";
 import {
   Calendar,
   MapPin,
   Clock,
   Shield,
-  FileText,
+  Award,
   CreditCard,
+  FileText,
   ArrowRight,
-  ArrowLeft,
+  CheckCircle2,
+  Users,
+  AlertTriangle,
 } from "lucide-react";
 
-export default async function ChampionshipPage({
+export default async function ChampionshipDetailsPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const tournament = await getPublicChampionshipData(slug);
 
-  // Fallback tournament data for demonstration / development
-  const tournament = {
-    slug,
-    name: "Kukkiwon Cup Championship 2026",
-    subtitle: "Presented by Kukkiwon North India & Kyorix Sports Technology",
-    status: "REGISTRATION_OPEN",
-    startDate: "2026-11-20T09:00:00Z",
-    endDate: "2026-11-23T18:00:00Z",
-    registrationClose: "2026-11-10T23:59:59Z",
-    venue: "Indira Gandhi Indoor Stadium Complex",
-    city: "New Delhi",
-    state: "Delhi",
-    country: "India",
-    feeAthlete: 2500,
-    feeCoach: 1500,
-    feeOfficial: 0,
-    currency: "INR",
-  };
+  const scheduleItems = [
+    { day: "Day 1", date: "Friday, 20 Nov 2026", activity: "Official Delegations Arrival, Weight Weigh-In & Head of Team Technical Meeting" },
+    { day: "Day 2", date: "Saturday, 21 Nov 2026", activity: "Poomsae (Individual & Team Divisions), Cadet & Sub-Junior Kyorugi Matches" },
+    { day: "Day 3", date: "Sunday, 22 Nov 2026", activity: "Junior & Senior Kyorugi Preliminary & Semi-Final Elimination Rounds" },
+    { day: "Day 4", date: "Monday, 23 Nov 2026", activity: "Championship Finals, Demonstration Showcase, Medal Ceremonies & Closing" },
+  ];
+
+  const divisions = [
+    { name: "Senior Division", age: "18+ Years", belt: "1st Dan / Poom and above", rules: "World Taekwondo Senior Rules" },
+    { name: "Junior Division", age: "15 – 17 Years", belt: "1st Dan / Poom and above", rules: "World Taekwondo Junior Rules" },
+    { name: "Cadet Division", age: "12 – 14 Years", belt: "Poom Belt Holders", rules: "Head contact limited rules" },
+    { name: "Sub-Junior Division", age: "Under 12 Years", belt: "Color Belt & Poom", rules: "Non-head contact safety rules" },
+  ];
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#090D16]">
+    <div className="flex min-h-screen flex-col bg-[#070B14] text-slate-100 selection:bg-amber-400 selection:text-slate-950 font-sans">
       <PublicHeader />
 
-      <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-5xl space-y-10">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-sky-400 transition-colors uppercase tracking-wider"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span>Back to Home</span>
-        </Link>
-
-        {/* Tournament Header Banner */}
-        <div className="rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-950 via-[#0B1528] to-slate-950 p-6 sm:p-10 space-y-4 shadow-2xl">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <Badge variant="success">Registration Open</Badge>
-            <span className="text-xs font-mono text-slate-400">
-              Slug: <strong className="text-sky-400">{tournament.slug}</strong>
-            </span>
-          </div>
-
-          <h1 className="text-2xl sm:text-4xl font-extrabold text-white uppercase tracking-tight">
-            {tournament.name}
-          </h1>
-          <p className="text-sm text-amber-400 font-medium">{tournament.subtitle}</p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-800/80 text-xs text-slate-300">
-            <div className="flex items-center gap-2.5">
-              <Calendar className="h-4 w-4 text-sky-400 shrink-0" />
-              <span>
-                {formatDate(tournament.startDate)} – {formatDate(tournament.endDate)}
+      <main className="flex-1">
+        {/* Championship Header Banner */}
+        <section className="relative overflow-hidden border-b border-slate-800/80 bg-[#090D16] py-14 sm:py-20">
+          <div className="container relative mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-6 text-center sm:text-left">
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">
+              <Badge variant="gold">Official Championship</Badge>
+              <Badge variant="success">Registration Open</Badge>
+              <span className="text-xs font-mono text-slate-400">
+                Slug: <strong className="text-amber-400">{tournament.slug}</strong>
               </span>
             </div>
-            <div className="flex items-center gap-2.5">
-              <MapPin className="h-4 w-4 text-sky-400 shrink-0" />
-              <span>
-                {tournament.venue}, {tournament.city}
-              </span>
+
+            <div className="space-y-2">
+              <h1 className="text-3xl sm:text-5xl font-extrabold uppercase tracking-tight text-white">
+                {tournament.name}
+              </h1>
+              <p className="text-sm sm:text-base text-amber-300/90 font-medium">
+                {tournament.subtitle}
+              </p>
             </div>
-            <div className="flex items-center gap-2.5">
-              <Clock className="h-4 w-4 text-amber-400 shrink-0" />
-              <span>Closes {formatDate(tournament.registrationClose)}</span>
+
+            {/* Quick Metadata Bar */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-800 text-xs text-slate-300">
+              <div className="flex items-center gap-2.5">
+                <Calendar className="h-4 w-4 text-amber-400 shrink-0" />
+                <span>
+                  {formatDate(tournament.startDate)} – {formatDate(tournament.endDate)}
+                </span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <MapPin className="h-4 w-4 text-sky-400 shrink-0" />
+                <span>
+                  {tournament.venue}, {tournament.city}
+                </span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <Clock className="h-4 w-4 text-emerald-400 shrink-0" />
+                <span>Registration Closes: {formatDate(tournament.registrationClose)}</span>
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <Link href="/register">
+                <Button variant="gold" size="lg" className="text-xs uppercase font-extrabold px-8">
+                  <span>Register Competitor Now</span>
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </Link>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Tournament Details Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Fee Structure */}
-          <Card className="border-slate-800 bg-slate-900/60 p-6">
-            <CardHeader className="p-0 pb-4">
-              <CardTitle className="text-base flex items-center gap-2">
-                <CreditCard className="h-4 w-4 text-sky-400" />
-                <span>Entry & Accreditation Fees</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0 space-y-3 pt-2 text-xs">
-              <div className="flex justify-between items-center py-2 border-b border-slate-800">
-                <span className="text-slate-300">Athlete Competitor Fee</span>
-                <span className="font-bold text-white">
-                  {formatCurrency(tournament.feeAthlete, tournament.currency)}
-                </span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-slate-800">
-                <span className="text-slate-300">Coach Accreditation Fee</span>
-                <span className="font-bold text-white">
-                  {formatCurrency(tournament.feeCoach, tournament.currency)}
-                </span>
-              </div>
-              <div className="flex justify-between items-center py-2">
-                <span className="text-slate-300">Referee / Official Accreditation</span>
-                <span className="font-bold text-emerald-400">Complimentary</span>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Schedule & Event Outline */}
+        <section className="py-16 border-b border-slate-800/80 bg-[#060A13]">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-10">
+            <div className="space-y-2">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#D4AF37]">
+                Official Program
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-bold uppercase text-white">
+                Tournament Schedule & Itinerary
+              </h2>
+            </div>
 
-          {/* Registration Requirements */}
-          <Card className="border-slate-800 bg-slate-900/60 p-6">
-            <CardHeader className="p-0 pb-4">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Shield className="h-4 w-4 text-amber-400" />
-                <span>Required Documentation</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0 space-y-2 pt-2 text-xs text-slate-300">
-              <p>• Government Photo ID (Aadhaar / Passport / Voter ID)</p>
-              <p>• Kukkiwon Dan/Poom Certificate (for Dan divisions & Coaches)</p>
-              <p>• Digital Passport Photo (for official accreditation badge)</p>
-              <p>• Signed Terms of Participation (Auditable Terms v1.0)</p>
-            </CardContent>
-          </Card>
-        </div>
+            <div className="space-y-3">
+              {scheduleItems.map((item) => (
+                <div
+                  key={item.day}
+                  className="p-5 rounded-xl border border-slate-800 bg-[#0A0F1D] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                >
+                  <div className="space-y-0.5 sm:w-1/4">
+                    <span className="font-bold text-amber-400 uppercase tracking-wide block">
+                      {item.day}
+                    </span>
+                    <span className="text-slate-400">{item.date}</span>
+                  </div>
+                  <div className="sm:w-3/4 font-medium text-slate-200">
+                    {item.activity}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
-        {/* CTA to Register (Phase Notice) */}
-        <div className="text-center pt-4">
-          <Link href="/register">
-            <Button variant="gold" size="lg" className="uppercase tracking-wider">
-              <span>Proceed to Registration Portal</span>
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-          </Link>
-        </div>
+        {/* Age & Division Categories */}
+        <section className="py-16 border-b border-slate-800/80 bg-[#090D16]">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-10">
+            <div className="space-y-2">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#00E5FF]">
+                Eligibility
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-bold uppercase text-white">
+                Competition Divisions & Belt Criteria
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {divisions.map((div) => (
+                <div
+                  key={div.name}
+                  className="p-6 rounded-xl border border-slate-800 bg-[#0C1222] space-y-3 text-xs"
+                >
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-bold text-white uppercase">{div.name}</h3>
+                    <Badge variant="cyan">{div.age}</Badge>
+                  </div>
+                  <div className="space-y-1 text-slate-400">
+                    <div>Belt Requirement: <strong className="text-slate-200">{div.belt}</strong></div>
+                    <div>Rules: <strong className="text-slate-200">{div.rules}</strong></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Fees & Technical Rules */}
+        <section id="rules" className="py-16 bg-[#060A13]">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-8">
+            <div className="space-y-2">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#D4AF37]">
+                Financial & Regulatory Outline
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-bold uppercase text-white">
+                Accreditation Fees & Guidelines
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-300">
+              <div className="p-6 rounded-xl border border-slate-800 bg-[#0A0F1D] space-y-4">
+                <h3 className="text-sm font-bold text-white uppercase flex items-center gap-2">
+                  <CreditCard className="h-4 w-4 text-amber-400" />
+                  <span>Entry Fee Structure</span>
+                </h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between py-1.5 border-b border-slate-800">
+                    <span>Athlete Entry (per discipline)</span>
+                    <span className="font-bold text-white">{formatCurrency(tournament.entryFeeAthlete, tournament.currency)}</span>
+                  </div>
+                  <div className="flex justify-between py-1.5 border-b border-slate-800">
+                    <span>Coach Accreditation Mat Pass</span>
+                    <span className="font-bold text-white">{formatCurrency(tournament.entryFeeCoach, tournament.currency)}</span>
+                  </div>
+                  <div className="flex justify-between py-1.5">
+                    <span>Referees, Jury & Board Members</span>
+                    <span className="font-bold text-emerald-400">Complimentary</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 rounded-xl border border-slate-800 bg-[#0A0F1D] space-y-4">
+                <h3 className="text-sm font-bold text-white uppercase flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-sky-400" />
+                  <span>Technical Rules Summary</span>
+                </h3>
+                <ul className="space-y-1.5 text-slate-400">
+                  <li>• World Taekwondo Competition Rules strictly apply.</li>
+                  <li>• Electronic body protector and sensor scoring provided by Kyorix.</li>
+                  <li>• Mandatory mouthguard, groin guard, shin/forearm guards, and WT gloves.</li>
+                  <li>• Valid government photo identification required at weigh-in.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="text-center pt-4">
+              <Link href="/register">
+                <Button variant="gold" size="lg" className="text-xs uppercase font-extrabold px-10">
+                  <span>Register Now for {tournament.name}</span>
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
       </main>
 
       <PublicFooter />

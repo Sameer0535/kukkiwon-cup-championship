@@ -1,299 +1,652 @@
 // ==============================================================================
-// KUKKIWON CUP CHAMPIONSHIP - FOUNDATION HOMEPAGE
-// Phase 1 Architecture, Database & System Readiness Dashboard
+// KUKKIWON CUP CHAMPIONSHIP - OFFICIAL PUBLIC HOMEPAGE (PHASE 2)
+// Institutional Sports Federation Website — Kukkiwon North India x Kyorix
 // ==============================================================================
 
 import Link from "next/link";
 import Image from "next/image";
 import { PublicHeader } from "@/components/layout/public-header";
 import { PublicFooter } from "@/components/layout/public-footer";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { BRANDING } from "@/config/branding";
+import { SITE_CONFIG } from "@/config/site";
+import { getPublicChampionshipData } from "@/lib/cms";
+import { formatDate, formatCurrency } from "@/lib/utils";
 import {
-  Database,
-  ShieldCheck,
-  QrCode,
-  FileCheck2,
-  Lock,
-  Layers,
-  CheckCircle2,
+  Calendar,
+  MapPin,
+  Clock,
+  Shield,
+  Award,
   ArrowRight,
-  Server,
-  Activity,
+  ExternalLink,
+  Download,
+  Eye,
+  CheckCircle2,
   Cpu,
+  Mail,
+  Phone,
+  FileText,
+  AlertCircle,
 } from "lucide-react";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const tournament = await getPublicChampionshipData("kukkiwon-cup-2026");
+
   return (
-    <div className="flex min-h-screen flex-col bg-[#090D16]">
+    <div className="flex min-h-screen flex-col bg-[#070B14] text-slate-100 selection:bg-amber-400 selection:text-slate-950 font-sans">
       <PublicHeader />
 
       <main className="flex-1">
-        {/* Hero Section with Dual Branding Presentation */}
-        <section className="relative overflow-hidden border-b border-slate-800/80 bg-gradient-to-b from-slate-950 via-[#0B1220] to-[#090D16] py-16 sm:py-24">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(56,189,248,0.15),transparent)]" />
-          
-          <div className="container relative mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
-            {/* Phase 1 Badge */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-sky-500/30 bg-sky-500/10 px-4 py-1.5 text-xs font-semibold text-sky-400">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>PHASE 1 COMPLETE — FOUNDATION & SYSTEM ARCHITECTURE</span>
-            </div>
+        {/* =========================================================================
+            1. HERO SECTION (Requirements 7, 8 & 26)
+            ========================================================================= */}
+        <section className="relative overflow-hidden border-b border-slate-800/80 bg-[#090D16] py-14 sm:py-20 lg:py-28">
+          {/* Subtle Institutional Architectural Grid & Gradient */}
+          <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:4rem_4rem]" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(212,175,55,0.12),transparent_70%)] pointer-events-none" />
 
-            {/* Official Logos Display */}
-            <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-12 py-4">
-              {/* Kukkiwon Logo Container */}
-              <div className="flex items-center gap-4 rounded-2xl border border-slate-800 bg-white p-3 shadow-xl hover:scale-105 transition-transform duration-300">
-                <div className="relative h-16 w-16 sm:h-20 sm:w-20">
-                  <Image
-                    src={BRANDING.kukkiwon.logoPath}
-                    alt={BRANDING.kukkiwon.name}
-                    fill
-                    className="object-contain"
-                    priority
-                  />
+          <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+              {/* Left Column: Official Heading, Metadata & CTAs */}
+              <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+                {/* Official Dual Logos in Hero */}
+                <div className="flex items-center justify-center lg:justify-start gap-4 pb-2">
+                  <div className="relative h-14 w-14 sm:h-16 sm:w-16 overflow-hidden rounded-xl bg-white p-1 border border-slate-700 shadow-md shrink-0">
+                    <Image
+                      src={BRANDING.kukkiwon.logoPath}
+                      alt={BRANDING.kukkiwon.name}
+                      fill
+                      className="object-contain"
+                      priority
+                    />
+                  </div>
+                  <span className="text-xl font-light text-slate-500">×</span>
+                  <div className="relative h-12 w-28 sm:h-14 sm:w-36 overflow-hidden shrink-0">
+                    <Image
+                      src={BRANDING.kyorix.logoPath}
+                      alt={BRANDING.kyorix.name}
+                      fill
+                      className="object-contain"
+                      priority
+                    />
+                  </div>
+                </div>
+
+                {/* Subtitle / Governing Banner */}
+                <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 py-1 text-xs font-semibold text-amber-300">
+                  <Shield className="h-3.5 w-3.5 text-amber-400" />
+                  <span>World Taekwondo Headquarters Sanctioned Championship</span>
+                </div>
+
+                {/* Main Championship Title */}
+                <div className="space-y-2">
+                  <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold uppercase tracking-tight text-white leading-tight font-sans">
+                    Kukkiwon Cup <br className="hidden sm:inline" />
+                    <span className="text-[#D4AF37]">Championship</span>
+                  </h1>
+                  <p className="text-sm sm:text-base text-slate-300 font-medium max-w-xl mx-auto lg:mx-0">
+                    {tournament.subtitle}
+                  </p>
+                </div>
+
+                {/* Championship Core Metadata Strip */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-y border-slate-800/80 py-4 max-w-2xl mx-auto lg:mx-0 text-left">
+                  <div className="flex items-start gap-2.5">
+                    <Calendar className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
+                        Dates
+                      </span>
+                      <span className="text-xs font-semibold text-white">
+                        {formatDate(tournament.startDate)} – {formatDate(tournament.endDate)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2.5">
+                    <MapPin className="h-4 w-4 text-sky-400 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
+                        Venue
+                      </span>
+                      <span className="text-xs font-semibold text-white truncate block max-w-[180px]">
+                        {tournament.venue}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2.5">
+                    <Clock className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
+                        Deadline
+                      </span>
+                      <span className="text-xs font-semibold text-white">
+                        {formatDate(tournament.registrationClose)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Primary & Secondary Action Buttons (Requirement 7) */}
+                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-2">
+                  <Link href="/register" className="w-full sm:w-auto">
+                    <Button
+                      variant="gold"
+                      size="lg"
+                      className="w-full sm:w-auto text-xs uppercase tracking-wider font-extrabold px-8 py-3.5 shadow-xl shadow-amber-500/20"
+                    >
+                      <span>Register Now</span>
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </Link>
+
+                  <Link href="/championship/kukkiwon-cup-2026" className="w-full sm:w-auto">
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="w-full sm:w-auto text-xs uppercase tracking-wider font-bold px-7 border-slate-700 bg-slate-900/60 hover:bg-slate-800 text-slate-200"
+                    >
+                      <span>Explore Championship</span>
+                    </Button>
+                  </Link>
                 </div>
               </div>
 
-              <span className="text-2xl font-light text-slate-400">×</span>
+              {/* Right Column: Championship Visual Showcase */}
+              <div className="lg:col-span-5 flex justify-center">
+                <div className="relative w-full max-w-md aspect-[3/4] rounded-2xl border-2 border-slate-800 bg-[#0C1222] p-5 shadow-2xl flex flex-col justify-between overflow-hidden group">
+                  {/* Subtle Corner Accents */}
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-amber-400/10 rounded-bl-full pointer-events-none" />
+                  
+                  {/* Top Seal */}
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div className="flex items-center gap-2.5">
+                      <div className="relative h-10 w-10 bg-white rounded-lg p-1">
+                        <Image
+                          src={BRANDING.kukkiwon.logoPath}
+                          alt={BRANDING.kukkiwon.name}
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                      <div>
+                        <span className="text-[11px] font-bold text-white uppercase block">
+                          Official Bulletin
+                        </span>
+                        <span className="text-[10px] text-amber-400 font-semibold">
+                          Kukkiwon Cup 2026
+                        </span>
+                      </div>
+                    </div>
+                    <Badge variant="gold">Accredited</Badge>
+                  </div>
 
-              {/* Kyorix Logo Container */}
-              <div className="flex items-center gap-4 rounded-2xl border border-slate-800 bg-slate-950/90 p-4 shadow-xl hover:scale-105 transition-transform duration-300">
-                <div className="relative h-14 w-36 sm:h-16 sm:w-44">
-                  <Image
-                    src={BRANDING.kyorix.logoPath}
-                    alt={BRANDING.kyorix.name}
-                    fill
-                    className="object-contain"
-                    priority
-                  />
+                  {/* Poster Showcase Body */}
+                  <div className="text-center space-y-3 py-6 my-auto">
+                    <Award className="h-16 w-16 mx-auto text-[#D4AF37] animate-pulse" />
+                    <div className="space-y-1">
+                      <span className="text-[11px] tracking-widest uppercase font-bold text-slate-400">
+                        Official Championship
+                      </span>
+                      <h3 className="text-2xl font-black text-white uppercase tracking-tight">
+                        {tournament.name}
+                      </h3>
+                      <p className="text-xs text-slate-300 max-w-xs mx-auto">
+                        New Delhi • {formatDate(tournament.startDate)}
+                      </p>
+                    </div>
+
+                    <div className="pt-2">
+                      <span className="inline-block text-[11px] font-mono px-3 py-1 rounded bg-slate-950 border border-slate-800 text-cyan-400">
+                        Powered by Kyorix Electronic Scoring
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Bottom Strip */}
+                  <div className="border-t border-slate-800 pt-3 flex items-center justify-between text-[11px] text-slate-400">
+                    <span>Sanction: Kukkiwon India North</span>
+                    <span className="text-emerald-400 font-medium">Entries Open</span>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            {/* Title & Tagline */}
-            <div className="space-y-4 max-w-3xl mx-auto">
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white uppercase">
-                Kukkiwon Cup <span className="gold-gradient-text">Championship</span>
-              </h1>
-              <p className="text-sm sm:text-base text-slate-300 font-medium">
-                Collaboration between{" "}
-                <span className="text-amber-400 font-semibold">Kukkiwon India North Branch</span>{" "}
-                and{" "}
-                <span className="text-cyan-400 font-semibold">Kyorix Sports Technology</span>
-              </p>
-              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                A 100% standalone, decoupled tournament platform with dedicated PostgreSQL database,
-                role-based security, private document storage, cryptographic QR verification, and accreditation architecture.
-              </p>
-            </div>
-
-            {/* Quick Action Buttons */}
-            <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
-              <Link
-                href="/admin"
-                className="inline-flex items-center gap-2 rounded-lg bg-sky-500 px-5 py-2.5 text-xs font-bold text-slate-950 hover:bg-sky-400 shadow-lg shadow-sky-500/25 transition-all uppercase tracking-wider"
-              >
-                <span>Explore Admin Portal</span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-
-              <Link
-                href="/verify/demo-token"
-                className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900/80 px-5 py-2.5 text-xs font-semibold text-slate-200 hover:bg-slate-800 hover:text-white transition-all uppercase tracking-wider"
-              >
-                <QrCode className="h-4 w-4 text-emerald-400" />
-                <span>Test QR Verification</span>
-              </Link>
-
-              <Link
-                href="/api/health"
-                target="_blank"
-                className="inline-flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-950 px-4 py-2.5 text-xs font-medium text-slate-400 hover:text-sky-400 transition-colors"
-              >
-                <Activity className="h-4 w-4 text-sky-400" />
-                <span>API Health Diagnostics</span>
-              </Link>
             </div>
           </div>
         </section>
 
-        {/* Architecture Checklist & Highlights Grid */}
-        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-12">
-          <div className="text-center space-y-2 max-w-2xl mx-auto">
-            <h2 className="text-2xl font-bold tracking-tight text-white uppercase">
-              Phase 1 Deliverables & Architecture
-            </h2>
-            <p className="text-xs text-slate-400">
-              Complete relational models, security boundaries, and modular architecture implemented strictly per specification.
-            </p>
-          </div>
+        {/* =========================================================================
+            2. ABOUT THE CHAMPIONSHIP (Requirement 9)
+            ========================================================================= */}
+        <section className="py-16 sm:py-24 border-b border-slate-800/80 bg-[#060A13]">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-10">
+            <div className="text-center space-y-3 max-w-3xl mx-auto">
+              <span className="text-xs font-bold uppercase tracking-widest text-amber-400">
+                Official Sanction & Purpose
+              </span>
+              <h2 className="text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-white">
+                About The Championship
+              </h2>
+              <p className="text-sm sm:text-base text-slate-300 leading-relaxed pt-2">
+                {tournament.description}
+              </p>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Card 1: 100% Standalone Isolation */}
-            <Card className="border-slate-800 bg-slate-900/60 hover:border-slate-700 transition-all">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
-                    <ShieldCheck className="h-5 w-5" />
-                  </div>
-                  <Badge variant="success">Decoupled</Badge>
+            {/* Core Pillars Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+              <div className="p-6 rounded-xl border border-slate-800 bg-[#0A0F1D] space-y-3">
+                <div className="h-10 w-10 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold">
+                  <Shield className="h-5 w-5" />
                 </div>
-                <CardTitle className="pt-3">100% Standalone Isolation</CardTitle>
-                <CardDescription>
-                  Completely independent of the legacy Kyorix website (<code className="text-slate-300">kyorix-mgr.vercel.app</code>).
-                  Has its own frontend, backend, database, authentication, storage, payment config, and ID engine.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            {/* Card 2: Relational PostgreSQL Schema */}
-            <Card className="border-slate-800 bg-slate-900/60 hover:border-slate-700 transition-all">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-lg bg-sky-500/10 text-sky-400">
-                    <Database className="h-5 w-5" />
-                  </div>
-                  <Badge variant="info">12 Relational Entities</Badge>
-                </div>
-                <CardTitle className="pt-3">Relational PostgreSQL Models</CardTitle>
-                <CardDescription>
-                  Type-safe Prisma client & SQL DDL covering: Championships, Participants, Registrations,
-                  Designations, Nationalities, Documents, Payments, IdCards, AdminUsers, AuditLogs, SiteSettings, and TermsVersions.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            {/* Card 3: Role-Based Access Control */}
-            <Card className="border-slate-800 bg-slate-900/60 hover:border-slate-700 transition-all">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-lg bg-purple-500/10 text-purple-400">
-                    <Lock className="h-5 w-5" />
-                  </div>
-                  <Badge variant="warning">7 RBAC Roles</Badge>
-                </div>
-                <CardTitle className="pt-3">Secure Server-Side Auth</CardTitle>
-                <CardDescription>
-                  Multi-tier RBAC: <code className="text-slate-300">SUPER_ADMIN</code>, <code className="text-slate-300">EVENT_ADMIN</code>,
-                  <code className="text-slate-300">REGISTRATION_ADMIN</code>, <code className="text-slate-300">FINANCE_ADMIN</code>,
-                  <code className="text-slate-300">DOCUMENT_ADMIN</code>, <code className="text-slate-300">CONTENT_ADMIN</code>, and <code className="text-slate-300">VIEWER</code>.
-                  No public registration endpoint.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            {/* Card 4: Private File Storage Architecture */}
-            <Card className="border-slate-800 bg-slate-900/60 hover:border-slate-700 transition-all">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400">
-                    <FileCheck2 className="h-5 w-5" />
-                  </div>
-                  <Badge variant="gold">Encrypted Buckets</Badge>
-                </div>
-                <CardTitle className="pt-3">Private Document Storage</CardTitle>
-                <CardDescription>
-                  Logical bucket segregation (<code className="text-slate-300">participant-documents</code>, <code className="text-slate-300">participant-photos</code>,
-                  <code className="text-slate-300">championship-assets</code>, <code className="text-slate-300">id-cards</code>). Strictly private government IDs with time-limited signed URLs.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            {/* Card 5: Cryptographic QR Verification */}
-            <Card className="border-slate-800 bg-slate-900/60 hover:border-slate-700 transition-all">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
-                    <QrCode className="h-5 w-5" />
-                  </div>
-                  <Badge variant="cyan">Zero-PII QR</Badge>
-                </div>
-                <CardTitle className="pt-3">QR Verification Engine</CardTitle>
-                <CardDescription>
-                  High-entropy cryptographic tokens pointing to configurable verification domain (<code className="text-slate-300">/verify/[token]</code>).
-                  Never embeds raw participant PII directly in QR payload.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            {/* Card 6: Multi-Championship Scalability */}
-            <Card className="border-slate-800 bg-slate-900/60 hover:border-slate-700 transition-all">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
-                    <Layers className="h-5 w-5" />
-                  </div>
-                  <Badge variant="default">Multi-Edition</Badge>
-                </div>
-                <CardTitle className="pt-3">Multi-Tournament Scalability</CardTitle>
-                <CardDescription>
-                  URL slugs (<code className="text-slate-300">kukkiwon-cup-2026</code>), event-specific fees, dates, rules, venues,
-                  and configurable designation options. Ready for future editions without database restructuring.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </div>
-        </section>
-
-        {/* System Diagnostics & Environment Transparency */}
-        <section className="container mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-          <div className="rounded-2xl border border-slate-800 bg-slate-950 p-6 sm:p-8 space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
-              <div>
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <Cpu className="h-5 w-5 text-sky-400" />
-                  <span>Platform Verification Checklist</span>
+                <h3 className="text-base font-bold text-white uppercase tracking-wide">
+                  Kukkiwon Accreditation
                 </h3>
-                <p className="text-xs text-slate-400 mt-1">
-                  Automated architectural verification of Phase 1 requirements
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Conducted under direct technical sanction of Kukkiwon India North Branch. Official certificates,
+                  rank points, and Dan recognition recognized worldwide.
                 </p>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-ping" />
-                <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
-                  Ready for Phase 2
+
+              <div className="p-6 rounded-xl border border-slate-800 bg-[#0A0F1D] space-y-3">
+                <div className="h-10 w-10 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center font-bold">
+                  <Cpu className="h-5 w-5" />
+                </div>
+                <h3 className="text-base font-bold text-white uppercase tracking-wide">
+                  Kyorix Sport Technology
+                </h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Featuring cutting-edge wireless electronic scoring systems, automated ring mats, and cryptographic
+                  QR badges ensuring total transparency in scoring and credentials.
+                </p>
+              </div>
+
+              <div className="p-6 rounded-xl border border-slate-800 bg-[#0A0F1D] space-y-3">
+                <div className="h-10 w-10 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold">
+                  <Award className="h-5 w-5" />
+                </div>
+                <h3 className="text-base font-bold text-white uppercase tracking-wide">
+                  National Competitor Pool
+                </h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Welcoming leading dojangs, state associations, collegiate athletes, and certified coaches across
+                  Delhi, Haryana, Punjab, Uttar Pradesh, Himachal, and partner nations.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* =========================================================================
+            3. DUAL ORGANIZATION SECTION (Requirement 10)
+            ========================================================================= */}
+        <section className="py-16 sm:py-24 border-b border-slate-800/80 bg-[#090D16]">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-12">
+            <div className="text-center space-y-2 max-w-2xl mx-auto">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#D4AF37]">
+                Collaboration & Leadership
+              </span>
+              <h2 className="text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-white">
+                Presented in Partnership
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-400">
+                A strategic sporting union combining authentic martial arts governance with modern tournament technology.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Partner 1: Kukkiwon India North Branch */}
+              <div className="p-8 rounded-2xl border border-slate-800 bg-[#0C1222] space-y-5 flex flex-col justify-between">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="relative h-16 w-16 overflow-hidden rounded-xl bg-white p-2 border border-slate-700 shadow-md shrink-0">
+                      <Image
+                        src={BRANDING.kukkiwon.logoPath}
+                        alt={BRANDING.kukkiwon.name}
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white uppercase tracking-wide">
+                        {BRANDING.kukkiwon.name}
+                      </h3>
+                      <p className="text-xs text-[#D4AF37] font-semibold">
+                        {BRANDING.kukkiwon.branch}
+                      </p>
+                      <p className="text-[11px] text-slate-400">
+                        {BRANDING.kukkiwon.title}
+                      </p>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-slate-300 leading-relaxed pt-2">
+                    Established under the authority of World Taekwondo Headquarters Kukkiwon (Seoul, South Korea).
+                    The India North Branch is the official governing authority responsible for Dan promotions,
+                    black belt certifications, instructor seminars, and sanctioned championships across Northern India.
+                  </p>
+                </div>
+
+                <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-xs">
+                  <span className="text-slate-400">Sanctioning Body</span>
+                  <a
+                    href="https://kukkiwon-india.org/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 font-semibold text-[#D4AF37] hover:underline"
+                  >
+                    <span>Visit Kukkiwon India</span>
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+              </div>
+
+              {/* Partner 2: Kyorix Sports Technology */}
+              <div className="p-8 rounded-2xl border border-slate-800 bg-[#0C1222] space-y-5 flex flex-col justify-between">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="relative h-16 w-32 overflow-hidden rounded-xl bg-slate-950 p-2 border border-slate-800 shadow-md shrink-0">
+                      <Image
+                        src={BRANDING.kyorix.logoPath}
+                        alt={BRANDING.kyorix.name}
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white uppercase tracking-wide">
+                        {BRANDING.kyorix.name}
+                      </h3>
+                      <p className="text-xs text-[#00E5FF] font-semibold">
+                        {BRANDING.kyorix.subtitle}
+                      </p>
+                      <p className="text-[11px] text-slate-400">
+                        Sports Hardware & Accreditation Partner
+                      </p>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-slate-300 leading-relaxed pt-2">
+                    Pioneers in martial arts competition electronics, Kyorix Sports Technology engineers wireless
+                    electronic chest and head protectors, multi-mat management software, real-time judge scoring consoles,
+                    and secure cryptographic QR credentials ensuring flawless event execution.
+                  </p>
+                </div>
+
+                <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-xs">
+                  <span className="text-slate-400">Technology & Accreditation</span>
+                  <span className="text-[#00E5FF] font-semibold">
+                    Electronic Scoring Partner
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* =========================================================================
+            4. CHAMPIONSHIP DETAILS & DISCIPLINES (Requirement 11)
+            ========================================================================= */}
+        <section id="information" className="py-16 sm:py-24 border-b border-slate-800/80 bg-[#060A13]">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-12">
+            <div className="text-center space-y-2 max-w-2xl mx-auto">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#D4AF37]">
+                Tournament Structure
+              </span>
+              <h2 className="text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-white">
+                Championship Details & Disciplines
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-400">
+                Official competition divisions, entry fee schedule, and venue regulations.
+              </p>
+            </div>
+
+            {/* Disciplines Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {tournament.disciplines.map((d) => (
+                <div
+                  key={d.title}
+                  className="p-6 rounded-xl border border-slate-800 bg-[#0A0F1D] space-y-3"
+                >
+                  <span className="text-[11px] font-mono text-[#D4AF37] block font-bold uppercase">
+                    {d.category}
+                  </span>
+                  <h3 className="text-base font-bold text-white uppercase">{d.title}</h3>
+                  <p className="text-xs text-slate-400 leading-relaxed">{d.description}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Entry Fee & Rules Strip */}
+            <div className="p-8 rounded-2xl border border-slate-800 bg-[#0C1222] grid grid-cols-1 sm:grid-cols-3 gap-6 text-center sm:text-left">
+              <div className="space-y-1 sm:border-r sm:border-slate-800 sm:pr-6">
+                <span className="text-xs text-slate-400 uppercase font-semibold">
+                  Athlete Competitor Fee
+                </span>
+                <div className="text-2xl font-black text-white">
+                  {formatCurrency(tournament.entryFeeAthlete, tournament.currency)}
+                </div>
+                <span className="text-[11px] text-slate-500 block">
+                  Includes accreditation badge & official entry
+                </span>
+              </div>
+
+              <div className="space-y-1 sm:border-r sm:border-slate-800 sm:pr-6">
+                <span className="text-xs text-slate-400 uppercase font-semibold">
+                  Coach Accreditation Fee
+                </span>
+                <div className="text-2xl font-black text-white">
+                  {formatCurrency(tournament.entryFeeCoach, tournament.currency)}
+                </div>
+                <span className="text-[11px] text-slate-500 block">
+                  Includes coaching zone mat pass
+                </span>
+              </div>
+
+              <div className="space-y-1">
+                <span className="text-xs text-slate-400 uppercase font-semibold">
+                  Official Referees & Jury
+                </span>
+                <div className="text-2xl font-black text-emerald-400">
+                  Complimentary
+                </div>
+                <span className="text-[11px] text-slate-500 block">
+                  Sanctioned board invitation required
                 </span>
               </div>
             </div>
+          </div>
+        </section>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
-              <div className="flex items-center gap-2 text-slate-300">
-                <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-                <span>Next.js App Router & TypeScript Strict</span>
+        {/* =========================================================================
+            5. OFFICIAL CHAMPIONSHIP POSTER SECTION (Requirement 12)
+            ========================================================================= */}
+        <section className="py-16 sm:py-24 border-b border-slate-800/80 bg-[#090D16]">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-10">
+            <div className="text-center space-y-2 max-w-2xl mx-auto">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#D4AF37]">
+                Tournament Circulation
+              </span>
+              <h2 className="text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-white">
+                Official Championship Poster
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-400">
+                Official tournament announcement document issued by the Organizing Committee.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              {/* Poster Container with Aspect Ratio */}
+              <div className="lg:col-span-6 flex justify-center">
+                <div className="relative w-full max-w-sm aspect-[3/4] rounded-2xl border-2 border-slate-800 bg-[#060A13] p-6 shadow-2xl flex flex-col justify-between text-center overflow-hidden">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <span className="text-[10px] uppercase font-bold text-amber-400">
+                      Official Tournament Notice
+                    </span>
+                    <span className="text-[10px] text-slate-500">Edition 2026</span>
+                  </div>
+
+                  <div className="space-y-3 my-auto py-6">
+                    <Award className="h-16 w-16 mx-auto text-[#D4AF37]" />
+                    <h3 className="text-xl font-extrabold text-white uppercase tracking-tight">
+                      Kukkiwon Cup Championship
+                    </h3>
+                    <p className="text-xs text-amber-300 font-medium">
+                      India North Branch Sanctioned
+                    </p>
+                    <p className="text-[11px] text-slate-400 max-w-xs mx-auto">
+                      Indira Gandhi Indoor Stadium, New Delhi
+                      <br />
+                      {formatDate(tournament.startDate)} – {formatDate(tournament.endDate)}
+                    </p>
+                  </div>
+
+                  <div className="pt-3 border-t border-slate-800 text-[10px] text-slate-500">
+                    Kukkiwon India North × Kyorix Sports Technology
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-slate-300">
-                <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-                <span>PostgreSQL / Supabase Schema & DDL</span>
+
+              {/* Poster Information & Actions */}
+              <div className="lg:col-span-6 space-y-6 text-center lg:text-left">
+                <div className="space-y-3">
+                  <h3 className="text-xl font-bold text-white uppercase">
+                    Tournament Poster & Technical Outline
+                  </h3>
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    The official championship poster and tournament circular contain the sanctioned rules,
+                    weight categories, age divisions, protest procedures, and credential collection schedules.
+                  </p>
+                </div>
+
+                <div className="space-y-2 text-xs text-slate-400">
+                  <div className="flex items-center justify-center lg:justify-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                    <span>Official high-resolution print aspect ratio</span>
+                  </div>
+                  <div className="flex items-center justify-center lg:justify-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                    <span>Authorized signatures of governing committee</span>
+                  </div>
+                  <div className="flex items-center justify-center lg:justify-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                    <span>Editable via Admin CMS in subsequent editions</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-2">
+                  <Link href="/championship/kukkiwon-cup-2026">
+                    <Button variant="secondary" size="md" className="text-xs uppercase font-bold">
+                      <Eye className="h-4 w-4 mr-1.5" />
+                      <span>View Tournament Details</span>
+                    </Button>
+                  </Link>
+                  <Link href="/register">
+                    <Button variant="gold" size="md" className="text-xs uppercase font-extrabold">
+                      <span>Register Competitor</span>
+                      <ArrowRight className="h-4 w-4 ml-1.5" />
+                    </Button>
+                  </Link>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-slate-300">
-                <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-                <span>Prisma Client (v6) Type Generation</span>
+            </div>
+          </div>
+        </section>
+
+        {/* =========================================================================
+            6. REGISTRATION CALL TO ACTION (Requirement 13)
+            ========================================================================= */}
+        <section className="py-16 sm:py-24 border-b border-slate-800/80 bg-gradient-to-b from-[#090D16] to-[#04070D]">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl text-center space-y-6">
+            <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1 text-xs font-semibold text-amber-300">
+              <Shield className="h-3.5 w-3.5 text-amber-400" />
+              <span>Official Entries Open • National Participation</span>
+            </div>
+
+            <div className="space-y-3">
+              <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-white font-sans">
+                Ready to Take Part?
+              </h2>
+              <p className="text-sm sm:text-base text-slate-300 max-w-xl mx-auto leading-relaxed">
+                Register for the Kukkiwon Cup Championship. Compete under official Kukkiwon sanction
+                and secure your certified tournament accreditation badge.
+              </p>
+            </div>
+
+            <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link href="/register" className="w-full sm:w-auto">
+                <Button
+                  variant="gold"
+                  size="lg"
+                  className="w-full sm:w-auto text-xs uppercase tracking-wider font-black px-10 py-4 text-slate-950 shadow-2xl shadow-amber-500/25"
+                >
+                  <span>Register Now</span>
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </Link>
+              <Link href="/contact" className="w-full sm:w-auto">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full sm:w-auto text-xs uppercase tracking-wider font-bold px-8 border-slate-700 text-slate-300"
+                >
+                  <span>Contact Secretariat</span>
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* =========================================================================
+            7. CONTACT & SECRETARIAT SECTION (Requirement 15)
+            ========================================================================= */}
+        <section className="py-16 sm:py-24 bg-[#060A13]">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-10">
+            <div className="text-center space-y-2 max-w-2xl mx-auto">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#D4AF37]">
+                Tournament Secretariat
+              </span>
+              <h2 className="text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-white">
+                Official Inquiries & Support
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-400">
+                Official communication channels for participating academies, coaches, and delegations.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+              <div className="p-6 rounded-xl border border-slate-800 bg-[#0A0F1D] space-y-2">
+                <Mail className="h-6 w-6 mx-auto text-[#D4AF37]" />
+                <h4 className="text-xs uppercase font-bold text-white tracking-wider">
+                  Email Secretariat
+                </h4>
+                <a
+                  href={`mailto:${tournament.contactEmail}`}
+                  className="text-xs font-medium text-slate-300 hover:text-white transition-colors block"
+                >
+                  {tournament.contactEmail}
+                </a>
               </div>
-              <div className="flex items-center gap-2 text-slate-300">
-                <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-                <span>Decoupled Public ID & Secret Database ID</span>
+
+              <div className="p-6 rounded-xl border border-slate-800 bg-[#0A0F1D] space-y-2">
+                <Phone className="h-6 w-6 mx-auto text-[#00E5FF]" />
+                <h4 className="text-xs uppercase font-bold text-white tracking-wider">
+                  Helpline
+                </h4>
+                <span className="text-xs font-medium text-slate-300 block">
+                  {tournament.contactPhone}
+                </span>
               </div>
-              <div className="flex items-center gap-2 text-slate-300">
-                <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-                <span>Configurable Designations (10 Initial Values)</span>
-              </div>
-              <div className="flex items-center gap-2 text-slate-300">
-                <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-                <span>Standardized Nationalities & ISO Flags</span>
-              </div>
-              <div className="flex items-center gap-2 text-slate-300">
-                <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-                <span>Private Storage & Signed URL Handler</span>
-              </div>
-              <div className="flex items-center gap-2 text-slate-300">
-                <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-                <span>Cryptographic QR Verification Architecture</span>
-              </div>
-              <div className="flex items-center gap-2 text-slate-300">
-                <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-                <span>Zero Credentials In Code (.env.example)</span>
+
+              <div className="p-6 rounded-xl border border-slate-800 bg-[#0A0F1D] space-y-2">
+                <MapPin className="h-6 w-6 mx-auto text-emerald-400" />
+                <h4 className="text-xs uppercase font-bold text-white tracking-wider">
+                  Competition Stadium
+                </h4>
+                <span className="text-xs font-medium text-slate-300 block">
+                  {tournament.contactAddress}
+                </span>
               </div>
             </div>
           </div>
