@@ -56,28 +56,16 @@ export function PublicHeader() {
       {/* Main Header */}
       <header className="sticky top-0 z-40 w-full border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-xs">
         <div className="container mx-auto flex h-20 items-center justify-between px-3 sm:px-6 lg:px-8">
-          {/* LEFT & CENTER: Kukkiwon & Kyorix Brand Logos + Championship Title */}
-          <Link href="/" className="flex items-center gap-2.5 sm:gap-3.5 group min-w-0">
-            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-              <div className="relative h-9 w-13 sm:h-11 sm:w-16 shrink-0 transition-transform group-hover:scale-105 flex items-center justify-center">
-                <Image
-                  src={BRANDING.kukkiwon.logoPath}
-                  alt={BRANDING.kukkiwon.name}
-                  fill
-                  className="object-contain"
-                  priority
-                />
-              </div>
-              <span className="text-slate-300 font-extralight text-xs sm:text-sm select-none">×</span>
-              <div className="relative h-9 w-11 sm:h-11 sm:w-14 shrink-0 transition-transform group-hover:scale-105 flex items-center justify-center">
-                <Image
-                  src={BRANDING.kyorix.logoPath}
-                  alt={BRANDING.kyorix.name}
-                  fill
-                  className="object-contain"
-                  priority
-                />
-              </div>
+          {/* LEFT & CENTER: Kukkiwon Official Logo + Championship Title */}
+          <Link href="/" className="flex items-center gap-3 sm:gap-4 group min-w-0">
+            <div className="relative h-10 w-14 sm:h-12 sm:w-18 shrink-0 transition-transform group-hover:scale-105 flex items-center justify-center">
+              <Image
+                src={BRANDING.kukkiwon.logoPath}
+                alt={BRANDING.kukkiwon.name}
+                fill
+                className="object-contain"
+                priority
+              />
             </div>
             <div className="flex flex-col min-w-0">
               <span className="text-xs sm:text-base lg:text-lg font-black tracking-wider text-slate-950 uppercase font-sans leading-tight truncate">
@@ -161,25 +149,14 @@ export function PublicHeader() {
             <div className="space-y-6">
               {/* Drawer Header */}
               <div className="flex items-center justify-between border-b border-slate-200 pb-4">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <div className="relative h-8 w-11 shrink-0 flex items-center justify-center">
-                      <Image
-                        src={BRANDING.kukkiwon.logoPath}
-                        alt={BRANDING.kukkiwon.name}
-                        fill
-                        className="object-contain"
-                      />
-                    </div>
-                    <span className="text-slate-300 font-extralight text-xs select-none">×</span>
-                    <div className="relative h-8 w-10 shrink-0 flex items-center justify-center">
-                      <Image
-                        src={BRANDING.kyorix.logoPath}
-                        alt={BRANDING.kyorix.name}
-                        fill
-                        className="object-contain"
-                      />
-                    </div>
+                <div className="flex items-center gap-3">
+                  <div className="relative h-8 w-12 shrink-0 flex items-center justify-center">
+                    <Image
+                      src={BRANDING.kukkiwon.logoPath}
+                      alt={BRANDING.kukkiwon.name}
+                      fill
+                      className="object-contain"
+                    />
                   </div>
                   <div>
                     <span className="text-xs font-black text-slate-950 block uppercase tracking-wider">

@@ -15,41 +15,32 @@ export function PublicFooter() {
       {/* Upper Footer Block */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-          {/* Column 1: Joint Championship Organizers & Identity */}
+          {/* Column 1: Kyorix Sports Technology Official Corporate Profile */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="relative h-14 w-20 shrink-0 flex items-center justify-center">
-                <Image
-                  src={BRANDING.kukkiwon.logoPath}
-                  alt={BRANDING.kukkiwon.name}
-                  fill
-                  className="object-contain"
-                />
-              </div>
-              <span className="text-slate-600 font-extralight text-2xl select-none">×</span>
-              <div className="relative h-14 w-18 shrink-0 flex items-center justify-center">
+              <div className="relative h-16 w-24 shrink-0 flex items-center justify-center">
                 <Image
                   src={BRANDING.kyorix.logoPath}
                   alt={BRANDING.kyorix.name}
                   fill
-                  className="object-contain"
+                  className="object-contain drop-shadow-[0_0_15px_rgba(0,229,255,0.2)]"
                 />
               </div>
             </div>
 
-            <div className="flex flex-col">
-              <span className="text-sm font-black text-white uppercase tracking-wider">
-                KUKKIWON CUP 2026
+            <div className="flex flex-col space-y-1">
+              <span className="text-sm sm:text-base font-black text-white uppercase tracking-wider font-sans">
+                KYORIX SPORTS TECHNOLOGY
               </span>
-              <span className="text-[10px] text-cyan-400 font-bold uppercase tracking-widest">
-                KUKKIWON INDIA NORTH BRANCH × KYORIX
+              <span className="text-[10px] sm:text-[11px] text-cyan-400 font-bold uppercase tracking-widest">
+                Combat Sports Electronic Scoring & Infrastructure
               </span>
             </div>
 
             <p className="text-xs text-slate-400 leading-relaxed">
-              Official Kukkiwon Cup Championship sanctioned by World Taekwondo Headquarters
-              Kukkiwon India North Branch, powered by Kyorix Sports Technology electronic scoring
-              and tournament platform.
+              Kyorix Sports Technology Private Limited is a premier sports technology enterprise delivering
+              next-generation wireless electronic body protector systems (PSS), instant video replay adjudication,
+              real-time mat management, and secure digital athlete accreditation for world-class combat sports events.
             </p>
           </div>
 
