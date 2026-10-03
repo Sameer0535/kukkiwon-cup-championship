@@ -25,7 +25,10 @@ import {
   History,
   QrCode,
   RotateCw,
+  Network,
+  RotateCcw,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import type { AdminRegistrationDetails } from "@/types/admin";
 
 export default function AdminRegistrationDetailPage() {
@@ -42,6 +45,10 @@ export default function AdminRegistrationDetailPage() {
   // Status transition state
   const [targetStatus, setTargetStatus] = React.useState("");
   const [statusReason, setStatusReason] = React.useState("");
+
+  // Kyorix Integration state
+  const [kyorixRecord, setKyorixRecord] = React.useState<any>(null);
+  const [kyorixActionLoading, setKyorixActionLoading] = React.useState(false);
 
   const loadDetails = React.useCallback(async () => {
     setLoading(true);
@@ -67,9 +74,68 @@ export default function AdminRegistrationDetailPage() {
     }
   }, [registrationId]);
 
+  const fetchKyorixRecord = React.useCallback(async () => {
+    try {
+      const res = await fetch(`/api/admin/integration/kyorix/athletes/${registrationId}/sync`);
+      if (res.ok) {
+        const data = await res.json();
+        setKyorixRecord(data.record || null);
+      }
+    } catch {
+      // Ignore
+    }
+  }, [registrationId]);
+
   React.useEffect(() => {
     loadDetails();
-  }, [loadDetails]);
+    fetchKyorixRecord();
+  }, [loadDetails, fetchKyorixRecord]);
+
+  const handleSyncToKyorix = async () => {
+    try {
+      setKyorixActionLoading(true);
+      setErrorMessage(null);
+      setSuccessMessage(null);
+      const res = await fetch(`/api/admin/integration/kyorix/athletes/${registrationId}/sync`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSuccessMessage(`Synchronized with Kyorix successfully: Athlete ID ${data.kyorixAthleteId}`);
+        fetchKyorixRecord();
+      } else {
+        setErrorMessage(data.error || data.message || "Failed to synchronize with Kyorix.");
+        fetchKyorixRecord();
+      }
+    } catch {
+      setErrorMessage("Network error synchronizing with Kyorix.");
+    } finally {
+      setKyorixActionLoading(false);
+    }
+  };
+
+  const handleRetryKyorixSync = async () => {
+    try {
+      setKyorixActionLoading(true);
+      setErrorMessage(null);
+      setSuccessMessage(null);
+      const res = await fetch(`/api/admin/integration/kyorix/athletes/${registrationId}/retry`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSuccessMessage(`Kyorix synchronization retry succeeded: ${data.kyorixAthleteId}`);
+        fetchKyorixRecord();
+      } else {
+        setErrorMessage(data.error || data.message || "Retry failed.");
+        fetchKyorixRecord();
+      }
+    } catch {
+      setErrorMessage("Network error retrying Kyorix sync.");
+    } finally {
+      setKyorixActionLoading(false);
+    }
+  };
 
   // Handle status transition
   const handleStatusTransition = async (e: React.FormEvent) => {
@@ -380,6 +446,96 @@ export default function AdminRegistrationDetailPage() {
                 Card has not yet been generated for this athlete.
               </p>
             )}
+          </div>
+
+          {/* Kyorix Ecosystem Integration (Section 29) */}
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
+                <Network className="h-4 w-4 text-[#D4AF37]" />
+                <span>Kyorix Ecosystem Integration</span>
+              </h3>
+              <Badge
+                variant="outline"
+                className={
+                  kyorixRecord?.syncStatus === "SYNCED"
+                    ? "bg-emerald-950/60 text-emerald-400 border-emerald-500/30"
+                    : kyorixRecord?.syncStatus === "FAILED"
+                    ? "bg-rose-950/60 text-rose-400 border-rose-500/30"
+                    : kyorixRecord?.syncStatus === "PENDING"
+                    ? "bg-amber-950/60 text-amber-400 border-amber-500/30"
+                    : "bg-slate-900 text-slate-400 border-slate-800"
+                }
+              >
+                {kyorixRecord?.syncStatus || "NOT_SYNCED"}
+              </Badge>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 p-4 rounded-xl bg-slate-950/80 border border-slate-800 text-xs">
+              <div>
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Kyorix Athlete ID</span>
+                <span className="font-mono text-emerald-400 font-bold">
+                  {kyorixRecord?.kyorixAthleteId || "—"}
+                </span>
+              </div>
+              <div>
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Kyorix Registration ID</span>
+                <span className="font-mono text-slate-300">
+                  {kyorixRecord?.kyorixRegistrationId || "—"}
+                </span>
+              </div>
+              <div>
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Last Synchronized</span>
+                <span className="text-slate-300">
+                  {kyorixRecord?.lastSyncedAt
+                    ? new Date(kyorixRecord.lastSyncedAt).toLocaleString()
+                    : "Not yet synced"}
+                </span>
+              </div>
+              <div>
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Sync Attempts</span>
+                <span className="text-slate-300">
+                  {kyorixRecord?.attempts ?? 0} {kyorixRecord?.syncVersion ? `(v${kyorixRecord.syncVersion})` : ""}
+                </span>
+              </div>
+            </div>
+
+            {kyorixRecord?.lastError && (
+              <div className="p-3 rounded-lg bg-rose-950/40 border border-rose-500/30 text-xs text-rose-300">
+                <span className="font-bold">Sync Error: </span>
+                {kyorixRecord.lastError}
+              </div>
+            )}
+
+            <div className="flex items-center gap-3 pt-1">
+              {kyorixRecord?.syncStatus === "FAILED" ? (
+                <button
+                  type="button"
+                  onClick={handleRetryKyorixSync}
+                  disabled={kyorixActionLoading}
+                  className="px-3 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold uppercase transition flex items-center gap-1.5"
+                >
+                  <RotateCcw className={`h-3.5 w-3.5 ${kyorixActionLoading ? "animate-spin" : ""}`} />
+                  Retry Kyorix Sync
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleSyncToKyorix}
+                  disabled={kyorixActionLoading}
+                  className="px-3 py-2 rounded-lg bg-[#D4AF37] hover:bg-[#b5952f] text-slate-950 text-xs font-bold uppercase transition flex items-center gap-1.5"
+                >
+                  <Network className={`h-3.5 w-3.5 ${kyorixActionLoading ? "animate-spin" : ""}`} />
+                  {kyorixRecord?.syncStatus === "SYNCED" ? "Resync to Kyorix" : "Sync to Kyorix"}
+                </button>
+              )}
+              <Link
+                href="/admin/integration/kyorix"
+                className="text-xs text-slate-400 hover:text-white underline underline-offset-2 ml-auto"
+              >
+                Manage Integration →
+              </Link>
+            </div>
           </div>
 
           {/* Status State Machine Transition Form */}

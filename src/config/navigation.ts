@@ -84,6 +84,13 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     description: "Manage public championship info, announcements, schedule, and live publishing",
   },
   {
+    title: "Kyorix Integration",
+    href: "/admin/integration/kyorix",
+    icon: "Network",
+    requiredRole: ["SUPER_ADMIN", "EVENT_ADMIN", "REGISTRATION_ADMIN", "VIEWER"],
+    description: "Manage Kyorix ecosystem synchronization, mapping, and audit status",
+  },
+  {
     title: "Audit Logs",
     href: "/admin/audit",
     icon: "ShieldAlert",

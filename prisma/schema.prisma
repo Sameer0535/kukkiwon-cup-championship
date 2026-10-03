@@ -115,6 +115,14 @@ enum AdminRole {
   VIEWER
 }
 
+enum KyorixSyncStatus {
+  NOT_SYNCED
+  PENDING
+  SYNCED
+  FAILED
+  DISCONNECTED
+}
+
 // ------------------------------------------------------------------------------
 // 1. REGISTRANT / USER ACCOUNTS (Phase 3 Authentication)
 // ------------------------------------------------------------------------------
@@ -185,6 +193,8 @@ model Championship {
   announcements         ChampionshipAnnouncement[]
   important_dates       ChampionshipImportantDate[]
   faqs                  ChampionshipFAQ[]
+  kyorix_mapping        KyorixChampionshipMapping?
+  kyorix_records        KyorixIntegrationRecord[]
 
   @@index([slug])
   @@index([status])
@@ -365,6 +375,7 @@ model Registration {
   documents             Document[]
   participant_documents ParticipantDocument[]
   id_card               IdCard?
+  kyorix_record         KyorixIntegrationRecord?
 
   @@index([user_id])
   @@index([championship_id])
@@ -929,4 +940,56 @@ model ChampionshipFAQ {
 
   @@index([championship_id, is_published, display_order])
   @@map("championship_faqs")
+}
+
+// ------------------------------------------------------------------------------
+// 17. KYORIX INTEGRATION & SYNCHRONIZATION ARCHITECTURE (Phase 10)
+// ------------------------------------------------------------------------------
+
+model KyorixChampionshipMapping {
+  id                       String        @id @default(uuid()) @db.Uuid
+  championship_id          String        @unique @db.Uuid
+  kyorix_championship_id   String        @db.VarChar(100)
+  kyorix_championship_name String?       @db.VarChar(255)
+  is_enabled               Boolean       @default(false)
+  sync_mode                String        @default("MANUAL") @db.VarChar(20) // MANUAL, AUTOMATIC
+  mapped_at                DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime      @updatedAt @db.Timestamptz(6)
+  created_by               String?       @db.VarChar(255)
+
+  // Relationships
+  championship             Championship  @relation(fields: [championship_id], references: [id], onDelete: Cascade)
+
+  @@index([kyorix_championship_id])
+  @@index([is_enabled])
+  @@map("kyorix_championship_mappings")
+}
+
+model KyorixIntegrationRecord {
+  id                     String            @id @default(uuid()) @db.Uuid
+  championship_id        String            @db.Uuid
+  registration_id        String            @unique @db.Uuid
+  athlete_id             String            @db.VarChar(100) // Local KKC26-ATH-001001
+  kyorix_athlete_id      String?           @db.VarChar(100) // External Kyorix athlete ID
+  kyorix_registration_id String?           @db.VarChar(100) // External Kyorix registration ID
+  kyorix_championship_id String?           @db.VarChar(100)
+  sync_status            KyorixSyncStatus  @default(NOT_SYNCED)
+  last_synced_at         DateTime?         @db.Timestamptz(6)
+  last_sync_attempt_at   DateTime?         @db.Timestamptz(6)
+  last_error             String?           @db.Text
+  sync_version           Int               @default(1)
+  attempts               Int               @default(0)
+  idempotency_key        String?           @unique @db.VarChar(255)
+  created_at             DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime          @updatedAt @db.Timestamptz(6)
+
+  // Relationships
+  championship           Championship      @relation(fields: [championship_id], references: [id], onDelete: Cascade)
+  registration           Registration      @relation(fields: [registration_id], references: [id], onDelete: Cascade)
+
+  @@index([championship_id, sync_status])
+  @@index([athlete_id])
+  @@index([kyorix_athlete_id])
+  @@index([sync_status])
+  @@map("kyorix_integration_records")
 }
