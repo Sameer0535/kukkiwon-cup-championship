@@ -21,6 +21,7 @@ const ROLE_HIERARCHY: Record<AdminRole, number> = {
   REGISTRATION_ADMIN: 50,
   DOCUMENT_ADMIN: 40,
   CONTENT_ADMIN: 30,
+  REGISTRAR: 20,
   VIEWER: 10,
 };
 

@@ -1,0 +1,56 @@
+// ==============================================================================
+// ADMIN CMS ANNOUNCEMENT MUTATION & DELETION API (PATCH & DELETE /api/admin/cms/announcements/[id])
+// Update, publish, and delete administrative announcements
+// ==============================================================================
+
+import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/server-auth";
+import { CmsService } from "@/server/services/cms.service";
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const admin = await requireAdmin(req, ["SUPER_ADMIN", "EVENT_ADMIN"]);
+    const { id } = await params;
+    const body = await req.json();
+
+    const updated = await CmsService.updateAnnouncement(id, body, admin);
+
+    return NextResponse.json({
+      success: true,
+      data: updated,
+      message: "Announcement updated successfully.",
+    });
+  } catch (err: any) {
+    const status = err.statusCode || 400;
+    return NextResponse.json(
+      { error: err.message || "Failed to update announcement." },
+      { status }
+    );
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const admin = await requireAdmin(req, ["SUPER_ADMIN", "EVENT_ADMIN"]);
+    const { id } = await params;
+
+    const result = await CmsService.deleteAnnouncement(id, admin);
+
+    return NextResponse.json({
+      message: "Announcement deleted successfully.",
+      ...result,
+    });
+  } catch (err: any) {
+    const status = err.statusCode || 400;
+    return NextResponse.json(
+      { error: err.message || "Failed to delete announcement." },
+      { status }
+    );
+  }
+}

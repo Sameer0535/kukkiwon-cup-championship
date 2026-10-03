@@ -1,114 +1,181 @@
 // ==============================================================================
-// ADMIN CONTENT & TERMS MANAGER (Requirements 17 & 18)
-// Site settings and auditable terms & conditions versioning
+// ADMIN CONTENT CMS HUB (Phase 9 - Requirement 16)
+// Centralized portal for managing public championship content, categories,
+// registration fees, announcements, and public documents
 // ==============================================================================
 
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { FileText, Plus, Shield, CheckCircle2 } from "lucide-react";
+import {
+  Trophy,
+  Tag,
+  CreditCard,
+  Bell,
+  FileDown,
+  ExternalLink,
+  ArrowRight,
+  Shield,
+  Calendar,
+  Sparkles,
+  Globe,
+} from "lucide-react";
 
-export default function AdminContentPage() {
-  const termsVersions = [
+export default function AdminContentHubPage() {
+  const [loading, setLoading] = React.useState(true);
+  const [data, setData] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    fetch("/api/public/championship?package=true")
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.data) setData(res.data);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const sections = [
     {
-      version: "v1.0",
-      title: "Official Kukkiwon Cup 2026 Participation & Accreditation Agreement",
-      publishedAt: "02 Oct 2026",
-      acceptedCount: "Active version",
-      isActive: true,
+      title: "Championship Information",
+      description: "Manage tournament name, edition, dates, venue, branding images, contact details, and publishing state.",
+      href: "/admin/content/championship",
+      icon: Trophy,
+      count: data?.championship ? `Status: ${data.championship.status}` : "Configure",
+      badge: data?.championship?.isPublished ? "PUBLISHED" : "DRAFT",
+      badgeVariant: (data?.championship?.isPublished ? "success" : "warning") as any,
+    },
+    {
+      title: "Competition Categories",
+      description: "Configure disciplines (Kyorugi, Poomsae, Demo), weight classes, age groups, gender rules, and active states.",
+      href: "/admin/content/categories",
+      icon: Tag,
+      count: data?.categories ? `${data.categories.length} Categories` : "Loading...",
+      badge: "ACTIVE IN SYSTEM",
+      badgeVariant: "info" as any,
+    },
+    {
+      title: "Registration Fees & Surcharges",
+      description: "Authoritative base entry fees, late fee surcharges, participant type tiers, and effective payment deadlines.",
+      href: "/admin/content/fees",
+      icon: CreditCard,
+      count: data?.fees ? `${data.fees.length} Fee Rules` : "Loading...",
+      badge: "FINANCIAL ENGINE",
+      badgeVariant: "gold" as any,
+    },
+    {
+      title: "Official Announcements",
+      description: "Publish notices, referee instructions, equipment guidelines, and schedule alerts with live publication control.",
+      href: "/admin/content/announcements",
+      icon: Bell,
+      count: data?.announcements ? `${data.announcements.length} Published` : "Loading...",
+      badge: "LIVE FEED",
+      badgeVariant: "secondary" as any,
+    },
+    {
+      title: "Public Documents & Prospectus",
+      description: "Manage official downloadable prospectus PDFs, technical guidelines, identity criteria, and tournament terms.",
+      href: "/admin/content/documents",
+      icon: FileDown,
+      count: data?.documents ? `${data.documents.length} Documents` : "Loading...",
+      badge: "PUBLIC REPO",
+      badgeVariant: "default" as any,
     },
   ];
 
   return (
-    <div className="space-y-8 max-w-5xl">
-      <div>
-        <h2 className="text-xl font-bold uppercase tracking-wide text-white flex items-center gap-2">
-          <FileText className="h-5 w-5 text-sky-400" />
-          <span>Website Content & Terms Versioning</span>
-        </h2>
-        <p className="text-xs text-slate-400 mt-1">
-          Content model and auditable legal agreement versions. When a participant accepts terms, the exact version number is permanently recorded.
-        </p>
+    <div className="space-y-8 max-w-6xl">
+      {/* Top Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+        <div>
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[10px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/30 uppercase tracking-wider mb-2">
+            <Globe className="h-3 w-3" />
+            <span>Public Website CMS</span>
+          </div>
+          <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white flex items-center gap-2.5">
+            <span>Championship Content & Live Publishing</span>
+          </h2>
+          <p className="text-xs text-slate-400 mt-1">
+            Configure public tournament details, manage categories, entry fees, and broadcast announcements without redeploying code.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Link
+            href="/"
+            target="_blank"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-900 text-xs font-semibold text-slate-200 hover:text-white hover:border-slate-500 transition-colors shadow-sm"
+          >
+            <span>Preview Public Site</span>
+            <ExternalLink className="h-3.5 w-3.5" />
+          </Link>
+        </div>
       </div>
 
-      {/* Terms & Conditions Versioning */}
-      <Card className="border-slate-800 bg-slate-900/60 p-6 space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+      {/* Live Publishing Status Banner */}
+      <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/80 backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0">
+            <Sparkles className="h-5 w-5 text-emerald-400" />
+          </div>
           <div>
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-              <Shield className="h-4 w-4 text-amber-400" />
-              <span>Legal Terms & Conditions Versions</span>
-            </h3>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Ensure compliance traceability across regulatory revisions.
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-white uppercase tracking-wider">
+                Live Publishing Active
+              </span>
+              <Badge variant="success">IN PRODUCTION</Badge>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              Changes saved in this CMS immediately update the public tournament pages and registration engine.
             </p>
           </div>
-
-          <Button variant="secondary" size="sm">
-            <Plus className="h-4 w-4 mr-1.5" />
-            <span>Publish New Version</span>
-          </Button>
         </div>
 
-        <div className="space-y-3">
-          {termsVersions.map((t) => (
-            <div
-              key={t.version}
-              className="flex items-center justify-between p-4 rounded-xl border border-slate-800 bg-slate-950 text-xs"
+        <div className="flex items-center gap-2 text-xs">
+          <span className="text-slate-400">Current Edition:</span>
+          <span className="font-bold text-amber-400">Kukkiwon Cup 2026</span>
+        </div>
+      </div>
+
+      {/* Sections Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {sections.map((sec) => {
+          const Icon = sec.icon;
+          return (
+            <Link
+              key={sec.href}
+              href={sec.href}
+              className="group block rounded-2xl border border-slate-800/80 bg-slate-900/60 p-6 hover:bg-slate-900 hover:border-slate-700 transition-all shadow-md relative"
             >
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono font-bold text-sky-400 text-sm">
-                    {t.version}
-                  </span>
-                  <Badge variant="success">Current Active Version</Badge>
+              <div className="flex items-start justify-between mb-4">
+                <div className="h-11 w-11 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-center group-hover:scale-105 group-hover:border-amber-400/40 transition-all">
+                  <Icon className="h-5 w-5 text-amber-400" />
                 </div>
-                <div className="font-semibold text-slate-200">{t.title}</div>
-                <div className="text-[11px] text-slate-500">Published: {t.publishedAt}</div>
+                <Badge variant={sec.badgeVariant}>{sec.badge}</Badge>
               </div>
 
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" className="text-xs text-sky-400">
-                  Inspect Content
-                </Button>
+              <h3 className="text-sm font-bold text-white uppercase tracking-wide group-hover:text-amber-300 transition-colors">
+                {sec.title}
+              </h3>
+              <p className="text-xs text-slate-400 mt-1.5 line-clamp-3 leading-relaxed">
+                {sec.description}
+              </p>
+
+              <div className="mt-5 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+                <span className="text-slate-300 font-medium">{sec.count}</span>
+                <span className="text-amber-400 inline-flex items-center gap-1 font-semibold group-hover:translate-x-0.5 transition-transform">
+                  <span>Manage</span>
+                  <ArrowRight className="h-3 w-3" />
+                </span>
               </div>
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      {/* Site Settings Preview Form */}
-      <Card className="border-slate-800 bg-slate-900/60 p-6 space-y-4">
-        <div className="border-b border-slate-800 pb-3">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider">
-            Championship Metadata & Headline Settings
-          </h3>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-          <Input
-            label="Tournament Title"
-            defaultValue="Kukkiwon Cup Championship 2026"
-            disabled
-          />
-          <Input
-            label="Subtitle"
-            defaultValue="Presented by Kukkiwon North India & Kyorix Sports Technology"
-            disabled
-          />
-          <Input
-            label="Support Email"
-            defaultValue="contact@kukkiwoncup.org"
-            disabled
-          />
-          <Input
-            label="Support Phone"
-            defaultValue="+91 98765 43210"
-            disabled
-          />
-        </div>
-      </Card>
+            </Link>
+          );
+        })}
+      </div>
     </div>
   );
 }

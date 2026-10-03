@@ -80,7 +80,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     title: "Content & CMS",
     href: "/admin/content",
     icon: "FileText",
-    requiredRole: ["SUPER_ADMIN", "CONTENT_ADMIN"],
+    requiredRole: ["SUPER_ADMIN", "EVENT_ADMIN", "REGISTRAR", "FINANCE_ADMIN", "VIEWER"],
     description: "Publish announcements, edit hero text, and terms",
   },
   {

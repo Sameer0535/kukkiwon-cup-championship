@@ -85,13 +85,56 @@ const DEFAULT_CHAMPIONSHIP_DATA: PublicChampionshipContent = {
   ],
 };
 
+import { CmsService } from "@/server/services/cms.service";
+import {
+  PublicChampionshipPackage,
+  PublicAnnouncement,
+  PublicDocument,
+  PublicCategory,
+  PublicFee,
+} from "@/types/cms";
+
 /**
- * Fetches dynamic championship content from database layer
+ * Fetches dynamic championship content from authoritative CmsService
  */
 export async function getPublicChampionshipData(
   slug = "kukkiwon-cup-2026"
 ): Promise<PublicChampionshipContent> {
   try {
+    const cmsChamp = await CmsService.getChampionship(slug, false);
+
+    if (cmsChamp) {
+      return {
+        slug: cmsChamp.slug,
+        name: cmsChamp.name,
+        shortName: cmsChamp.shortName,
+        subtitle: cmsChamp.subtitle,
+        description: cmsChamp.description,
+        status: cmsChamp.registrationAvailability === "OPEN" ? "REGISTRATION_OPEN" : cmsChamp.status,
+        startDate: cmsChamp.startDate,
+        endDate: cmsChamp.endDate,
+        registrationOpen: cmsChamp.registrationOpen,
+        registrationClose: cmsChamp.registrationClose,
+        venue: cmsChamp.venue,
+        city: cmsChamp.city,
+        state: cmsChamp.state,
+        country: cmsChamp.country,
+        currency: cmsChamp.currency,
+        entryFeeAthlete: cmsChamp.entryFeeAthlete,
+        entryFeeCoach: cmsChamp.entryFeeCoach,
+        entryFeeOfficial: cmsChamp.entryFeeOfficial,
+        posterUrl: cmsChamp.posterUrl,
+        bannerUrl: cmsChamp.bannerUrl,
+        rulesDocumentUrl: cmsChamp.rulesDocumentUrl,
+        heroHeadline: cmsChamp.heroHeadline,
+        heroDescription: cmsChamp.heroDescription,
+        contactEmail: cmsChamp.contactEmail,
+        contactPhone: cmsChamp.contactPhone,
+        contactAddress: cmsChamp.contactAddress,
+        disciplines: DEFAULT_CHAMPIONSHIP_DATA.disciplines,
+      };
+    }
+
     const dbRecord = await prisma.championship.findUnique({
       where: { slug },
       include: {
@@ -133,7 +176,72 @@ export async function getPublicChampionshipData(
       disciplines: DEFAULT_CHAMPIONSHIP_DATA.disciplines,
     };
   } catch (error) {
-    // In local development before db migration, gracefully return structured default data
     return DEFAULT_CHAMPIONSHIP_DATA;
   }
 }
+
+/**
+ * Retrieves full public CMS package for a championship
+ */
+export async function getPublicChampionshipPackage(
+  slugOrId = "champ-kukkiwon-2026"
+): Promise<PublicChampionshipPackage | null> {
+  try {
+    return await CmsService.getPublicChampionshipPackage(slugOrId);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Retrieves published announcements for public display
+ */
+export async function getPublicAnnouncements(
+  championshipId = "champ-kukkiwon-2026"
+): Promise<PublicAnnouncement[]> {
+  try {
+    return await CmsService.listAnnouncements(championshipId, false);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Retrieves published documents for public display
+ */
+export async function getPublicDocuments(
+  championshipId = "champ-kukkiwon-2026"
+): Promise<PublicDocument[]> {
+  try {
+    return await CmsService.listPublicDocuments(championshipId, false);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Retrieves active public categories
+ */
+export async function getPublicCategories(
+  championshipId = "champ-kukkiwon-2026"
+): Promise<PublicCategory[]> {
+  try {
+    return await CmsService.listCategories(championshipId, false);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Retrieves active public fees
+ */
+export async function getPublicFees(
+  championshipId = "champ-kukkiwon-2026"
+): Promise<PublicFee[]> {
+  try {
+    return await CmsService.listFees(championshipId, false);
+  } catch {
+    return [];
+  }
+}
+

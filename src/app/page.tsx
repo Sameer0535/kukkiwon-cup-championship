@@ -11,7 +11,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BRANDING } from "@/config/branding";
 import { SITE_CONFIG } from "@/config/site";
-import { getPublicChampionshipData } from "@/lib/cms";
+import {
+  getPublicChampionshipData,
+  getPublicChampionshipPackage,
+} from "@/lib/cms";
+import { CmsService } from "@/server/services/cms.service";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import {
   Calendar,
@@ -29,14 +33,46 @@ import {
   Phone,
   FileText,
   AlertCircle,
+  Bell,
+  FileDown,
 } from "lucide-react";
 
 export default async function HomePage() {
+  const pkg = await getPublicChampionshipPackage("kukkiwon-cup-2026");
   const tournament = await getPublicChampionshipData("kukkiwon-cup-2026");
+  const availability = await CmsService.getRegistrationAvailability(
+    pkg?.championship.id || "champ-kukkiwon-2026"
+  );
+  const announcements = pkg?.announcements || [];
+  const documents = pkg?.documents || [];
+  const categories = pkg?.categories || [];
+  const fees = pkg?.fees || [];
 
   return (
     <div className="flex min-h-screen flex-col bg-[#070B14] text-slate-100 selection:bg-amber-400 selection:text-slate-950 font-sans">
       <PublicHeader />
+
+      {/* Live Announcement Banner from CMS */}
+      {announcements.length > 0 && (
+        <div className="bg-gradient-to-r from-amber-500/20 via-slate-900 to-amber-500/10 border-b border-amber-500/30 px-4 py-2.5">
+          <div className="container mx-auto flex items-center justify-between gap-4 text-xs">
+            <div className="flex items-center gap-2 text-amber-300">
+              <span className="bg-amber-500 text-slate-950 font-black px-2 py-0.5 rounded text-[10px] uppercase tracking-wider shrink-0">
+                Notice
+              </span>
+              <span className="font-semibold text-white truncate max-w-xl">
+                {announcements[0].title}:
+              </span>
+              <span className="text-slate-300 hidden md:inline truncate max-w-lg">
+                {announcements[0].shortDescription}
+              </span>
+            </div>
+            <a href="#announcements" className="text-amber-400 hover:underline font-bold shrink-0 text-[11px]">
+              View Bulletin ({announcements.length}) →
+            </a>
+          </div>
+        </div>
+      )}
 
       <main className="flex-1">
         {/* =========================================================================
@@ -74,10 +110,31 @@ export default async function HomePage() {
                   </div>
                 </div>
 
-                {/* Subtitle / Governing Banner */}
-                <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 py-1 text-xs font-semibold text-amber-300">
-                  <Shield className="h-3.5 w-3.5 text-amber-400" />
-                  <span>World Taekwondo Headquarters Sanctioned Championship</span>
+                {/* Subtitle / Governing Banner & Live Registration Status */}
+                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 py-1 text-xs font-semibold text-amber-300">
+                    <Shield className="h-3.5 w-3.5 text-amber-400" />
+                    <span>World Taekwondo Headquarters Sanctioned Championship</span>
+                  </div>
+
+                  {availability.status === "OPEN" && (
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/20 px-3.5 py-1 text-xs font-bold text-emerald-300 shadow-sm shadow-emerald-500/10">
+                      <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                      REGISTRATION OPEN
+                    </span>
+                  )}
+                  {availability.status === "COMING_SOON" && (
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/20 px-3.5 py-1 text-xs font-bold text-amber-300">
+                      <Clock className="h-3.5 w-3.5 text-amber-400" />
+                      REGISTRATION OPENS SOON
+                    </span>
+                  )}
+                  {availability.status === "CLOSED" && (
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-500/40 bg-rose-500/20 px-3.5 py-1 text-xs font-bold text-rose-300">
+                      <AlertCircle className="h-3.5 w-3.5 text-rose-400" />
+                      REGISTRATION CLOSED
+                    </span>
+                  )}
                 </div>
 
                 {/* Main Championship Title */}
@@ -132,16 +189,30 @@ export default async function HomePage() {
 
                 {/* Primary & Secondary Action Buttons (Requirement 7) */}
                 <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-2">
-                  <Link href="/register" className="w-full sm:w-auto">
-                    <Button
-                      variant="gold"
-                      size="lg"
-                      className="w-full sm:w-auto text-xs uppercase tracking-wider font-extrabold px-8 py-3.5 shadow-xl shadow-amber-500/20"
-                    >
-                      <span>Register Now</span>
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  </Link>
+                  {availability.isOpen ? (
+                    <Link href="/register" className="w-full sm:w-auto">
+                      <Button
+                        variant="gold"
+                        size="lg"
+                        className="w-full sm:w-auto text-xs uppercase tracking-wider font-extrabold px-8 py-3.5 shadow-xl shadow-amber-500/20"
+                      >
+                        <span>Register Now</span>
+                        <ArrowRight className="h-4 w-4 ml-2" />
+                      </Button>
+                    </Link>
+                  ) : (
+                    <div className="w-full sm:w-auto">
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        disabled
+                        className="w-full sm:w-auto text-xs uppercase tracking-wider font-bold px-8 py-3.5 border-rose-700/50 bg-rose-950/30 text-rose-300 cursor-not-allowed"
+                      >
+                        <AlertCircle className="h-4 w-4 mr-2 text-rose-400" />
+                        <span>Registration Closed</span>
+                      </Button>
+                    </div>
+                  )}
 
                   <Link href="/championship/kukkiwon-cup-2026" className="w-full sm:w-auto">
                     <Button
@@ -154,6 +225,7 @@ export default async function HomePage() {
                   </Link>
                 </div>
               </div>
+
 
               {/* Right Column: Championship Visual Showcase */}
               <div className="lg:col-span-5 flex justify-center">
@@ -555,6 +627,195 @@ export default async function HomePage() {
         </section>
 
         {/* =========================================================================
+            5B. OFFICIAL ANNOUNCEMENTS & BULLETINS (Phase 9 Requirement 11)
+            ========================================================================= */}
+        <section id="announcements" className="py-16 sm:py-24 border-b border-slate-800/80 bg-[#060A13]">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-10">
+            <div className="text-center space-y-2 max-w-2xl mx-auto">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#D4AF37]">
+                Official Communications
+              </span>
+              <h2 className="text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-white">
+                Latest Announcements
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-400">
+                Official notices, equipment guidelines, and technical briefings issued by the organizing committee.
+              </p>
+            </div>
+
+            {announcements.length === 0 ? (
+              <div className="p-8 rounded-xl border border-slate-800 bg-[#0C1222] text-center text-slate-400 text-sm">
+                No active announcements currently published. Check back soon for official updates.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {announcements.map((ann) => (
+                  <div
+                    key={ann.id}
+                    className="p-6 rounded-2xl border border-slate-800 bg-[#0C1222] space-y-4 flex flex-col justify-between hover:border-amber-500/40 transition-colors"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="inline-flex items-center gap-1 font-bold text-amber-400 bg-amber-400/10 px-2.5 py-0.5 rounded-full border border-amber-400/20">
+                          <Bell className="h-3 w-3" />
+                          Official Notice
+                        </span>
+                        <span className="text-slate-400 font-mono">
+                          {new Date(ann.publishDate).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </span>
+                      </div>
+                      <h3 className="text-base font-bold text-white leading-snug">
+                        {ann.title}
+                      </h3>
+                      <p className="text-xs text-slate-300 leading-relaxed">
+                        {ann.shortDescription}
+                      </p>
+                      <p className="text-xs text-slate-400 leading-relaxed border-t border-slate-800/80 pt-3">
+                        {ann.content}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* =========================================================================
+            5C. PUBLIC CHAMPIONSHIP DOCUMENTS (Phase 9 Requirement 12)
+            ========================================================================= */}
+        <section id="documents" className="py-16 sm:py-24 border-b border-slate-800/80 bg-[#090D16]">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-10">
+            <div className="text-center space-y-2 max-w-2xl mx-auto">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#D4AF37]">
+                Official Publications
+              </span>
+              <h2 className="text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-white">
+                Public Championship Documents
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-400">
+                Download official event prospectuses, category technical guidelines, and participation guidelines.
+              </p>
+            </div>
+
+            {documents.length === 0 ? (
+              <div className="p-8 rounded-xl border border-slate-800 bg-[#0C1222] text-center text-slate-400 text-sm">
+                No public documents uploaded at this time.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {documents.map((doc) => (
+                  <div
+                    key={doc.id}
+                    className="p-5 rounded-2xl border border-slate-800 bg-[#0C1222] space-y-4 flex flex-col justify-between hover:border-slate-700 transition-colors"
+                  >
+                    <div className="space-y-2.5">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="inline-block text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-cyan-400 font-semibold">
+                          {doc.documentType}
+                        </span>
+                        <span className="text-slate-500 text-[11px]">
+                          {doc.fileSizeFormatted}
+                        </span>
+                      </div>
+                      <h4 className="text-sm font-bold text-white line-clamp-1">
+                        {doc.title}
+                      </h4>
+                      <p className="text-xs text-slate-400 leading-relaxed line-clamp-2">
+                        {doc.description}
+                      </p>
+                    </div>
+
+                    <a
+                      href={doc.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 w-full py-2 px-3 rounded-lg border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-bold transition-colors"
+                    >
+                      <FileDown className="h-3.5 w-3.5 text-amber-400" />
+                      <span>Download Document</span>
+                    </a>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* =========================================================================
+            5D. IMPORTANT DATES TIMELINE (Phase 9 Requirement 10)
+            ========================================================================= */}
+        <section id="dates" className="py-16 sm:py-24 border-b border-slate-800/80 bg-[#060A13]">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-10">
+            <div className="text-center space-y-2 max-w-2xl mx-auto">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#D4AF37]">
+                Key Milestones
+              </span>
+              <h2 className="text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-white">
+                Important Championship Dates
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-400">
+                Crucial deadlines for athlete submissions, late registrations, and tournament start dates.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="p-5 rounded-xl border border-slate-800 bg-[#0C1222] space-y-1.5">
+                <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider block">
+                  Registration Opens
+                </span>
+                <span className="text-sm font-bold text-white block">
+                  {formatDate(tournament.registrationOpen)}
+                </span>
+                <span className="text-[11px] text-slate-400 block">
+                  Digital entries portal goes live
+                </span>
+              </div>
+
+              <div className="p-5 rounded-xl border border-slate-800 bg-[#0C1222] space-y-1.5">
+                <span className="text-[10px] uppercase font-bold text-rose-400 tracking-wider block">
+                  Registration Closes
+                </span>
+                <span className="text-sm font-bold text-white block">
+                  {formatDate(tournament.registrationClose)}
+                </span>
+                <span className="text-[11px] text-slate-400 block">
+                  Standard entry deadline
+                </span>
+              </div>
+
+              <div className="p-5 rounded-xl border border-slate-800 bg-[#0C1222] space-y-1.5">
+                <span className="text-[10px] uppercase font-bold text-amber-300 tracking-wider block">
+                  Late Registration
+                </span>
+                <span className="text-sm font-bold text-white block">
+                  {tournament.startDate ? formatDate(tournament.startDate) : "N/A"}
+                </span>
+                <span className="text-[11px] text-slate-400 block">
+                  Late surcharge applies
+                </span>
+              </div>
+
+              <div className="p-5 rounded-xl border border-slate-800 bg-[#0C1222] space-y-1.5">
+                <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider block">
+                  Championship Dates
+                </span>
+                <span className="text-sm font-bold text-white block">
+                  {formatDate(tournament.startDate)} – {formatDate(tournament.endDate)}
+                </span>
+                <span className="text-[11px] text-slate-400 block">
+                  {tournament.venue}, {tournament.city}
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* =========================================================================
             6. REGISTRATION CALL TO ACTION (Requirement 13)
             ========================================================================= */}
         <section className="py-16 sm:py-24 border-b border-slate-800/80 bg-gradient-to-b from-[#090D16] to-[#04070D]">
@@ -575,16 +836,30 @@ export default async function HomePage() {
             </div>
 
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/register" className="w-full sm:w-auto">
-                <Button
-                  variant="gold"
-                  size="lg"
-                  className="w-full sm:w-auto text-xs uppercase tracking-wider font-black px-10 py-4 text-slate-950 shadow-2xl shadow-amber-500/25"
-                >
-                  <span>Register Now</span>
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              </Link>
+              {availability.isOpen ? (
+                <Link href="/register" className="w-full sm:w-auto">
+                  <Button
+                    variant="gold"
+                    size="lg"
+                    className="w-full sm:w-auto text-xs uppercase tracking-wider font-black px-10 py-4 text-slate-950 shadow-2xl shadow-amber-500/25"
+                  >
+                    <span>Register Now</span>
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                </Link>
+              ) : (
+                <div className="w-full sm:w-auto">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    disabled
+                    className="w-full sm:w-auto text-xs uppercase tracking-wider font-bold px-10 py-4 border-rose-700/50 bg-rose-950/30 text-rose-300 cursor-not-allowed"
+                  >
+                    <AlertCircle className="h-4 w-4 mr-2 text-rose-400" />
+                    <span>Registration Closed</span>
+                  </Button>
+                </div>
+              )}
               <Link href="/contact" className="w-full sm:w-auto">
                 <Button
                   variant="outline"

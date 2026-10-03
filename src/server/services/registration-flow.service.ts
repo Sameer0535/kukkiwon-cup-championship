@@ -20,6 +20,7 @@ import {
 } from "@/lib/utils";
 import { CategoryService } from "./category.service";
 import { AcademyService } from "./academy.service";
+import { CmsService } from "./cms.service";
 
 // In-memory fallback registry for dev mode
 interface FallbackRegistration {
@@ -63,8 +64,17 @@ export class RegistrationFlowService {
     participantType: ParticipantType;
     championshipId?: string;
     draftData: AthleteDraftData | CoachDraftData | AcademyDraftData;
+    checkDate?: Date;
   }): Promise<{ registrationId: string; registrationNumber: string }> {
-    const { userId, registrationId, participantType, championshipId = "c1111111-1111-1111-1111-111111111111", draftData } = params;
+    const { userId, registrationId, participantType, championshipId = "champ-kukkiwon-2026", draftData, checkDate } = params;
+
+    // Requirement 5 & 23: Server-side registration availability enforcement
+    if (!registrationId) {
+      const availability = await CmsService.getRegistrationAvailability(championshipId, checkDate);
+      if (availability.status === "CLOSED") {
+        throw new Error("Registration is closed for this championship.");
+      }
+    }
 
     const draftJson = JSON.stringify(draftData);
 
@@ -171,7 +181,11 @@ export class RegistrationFlowService {
         registrationNumber: reg.registration_number,
       };
     } catch (e: any) {
-      if (e.message?.includes("Unauthorized") || e.message?.includes("Submitted")) {
+      if (
+        e.message?.includes("Unauthorized") ||
+        e.message?.includes("Submitted") ||
+        e.message?.includes("closed")
+      ) {
         throw e;
       }
       // Fallback in-memory
@@ -434,6 +448,13 @@ export class RegistrationFlowService {
     submittedAt: string;
   }> {
     const { registrationId, userId, participantType, draftData } = params;
+
+    // Requirement 5 & 23: Server-side registration availability enforcement for submissions
+    const targetChampId = (draftData as any).championship_id || "champ-kukkiwon-2026";
+    const availability = await CmsService.getRegistrationAvailability(targetChampId);
+    if (availability.status === "CLOSED") {
+      throw new Error("Registration is closed for this championship.");
+    }
 
     // 1. Validate Legal Declarations
     if (!draftData.declaration_accurate || !draftData.declaration_terms) {

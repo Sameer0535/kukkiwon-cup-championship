@@ -7,6 +7,7 @@ export type AdminRole =
   | 'SUPER_ADMIN'
   | 'EVENT_ADMIN'
   | 'REGISTRATION_ADMIN'
+  | 'REGISTRAR'
   | 'FINANCE_ADMIN'
   | 'DOCUMENT_ADMIN'
   | 'CONTENT_ADMIN'
