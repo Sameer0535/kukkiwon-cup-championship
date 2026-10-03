@@ -202,17 +202,28 @@ export class DocumentStorageService {
     return `championship/${params.championshipId}/registration/${params.registrationId}/documents/${params.documentRequirementId}/${randomKey}${cleanExt}`;
   }
 
+  private static resolveSecurePath(storageKey: string): string {
+    let decoded = storageKey;
+    try {
+      decoded = decodeURIComponent(storageKey);
+    } catch {
+      throw new Error("Invalid storage destination path.");
+    }
+    const base = path.resolve(this.baseStorageDir);
+    const fullPath = path.resolve(base, decoded);
+
+    if (fullPath !== base && !fullPath.startsWith(base + path.sep)) {
+      throw new Error("Invalid storage destination path.");
+    }
+    return fullPath;
+  }
+
   /**
    * REQUIREMENT 4: Private Storage Writing
    * Saves document into private non-public location
    */
   static async savePrivateDocument(storageKey: string, buffer: Buffer): Promise<void> {
-    const fullPath = path.resolve(this.baseStorageDir, storageKey);
-
-    // Guard against directory traversal
-    if (!fullPath.startsWith(path.resolve(this.baseStorageDir))) {
-      throw new Error("Invalid storage destination path.");
-    }
+    const fullPath = this.resolveSecurePath(storageKey);
 
     const parentDir = path.dirname(fullPath);
     await fs.mkdir(parentDir, { recursive: true });
@@ -223,11 +234,7 @@ export class DocumentStorageService {
    * Reads private document buffer
    */
   static async readPrivateDocument(storageKey: string): Promise<Buffer> {
-    const fullPath = path.resolve(this.baseStorageDir, storageKey);
-
-    if (!fullPath.startsWith(path.resolve(this.baseStorageDir))) {
-      throw new Error("Invalid storage path.");
-    }
+    const fullPath = this.resolveSecurePath(storageKey);
 
     return await fs.readFile(fullPath);
   }
@@ -237,10 +244,7 @@ export class DocumentStorageService {
    */
   static async deletePrivateDocument(storageKey: string): Promise<boolean> {
     try {
-      const fullPath = path.resolve(this.baseStorageDir, storageKey);
-      if (!fullPath.startsWith(path.resolve(this.baseStorageDir))) {
-        return false;
-      }
+      const fullPath = this.resolveSecurePath(storageKey);
       await fs.unlink(fullPath);
       return true;
     } catch {
