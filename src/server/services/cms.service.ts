@@ -18,6 +18,16 @@ import {
   PublicChampionshipPackage,
   PublicationStatus,
   RegistrationAvailability,
+  RegistrationState,
+  ChampionshipContentDTO,
+  ChampionshipImportantDateDTO,
+  ChampionshipFAQDTO,
+  PublicChampionshipResponse,
+  CreateOrUpdateContentInput,
+  CreateDateInput,
+  UpdateDateInput,
+  CreateFAQInput,
+  UpdateFAQInput,
   UpdateChampionshipCmsInput,
   CreateCategoryInput,
   UpdateCategoryInput,
@@ -80,6 +90,13 @@ interface FallbackChampionshipData {
   social_links: Record<string, string>;
   is_published: boolean;
   updated_at: string;
+  hero_title?: string;
+  hero_subtitle?: string;
+  location?: string;
+  registration_instructions?: string;
+  website_status?: PublicationStatus;
+  published_at?: string | null;
+  updated_by?: string | null;
 }
 
 const FALLBACK_CHAMPIONSHIPS: Map<string, FallbackChampionshipData> = new Map([
@@ -453,12 +470,114 @@ const FALLBACK_PUBLIC_DOCUMENTS: Map<string, PublicDocument> = new Map([
   ],
 ]);
 
+const FALLBACK_DATES: Map<string, ChampionshipImportantDateDTO> = new Map([
+  [
+    "date-001",
+    {
+      id: "date-001",
+      championshipId: "champ-kukkiwon-2026",
+      title: "Online Registration Opens",
+      description: "Early access for affiliated academies and accredited athletes.",
+      date: "2026-09-01T00:00:00Z",
+      displayOrder: 1,
+      isPublished: true,
+      createdAt: "2026-09-01T00:00:00Z",
+      updatedAt: "2026-09-01T00:00:00Z",
+    },
+  ],
+  [
+    "date-002",
+    {
+      id: "date-002",
+      championshipId: "champ-kukkiwon-2026",
+      title: "Regular Registration Closes",
+      description: "Standard entry fee cutoff across all divisions.",
+      date: "2026-11-10T23:59:59Z",
+      displayOrder: 2,
+      isPublished: true,
+      createdAt: "2026-09-01T00:00:00Z",
+      updatedAt: "2026-09-01T00:00:00Z",
+    },
+  ],
+  [
+    "date-003",
+    {
+      id: "date-003",
+      championshipId: "champ-kukkiwon-2026",
+      title: "Late Registration Deadline",
+      description: "Final deadline with late registration surcharge. Strictly no walk-ins.",
+      date: "2026-11-15T23:59:59Z",
+      displayOrder: 3,
+      isPublished: true,
+      createdAt: "2026-09-01T00:00:00Z",
+      updatedAt: "2026-09-01T00:00:00Z",
+    },
+  ],
+  [
+    "date-004",
+    {
+      id: "date-004",
+      championshipId: "champ-kukkiwon-2026",
+      title: "Championship Opening Ceremony & Day 1",
+      description: "Assembly, technical meeting, and Sub-Junior / Cadet sparring bouts.",
+      date: "2026-11-20T09:00:00Z",
+      displayOrder: 4,
+      isPublished: true,
+      createdAt: "2026-09-01T00:00:00Z",
+      updatedAt: "2026-09-01T00:00:00Z",
+    },
+  ],
+]);
+
+const FALLBACK_FAQS: Map<string, ChampionshipFAQDTO> = new Map([
+  [
+    "faq-001",
+    {
+      id: "faq-001",
+      championshipId: "champ-kukkiwon-2026",
+      question: "Who is eligible to participate in the Kukkiwon Cup 2026?",
+      answer: "Accredited athletes holding a recognized Taekwondo rank (Poom/Dan or certified color belt) from registered academies in India and partner nations are eligible to compete in their respective age/weight categories.",
+      displayOrder: 1,
+      isPublished: true,
+      createdAt: "2026-09-01T00:00:00Z",
+      updatedAt: "2026-09-01T00:00:00Z",
+    },
+  ],
+  [
+    "faq-002",
+    {
+      id: "faq-002",
+      championshipId: "champ-kukkiwon-2026",
+      question: "How does the Digital Athlete ID Card and QR verification work?",
+      answer: "After registration approval and verified fee payment, your official Digital Athlete ID card is issued immediately. You can download or print it. The card includes a cryptographically secure QR code scanned by ring officials for instant accreditation verification.",
+      displayOrder: 2,
+      isPublished: true,
+      createdAt: "2026-09-01T00:00:00Z",
+      updatedAt: "2026-09-01T00:00:00Z",
+    },
+  ],
+  [
+    "faq-003",
+    {
+      id: "faq-003",
+      championshipId: "champ-kukkiwon-2026",
+      question: "Can I make changes to my category or division after payment?",
+      answer: "Minor category corrections due to official weight updates must be approved by the Championship Registrar before the technical draw. Please contact the secretariat with your Athlete ID.",
+      displayOrder: 3,
+      isPublished: true,
+      createdAt: "2026-09-01T00:00:00Z",
+      updatedAt: "2026-09-01T00:00:00Z",
+    },
+  ],
+]);
+
 export class CmsService {
   private static checkContentPermission(adminSession?: AdminSession) {
     if (!adminSession) return;
     if (
       adminSession.role === "VIEWER" ||
       (adminSession.role as any) === "REGISTRANT" ||
+      (adminSession.role as any) === "REGISTRAR" ||
       adminSession.role === "FINANCE_ADMIN"
     ) {
       throw new AuthError("Forbidden: Insufficient privileges for championship content.", 403);
@@ -762,6 +881,14 @@ export class CmsService {
       AuditService.logAction({
         adminUserId: adminSession.user_id,
         action: auditAction,
+        entityType: "Championship",
+        entityId: championshipId,
+        oldValue: { name: current.name, status: current.status },
+        newValue: { name: existingFallback.name, status: existingFallback.status },
+      }).catch(() => {});
+      AuditService.logAction({
+        adminUserId: adminSession.user_id,
+        action: auditAction === "CHAMPIONSHIP_PUBLISHED" ? "CMS_CONTENT_PUBLISHED" : auditAction === "CHAMPIONSHIP_UNPUBLISHED" ? "CMS_CONTENT_UNPUBLISHED" : "CMS_CONTENT_UPDATED",
         entityType: "Championship",
         entityId: championshipId,
         oldValue: { name: current.name, status: current.status },
@@ -1365,6 +1492,13 @@ export class CmsService {
         entityId: ann.id,
         newValue: { title: ann.title, status: ann.status },
       }).catch(() => {});
+      AuditService.logAction({
+        adminUserId: adminSession.user_id,
+        action: "CMS_ANNOUNCEMENT_CREATED",
+        entityType: "Announcement",
+        entityId: ann.id,
+        newValue: { title: ann.title, status: ann.status },
+      }).catch(() => {});
     }
 
     return ann;
@@ -1417,6 +1551,14 @@ export class CmsService {
         oldValue: { title: current.title, status: current.status },
         newValue: { title: updated.title, status: updated.status },
       }).catch(() => {});
+      AuditService.logAction({
+        adminUserId: adminSession.user_id,
+        action: "CMS_ANNOUNCEMENT_UPDATED",
+        entityType: "Announcement",
+        entityId: id,
+        oldValue: { title: current.title, status: current.status },
+        newValue: { title: updated.title, status: updated.status },
+      }).catch(() => {});
     }
 
     return updated;
@@ -1446,6 +1588,13 @@ export class CmsService {
       AuditService.logAction({
         adminUserId: adminSession.user_id,
         action: "ANNOUNCEMENT_DELETED",
+        entityType: "Announcement",
+        entityId: id,
+        oldValue: { title: current.title },
+      }).catch(() => {});
+      AuditService.logAction({
+        adminUserId: adminSession.user_id,
+        action: "CMS_ANNOUNCEMENT_DELETED",
         entityType: "Announcement",
         entityId: id,
         oldValue: { title: current.title },
@@ -1631,6 +1780,588 @@ export class CmsService {
       categories,
       fees,
       announcements,
+      documents,
+    };
+  }
+
+  // ============================================================================
+  // 8. REGISTRATION STATE & AUTHORITATIVE DATES (Phase 9 Expanded)
+  // ============================================================================
+
+  static calculateRegistrationState(
+    status: PublicationStatus,
+    registrationOpen: string,
+    registrationClose: string,
+    lateRegistrationDeadline: string | null
+  ): RegistrationState {
+    if (status !== "PUBLISHED") return "CLOSED";
+    const now = new Date();
+    const openDate = new Date(registrationOpen);
+    const closeDate = new Date(registrationClose);
+    const lateDate = lateRegistrationDeadline ? new Date(lateRegistrationDeadline) : closeDate;
+
+    if (now < openDate) return "NOT_OPEN";
+    if (now > lateDate) return "CLOSED";
+
+    const diffHours = (closeDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+    if (diffHours <= 72 || now > closeDate) {
+      return "CLOSING_SOON";
+    }
+
+    return "OPEN";
+  }
+
+  static async getRegistrationState(championshipId = "champ-kukkiwon-2026"): Promise<RegistrationState> {
+    const champ = await this.getChampionship(championshipId, true);
+    if (!champ) return "CLOSED";
+    return this.calculateRegistrationState(
+      champ.status,
+      champ.registrationOpen,
+      champ.registrationClose,
+      champ.lateRegistrationDeadline
+    );
+  }
+
+  // ============================================================================
+  // 9. CONTENT VERSIONING & PUBLISHING (Requirements 1, 3, 5, 7, 8, 10, 15)
+  // ============================================================================
+
+  static async getContent(championshipId = "champ-kukkiwon-2026"): Promise<ChampionshipContentDTO> {
+    const champ = await this.getChampionship(championshipId, true);
+    if (!champ) {
+      throw new Error(`Championship '${championshipId}' not found.`);
+    }
+
+    const fallback = FALLBACK_CHAMPIONSHIPS.get(championshipId);
+
+    return {
+      id: `content-${champ.id}`,
+      championshipId: champ.id,
+      heroTitle: fallback?.hero_title || champ.heroHeadline || "The Pinnacle of Taekwondo Excellence",
+      heroSubtitle: fallback?.hero_subtitle || champ.subtitle || "Sanctioned by World Taekwondo Headquarters Kukkiwon India North Branch",
+      description: champ.description || "",
+      venue: champ.venue,
+      location: fallback?.location || `${champ.city}, ${champ.state}, ${champ.country}`,
+      registrationInstructions: fallback?.registration_instructions || "1. Submit athlete profile and national Dan accreditation.\n2. Upload mandatory verification documents.\n3. Complete registration payment to receive your Digital ID card.",
+      contactEmail: champ.contactEmail,
+      contactPhone: champ.contactPhone,
+      websiteStatus: champ.status,
+      createdAt: champ.updatedAt,
+      updatedAt: champ.updatedAt,
+      publishedAt: fallback?.published_at || (champ.status === "PUBLISHED" ? champ.updatedAt : null),
+      updatedBy: fallback?.updated_by || null,
+    };
+  }
+
+  static async updateContent(
+    championshipId: string,
+    input: CreateOrUpdateContentInput,
+    adminSession?: AdminSession
+  ): Promise<ChampionshipContentDTO> {
+    this.checkContentPermission(adminSession);
+
+    if (
+      adminSession?.assigned_championship_id &&
+      adminSession.assigned_championship_id !== championshipId
+    ) {
+      throw new AuthError("Forbidden: You do not have permission to manage this championship.", 403);
+    }
+
+    const champ = await this.getChampionship(championshipId, true);
+    if (!champ) {
+      throw new Error(`Championship '${championshipId}' not found.`);
+    }
+
+    const existingFallback = FALLBACK_CHAMPIONSHIPS.get(championshipId);
+    if (existingFallback) {
+      if (input.heroTitle) {
+        existingFallback.hero_title = input.heroTitle;
+        existingFallback.hero_headline = input.heroTitle;
+      }
+      if (input.heroSubtitle) {
+        existingFallback.hero_subtitle = input.heroSubtitle;
+        existingFallback.subtitle = input.heroSubtitle;
+      }
+      if (input.description) existingFallback.description = input.description;
+      if (input.venue) existingFallback.venue = input.venue;
+      if (input.location) existingFallback.location = input.location;
+      if (input.registrationInstructions) existingFallback.registration_instructions = input.registrationInstructions;
+      if (input.contactEmail) existingFallback.contact_email = input.contactEmail;
+      if (input.contactPhone) existingFallback.contact_phone = input.contactPhone;
+      if (input.websiteStatus) {
+        existingFallback.status = input.websiteStatus;
+        existingFallback.is_published = input.websiteStatus === "PUBLISHED";
+      }
+      existingFallback.updated_at = new Date().toISOString();
+      if (adminSession?.email) existingFallback.updated_by = adminSession.email;
+    }
+
+    if (adminSession?.user_id) {
+      AuditService.logAction({
+        adminUserId: adminSession.user_id,
+        action: "CMS_CONTENT_UPDATED",
+        entityType: "ChampionshipContent",
+        entityId: championshipId,
+        newValue: input as unknown as Record<string, unknown>,
+      }).catch(() => {});
+    }
+
+    return this.getContent(championshipId);
+  }
+
+  static async publishChampionshipContent(
+    championshipId = "champ-kukkiwon-2026",
+    adminSession?: AdminSession
+  ): Promise<{ success: boolean; status: PublicationStatus; publishedAt: string }> {
+    this.checkContentPermission(adminSession);
+
+    if (
+      adminSession?.assigned_championship_id &&
+      adminSession.assigned_championship_id !== championshipId
+    ) {
+      throw new AuthError("Forbidden: You do not have permission to publish this championship.", 403);
+    }
+
+    const existingFallback = FALLBACK_CHAMPIONSHIPS.get(championshipId);
+    if (!existingFallback) {
+      throw new Error(`Championship '${championshipId}' not found.`);
+    }
+
+    const nowIso = new Date().toISOString();
+    existingFallback.status = "PUBLISHED";
+    existingFallback.is_published = true;
+    existingFallback.published_at = nowIso;
+    existingFallback.updated_at = nowIso;
+    if (adminSession?.email) existingFallback.updated_by = adminSession.email;
+
+    if (adminSession?.user_id) {
+      AuditService.logAction({
+        adminUserId: adminSession.user_id,
+        action: "CMS_CONTENT_PUBLISHED",
+        entityType: "ChampionshipContent",
+        entityId: championshipId,
+        newValue: { status: "PUBLISHED", publishedAt: nowIso },
+      }).catch(() => {});
+    }
+
+    return {
+      success: true,
+      status: "PUBLISHED",
+      publishedAt: nowIso,
+    };
+  }
+
+  static async unpublishChampionshipContent(
+    championshipId = "champ-kukkiwon-2026",
+    adminSession?: AdminSession
+  ): Promise<{ success: boolean; status: PublicationStatus }> {
+    this.checkContentPermission(adminSession);
+
+    if (
+      adminSession?.assigned_championship_id &&
+      adminSession.assigned_championship_id !== championshipId
+    ) {
+      throw new AuthError("Forbidden: You do not have permission to unpublish this championship.", 403);
+    }
+
+    const existingFallback = FALLBACK_CHAMPIONSHIPS.get(championshipId);
+    if (!existingFallback) {
+      throw new Error(`Championship '${championshipId}' not found.`);
+    }
+
+    existingFallback.status = "DRAFT";
+    existingFallback.is_published = false;
+    existingFallback.updated_at = new Date().toISOString();
+    if (adminSession?.email) existingFallback.updated_by = adminSession.email;
+
+    if (adminSession?.user_id) {
+      AuditService.logAction({
+        adminUserId: adminSession.user_id,
+        action: "CMS_CONTENT_UNPUBLISHED",
+        entityType: "ChampionshipContent",
+        entityId: championshipId,
+        newValue: { status: "DRAFT" },
+      }).catch(() => {});
+    }
+
+    return {
+      success: true,
+      status: "DRAFT",
+    };
+  }
+
+  // ============================================================================
+  // 10. IMPORTANT DATES CRUD (Requirements 2, 7, 9, 15)
+  // ============================================================================
+
+  static async listDates(
+    championshipId = "champ-kukkiwon-2026",
+    includeUnpublished = false
+  ): Promise<ChampionshipImportantDateDTO[]> {
+    const list: ChampionshipImportantDateDTO[] = [];
+    FALLBACK_DATES.forEach((d) => {
+      if (d.championshipId === championshipId) {
+        if (includeUnpublished || d.isPublished) {
+          list.push(d);
+        }
+      }
+    });
+
+    return list.sort((a, b) => a.displayOrder - b.displayOrder);
+  }
+
+  static async createDate(
+    input: CreateDateInput,
+    adminSession?: AdminSession
+  ): Promise<ChampionshipImportantDateDTO> {
+    this.checkContentPermission(adminSession);
+
+    if (
+      adminSession?.assigned_championship_id &&
+      adminSession.assigned_championship_id !== input.championshipId
+    ) {
+      throw new AuthError("Forbidden: You do not have permission to add dates for this championship.", 403);
+    }
+
+    if (!input.title || !input.title.trim()) {
+      throw new Error("Date title is required.");
+    }
+    if (!input.date) {
+      throw new Error("Date timestamp is required.");
+    }
+
+    const newId = `date-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+    const nowIso = new Date().toISOString();
+    const item: ChampionshipImportantDateDTO = {
+      id: newId,
+      championshipId: input.championshipId,
+      title: input.title.trim(),
+      description: input.description?.trim() || null,
+      date: input.date,
+      displayOrder: input.displayOrder ?? FALLBACK_DATES.size + 1,
+      isPublished: input.isPublished ?? true,
+      createdAt: nowIso,
+      updatedAt: nowIso,
+    };
+
+    FALLBACK_DATES.set(newId, item);
+
+    if (adminSession?.user_id) {
+      AuditService.logAction({
+        adminUserId: adminSession.user_id,
+        action: "CMS_DATE_CREATED",
+        entityType: "ChampionshipImportantDate",
+        entityId: newId,
+        newValue: { title: item.title, date: item.date },
+      }).catch(() => {});
+    }
+
+    return item;
+  }
+
+  static async updateDate(
+    id: string,
+    input: UpdateDateInput,
+    adminSession?: AdminSession
+  ): Promise<ChampionshipImportantDateDTO> {
+    this.checkContentPermission(adminSession);
+
+    const current = FALLBACK_DATES.get(id);
+    if (!current) {
+      throw new Error(`Important date '${id}' not found.`);
+    }
+
+    if (
+      adminSession?.assigned_championship_id &&
+      adminSession.assigned_championship_id !== current.championshipId
+    ) {
+      throw new AuthError("Forbidden: You do not have access to this date.", 403);
+    }
+
+    const updated: ChampionshipImportantDateDTO = {
+      ...current,
+      title: input.title !== undefined ? input.title.trim() : current.title,
+      description: input.description !== undefined ? input.description?.trim() || null : current.description,
+      date: input.date || current.date,
+      displayOrder: input.displayOrder !== undefined ? input.displayOrder : current.displayOrder,
+      isPublished: input.isPublished !== undefined ? input.isPublished : current.isPublished,
+      updatedAt: new Date().toISOString(),
+    };
+
+    FALLBACK_DATES.set(id, updated);
+
+    if (adminSession?.user_id) {
+      AuditService.logAction({
+        adminUserId: adminSession.user_id,
+        action: "CMS_DATE_UPDATED",
+        entityType: "ChampionshipImportantDate",
+        entityId: id,
+        oldValue: { title: current.title, isPublished: current.isPublished },
+        newValue: { title: updated.title, isPublished: updated.isPublished },
+      }).catch(() => {});
+    }
+
+    return updated;
+  }
+
+  static async deleteDate(
+    id: string,
+    adminSession?: AdminSession
+  ): Promise<{ success: boolean; id: string }> {
+    this.checkContentPermission(adminSession);
+
+    const current = FALLBACK_DATES.get(id);
+    if (!current) {
+      throw new Error(`Important date '${id}' not found.`);
+    }
+
+    if (
+      adminSession?.assigned_championship_id &&
+      adminSession.assigned_championship_id !== current.championshipId
+    ) {
+      throw new AuthError("Forbidden: You do not have permission to delete this date.", 403);
+    }
+
+    FALLBACK_DATES.delete(id);
+
+    if (adminSession?.user_id) {
+      AuditService.logAction({
+        adminUserId: adminSession.user_id,
+        action: "CMS_DATE_DELETED",
+        entityType: "ChampionshipImportantDate",
+        entityId: id,
+        oldValue: { title: current.title },
+      }).catch(() => {});
+    }
+
+    return { success: true, id };
+  }
+
+  // ============================================================================
+  // 11. FAQ CRUD (Requirements 2, 7, 9, 15)
+  // ============================================================================
+
+  static async listFAQs(
+    championshipId = "champ-kukkiwon-2026",
+    includeUnpublished = false
+  ): Promise<ChampionshipFAQDTO[]> {
+    const list: ChampionshipFAQDTO[] = [];
+    FALLBACK_FAQS.forEach((f) => {
+      if (f.championshipId === championshipId) {
+        if (includeUnpublished || f.isPublished) {
+          list.push(f);
+        }
+      }
+    });
+
+    return list.sort((a, b) => a.displayOrder - b.displayOrder);
+  }
+
+  static async createFAQ(
+    input: CreateFAQInput,
+    adminSession?: AdminSession
+  ): Promise<ChampionshipFAQDTO> {
+    this.checkContentPermission(adminSession);
+
+    if (
+      adminSession?.assigned_championship_id &&
+      adminSession.assigned_championship_id !== input.championshipId
+    ) {
+      throw new AuthError("Forbidden: You do not have permission to add FAQs for this championship.", 403);
+    }
+
+    if (!input.question || !input.question.trim()) {
+      throw new Error("FAQ question is required.");
+    }
+    if (!input.answer || !input.answer.trim()) {
+      throw new Error("FAQ answer is required.");
+    }
+
+    const newId = `faq-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+    const nowIso = new Date().toISOString();
+    const item: ChampionshipFAQDTO = {
+      id: newId,
+      championshipId: input.championshipId,
+      question: input.question.trim(),
+      answer: input.answer.trim(),
+      displayOrder: input.displayOrder ?? FALLBACK_FAQS.size + 1,
+      isPublished: input.isPublished ?? true,
+      createdAt: nowIso,
+      updatedAt: nowIso,
+    };
+
+    FALLBACK_FAQS.set(newId, item);
+
+    if (adminSession?.user_id) {
+      AuditService.logAction({
+        adminUserId: adminSession.user_id,
+        action: "CMS_FAQ_CREATED",
+        entityType: "ChampionshipFAQ",
+        entityId: newId,
+        newValue: { question: item.question },
+      }).catch(() => {});
+    }
+
+    return item;
+  }
+
+  static async updateFAQ(
+    id: string,
+    input: UpdateFAQInput,
+    adminSession?: AdminSession
+  ): Promise<ChampionshipFAQDTO> {
+    this.checkContentPermission(adminSession);
+
+    const current = FALLBACK_FAQS.get(id);
+    if (!current) {
+      throw new Error(`FAQ '${id}' not found.`);
+    }
+
+    if (
+      adminSession?.assigned_championship_id &&
+      adminSession.assigned_championship_id !== current.championshipId
+    ) {
+      throw new AuthError("Forbidden: You do not have access to this FAQ.", 403);
+    }
+
+    const updated: ChampionshipFAQDTO = {
+      ...current,
+      question: input.question !== undefined ? input.question.trim() : current.question,
+      answer: input.answer !== undefined ? input.answer.trim() : current.answer,
+      displayOrder: input.displayOrder !== undefined ? input.displayOrder : current.displayOrder,
+      isPublished: input.isPublished !== undefined ? input.isPublished : current.isPublished,
+      updatedAt: new Date().toISOString(),
+    };
+
+    FALLBACK_FAQS.set(id, updated);
+
+    if (adminSession?.user_id) {
+      AuditService.logAction({
+        adminUserId: adminSession.user_id,
+        action: "CMS_FAQ_UPDATED",
+        entityType: "ChampionshipFAQ",
+        entityId: id,
+        oldValue: { question: current.question },
+        newValue: { question: updated.question },
+      }).catch(() => {});
+    }
+
+    return updated;
+  }
+
+  static async deleteFAQ(
+    id: string,
+    adminSession?: AdminSession
+  ): Promise<{ success: boolean; id: string }> {
+    this.checkContentPermission(adminSession);
+
+    const current = FALLBACK_FAQS.get(id);
+    if (!current) {
+      throw new Error(`FAQ '${id}' not found.`);
+    }
+
+    if (
+      adminSession?.assigned_championship_id &&
+      adminSession.assigned_championship_id !== current.championshipId
+    ) {
+      throw new AuthError("Forbidden: You do not have permission to delete this FAQ.", 403);
+    }
+
+    FALLBACK_FAQS.delete(id);
+
+    if (adminSession?.user_id) {
+      AuditService.logAction({
+        adminUserId: adminSession.user_id,
+        action: "CMS_FAQ_DELETED",
+        entityType: "ChampionshipFAQ",
+        entityId: id,
+        oldValue: { question: current.question },
+      }).catch(() => {});
+    }
+
+    return { success: true, id };
+  }
+
+  // ============================================================================
+  // 12. COMPREHENSIVE SANITIZED PUBLIC CHAMPIONSHIP DTO (/api/championship/public)
+  // ============================================================================
+
+  static async getPublicChampionshipDTO(
+    slugOrId = "champ-kukkiwon-2026"
+  ): Promise<PublicChampionshipResponse | null> {
+    const champ = await this.getChampionship(slugOrId, false);
+    if (!champ) return null;
+
+    const [dates, faqs, announcements, categories, fees, documents] = await Promise.all([
+      this.listDates(champ.id, false),
+      this.listFAQs(champ.id, false),
+      this.listAnnouncements(champ.id, false),
+      this.listCategories(champ.id, false),
+      this.listFees(champ.id, false),
+      this.listPublicDocuments(champ.id, false),
+    ]);
+
+    const registrationStatus = this.calculateRegistrationState(
+      champ.status,
+      champ.registrationOpen,
+      champ.registrationClose,
+      champ.lateRegistrationDeadline
+    );
+
+    const fallback = FALLBACK_CHAMPIONSHIPS.get(champ.id);
+
+    return {
+      id: champ.id,
+      slug: champ.slug,
+      name: champ.name,
+      shortName: champ.shortName,
+      edition: champ.edition,
+      subtitle: champ.subtitle,
+      description: champ.description,
+      venue: champ.venue,
+      location: fallback?.location || `${champ.city}, ${champ.state}, ${champ.country}`,
+      city: champ.city,
+      state: champ.state,
+      country: champ.country,
+      heroTitle: fallback?.hero_title || champ.heroHeadline,
+      heroSubtitle: fallback?.hero_subtitle || champ.subtitle,
+      heroHeadline: champ.heroHeadline,
+      heroDescription: champ.heroDescription,
+      registrationInstructions: fallback?.registration_instructions || "Complete athlete details, upload required belt/age documents, and remit registration fees online.",
+      registrationStatus,
+      startDate: champ.startDate,
+      endDate: champ.endDate,
+      registrationOpen: champ.registrationOpen,
+      registrationClose: champ.registrationClose,
+      lateRegistrationDeadline: champ.lateRegistrationDeadline,
+      contactEmail: champ.contactEmail,
+      contactPhone: champ.contactPhone,
+      contactWhatsapp: champ.contactWhatsapp,
+      contactAddress: champ.contactAddress,
+      socialLinks: champ.socialLinks,
+      publishedAt: fallback?.published_at || (champ.status === "PUBLISHED" ? champ.updatedAt : null),
+      importantDates: dates.map((d) => ({
+        id: d.id,
+        title: d.title,
+        description: d.description,
+        date: d.date,
+        displayOrder: d.displayOrder,
+      })),
+      announcements: announcements.map((a) => ({
+        id: a.id,
+        title: a.title,
+        content: a.content,
+        priority: a.displayOrder,
+        publishedAt: a.publishDate,
+      })),
+      faqs: faqs.map((f) => ({
+        id: f.id,
+        question: f.question,
+        answer: f.answer,
+        displayOrder: f.displayOrder,
+      })),
+      categories,
+      fees,
       documents,
     };
   }

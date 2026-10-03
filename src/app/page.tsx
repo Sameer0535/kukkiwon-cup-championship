@@ -14,6 +14,8 @@ import { SITE_CONFIG } from "@/config/site";
 import {
   getPublicChampionshipData,
   getPublicChampionshipPackage,
+  getPublicFAQs,
+  getPublicImportantDates,
 } from "@/lib/cms";
 import { CmsService } from "@/server/services/cms.service";
 import { formatDate, formatCurrency } from "@/lib/utils";
@@ -23,6 +25,7 @@ import {
   Clock,
   Shield,
   Award,
+  HelpCircle,
   ArrowRight,
   ExternalLink,
   Download,
@@ -47,6 +50,9 @@ export default async function HomePage() {
   const documents = pkg?.documents || [];
   const categories = pkg?.categories || [];
   const fees = pkg?.fees || [];
+  const champId = pkg?.championship.id || "champ-kukkiwon-2026";
+  const dynamicDates = await getPublicImportantDates(champId);
+  const faqs = await getPublicFAQs(champId);
 
   return (
     <div className="flex min-h-screen flex-col bg-[#070B14] text-slate-100 selection:bg-amber-400 selection:text-slate-950 font-sans">
@@ -764,56 +770,112 @@ export default async function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="p-5 rounded-xl border border-slate-800 bg-[#0C1222] space-y-1.5">
-                <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider block">
-                  Registration Opens
-                </span>
-                <span className="text-sm font-bold text-white block">
-                  {formatDate(tournament.registrationOpen)}
-                </span>
-                <span className="text-[11px] text-slate-400 block">
-                  Digital entries portal goes live
-                </span>
-              </div>
+              {dynamicDates && dynamicDates.length > 0 ? (
+                dynamicDates.map((d) => (
+                  <div key={d.id} className="p-5 rounded-xl border border-slate-800 bg-[#0C1222] space-y-1.5 hover:border-amber-400/40 transition-colors">
+                    <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider block">
+                      {d.title}
+                    </span>
+                    <span className="text-sm font-bold text-white block">
+                      {formatDate(d.date)}
+                    </span>
+                    <span className="text-[11px] text-slate-400 block line-clamp-2">
+                      {d.description || "Official tournament milestone"}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <>
+                  <div className="p-5 rounded-xl border border-slate-800 bg-[#0C1222] space-y-1.5">
+                    <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider block">
+                      Registration Opens
+                    </span>
+                    <span className="text-sm font-bold text-white block">
+                      {formatDate(tournament.registrationOpen)}
+                    </span>
+                    <span className="text-[11px] text-slate-400 block">
+                      Digital entries portal goes live
+                    </span>
+                  </div>
 
-              <div className="p-5 rounded-xl border border-slate-800 bg-[#0C1222] space-y-1.5">
-                <span className="text-[10px] uppercase font-bold text-rose-400 tracking-wider block">
-                  Registration Closes
-                </span>
-                <span className="text-sm font-bold text-white block">
-                  {formatDate(tournament.registrationClose)}
-                </span>
-                <span className="text-[11px] text-slate-400 block">
-                  Standard entry deadline
-                </span>
-              </div>
+                  <div className="p-5 rounded-xl border border-slate-800 bg-[#0C1222] space-y-1.5">
+                    <span className="text-[10px] uppercase font-bold text-rose-400 tracking-wider block">
+                      Registration Closes
+                    </span>
+                    <span className="text-sm font-bold text-white block">
+                      {formatDate(tournament.registrationClose)}
+                    </span>
+                    <span className="text-[11px] text-slate-400 block">
+                      Standard entry deadline
+                    </span>
+                  </div>
 
-              <div className="p-5 rounded-xl border border-slate-800 bg-[#0C1222] space-y-1.5">
-                <span className="text-[10px] uppercase font-bold text-amber-300 tracking-wider block">
-                  Late Registration
-                </span>
-                <span className="text-sm font-bold text-white block">
-                  {tournament.startDate ? formatDate(tournament.startDate) : "N/A"}
-                </span>
-                <span className="text-[11px] text-slate-400 block">
-                  Late surcharge applies
-                </span>
-              </div>
+                  <div className="p-5 rounded-xl border border-slate-800 bg-[#0C1222] space-y-1.5">
+                    <span className="text-[10px] uppercase font-bold text-amber-300 tracking-wider block">
+                      Late Registration
+                    </span>
+                    <span className="text-sm font-bold text-white block">
+                      {tournament.startDate ? formatDate(tournament.startDate) : "N/A"}
+                    </span>
+                    <span className="text-[11px] text-slate-400 block">
+                      Late surcharge applies
+                    </span>
+                  </div>
 
-              <div className="p-5 rounded-xl border border-slate-800 bg-[#0C1222] space-y-1.5">
-                <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider block">
-                  Championship Dates
-                </span>
-                <span className="text-sm font-bold text-white block">
-                  {formatDate(tournament.startDate)} – {formatDate(tournament.endDate)}
-                </span>
-                <span className="text-[11px] text-slate-400 block">
-                  {tournament.venue}, {tournament.city}
-                </span>
-              </div>
+                  <div className="p-5 rounded-xl border border-slate-800 bg-[#0C1222] space-y-1.5">
+                    <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider block">
+                      Championship Dates
+                    </span>
+                    <span className="text-sm font-bold text-white block">
+                      {formatDate(tournament.startDate)} – {formatDate(tournament.endDate)}
+                    </span>
+                    <span className="text-[11px] text-slate-400 block">
+                      {tournament.venue}, {tournament.city}
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </section>
+
+        {/* =========================================================================
+            5E. FREQUENTLY ASKED QUESTIONS (FAQ) (Phase 9 CMS)
+            ========================================================================= */}
+        {faqs && faqs.length > 0 && (
+          <section id="faq" className="py-16 sm:py-24 border-b border-slate-800/80 bg-[#090D16]">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl space-y-10">
+              <div className="text-center space-y-2 max-w-2xl mx-auto">
+                <span className="text-xs font-bold uppercase tracking-widest text-[#D4AF37]">
+                  Official Guidance
+                </span>
+                <h2 className="text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-white">
+                  Frequently Asked Questions
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-400">
+                  Answers to key questions regarding athlete eligibility, ID card accreditation, and participation.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                {faqs.map((faq) => (
+                  <div
+                    key={faq.id}
+                    className="p-6 rounded-2xl border border-slate-800 bg-[#0C1222] space-y-2 hover:border-slate-700 transition-colors"
+                  >
+                    <h3 className="text-base font-bold text-white flex items-center gap-2.5">
+                      <HelpCircle className="h-4 w-4 text-amber-400 shrink-0" />
+                      <span>{faq.question}</span>
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-300 pl-6 leading-relaxed">
+                      {faq.answer}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* =========================================================================
             6. REGISTRATION CALL TO ACTION (Requirement 13)

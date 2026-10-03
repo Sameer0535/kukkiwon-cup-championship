@@ -105,6 +105,12 @@ export default function AdminContentHubPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          <Link href="/admin/cms">
+            <Button size="sm" className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold flex items-center gap-1.5 text-xs">
+              <Globe className="h-3.5 w-3.5" />
+              <span>Full CMS Workspace</span>
+            </Button>
+          </Link>
           <Link
             href="/"
             target="_blank"

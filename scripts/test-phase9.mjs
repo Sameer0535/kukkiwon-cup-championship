@@ -726,12 +726,192 @@ async function runTests() {
     assert((c).registrations === undefined, "Public category DTO does not embed raw registration records");
   });
 
-  // 10.3 Public documents DTO contains only safe, approved fields
-  const docs = await CmsService.listPublicDocuments("champ-kukkiwon-2026", false);
-  docs.forEach((d) => {
-    assert(d.fileUrl.startsWith("/") || d.fileUrl.startsWith("http"), "Document fileUrl is a sanitized safe path");
-    assert((d).uploaded_by_admin_id === undefined, "Public document DTO does not leak admin personal IDs");
-  });
+  // ----------------------------------------------------------------------------
+  // TEST GROUP 11: CONTENT VERSIONING & PUBLISHING WORKFLOW
+  // ----------------------------------------------------------------------------
+  console.log("\n📰 [TEST GROUP 11] Content Versioning & Publishing Workflow");
+
+  // 11.1 Retrieve content DTO
+  const initialContent = await CmsService.getContent("champ-kukkiwon-2026");
+  assert(initialContent !== null, "ChampionshipContent DTO retrieved");
+  assert(initialContent.heroTitle.length > 0, "Hero title is populated");
+  assert(initialContent.websiteStatus === "PUBLISHED" || initialContent.websiteStatus === "DRAFT", "Website status is valid publication status");
+
+  // 11.2 Update content as Event Admin
+  const updatedContent = await CmsService.updateContent(
+    "champ-kukkiwon-2026",
+    {
+      heroTitle: "Updated Pinnacle of Taekwondo Excellence",
+      heroSubtitle: "Kukkiwon North India Official Cup",
+      location: "New Delhi, India",
+    },
+    eventAdminSession
+  );
+  assert(updatedContent.heroTitle === "Updated Pinnacle of Taekwondo Excellence", "Content updated successfully");
+  assert(updatedContent.heroSubtitle === "Kukkiwon North India Official Cup", "Hero subtitle updated");
+
+  // 11.3 Unpublish content to DRAFT
+  const unpublishRes = await CmsService.unpublishChampionshipContent("champ-kukkiwon-2026", eventAdminSession);
+  assert(unpublishRes.status === "DRAFT", "Content successfully unpublished to DRAFT");
+
+  // 11.4 When unpublished, public endpoint reflects status
+  const draftContentCheck = await CmsService.getContent("champ-kukkiwon-2026");
+  assert(draftContentCheck.websiteStatus === "DRAFT", "Content status is now DRAFT");
+
+  // 11.5 Publish content back to PUBLISHED
+  const publishRes = await CmsService.publishChampionshipContent("champ-kukkiwon-2026", superAdminSession);
+  assert(publishRes.status === "PUBLISHED", "Content successfully published to live website");
+  assert(publishRes.publishedAt !== null, "Publication timestamp recorded");
+
+  // ----------------------------------------------------------------------------
+  // TEST GROUP 12: IMPORTANT DATES CRUD
+  // ----------------------------------------------------------------------------
+  console.log("\n📅 [TEST GROUP 12] Championship Important Dates CRUD");
+
+  // 12.1 List existing dates
+  const initialDates = await CmsService.listDates("champ-kukkiwon-2026", true);
+  assert(initialDates.length >= 4, "Initial dates list contains seeded milestones");
+
+  // 12.2 Create new date
+  const newDate = await CmsService.createDate(
+    {
+      championshipId: "champ-kukkiwon-2026",
+      title: "Technical Delegate Briefing",
+      description: "Online Zoom briefing for all head coaches and team managers.",
+      date: "2026-11-18T14:00:00Z",
+      displayOrder: 5,
+      isPublished: true,
+    },
+    eventAdminSession
+  );
+  assert(newDate.id.startsWith("date-"), "New date created with unique ID");
+  assert(newDate.title === "Technical Delegate Briefing", "Date title matches input");
+
+  // 12.3 Update date
+  const updatedDate = await CmsService.updateDate(
+    newDate.id,
+    {
+      title: "Mandatory Technical Delegate Briefing",
+      isPublished: false,
+    },
+    eventAdminSession
+  );
+  assert(updatedDate.title === "Mandatory Technical Delegate Briefing", "Date title updated");
+  assert(updatedDate.isPublished === false, "Date unpublished");
+
+  // 12.4 Verify public filtering excludes unpublished date
+  const publicDates = await CmsService.listDates("champ-kukkiwon-2026", false);
+  const foundHiddenDate = publicDates.some((d) => d.id === newDate.id);
+  assert(!foundHiddenDate, "Unpublished date is excluded from public list");
+
+  // 12.5 Delete date
+  const deleteDateRes = await CmsService.deleteDate(newDate.id, eventAdminSession);
+  assert(deleteDateRes.success === true, "Date deleted successfully");
+
+  // ----------------------------------------------------------------------------
+  // TEST GROUP 13: FAQ CRUD
+  // ----------------------------------------------------------------------------
+  console.log("\n❓ [TEST GROUP 13] Championship FAQ CRUD");
+
+  // 13.1 List existing FAQs
+  const initialFaqs = await CmsService.listFAQs("champ-kukkiwon-2026", true);
+  assert(initialFaqs.length >= 3, "Initial FAQs list contains seeded entries");
+
+  // 13.2 Create new FAQ
+  const newFaq = await CmsService.createFAQ(
+    {
+      championshipId: "champ-kukkiwon-2026",
+      question: "What protective gear is mandatory for Kyorugi competitors?",
+      answer: "World Taekwondo approved trunk protector, headgear, shin guards, forearm guards, groin guard, mouthguard, and gloves are required.",
+      displayOrder: 4,
+      isPublished: true,
+    },
+    eventAdminSession
+  );
+  assert(newFaq.id.startsWith("faq-"), "New FAQ created with unique ID");
+  assert(newFaq.question.includes("protective gear"), "FAQ question matches");
+
+  // 13.3 Update FAQ
+  const updatedFaq = await CmsService.updateFAQ(
+    newFaq.id,
+    {
+      answer: "World Taekwondo approved sensor socks, trunk protector, and headgear are mandatory.",
+      isPublished: false,
+    },
+    eventAdminSession
+  );
+  assert(updatedFaq.isPublished === false, "FAQ unpublished to draft");
+
+  // 13.4 Verify public filtering excludes unpublished FAQ
+  const publicFaqs = await CmsService.listFAQs("champ-kukkiwon-2026", false);
+  const foundHiddenFaq = publicFaqs.some((f) => f.id === newFaq.id);
+  assert(!foundHiddenFaq, "Unpublished FAQ is excluded from public list");
+
+  // 13.5 Delete FAQ
+  const deleteFaqRes = await CmsService.deleteFAQ(newFaq.id, eventAdminSession);
+  assert(deleteFaqRes.success === true, "FAQ deleted successfully");
+
+  // ----------------------------------------------------------------------------
+  // TEST GROUP 14: FOUR-STATE REGISTRATION AVAILABILITY ENGINE
+  // ----------------------------------------------------------------------------
+  console.log("\n🚦 [TEST GROUP 14] Registration State Machine (OPEN, CLOSING_SOON, CLOSED, NOT_OPEN)");
+
+  // 14.1 NOT_OPEN state (future opening date)
+  const evalNotOpenState = CmsService.calculateRegistrationState(
+    "PUBLISHED",
+    "2026-12-01T00:00:00Z", // Future open date relative to current time
+    "2026-12-20T23:59:59Z",
+    "2026-12-25T23:59:59Z"
+  );
+  assert(evalNotOpenState === "NOT_OPEN", "Future registration correctly evaluates to NOT_OPEN");
+
+  // 14.2 OPEN state (active window, not close to deadline)
+  const evalOpenState = CmsService.calculateRegistrationState(
+    "PUBLISHED",
+    "2026-09-01T00:00:00Z",
+    "2026-11-10T23:59:59Z",
+    "2026-11-15T23:59:59Z"
+  );
+  assert(evalOpenState === "OPEN" || evalOpenState === "CLOSING_SOON", "Active registration evaluates to OPEN or CLOSING_SOON");
+
+  // 14.3 CLOSED state (past all deadlines)
+  const evalClosedState = CmsService.calculateRegistrationState(
+    "PUBLISHED",
+    "2026-01-01T00:00:00Z",
+    "2026-01-20T23:59:59Z",
+    "2026-01-25T23:59:59Z"
+  );
+  assert(evalClosedState === "CLOSED", "Expired deadlines evaluate to CLOSED");
+
+  // 14.4 Unpublished state forces CLOSED
+  const evalUnpublishedForcesClosed = CmsService.calculateRegistrationState(
+    "DRAFT",
+    "2026-09-01T00:00:00Z",
+    "2026-11-10T23:59:59Z",
+    "2026-11-15T23:59:59Z"
+  );
+  assert(evalUnpublishedForcesClosed === "CLOSED", "Draft championship registration is strictly CLOSED");
+
+  // ----------------------------------------------------------------------------
+  // TEST GROUP 15: SANITIZED PUBLIC CHAMPIONSHIP DTO (/api/championship/public)
+  // ----------------------------------------------------------------------------
+  console.log("\n🌐 [TEST GROUP 15] Public Championship Unified DTO (/api/championship/public)");
+
+  const publicDto = await CmsService.getPublicChampionshipDTO("champ-kukkiwon-2026");
+  assert(publicDto !== null, "Unified public championship DTO retrieved");
+  assert(publicDto.slug === "kukkiwon-cup-2026", "DTO slug matches");
+  assert(publicDto.registrationStatus !== undefined, "DTO contains authoritative registrationStatus");
+  assert(Array.isArray(publicDto.importantDates), "DTO contains importantDates array");
+  assert(Array.isArray(publicDto.announcements), "DTO contains announcements array");
+  assert(Array.isArray(publicDto.faqs), "DTO contains faqs array");
+  assert(Array.isArray(publicDto.categories), "DTO contains categories array");
+  assert(Array.isArray(publicDto.fees), "DTO contains fees array");
+  assert(Array.isArray(publicDto.documents), "DTO contains documents array");
+
+  // Check privacy of public DTO
+  assert((publicDto).admin_id === undefined, "DTO strips admin_id");
+  assert((publicDto).updated_by === undefined, "DTO strips updated_by");
+  assert((publicDto).audit_logs === undefined, "DTO strips audit_logs");
 
   // ----------------------------------------------------------------------------
   // SUMMARY

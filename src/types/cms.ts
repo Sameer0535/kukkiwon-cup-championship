@@ -7,6 +7,8 @@ export type PublicationStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
 
 export type RegistrationAvailability = "OPEN" | "CLOSED" | "COMING_SOON";
 
+export type RegistrationState = "NOT_OPEN" | "OPEN" | "CLOSING_SOON" | "CLOSED";
+
 export interface PublicChampionship {
   id: string;
   slug: string;
@@ -256,3 +258,148 @@ export interface UpdatePublicDocumentInput {
   status?: PublicationStatus;
   displayOrder?: number;
 }
+
+// ------------------------------------------------------------------------------
+// Championship Content, Dates & FAQ DTOs
+// ------------------------------------------------------------------------------
+
+export interface ChampionshipContentDTO {
+  id: string;
+  championshipId: string;
+  heroTitle: string;
+  heroSubtitle: string | null;
+  description: string | null;
+  venue: string | null;
+  location: string | null;
+  registrationInstructions: string | null;
+  contactEmail: string | null;
+  contactPhone: string | null;
+  websiteStatus: PublicationStatus;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string | null;
+  updatedBy: string | null;
+}
+
+export interface ChampionshipImportantDateDTO {
+  id: string;
+  championshipId: string;
+  title: string;
+  description: string | null;
+  date: string;
+  displayOrder: number;
+  isPublished: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ChampionshipFAQDTO {
+  id: string;
+  championshipId: string;
+  question: string;
+  answer: string;
+  displayOrder: number;
+  isPublished: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PublicChampionshipResponse {
+  id: string;
+  slug: string;
+  name: string;
+  shortName: string;
+  edition: string;
+  subtitle: string;
+  description: string;
+  venue: string;
+  location: string;
+  city: string;
+  state: string;
+  country: string;
+  heroTitle: string;
+  heroSubtitle: string;
+  heroHeadline: string;
+  heroDescription: string;
+  registrationInstructions: string;
+  registrationStatus: RegistrationState;
+  startDate: string;
+  endDate: string;
+  registrationOpen: string;
+  registrationClose: string;
+  lateRegistrationDeadline: string | null;
+  contactEmail: string;
+  contactPhone: string;
+  contactWhatsapp: string | null;
+  contactAddress: string;
+  socialLinks: Record<string, string>;
+  publishedAt: string | null;
+  importantDates: {
+    id: string;
+    title: string;
+    description: string | null;
+    date: string;
+    displayOrder: number;
+  }[];
+  announcements: {
+    id: string;
+    title: string;
+    content: string;
+    priority: number;
+    publishedAt: string | null;
+  }[];
+  faqs: {
+    id: string;
+    question: string;
+    answer: string;
+    displayOrder: number;
+  }[];
+  categories: PublicCategory[];
+  fees: PublicFee[];
+  documents: PublicDocument[];
+}
+
+export interface CreateOrUpdateContentInput {
+  heroTitle?: string;
+  heroSubtitle?: string;
+  description?: string;
+  venue?: string;
+  location?: string;
+  registrationInstructions?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  websiteStatus?: PublicationStatus;
+}
+
+export interface CreateDateInput {
+  championshipId: string;
+  title: string;
+  description?: string;
+  date: string;
+  displayOrder?: number;
+  isPublished?: boolean;
+}
+
+export interface UpdateDateInput {
+  title?: string;
+  description?: string;
+  date?: string;
+  displayOrder?: number;
+  isPublished?: boolean;
+}
+
+export interface CreateFAQInput {
+  championshipId: string;
+  question: string;
+  answer: string;
+  displayOrder?: number;
+  isPublished?: boolean;
+}
+
+export interface UpdateFAQInput {
+  question?: string;
+  answer?: string;
+  displayOrder?: number;
+  isPublished?: boolean;
+}
+

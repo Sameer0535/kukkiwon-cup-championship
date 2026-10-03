@@ -181,6 +181,10 @@ model Championship {
   registration_fees     RegistrationFee[]
   site_settings         SiteSetting?
   terms_versions        TermsVersion[]
+  content_config        ChampionshipContent?
+  announcements         ChampionshipAnnouncement[]
+  important_dates       ChampionshipImportantDate[]
+  faqs                  ChampionshipFAQ[]
 
   @@index([slug])
   @@index([status])
@@ -841,4 +845,88 @@ model TermsVersion {
   @@index([version])
   @@index([is_active])
   @@map("terms_versions")
+}
+
+// ------------------------------------------------------------------------------
+// 16. CHAMPIONSHIP CMS CONTENT & LIVE PUBLISHING ARCHITECTURE (Phase 9)
+// ------------------------------------------------------------------------------
+
+model ChampionshipContent {
+  id                        String         @id @default(uuid()) @db.Uuid
+  championship_id           String         @unique @db.Uuid
+  hero_title                String         @db.VarChar(255)
+  hero_subtitle             String?        @db.VarChar(255)
+  description               String?        @db.Text
+  venue                     String?        @db.VarChar(255)
+  location                  String?        @db.VarChar(255)
+  registration_instructions String?        @db.Text
+  contact_email             String?        @db.VarChar(255)
+  contact_phone             String?        @db.VarChar(50)
+  website_status            String         @default("DRAFT") @db.VarChar(50) // DRAFT, PUBLISHED, ARCHIVED
+  created_at                DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime       @updatedAt @db.Timestamptz(6)
+  published_at              DateTime?      @db.Timestamptz(6)
+  updated_by                String?        @db.VarChar(255)
+
+  // Relationships
+  championship              Championship   @relation(fields: [championship_id], references: [id], onDelete: Cascade)
+
+  @@index([website_status])
+  @@map("championship_contents")
+}
+
+model ChampionshipAnnouncement {
+  id              String        @id @default(uuid()) @db.Uuid
+  championship_id String        @db.Uuid
+  title           String        @db.VarChar(255)
+  content         String        @db.Text
+  priority        Int           @default(0) // Higher number = higher priority
+  is_published    Boolean       @default(false)
+  published_at    DateTime?     @db.Timestamptz(6)
+  expires_at      DateTime?     @db.Timestamptz(6)
+  created_at      DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime      @updatedAt @db.Timestamptz(6)
+  created_by      String?       @db.VarChar(255)
+
+  // Relationships
+  championship    Championship  @relation(fields: [championship_id], references: [id], onDelete: Cascade)
+
+  @@index([championship_id, is_published])
+  @@index([priority, published_at])
+  @@map("championship_announcements")
+}
+
+model ChampionshipImportantDate {
+  id              String        @id @default(uuid()) @db.Uuid
+  championship_id String        @db.Uuid
+  title           String        @db.VarChar(255)
+  description     String?       @db.Text
+  date            DateTime      @db.Timestamptz(6)
+  display_order   Int           @default(0)
+  is_published    Boolean       @default(true)
+  created_at      DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime      @updatedAt @db.Timestamptz(6)
+
+  // Relationships
+  championship    Championship  @relation(fields: [championship_id], references: [id], onDelete: Cascade)
+
+  @@index([championship_id, is_published, display_order])
+  @@map("championship_important_dates")
+}
+
+model ChampionshipFAQ {
+  id              String        @id @default(uuid()) @db.Uuid
+  championship_id String        @db.Uuid
+  question        String        @db.Text
+  answer          String        @db.Text
+  display_order   Int           @default(0)
+  is_published    Boolean       @default(true)
+  created_at      DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime      @updatedAt @db.Timestamptz(6)
+
+  // Relationships
+  championship    Championship  @relation(fields: [championship_id], references: [id], onDelete: Cascade)
+
+  @@index([championship_id, is_published, display_order])
+  @@map("championship_faqs")
 }

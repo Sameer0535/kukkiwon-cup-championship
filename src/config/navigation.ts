@@ -77,11 +77,11 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     description: "Batch generation, QR accreditation, and badge print",
   },
   {
-    title: "Content & CMS",
-    href: "/admin/content",
-    icon: "FileText",
-    requiredRole: ["SUPER_ADMIN", "EVENT_ADMIN", "REGISTRAR", "FINANCE_ADMIN", "VIEWER"],
-    description: "Publish announcements, edit hero text, and terms",
+    title: "Championship CMS",
+    href: "/admin/cms",
+    icon: "Globe",
+    requiredRole: ["SUPER_ADMIN", "EVENT_ADMIN", "REGISTRAR", "VIEWER"],
+    description: "Manage public championship info, announcements, schedule, and live publishing",
   },
   {
     title: "Audit Logs",

@@ -92,6 +92,9 @@ import {
   PublicDocument,
   PublicCategory,
   PublicFee,
+  ChampionshipImportantDateDTO,
+  ChampionshipFAQDTO,
+  PublicChampionshipResponse,
 } from "@/types/cms";
 
 /**
@@ -244,4 +247,44 @@ export async function getPublicFees(
     return [];
   }
 }
+
+/**
+ * Retrieves comprehensive sanitized public DTO for championship
+ */
+export async function getPublicChampionshipDTO(
+  slugOrId = "champ-kukkiwon-2026"
+): Promise<PublicChampionshipResponse | null> {
+  try {
+    return await CmsService.getPublicChampionshipDTO(slugOrId);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Retrieves published important dates
+ */
+export async function getPublicImportantDates(
+  championshipId = "champ-kukkiwon-2026"
+): Promise<ChampionshipImportantDateDTO[]> {
+  try {
+    return await CmsService.listDates(championshipId, false);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Retrieves published FAQs
+ */
+export async function getPublicFAQs(
+  championshipId = "champ-kukkiwon-2026"
+): Promise<ChampionshipFAQDTO[]> {
+  try {
+    return await CmsService.listFAQs(championshipId, false);
+  } catch {
+    return [];
+  }
+}
+
 
