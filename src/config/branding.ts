@@ -6,7 +6,7 @@
 export const BRANDING = {
   championshipName: "Kukkiwon Cup Championship",
   edition: "2026",
-  tagline: "Kukkiwon India North Branch x Kyorix Sports Technology",
+  tagline: "KUKKIWON INDIA NORTH BRANCH × KYORIX",
   
   // Organization 1: Kukkiwon India North Branch
   kukkiwon: {

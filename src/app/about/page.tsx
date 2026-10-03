@@ -50,12 +50,12 @@ export default function AboutPage() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
               <div className="lg:col-span-4 flex justify-center">
-                <div className="relative h-44 w-44 rounded-2xl bg-white p-4 border border-slate-200 shadow-md flex items-center justify-center">
+                <div className="relative h-36 w-44 rounded-2xl bg-white p-3 border border-slate-200 shadow-md flex items-center justify-center">
                   <Image
                     src={BRANDING.kukkiwon.logoPath}
                     alt={BRANDING.kukkiwon.name}
                     fill
-                    className="object-contain p-2"
+                    className="object-contain"
                   />
                 </div>
               </div>
@@ -133,7 +133,7 @@ export default function AboutPage() {
               </div>
 
               <div className="lg:col-span-4 flex justify-center order-1 lg:order-2">
-                <div className="relative h-28 w-56 rounded-2xl bg-white p-3 border border-slate-200 shadow-md flex items-center justify-center">
+                <div className="relative h-36 w-36 rounded-2xl bg-white p-3 border border-slate-200 shadow-md flex items-center justify-center">
                   <Image
                     src={BRANDING.kyorix.logoPath}
                     alt={BRANDING.kyorix.name}

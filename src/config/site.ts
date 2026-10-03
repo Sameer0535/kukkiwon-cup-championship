@@ -10,7 +10,7 @@ export const SITE_CONFIG = {
   ogImage: "/branding/kukkiwon-logo.jpg",
   links: {
     kukkiwonOfficial: "http://www.kukkiwon.or.kr",
-    supportEmail: "info@kukkiwoncup.org",
+    supportEmail: "contact@kyorix.com",
   },
   contact: {
     email: "contact@kyorix.com",

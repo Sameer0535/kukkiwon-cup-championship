@@ -40,7 +40,7 @@ export function BrandLogo({ variant = "combined", className = "" }: BrandLogoPro
   if (variant === "kyorix-only") {
     return (
       <div className={`flex items-center gap-3 ${className}`}>
-        <div className="relative h-10 w-28 overflow-hidden rounded">
+        <div className="relative h-10 w-10 overflow-hidden rounded">
           <Image
             src={BRANDING.kyorix.logoPath}
             alt={BRANDING.kyorix.name}
@@ -56,7 +56,7 @@ export function BrandLogo({ variant = "combined", className = "" }: BrandLogoPro
   if (variant === "compact") {
     return (
       <Link href="/" className={`flex items-center gap-3 group ${className}`}>
-        <div className="relative h-10 w-10 overflow-hidden rounded-lg bg-white p-1 border border-slate-700/60 shadow-sm">
+        <div className="relative h-10 w-12 overflow-hidden rounded-lg bg-white p-1 border border-slate-700/60 shadow-sm flex items-center justify-center">
           <Image
             src={BRANDING.kukkiwon.logoPath}
             alt={BRANDING.kukkiwon.name}
@@ -65,7 +65,7 @@ export function BrandLogo({ variant = "combined", className = "" }: BrandLogoPro
           />
         </div>
         <div className="h-6 w-px bg-slate-800" />
-        <div className="relative h-8 w-20 overflow-hidden">
+        <div className="relative h-8 w-8 overflow-hidden flex items-center justify-center">
           <Image
             src={BRANDING.kyorix.logoPath}
             alt={BRANDING.kyorix.name}
@@ -77,11 +77,11 @@ export function BrandLogo({ variant = "combined", className = "" }: BrandLogoPro
     );
   }
 
-  // Combined full header variant
+  // Combined full header variant (Kukkiwon-only logo in header as instructed)
   return (
     <Link href="/" className={`flex items-center gap-4 group ${className}`}>
       {/* Kukkiwon Emblem */}
-      <div className="relative h-12 w-12 overflow-hidden rounded-xl bg-white p-1 border border-slate-200 shadow-sm group-hover:border-blue-400 transition-colors">
+      <div className="relative h-12 w-14 overflow-hidden rounded-xl bg-white p-1 border border-slate-200 shadow-sm group-hover:border-blue-400 transition-colors flex items-center justify-center">
         <Image
           src={BRANDING.kukkiwon.logoPath}
           alt={BRANDING.kukkiwon.name}
@@ -97,21 +97,8 @@ export function BrandLogo({ variant = "combined", className = "" }: BrandLogoPro
             KUKKIWON CUP 2026
           </span>
         </div>
-        <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
-          <span>kukkiwon india north branch x kyorix</span>
-        </div>
-      </div>
-
-      {/* Kyorix Emblem */}
-      <div className="hidden sm:flex items-center pl-3 border-l border-slate-200">
-        <div className="relative h-9 w-28 overflow-hidden">
-          <Image
-            src={BRANDING.kyorix.logoPath}
-            alt={BRANDING.kyorix.name}
-            fill
-            className="object-contain"
-            priority
-          />
+        <div className="flex items-center gap-1.5 text-[11px] font-bold text-blue-700 tracking-wider uppercase">
+          <span>KUKKIWON INDIA NORTH BRANCH × KYORIX</span>
         </div>
       </div>
     </Link>

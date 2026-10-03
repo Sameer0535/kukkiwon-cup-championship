@@ -855,7 +855,7 @@ export default function AdminCmsPage() {
                 <Input
                   value={championship.contactAddress || ""}
                   onChange={(e) => setChampionship({ ...championship, contactAddress: e.target.value })}
-                  placeholder="Kukkiwon India North Secretariat, New Delhi, India"
+                  placeholder="Kyorix Sports Technology Private Limited, New Delhi, India"
                 />
               </div>
 
