@@ -56,22 +56,34 @@ export function PublicHeader() {
       {/* Main Header */}
       <header className="sticky top-0 z-40 w-full border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-xs">
         <div className="container mx-auto flex h-20 items-center justify-between px-3 sm:px-6 lg:px-8">
-          {/* LEFT & CENTER: Kukkiwon Emblem + Championship Title */}
-          <Link href="/" className="flex items-center gap-3 sm:gap-3.5 group min-w-0">
-            <div className="relative h-9 w-20 sm:h-10 sm:w-24 shrink-0 transition-transform group-hover:scale-105 flex items-center justify-center">
-              <Image
-                src={BRANDING.kukkiwon.logoPath}
-                alt={BRANDING.kukkiwon.name}
-                fill
-                className="object-contain"
-                priority
-              />
+          {/* LEFT & CENTER: Kukkiwon & Kyorix Brand Logos + Championship Title */}
+          <Link href="/" className="flex items-center gap-2.5 sm:gap-3.5 group min-w-0">
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              <div className="relative h-9 w-13 sm:h-11 sm:w-16 shrink-0 transition-transform group-hover:scale-105 flex items-center justify-center">
+                <Image
+                  src={BRANDING.kukkiwon.logoPath}
+                  alt={BRANDING.kukkiwon.name}
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+              <span className="text-slate-300 font-extralight text-xs sm:text-sm select-none">×</span>
+              <div className="relative h-9 w-11 sm:h-11 sm:w-14 shrink-0 transition-transform group-hover:scale-105 flex items-center justify-center">
+                <Image
+                  src={BRANDING.kyorix.logoPath}
+                  alt={BRANDING.kyorix.name}
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-sm sm:text-base lg:text-lg font-black tracking-wider text-slate-950 uppercase font-sans leading-tight truncate">
+              <span className="text-xs sm:text-base lg:text-lg font-black tracking-wider text-slate-950 uppercase font-sans leading-tight truncate">
                 KUKKIWON CUP 2026
               </span>
-              <span className="text-[10px] sm:text-[11px] font-bold tracking-wider text-blue-700 uppercase leading-tight truncate">
+              <span className="text-[9px] sm:text-[11px] font-bold tracking-wider text-blue-700 uppercase leading-tight truncate">
                 KUKKIWON INDIA NORTH BRANCH <span className="text-slate-400 font-normal">×</span> KYORIX
               </span>
             </div>
@@ -150,19 +162,30 @@ export function PublicHeader() {
               {/* Drawer Header */}
               <div className="flex items-center justify-between border-b border-slate-200 pb-4">
                 <div className="flex items-center gap-2.5">
-                  <div className="relative h-8 w-16 shrink-0 flex items-center justify-center">
-                    <Image
-                      src={BRANDING.kukkiwon.logoPath}
-                      alt={BRANDING.kukkiwon.name}
-                      fill
-                      className="object-contain"
-                    />
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <div className="relative h-8 w-11 shrink-0 flex items-center justify-center">
+                      <Image
+                        src={BRANDING.kukkiwon.logoPath}
+                        alt={BRANDING.kukkiwon.name}
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                    <span className="text-slate-300 font-extralight text-xs select-none">×</span>
+                    <div className="relative h-8 w-10 shrink-0 flex items-center justify-center">
+                      <Image
+                        src={BRANDING.kyorix.logoPath}
+                        alt={BRANDING.kyorix.name}
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
                   </div>
                   <div>
                     <span className="text-xs font-black text-slate-950 block uppercase tracking-wider">
                       KUKKIWON CUP 2026
                     </span>
-                    <span className="text-[10px] text-blue-700 font-bold block uppercase tracking-wider leading-tight">
+                    <span className="text-[9px] text-blue-700 font-bold block uppercase tracking-wider leading-tight">
                       KUKKIWON INDIA NORTH BRANCH × KYORIX
                     </span>
                   </div>

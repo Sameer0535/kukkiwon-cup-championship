@@ -15,10 +15,19 @@ export function PublicFooter() {
       {/* Upper Footer Block */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-          {/* Column 1: Kyorix Sports Technology Organization & Identity */}
+          {/* Column 1: Joint Championship Organizers & Identity */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="relative h-14 w-16 shrink-0 flex items-center justify-center">
+              <div className="relative h-14 w-20 shrink-0 flex items-center justify-center">
+                <Image
+                  src={BRANDING.kukkiwon.logoPath}
+                  alt={BRANDING.kukkiwon.name}
+                  fill
+                  className="object-contain"
+                />
+              </div>
+              <span className="text-slate-600 font-extralight text-2xl select-none">×</span>
+              <div className="relative h-14 w-18 shrink-0 flex items-center justify-center">
                 <Image
                   src={BRANDING.kyorix.logoPath}
                   alt={BRANDING.kyorix.name}
@@ -30,16 +39,17 @@ export function PublicFooter() {
 
             <div className="flex flex-col">
               <span className="text-sm font-black text-white uppercase tracking-wider">
-                KYORIX SPORTS TECHNOLOGY
+                KUKKIWON CUP 2026
               </span>
               <span className="text-[10px] text-cyan-400 font-bold uppercase tracking-widest">
-                Official Platform & Scoring Partner
+                KUKKIWON INDIA NORTH BRANCH × KYORIX
               </span>
             </div>
 
             <p className="text-xs text-slate-400 leading-relaxed">
-              Official tournament registration, digital accreditation, and electronic scoring platform
-              developed and operated by Kyorix Sports Technology.
+              Official Kukkiwon Cup Championship sanctioned by World Taekwondo Headquarters
+              Kukkiwon India North Branch, powered by Kyorix Sports Technology electronic scoring
+              and tournament platform.
             </p>
           </div>
 

@@ -74,9 +74,9 @@ export default async function HomePage() {
           )}
 
           <div className="container relative mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl text-center space-y-6">
-            {/* Grand Dual Logos in Hero (Transparent background, no text, increased size) */}
+            {/* Grand Dual Logos in Hero (Full official branding, transparent background, increased prominent size) */}
             <div className="flex items-center justify-center gap-6 sm:gap-10 pb-2">
-              <div className="relative h-20 w-40 sm:h-28 sm:w-56 md:h-32 md:w-64 shrink-0 flex items-center justify-center transition-transform hover:scale-105">
+              <div className="relative h-24 w-36 sm:h-32 sm:w-48 md:h-36 md:w-52 shrink-0 flex items-center justify-center transition-transform hover:scale-105">
                 <Image
                   src={BRANDING.kukkiwon.logoPath}
                   alt={BRANDING.kukkiwon.name}
@@ -86,7 +86,7 @@ export default async function HomePage() {
                 />
               </div>
               <span className="text-3xl sm:text-4xl font-extralight text-slate-300 select-none">×</span>
-              <div className="relative h-20 w-20 sm:h-28 sm:w-28 md:h-32 md:w-32 shrink-0 flex items-center justify-center transition-transform hover:scale-105">
+              <div className="relative h-24 w-32 sm:h-32 sm:w-44 md:h-36 md:w-48 shrink-0 flex items-center justify-center transition-transform hover:scale-105">
                 <Image
                   src={BRANDING.kyorix.logoPath}
                   alt={BRANDING.kyorix.name}
@@ -209,7 +209,7 @@ export default async function HomePage() {
               <div className="p-8 rounded-2xl border border-slate-200 bg-white space-y-5 flex flex-col justify-between shadow-xs">
                 <div className="space-y-4">
                   <div className="flex items-center gap-4">
-                    <div className="relative h-16 w-32 shrink-0 flex items-center justify-center">
+                    <div className="relative h-16 w-24 shrink-0 flex items-center justify-center">
                       <Image
                         src={BRANDING.kukkiwon.logoPath}
                         alt={BRANDING.kukkiwon.name}
@@ -255,7 +255,7 @@ export default async function HomePage() {
               <div className="p-8 rounded-2xl border border-blue-200 bg-white space-y-5 flex flex-col justify-between shadow-sm shadow-blue-500/5">
                 <div className="space-y-4">
                   <div className="flex items-center gap-4">
-                    <div className="relative h-16 w-20 shrink-0 flex items-center justify-center">
+                    <div className="relative h-16 w-22 shrink-0 flex items-center justify-center">
                       <Image
                         src={BRANDING.kyorix.logoPath}
                         alt={BRANDING.kyorix.name}
