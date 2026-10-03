@@ -103,7 +103,7 @@ async function main() {
   await runSection("SECTION B: Public Website & Navigation Smoke Tests", async () => {
     let serverAvailable = false;
     try {
-      const probe = await fetch(`${BASE_URL}/api/health`, { signal: AbortSignal.timeout(3000) });
+      const probe = await fetch(`${BASE_URL}/api/health`, { signal: AbortSignal.timeout(10000) });
       serverAvailable = probe.status === 200;
     } catch {}
 
@@ -825,6 +825,7 @@ async function main() {
   console.log(`============================================================`);
   console.log(`  Passed Tests:    ${totalPassed}`);
   console.log(`  Failed Tests:    ${totalFailed}`);
+  console.log(`  SUMMARY: ${totalPassed} PASSED, ${totalFailed} FAILED`);
   console.log(`  Blocked Items:   ${totalBlocked} (External provisioning requirements)`);
   console.log(`  Not Applicable:  ${totalNotApplicable}`);
   console.log(`  Duration:        ${Date.now() - startTime}ms`);
