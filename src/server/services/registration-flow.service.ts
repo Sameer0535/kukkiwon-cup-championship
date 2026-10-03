@@ -543,6 +543,10 @@ export class RegistrationFlowService {
           throw new Error("Unauthorized access to submit this registration.");
         }
 
+        if (existing.status !== "DRAFT") {
+          throw new Error("Cannot modify registration: record has already been submitted, approved, or paid.");
+        }
+
         regNumber = existing.registration_number;
 
         // Update participant details
@@ -611,7 +615,12 @@ export class RegistrationFlowService {
         submittedAt: now.toISOString(),
       };
     } catch (e: any) {
-      if (e.message?.includes("Unauthorized") || e.message?.includes("Category Eligibility") || e.message?.includes("Missing")) {
+      if (
+        e.message?.includes("Unauthorized") ||
+        e.message?.includes("Category Eligibility") ||
+        e.message?.includes("Missing") ||
+        e.message?.includes("Cannot modify registration")
+      ) {
         throw e;
       }
 
@@ -628,6 +637,9 @@ export class RegistrationFlowService {
         const existing = FALLBACK_REGISTRATIONS_STORE.get(registrationId)!;
         if (existing.user_id !== userId) {
           throw new Error("Unauthorized access to submit this registration.");
+        }
+        if (existing.status !== "DRAFT") {
+          throw new Error("Cannot modify registration: record has already been submitted, approved, or paid.");
         }
         regNumber = existing.registration_number;
       }

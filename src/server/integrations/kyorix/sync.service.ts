@@ -97,6 +97,13 @@ const ACTIVE_SYNC_LOCKS = new Set<string>();
 
 export class KyorixSyncService {
   /**
+   * Generates a deterministic idempotency key for Kyorix synchronization
+   */
+  static generateIdempotencyKey(registrationId: string, syncVersion = 1, prefix = "KKC26"): string {
+    return `${prefix}:${registrationId}:${syncVersion}`;
+  }
+
+  /**
    * Enforces role-based permissions and championship scoping
    */
   private static checkPermissions(

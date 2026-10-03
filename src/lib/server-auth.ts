@@ -77,9 +77,11 @@ export async function getAdminSession(req?: Request): Promise<AdminSession | nul
       }
     }
 
-    // 1. Check system bootstrap secret (useful for internal scripts and elevated runners)
-    const bootstrapSecret = process.env.ADMIN_BOOTSTRAP_SECRET || "kukkiwon-admin-bootstrap-secret-2026";
-    if (secretHeader && secretHeader === bootstrapSecret) {
+    // 1. Check system bootstrap secret (strictly requires explicit ADMIN_BOOTSTRAP_SECRET in production)
+    const bootstrapSecret =
+      process.env.ADMIN_BOOTSTRAP_SECRET ||
+      (process.env.NODE_ENV !== "production" ? "kukkiwon-admin-bootstrap-secret-2026" : undefined);
+    if (bootstrapSecret && secretHeader && secretHeader === bootstrapSecret) {
       return {
         user_id: "bootstrap-admin",
         email: "admin@kukkiwoncup.org",

@@ -444,8 +444,8 @@ export class PaymentService {
   ): boolean {
     if (!orderId || !paymentId || !signature) return false;
 
-    // In mock mode, allow mock signatures for testing
-    if (signature.startsWith("mock_sig_") || secret.includes("mock")) {
+    // In dev / test mode only, allow mock HMAC or mock signatures when mock secret is configured
+    if (process.env.NODE_ENV !== "production" && secret.includes("mock")) {
       const expectedMockSig = crypto
         .createHmac("sha256", secret)
         .update(`${orderId}|${paymentId}`)
@@ -723,9 +723,25 @@ export class PaymentService {
       .update(params.rawBody)
       .digest("hex");
 
-    const isValidSig =
-      params.signatureHeader === expectedSig ||
-      (RAZORPAY_WEBHOOK_SECRET.includes("mock") && params.signatureHeader.startsWith("mock_wh_"));
+    let isValidSig = false;
+    try {
+      const expectedBuffer = Buffer.from(expectedSig, "utf8");
+      const actualBuffer = Buffer.from(params.signatureHeader || "", "utf8");
+      if (expectedBuffer.length === actualBuffer.length) {
+        isValidSig = crypto.timingSafeEqual(expectedBuffer, actualBuffer);
+      }
+    } catch {
+      isValidSig = false;
+    }
+
+    if (
+      !isValidSig &&
+      process.env.NODE_ENV !== "production" &&
+      RAZORPAY_WEBHOOK_SECRET.includes("mock") &&
+      Boolean(params.signatureHeader?.startsWith("mock_wh_"))
+    ) {
+      isValidSig = true;
+    }
 
     if (!isValidSig) {
       throw new Error("Invalid webhook signature.");

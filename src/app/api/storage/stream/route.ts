@@ -31,7 +31,18 @@ export async function GET(request: NextRequest) {
     .update(`${filePath}:${expiresAt}`)
     .digest("hex");
 
-  if (signature !== expectedSig) {
+  let isSigValid = false;
+  try {
+    const sigBuffer = Buffer.from(signature, "utf8");
+    const expectedSigBuffer = Buffer.from(expectedSig, "utf8");
+    if (sigBuffer.length === expectedSigBuffer.length) {
+      isSigValid = crypto.timingSafeEqual(sigBuffer, expectedSigBuffer);
+    }
+  } catch {
+    isSigValid = false;
+  }
+
+  if (!isSigValid) {
     return new NextResponse("Forbidden: Invalid signature", { status: 403 });
   }
 
