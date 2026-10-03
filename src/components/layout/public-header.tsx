@@ -38,13 +38,13 @@ export function PublicHeader() {
   return (
     <>
       {/* Top Institutional Bar */}
-      <div className="w-full bg-[#050912] border-b border-slate-800/80 text-[10px] sm:text-[11px] text-slate-300 py-1.5 px-3 sm:px-8">
+      <div className="w-full bg-[#081120] border-b border-blue-950/80 text-[10px] sm:text-[11px] text-slate-300 py-1.5 px-3 sm:px-8">
         <div className="container mx-auto flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 sm:gap-2 truncate">
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
             <span className="font-semibold text-slate-200 truncate">World Taekwondo Headquarters</span>
             <span className="text-slate-500 hidden md:inline">•</span>
-            <span className="text-amber-400/90 hidden md:inline font-medium">India North Branch Sanctioned Event</span>
+            <span className="text-cyan-300/90 hidden md:inline font-medium">India North Branch Sanctioned Event</span>
           </div>
           <div className="hidden sm:flex items-center gap-2 shrink-0">
             <span className="text-slate-400 font-medium">Tech Partner:</span>
@@ -54,30 +54,38 @@ export function PublicHeader() {
       </div>
 
       {/* Main Header */}
-      <header className="sticky top-0 z-40 w-full border-b border-slate-800 bg-[#090D16]/95 backdrop-blur-md">
+      <header className="sticky top-0 z-40 w-full border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-xs">
         <div className="container mx-auto flex h-20 items-center justify-between px-3 sm:px-6 lg:px-8">
-          {/* LEFT & CENTER: Kukkiwon Emblem + Championship Title */}
-          <Link href="/" className="flex items-center gap-2.5 sm:gap-3.5 group min-w-0">
-            <div className="relative h-10 w-10 sm:h-12 sm:w-12 overflow-hidden rounded-xl bg-white p-1 border border-slate-700/80 shadow-md group-hover:border-amber-500/50 transition-colors shrink-0">
-              <Image
-                src={BRANDING.kukkiwon.logoPath}
-                alt={BRANDING.kukkiwon.name}
-                fill
-                className="object-contain"
-                priority
-              />
+          {/* LEFT & CENTER: Dual Logos + Championship Title */}
+          <Link href="/" className="flex items-center gap-3 sm:gap-4 group min-w-0">
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="relative h-10 w-10 sm:h-12 sm:w-12 overflow-hidden rounded-xl bg-white p-1 border border-slate-200 shadow-xs group-hover:border-blue-400 transition-colors">
+                <Image
+                  src={BRANDING.kukkiwon.logoPath}
+                  alt={BRANDING.kukkiwon.name}
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+              <div className="relative h-10 w-10 sm:h-12 sm:w-12 overflow-hidden rounded-xl bg-white p-1 border border-slate-200 shadow-xs group-hover:border-blue-400 transition-colors">
+                <Image
+                  src={BRANDING.kyorix.logoPath}
+                  alt={BRANDING.kyorix.name}
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
             </div>
             <div className="flex flex-col min-w-0">
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <span className="text-sm sm:text-base lg:text-lg font-extrabold tracking-wider text-white uppercase font-sans truncate">
-                  KUKKIWON CUP
-                </span>
-                <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-widest px-1 sm:px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0">
-                  {BRANDING.edition}
+                <span className="text-sm sm:text-base lg:text-lg font-black tracking-wider text-slate-900 uppercase font-sans truncate">
+                  KUKKIWON CUP 2026
                 </span>
               </div>
-              <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium tracking-wide truncate">
-                India North Branch <span className="text-slate-600">×</span> <span className="text-cyan-400">Kyorix</span>
+              <span className="text-[10px] sm:text-[11px] text-slate-500 font-medium tracking-wide truncate">
+                kukkiwon india north branch x kyorix
               </span>
             </div>
           </Link>
@@ -92,8 +100,8 @@ export function PublicHeader() {
                   href={item.href}
                   className={`text-xs uppercase font-bold tracking-wider transition-colors py-1 ${
                     isActive
-                      ? "text-amber-400 border-b-2 border-amber-400"
-                      : "text-slate-300 hover:text-white"
+                      ? "text-blue-600 border-b-2 border-blue-600"
+                      : "text-slate-600 hover:text-blue-600"
                   }`}
                 >
                   {item.title}
@@ -106,7 +114,7 @@ export function PublicHeader() {
           <div className="hidden sm:flex items-center gap-4">
             <Link
               href="/my-registration"
-              className="text-xs uppercase font-bold tracking-wider text-slate-300 hover:text-white transition-colors"
+              className="text-xs uppercase font-bold tracking-wider text-slate-600 hover:text-blue-600 transition-colors"
             >
               My Registrations
             </Link>
@@ -114,7 +122,7 @@ export function PublicHeader() {
               <Button
                 variant="gold"
                 size="md"
-                className="text-xs uppercase tracking-wider font-extrabold px-5 shadow-lg shadow-amber-500/20"
+                className="text-xs uppercase tracking-wider font-extrabold px-5 shadow-md shadow-blue-500/20"
               >
                 <span>Register Now</span>
                 <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
@@ -131,7 +139,7 @@ export function PublicHeader() {
             </Link>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-colors focus:outline-none min-h-[44px] min-w-[44px] flex items-center justify-center -mr-1"
+              className="p-2 rounded-lg text-slate-700 hover:text-blue-600 hover:bg-slate-100 transition-colors focus:outline-none min-h-[44px] min-w-[44px] flex items-center justify-center -mr-1"
               aria-label={mobileMenuOpen ? "Close navigation" : "Open navigation"}
             >
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -145,17 +153,17 @@ export function PublicHeader() {
         <div className="fixed inset-0 z-50 lg:hidden">
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity"
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
             onClick={() => setMobileMenuOpen(false)}
           />
 
           {/* Slide-out Drawer */}
-          <div className="fixed inset-y-0 right-0 w-full max-w-xs bg-[#0A0F1D] border-l border-slate-800 p-6 flex flex-col justify-between shadow-2xl z-10 animate-in slide-in-from-right duration-200">
+          <div className="fixed inset-y-0 right-0 w-full max-w-xs bg-white border-l border-slate-200 p-6 flex flex-col justify-between shadow-2xl z-10 animate-in slide-in-from-right duration-200 text-slate-900">
             <div className="space-y-6">
               {/* Drawer Header */}
-              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+              <div className="flex items-center justify-between border-b border-slate-200 pb-4">
                 <div className="flex items-center gap-2.5">
-                  <div className="relative h-9 w-9 overflow-hidden rounded-lg bg-white p-1">
+                  <div className="relative h-9 w-9 overflow-hidden rounded-lg bg-white p-1 border border-slate-200">
                     <Image
                       src={BRANDING.kukkiwon.logoPath}
                       alt={BRANDING.kukkiwon.name}
@@ -163,18 +171,26 @@ export function PublicHeader() {
                       className="object-contain"
                     />
                   </div>
+                  <div className="relative h-9 w-9 overflow-hidden rounded-lg bg-white p-1 border border-slate-200">
+                    <Image
+                      src={BRANDING.kyorix.logoPath}
+                      alt={BRANDING.kyorix.name}
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
                   <div>
-                    <span className="text-xs font-bold text-white block uppercase">
-                      Kukkiwon Cup
+                    <span className="text-xs font-bold text-slate-900 block uppercase">
+                      Kukkiwon Cup 2026
                     </span>
-                    <span className="text-[10px] text-amber-400 font-semibold">
-                      India North Branch
+                    <span className="text-[10px] text-blue-600 font-semibold block leading-tight">
+                      kukkiwon india north branch x kyorix
                     </span>
                   </div>
                 </div>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white min-h-[44px] min-w-[44px] flex items-center justify-center -mr-2"
+                  className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 min-h-[44px] min-w-[44px] flex items-center justify-center -mr-2"
                   aria-label="Close navigation menu"
                 >
                   <X className="h-5 w-5" />
@@ -188,7 +204,7 @@ export function PublicHeader() {
                     key={item.href}
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block px-3 py-2.5 rounded-lg text-sm font-semibold uppercase tracking-wider text-slate-200 hover:bg-slate-900 hover:text-amber-400 transition-colors"
+                    className="block px-3 py-2.5 rounded-lg text-sm font-semibold uppercase tracking-wider text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                   >
                     {item.title}
                   </Link>
@@ -197,7 +213,7 @@ export function PublicHeader() {
             </div>
 
             {/* Bottom Actions */}
-            <div className="space-y-3 pt-6 border-t border-slate-800">
+            <div className="space-y-3 pt-6 border-t border-slate-200">
               <Link
                 href="/register"
                 onClick={() => setMobileMenuOpen(false)}
@@ -212,13 +228,13 @@ export function PublicHeader() {
               <Link
                 href="/my-registration"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block w-full text-center py-2 text-xs uppercase font-bold text-slate-300 hover:text-white"
+                className="block w-full text-center py-2 text-xs uppercase font-bold text-slate-600 hover:text-blue-600"
               >
                 My Registrations
               </Link>
 
               <div className="flex items-center justify-center gap-2 text-[11px] text-slate-500">
-                <Shield className="h-3.5 w-3.5 text-amber-400" />
+                <Shield className="h-3.5 w-3.5 text-blue-600" />
                 <span>Official Championship Portal</span>
               </div>
             </div>

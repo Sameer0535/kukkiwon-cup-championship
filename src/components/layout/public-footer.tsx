@@ -11,41 +11,14 @@ import { MapPin, Mail, Phone, Shield, ExternalLink } from "lucide-react";
 
 export function PublicFooter() {
   return (
-    <footer className="w-full border-t border-slate-800 bg-[#060A13] text-slate-400">
+    <footer className="w-full border-t border-slate-800 bg-[#070E1B] text-slate-300">
       {/* Upper Footer Block */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-          {/* Column 1: Organization & Identity */}
+          {/* Column 1: Kyorix Sports Technology Organization & Identity */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="relative h-12 w-12 overflow-hidden rounded-xl bg-white p-1 border border-slate-700 shadow-md shrink-0">
-                <Image
-                  src={BRANDING.kukkiwon.logoPath}
-                  alt={BRANDING.kukkiwon.name}
-                  fill
-                  className="object-contain"
-                />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-sm font-extrabold text-white uppercase tracking-wider">
-                  KUKKIWON CUP
-                </span>
-                <span className="text-[10px] text-amber-400 font-bold uppercase tracking-widest">
-                  India North Branch
-                </span>
-              </div>
-            </div>
-
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Official tournament registration and digital accreditation platform sanctioned by
-              the World Taekwondo Headquarters Kukkiwon India North Branch, powered by Kyorix Sports Technology.
-            </p>
-
-            <div className="pt-2">
-              <span className="text-[10px] font-semibold tracking-wider text-slate-500 uppercase block mb-1">
-                Technology Partner
-              </span>
-              <div className="relative h-8 w-28 overflow-hidden rounded">
+              <div className="relative h-14 w-32 overflow-hidden rounded-xl bg-white p-1.5 border border-slate-200 shadow-md shrink-0">
                 <Image
                   src={BRANDING.kyorix.logoPath}
                   alt={BRANDING.kyorix.name}
@@ -54,36 +27,45 @@ export function PublicFooter() {
                 />
               </div>
             </div>
+
+            <div className="flex flex-col">
+              <span className="text-sm font-black text-white uppercase tracking-wider">
+                KYORIX SPORTS TECHNOLOGY
+              </span>
+              <span className="text-[10px] text-cyan-400 font-bold uppercase tracking-widest">
+                Official Platform & Scoring Partner
+              </span>
+            </div>
+
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Official tournament registration, digital accreditation, and electronic scoring platform
+              developed and operated by Kyorix Sports Technology.
+            </p>
           </div>
 
           {/* Column 2: Quick Links */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-white border-l-2 border-amber-400 pl-2">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-white border-l-2 border-blue-500 pl-2">
               Championship Navigation
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
-                <Link href="/" className="hover:text-white transition-colors">
+                <Link href="/" className="hover:text-cyan-400 transition-colors">
                   Home
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="hover:text-white transition-colors">
+                <Link href="/about" className="hover:text-cyan-400 transition-colors">
                   About the Championship
                 </Link>
               </li>
               <li>
-                <Link href="/championship/kukkiwon-cup-2026" className="hover:text-white transition-colors">
-                  Tournament Schedule & Rules
-                </Link>
-              </li>
-              <li>
-                <Link href="/register" className="hover:text-amber-400 font-semibold transition-colors">
+                <Link href="/register" className="hover:text-cyan-400 font-semibold transition-colors">
                   Register for Tournament
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-white transition-colors">
+                <Link href="/contact" className="hover:text-cyan-400 transition-colors">
                   Official Secretariat & Contact
                 </Link>
               </li>
@@ -92,27 +74,22 @@ export function PublicFooter() {
 
           {/* Column 3: Legal & Regulatory */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-white border-l-2 border-sky-400 pl-2">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-white border-l-2 border-cyan-400 pl-2">
               Legal & Regulations
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
-                <Link href="/terms" className="hover:text-white transition-colors">
+                <Link href="/terms" className="hover:text-cyan-400 transition-colors">
                   Terms & Conditions
                 </Link>
               </li>
               <li>
-                <Link href="/privacy" className="hover:text-white transition-colors">
+                <Link href="/privacy" className="hover:text-cyan-400 transition-colors">
                   Privacy & Data Protection Policy
                 </Link>
               </li>
               <li>
-                <Link href="/championship/kukkiwon-cup-2026#rules" className="hover:text-white transition-colors">
-                  Competition Rules & Regulations
-                </Link>
-              </li>
-              <li>
-                <Link href="/about#eligibility" className="hover:text-white transition-colors">
+                <Link href="/about#eligibility" className="hover:text-cyan-400 transition-colors">
                   Dan Certification Requirements
                 </Link>
               </li>
@@ -125,39 +102,39 @@ export function PublicFooter() {
             </ul>
           </div>
 
-          {/* Column 4: Official Secretariat Contact */}
+          {/* Column 4: Kyorix Company Contact */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-white border-l-2 border-emerald-400 pl-2">
-              Secretariat Contact
+            <h4 className="text-xs font-bold uppercase tracking-wider text-white border-l-2 border-blue-400 pl-2">
+              Kyorix Company Contact
             </h4>
             <div className="space-y-2.5 text-xs">
               <div className="flex items-start gap-2.5">
-                <MapPin className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
+                <MapPin className="h-4 w-4 text-cyan-400 shrink-0 mt-0.5" />
                 <span className="text-slate-300">
-                  {SITE_CONFIG.contact.address}
+                  Kyorix Sports Technology Private Limited, New Delhi, India
                 </span>
               </div>
               <div className="flex items-center gap-2.5">
-                <Mail className="h-4 w-4 text-slate-400 shrink-0" />
+                <Mail className="h-4 w-4 text-cyan-400 shrink-0" />
                 <a
-                  href={`mailto:${SITE_CONFIG.contact.email}`}
+                  href="mailto:contact@kyorix.com"
                   className="text-slate-300 hover:text-white transition-colors"
                 >
-                  {SITE_CONFIG.contact.email}
+                  contact@kyorix.com
                 </a>
               </div>
               <div className="flex items-center gap-2.5">
-                <Phone className="h-4 w-4 text-slate-400 shrink-0" />
-                <span className="text-slate-300">{SITE_CONFIG.contact.phone}</span>
+                <Phone className="h-4 w-4 text-cyan-400 shrink-0" />
+                <span className="text-slate-300">+91 98765 43210</span>
               </div>
               <div className="pt-2">
                 <a
-                  href={SITE_CONFIG.links.kukkiwonOfficial}
+                  href="https://kyorix.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[11px] text-amber-400 hover:underline"
+                  className="inline-flex items-center gap-1 text-[11px] text-cyan-400 hover:underline"
                 >
-                  <span>Kukkiwon World HQ (Korea)</span>
+                  <span>Kyorix Sports Technology Official Portal</span>
                   <ExternalLink className="h-3 w-3" />
                 </a>
               </div>
@@ -167,13 +144,13 @@ export function PublicFooter() {
       </div>
 
       {/* Bottom Legal Copyright Bar */}
-      <div className="border-t border-slate-800/80 bg-[#04070D] py-6 text-xs">
+      <div className="border-t border-slate-800 bg-[#050A14] py-6 text-xs">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-slate-400 text-center sm:text-left">
-            © {new Date().getFullYear()} {BRANDING.championshipName}. All rights reserved.
+            © {new Date().getFullYear()} Kyorix Sports Technology. All rights reserved.
           </p>
           <p className="text-slate-500 text-[11px] text-center sm:text-right">
-            Official Championship Platform • Sanctioned by Kukkiwon India North Branch & Kyorix Sports Technology
+            Official Championship Management Platform • Powered by Kyorix Sports Technology
           </p>
         </div>
       </div>

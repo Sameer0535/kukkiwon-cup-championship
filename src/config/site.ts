@@ -13,9 +13,9 @@ export const SITE_CONFIG = {
     supportEmail: "info@kukkiwoncup.org",
   },
   contact: {
-    email: "contact@kukkiwoncup.org",
+    email: "contact@kyorix.com",
     phone: "+91 98765 43210",
-    address: "Kukkiwon India North Branch, New Delhi, India",
+    address: "Kyorix Sports Technology Private Limited, New Delhi, India",
   },
   defaults: {
     currency: "INR",

@@ -22,7 +22,6 @@ export interface AdminNavItem {
 export const PUBLIC_NAV_ITEMS: NavItem[] = [
   { title: "Home", href: "/" },
   { title: "About", href: "/about" },
-  { title: "Championship", href: "/championship/kukkiwon-cup-2026" },
   { title: "Information", href: "/#information" },
   { title: "Contact", href: "/contact" },
 ];

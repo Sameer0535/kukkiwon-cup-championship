@@ -30,19 +30,19 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variantStyles = {
       primary:
-        "bg-sky-500 text-slate-950 font-semibold hover:bg-sky-400 shadow-md shadow-sky-500/20",
+        "bg-blue-600 text-white font-semibold hover:bg-blue-700 shadow-md shadow-blue-500/20",
       secondary:
-        "bg-slate-800 text-slate-100 hover:bg-slate-700 border border-slate-700/60",
+        "bg-blue-50 text-blue-900 hover:bg-blue-100 border border-blue-200",
       outline:
-        "border border-slate-700 bg-transparent text-slate-200 hover:bg-slate-800/80 hover:border-slate-600",
+        "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 hover:text-blue-600 hover:border-blue-300",
       ghost:
-        "bg-transparent text-slate-300 hover:bg-slate-800 hover:text-white",
+        "bg-transparent text-slate-600 hover:bg-blue-50 hover:text-blue-600",
       danger:
-        "bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20",
+        "bg-red-500/10 text-red-600 border border-red-500/30 hover:bg-red-500/20",
       gold:
-        "bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-600 text-slate-950 font-bold hover:brightness-110 shadow-lg shadow-amber-500/20",
+        "bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 text-white font-extrabold hover:brightness-110 shadow-lg shadow-blue-500/25",
       cyan:
-        "bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 font-bold hover:brightness-110 shadow-lg shadow-cyan-500/20",
+        "bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-extrabold hover:brightness-110 shadow-lg shadow-cyan-500/20",
     };
 
     const sizeStyles = {

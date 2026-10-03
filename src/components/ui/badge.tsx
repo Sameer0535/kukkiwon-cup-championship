@@ -25,14 +25,14 @@ export function Badge({
   ...props
 }: BadgeProps) {
   const variantStyles = {
-    default: "bg-slate-800 text-slate-300 border-slate-700/80",
-    success: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-    warning: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-    danger: "bg-red-500/10 text-red-400 border-red-500/20",
-    info: "bg-sky-500/10 text-sky-400 border-sky-500/20",
-    gold: "bg-amber-400/15 text-amber-300 border-amber-400/30",
-    cyan: "bg-cyan-500/15 text-cyan-300 border-cyan-400/30",
-    outline: "bg-transparent text-slate-400 border-slate-700",
+    default: "bg-slate-100 text-slate-800 border-slate-200",
+    success: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    warning: "bg-amber-50 text-amber-700 border-amber-200",
+    danger: "bg-red-50 text-red-700 border-red-200",
+    info: "bg-blue-50 text-blue-700 border-blue-200",
+    gold: "bg-blue-50 text-blue-700 border-blue-200 font-bold",
+    cyan: "bg-cyan-50 text-cyan-700 border-cyan-200 font-bold",
+    outline: "bg-white text-slate-700 border-slate-300",
   };
 
   return (

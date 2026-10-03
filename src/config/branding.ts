@@ -6,7 +6,7 @@
 export const BRANDING = {
   championshipName: "Kukkiwon Cup Championship",
   edition: "2026",
-  tagline: "World Taekwondo Headquarters India North Branch x Kyorix Sports Technology",
+  tagline: "Kukkiwon India North Branch x Kyorix Sports Technology",
   
   // Organization 1: Kukkiwon India North Branch
   kukkiwon: {
@@ -14,8 +14,8 @@ export const BRANDING = {
     branch: "India North Branch",
     title: "World Taekwondo Headquarters",
     logoPath: "/branding/kukkiwon-logo.jpg",
-    accentColor: "#D4AF37", // Kukkiwon Gold
-    primaryColor: "#0A2540", // Deep Kukkiwon Navy
+    accentColor: "#0066FF", // Royal Blue
+    primaryColor: "#0A2540", // Deep Navy
   },
 
   // Organization 2: Kyorix Sports Technology
@@ -24,17 +24,17 @@ export const BRANDING = {
     subtitle: "Sport Technology",
     logoPath: "/branding/kyorix-logo.png",
     accentColor: "#00E5FF", // Vibrant Cyan
-    primaryColor: "#0F172A", // Slate Dark
+    primaryColor: "#0066FF", // Royal Blue
   },
 
   // Combined Visual Identity
   theme: {
-    primaryBackground: "#090D16",
-    cardBackground: "#111827",
-    cardBorder: "#1F2937",
-    goldGradient: "from-amber-400 via-amber-500 to-yellow-600",
-    kyorixGradient: "from-cyan-400 via-sky-500 to-blue-600",
-    heroGradient: "radial-gradient(ellipse at 50% 0%, rgba(14, 165, 233, 0.15), transparent 70%)",
+    primaryBackground: "#FFFFFF",
+    cardBackground: "#FFFFFF",
+    cardBorder: "#E2E8F0",
+    goldGradient: "from-blue-600 via-blue-500 to-cyan-500",
+    kyorixGradient: "from-blue-600 via-cyan-500 to-sky-400",
+    heroGradient: "radial-gradient(ellipse at 50% 0%, rgba(0, 102, 255, 0.08), transparent 70%)",
   },
 } as const;
 

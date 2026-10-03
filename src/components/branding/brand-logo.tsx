@@ -81,7 +81,7 @@ export function BrandLogo({ variant = "combined", className = "" }: BrandLogoPro
   return (
     <Link href="/" className={`flex items-center gap-4 group ${className}`}>
       {/* Kukkiwon Emblem */}
-      <div className="relative h-12 w-12 overflow-hidden rounded-xl bg-white p-1 border border-slate-700/60 shadow-lg group-hover:border-amber-500/50 transition-colors">
+      <div className="relative h-12 w-12 overflow-hidden rounded-xl bg-white p-1 border border-slate-200 shadow-sm group-hover:border-blue-400 transition-colors">
         <Image
           src={BRANDING.kukkiwon.logoPath}
           alt={BRANDING.kukkiwon.name}
@@ -93,22 +93,17 @@ export function BrandLogo({ variant = "combined", className = "" }: BrandLogoPro
 
       <div className="flex flex-col">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-extrabold tracking-wider text-slate-100 uppercase">
-            KUKKIWON CUP
-          </span>
-          <span className="text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
-            {BRANDING.edition}
+          <span className="text-sm font-black tracking-wider text-slate-900 uppercase">
+            KUKKIWON CUP 2026
           </span>
         </div>
-        <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
-          <span>India North Branch</span>
-          <span className="text-slate-600">×</span>
-          <span className="text-cyan-400 font-semibold">Kyorix</span>
+        <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
+          <span>kukkiwon india north branch x kyorix</span>
         </div>
       </div>
 
       {/* Kyorix Emblem */}
-      <div className="hidden sm:flex items-center pl-3 border-l border-slate-800">
+      <div className="hidden sm:flex items-center pl-3 border-l border-slate-200">
         <div className="relative h-9 w-28 overflow-hidden">
           <Image
             src={BRANDING.kyorix.logoPath}

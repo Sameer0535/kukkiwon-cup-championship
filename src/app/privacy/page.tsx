@@ -11,23 +11,23 @@ import { Lock, Shield, CheckCircle2 } from "lucide-react";
 
 export default function PrivacyPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-[#070B14] text-slate-100 selection:bg-amber-400 selection:text-slate-950 font-sans">
+    <div className="flex min-h-screen flex-col bg-white text-slate-900 selection:bg-blue-600 selection:text-white font-sans">
       <PublicHeader />
 
       <main className="flex-1">
         {/* Header */}
-        <section className="relative overflow-hidden border-b border-slate-800/80 bg-[#090D16] py-14 sm:py-18">
+        <section className="relative overflow-hidden border-b border-slate-200 bg-gradient-to-b from-blue-50/70 via-white to-white py-14 sm:py-18">
           <div className="container relative mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl space-y-3">
             <div className="flex items-center gap-2">
               <Badge variant="cyan">Data Protection</Badge>
-              <span className="font-mono text-xs text-slate-400">
+              <span className="font-mono text-xs text-slate-500">
                 Tournament Privacy Protocol
               </span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold uppercase tracking-tight text-white">
+            <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-slate-950">
               Privacy & Credential Security Policy
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
               How the Kukkiwon Cup Championship protects participant records, identification files,
               and accreditation credentials.
             </p>
@@ -35,10 +35,10 @@ export default function PrivacyPage() {
         </section>
 
         {/* Content */}
-        <section className="py-14 sm:py-20 bg-[#060A13]">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl space-y-10 text-xs sm:text-sm text-slate-300 leading-relaxed">
+        <section className="py-14 sm:py-20 bg-slate-50/70">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl space-y-10 text-xs sm:text-sm text-slate-700 leading-relaxed">
             <div className="space-y-3">
-              <h2 className="text-base sm:text-lg font-bold uppercase text-white tracking-wide border-l-2 border-cyan-400 pl-3">
+              <h2 className="text-base sm:text-lg font-bold uppercase text-slate-950 tracking-wide border-l-2 border-cyan-500 pl-3">
                 1. Information We Collect
               </h2>
               <p>
@@ -49,19 +49,19 @@ export default function PrivacyPage() {
             </div>
 
             <div className="space-y-3">
-              <h2 className="text-base sm:text-lg font-bold uppercase text-white tracking-wide border-l-2 border-cyan-400 pl-3">
+              <h2 className="text-base sm:text-lg font-bold uppercase text-slate-950 tracking-wide border-l-2 border-cyan-500 pl-3">
                 2. Strictly Private Document Storage Architecture
               </h2>
               <p>
                 Government identification documents (such as Aadhaar cards, passports, or medical fitness
-                certificates) are held in strictly private, isolated cloud storage buckets (<code className="text-slate-200">participant-documents</code>).
+                certificates) are held in strictly private, isolated cloud storage buckets (<code className="text-blue-600 font-semibold">participant-documents</code>).
                 These files are never publicly exposed on the internet. Access is restricted to authorized
                 tournament credential examiners via time-limited, cryptographically signed URLs.
               </p>
             </div>
 
             <div className="space-y-3">
-              <h2 className="text-base sm:text-lg font-bold uppercase text-white tracking-wide border-l-2 border-cyan-400 pl-3">
+              <h2 className="text-base sm:text-lg font-bold uppercase text-slate-950 tracking-wide border-l-2 border-cyan-500 pl-3">
                 3. Cryptographic QR Verification & Zero-PII Policy
               </h2>
               <p>
@@ -73,7 +73,7 @@ export default function PrivacyPage() {
             </div>
 
             <div className="space-y-3">
-              <h2 className="text-base sm:text-lg font-bold uppercase text-white tracking-wide border-l-2 border-cyan-400 pl-3">
+              <h2 className="text-base sm:text-lg font-bold uppercase text-slate-950 tracking-wide border-l-2 border-cyan-500 pl-3">
                 4. Data Sharing & Non-Disclosure
               </h2>
               <p>
@@ -84,14 +84,14 @@ export default function PrivacyPage() {
               </p>
             </div>
 
-            <div className="p-6 rounded-xl border border-slate-800 bg-[#0A0F1D] space-y-2 text-slate-400">
-              <div className="flex items-center gap-2 text-white font-bold uppercase text-xs">
-                <Lock className="h-4 w-4 text-cyan-400" />
+            <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-2 text-slate-600 shadow-xs">
+              <div className="flex items-center gap-2 text-slate-900 font-bold uppercase text-xs">
+                <Lock className="h-4 w-4 text-cyan-600" />
                 <span>Security Governance Compliance</span>
               </div>
               <p className="text-xs">
                 For questions regarding data retention or to request correction of your tournament records,
-                contact the Data Controller at <code className="text-slate-200">privacy@kukkiwoncup.org</code>.
+                contact the Data Controller at <code className="text-blue-600 font-semibold">privacy@kyorix.com</code>.
               </p>
             </div>
           </div>

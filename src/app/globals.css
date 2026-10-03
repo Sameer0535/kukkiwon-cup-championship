@@ -1,27 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  --background: #090d16;
-  --foreground: #f8fafc;
-  --card: #0f172a;
-  --card-foreground: #f8fafc;
-  --popover: #0f172a;
-  --popover-foreground: #f8fafc;
-  --primary: #38bdf8;
-  --primary-foreground: #090d16;
-  --secondary: #1e293b;
-  --secondary-foreground: #f8fafc;
-  --muted: #1e293b;
-  --muted-foreground: #94a3b8;
-  --accent: #d4af37;
-  --accent-foreground: #090d16;
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --primary: #0066ff;
+  --primary-foreground: #ffffff;
+  --secondary: #f0f7ff;
+  --secondary-foreground: #0047ab;
+  --muted: #f8fafc;
+  --muted-foreground: #64748b;
+  --accent: #00e5ff;
+  --accent-foreground: #0f172a;
   --destructive: #ef4444;
-  --destructive-foreground: #f8fafc;
-  --border: #1e293b;
-  --input: #1e293b;
-  --ring: #38bdf8;
-  --kukkiwon-gold: #d4af37;
+  --destructive-foreground: #ffffff;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #0066ff;
+  --kukkiwon-gold: #0066ff;
   --kukkiwon-navy: #0a2540;
+  --kyorix-blue: #0066ff;
   --kyorix-cyan: #00e5ff;
 }
 
@@ -67,34 +68,34 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #090d16;
+  background: #f8fafc;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #cbd5e1;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #94a3b8;
 }
 
 /* Glassmorphism utility */
 .glass-panel {
-  background: rgba(15, 23, 42, 0.75);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
 .gold-gradient-text {
-  background: linear-gradient(135deg, #fef08a 0%, #eab308 50%, #ca8a04 100%);
+  background: linear-gradient(135deg, #0066ff 0%, #00a3ff 50%, #00e5ff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .kyorix-gradient-text {
-  background: linear-gradient(135deg, #a5f3fc 0%, #38bdf8 50%, #0284c7 100%);
+  background: linear-gradient(135deg, #0066ff 0%, #00a3ff 50%, #00e5ff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }

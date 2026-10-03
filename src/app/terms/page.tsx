@@ -12,23 +12,23 @@ import { Shield, FileText, CheckCircle2 } from "lucide-react";
 
 export default function TermsPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-[#070B14] text-slate-100 selection:bg-amber-400 selection:text-slate-950 font-sans">
+    <div className="flex min-h-screen flex-col bg-white text-slate-900 selection:bg-blue-600 selection:text-white font-sans">
       <PublicHeader />
 
       <main className="flex-1">
         {/* Header */}
-        <section className="relative overflow-hidden border-b border-slate-800/80 bg-[#090D16] py-14 sm:py-18">
+        <section className="relative overflow-hidden border-b border-slate-200 bg-gradient-to-b from-blue-50/70 via-white to-white py-14 sm:py-18">
           <div className="container relative mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl space-y-3">
             <div className="flex items-center gap-2">
               <Badge variant="gold">Legal Framework</Badge>
-              <span className="font-mono text-xs text-slate-400">
-                Active Terms Version: <strong className="text-white">v1.0</strong>
+              <span className="font-mono text-xs text-slate-500">
+                Active Terms Version: <strong className="text-slate-900">v1.0</strong>
               </span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold uppercase tracking-tight text-white">
+            <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-slate-950">
               Terms & Conditions
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
               Official participant agreement, tournament regulations, and liability waiver for the
               Kukkiwon Cup Championship.
             </p>
@@ -36,10 +36,10 @@ export default function TermsPage() {
         </section>
 
         {/* Legal Text Content */}
-        <section className="py-14 sm:py-20 bg-[#060A13]">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl space-y-10 text-xs sm:text-sm text-slate-300 leading-relaxed">
+        <section className="py-14 sm:py-20 bg-slate-50/70">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl space-y-10 text-xs sm:text-sm text-slate-700 leading-relaxed">
             <div className="space-y-3">
-              <h2 className="text-base sm:text-lg font-bold uppercase text-white tracking-wide border-l-2 border-amber-400 pl-3">
+              <h2 className="text-base sm:text-lg font-bold uppercase text-slate-950 tracking-wide border-l-2 border-blue-600 pl-3">
                 1. Championship Eligibility & Sanction
               </h2>
               <p>
@@ -51,7 +51,7 @@ export default function TermsPage() {
             </div>
 
             <div className="space-y-3">
-              <h2 className="text-base sm:text-lg font-bold uppercase text-white tracking-wide border-l-2 border-amber-400 pl-3">
+              <h2 className="text-base sm:text-lg font-bold uppercase text-slate-950 tracking-wide border-l-2 border-blue-600 pl-3">
                 2. Dan & Poom Certificate Verification
               </h2>
               <p>
@@ -62,7 +62,7 @@ export default function TermsPage() {
             </div>
 
             <div className="space-y-3">
-              <h2 className="text-base sm:text-lg font-bold uppercase text-white tracking-wide border-l-2 border-amber-400 pl-3">
+              <h2 className="text-base sm:text-lg font-bold uppercase text-slate-950 tracking-wide border-l-2 border-blue-600 pl-3">
                 3. Physical Fitness, Health & Assumption of Risk
               </h2>
               <p>
@@ -74,7 +74,7 @@ export default function TermsPage() {
             </div>
 
             <div className="space-y-3">
-              <h2 className="text-base sm:text-lg font-bold uppercase text-white tracking-wide border-l-2 border-amber-400 pl-3">
+              <h2 className="text-base sm:text-lg font-bold uppercase text-slate-950 tracking-wide border-l-2 border-blue-600 pl-3">
                 4. Accreditation, Badge Display & Media Rights
               </h2>
               <p>
@@ -86,7 +86,7 @@ export default function TermsPage() {
             </div>
 
             <div className="space-y-3">
-              <h2 className="text-base sm:text-lg font-bold uppercase text-white tracking-wide border-l-2 border-amber-400 pl-3">
+              <h2 className="text-base sm:text-lg font-bold uppercase text-slate-950 tracking-wide border-l-2 border-blue-600 pl-3">
                 5. Fee Policy & Cancellation
               </h2>
               <p>
@@ -96,14 +96,14 @@ export default function TermsPage() {
               </p>
             </div>
 
-            <div className="p-6 rounded-xl border border-slate-800 bg-[#0A0F1D] space-y-2 text-slate-400">
-              <div className="flex items-center gap-2 text-white font-bold uppercase text-xs">
-                <Shield className="h-4 w-4 text-amber-400" />
+            <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-2 text-slate-600 shadow-xs">
+              <div className="flex items-center gap-2 text-slate-900 font-bold uppercase text-xs">
+                <Shield className="h-4 w-4 text-blue-600" />
                 <span>Auditable Legal Acceptance</span>
               </div>
               <p className="text-xs">
                 When you enroll in the tournament platform, your acceptance is recorded with the exact timestamp
-                and terms version (<code className="text-slate-200">v1.0</code>) in compliance with digital sports governance standards.
+                and terms version (<code className="text-blue-600 font-semibold">v1.0</code>) in compliance with digital sports governance standards.
               </p>
             </div>
           </div>

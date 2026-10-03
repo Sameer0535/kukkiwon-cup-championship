@@ -30,82 +30,82 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#070B14] text-slate-100 selection:bg-amber-400 selection:text-slate-950 font-sans">
+    <div className="flex min-h-screen flex-col bg-white text-slate-900 selection:bg-blue-600 selection:text-white font-sans">
       <PublicHeader />
 
       <main className="flex-1">
         {/* Contact Banner */}
-        <section className="relative overflow-hidden border-b border-slate-800/80 bg-[#090D16] py-14 sm:py-20">
+        <section className="relative overflow-hidden border-b border-slate-200 bg-gradient-to-b from-blue-50/70 via-white to-white py-14 sm:py-20">
           <div className="container relative mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl text-center space-y-4">
-            <span className="text-xs font-bold uppercase tracking-widest text-[#D4AF37]">
+            <span className="text-xs font-bold uppercase tracking-widest text-blue-600">
               Communication & Support
             </span>
-            <h1 className="text-3xl sm:text-5xl font-extrabold uppercase tracking-tight text-white">
+            <h1 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-slate-950">
               Tournament Secretariat
             </h1>
-            <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed">
               Official inquiry desk for participating academies, coaches, technical delegations, and media.
             </p>
           </div>
         </section>
 
         {/* Contact Channels Grid */}
-        <section className="py-16 sm:py-20 border-b border-slate-800/80 bg-[#060A13]">
+        <section className="py-16 sm:py-20 border-b border-slate-200 bg-slate-50/70">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Channel 1: Headquarters Email */}
-              <div className="p-8 rounded-2xl border border-slate-800 bg-[#0A0F1D] space-y-4 text-center">
-                <div className="h-12 w-12 rounded-xl bg-amber-500/10 text-[#D4AF37] flex items-center justify-center mx-auto">
+              <div className="p-8 rounded-2xl border border-slate-200 bg-white space-y-4 text-center shadow-xs">
+                <div className="h-12 w-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto">
                   <Mail className="h-6 w-6" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                  <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
                     Official Email
                   </h3>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-slate-500">
                     Direct communication with the organizing committee
                   </p>
                 </div>
                 <a
                   href={`mailto:${SITE_CONFIG.contact.email}`}
-                  className="text-xs font-bold text-amber-400 hover:underline block pt-2"
+                  className="text-xs font-bold text-blue-600 hover:underline block pt-2"
                 >
                   {SITE_CONFIG.contact.email}
                 </a>
               </div>
 
               {/* Channel 2: Telephone Helpline */}
-              <div className="p-8 rounded-2xl border border-slate-800 bg-[#0A0F1D] space-y-4 text-center">
-                <div className="h-12 w-12 rounded-xl bg-cyan-500/10 text-[#00E5FF] flex items-center justify-center mx-auto">
+              <div className="p-8 rounded-2xl border border-slate-200 bg-white space-y-4 text-center shadow-xs">
+                <div className="h-12 w-12 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center mx-auto">
                   <Phone className="h-6 w-6" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                  <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
                     Official Helpline
                   </h3>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-slate-500">
                     Monday to Saturday • 9:00 AM – 6:00 PM IST
                   </p>
                 </div>
-                <span className="text-xs font-bold text-cyan-400 block pt-2">
+                <span className="text-xs font-bold text-cyan-600 block pt-2">
                   {SITE_CONFIG.contact.phone}
                 </span>
               </div>
 
               {/* Channel 3: Stadium Venue Location */}
-              <div className="p-8 rounded-2xl border border-slate-800 bg-[#0A0F1D] space-y-4 text-center">
-                <div className="h-12 w-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mx-auto">
+              <div className="p-8 rounded-2xl border border-slate-200 bg-white space-y-4 text-center shadow-xs">
+                <div className="h-12 w-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
                   <MapPin className="h-6 w-6" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                  <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
                     Championship Venue
                   </h3>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-slate-500">
                     Tournament venue & weigh-in center
                   </p>
                 </div>
-                <span className="text-xs font-semibold text-slate-200 block pt-2">
+                <span className="text-xs font-semibold text-slate-700 block pt-2">
                   {SITE_CONFIG.contact.address}
                 </span>
               </div>
@@ -114,17 +114,17 @@ export default function ContactPage() {
         </section>
 
         {/* Inquiry Form */}
-        <section className="py-16 sm:py-20 bg-[#090D16]">
+        <section className="py-16 sm:py-20 bg-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
-            <div className="p-8 sm:p-10 rounded-2xl border border-slate-800 bg-[#0C1222] space-y-8 shadow-2xl">
-              <div className="space-y-2 border-b border-slate-800 pb-4">
-                <span className="text-xs font-bold uppercase tracking-widest text-[#D4AF37]">
+            <div className="p-8 sm:p-10 rounded-2xl border border-slate-200 bg-white space-y-8 shadow-sm">
+              <div className="space-y-2 border-b border-slate-200 pb-4">
+                <span className="text-xs font-bold uppercase tracking-widest text-blue-600">
                   Electronic Inquiry
                 </span>
-                <h2 className="text-xl sm:text-2xl font-bold uppercase text-white">
+                <h2 className="text-xl sm:text-2xl font-bold uppercase text-slate-900">
                   Send a Message to the Organizing Committee
                 </h2>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-slate-500">
                   For inquiries regarding team quotas, bulk academy submissions, or technical clarifications.
                 </p>
               </div>
@@ -171,7 +171,7 @@ export default function ContactPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold tracking-wide uppercase text-slate-300">
+                    <label className="block text-xs font-semibold tracking-wide uppercase text-slate-700">
                       Inquiry Details
                     </label>
                     <textarea
@@ -180,7 +180,7 @@ export default function ContactPage() {
                       onChange={(e) => setMessage(e.target.value)}
                       required
                       placeholder="Specify your inquiry regarding entry requirements, rules, or delegation logistics..."
-                      className="flex w-full rounded-lg border border-slate-800 bg-slate-900/90 px-3.5 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400 transition-colors"
+                      className="flex w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors"
                     />
                   </div>
 
@@ -188,7 +188,7 @@ export default function ContactPage() {
                     type="submit"
                     variant="gold"
                     size="lg"
-                    className="w-full sm:w-auto uppercase font-bold text-xs tracking-wider px-8"
+                    className="w-full sm:w-auto uppercase font-bold text-xs tracking-wider px-8 shadow-md shadow-blue-500/20"
                   >
                     <Send className="h-4 w-4 mr-2" />
                     <span>Transmit Inquiry</span>
