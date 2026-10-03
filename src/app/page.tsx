@@ -52,15 +52,31 @@ export default async function HomePage() {
         {/* =========================================================================
             1. HERO SECTION (White & Blue Tech Palette)
             ========================================================================= */}
-        <section className="relative overflow-hidden border-b border-slate-200 bg-gradient-to-b from-blue-50/80 via-white to-white py-14 sm:py-20 lg:py-24">
-          {/* Subtle High-Tech Blueprint Grid & Radial Glow */}
-          <div className="absolute inset-0 opacity-[0.04] bg-[linear-gradient(to_right,#0066ff_1px,transparent_1px),linear-gradient(to_bottom,#0066ff_1px,transparent_1px)] bg-[size:3.5rem_3.5rem] pointer-events-none" />
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(0,102,255,0.08),transparent_70%)] pointer-events-none" />
+        <section className="relative overflow-hidden border-b border-slate-200 bg-gradient-to-b from-blue-50/70 via-white to-white py-14 sm:py-20 lg:py-24">
+          {/* Dynamic Background Image (Editable via Admin Portal) */}
+          {tournament.bannerUrl ? (
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              <Image
+                src={tournament.bannerUrl}
+                alt="Championship Hero Backdrop"
+                fill
+                className="object-cover object-center opacity-25"
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/85 to-white" />
+            </div>
+          ) : (
+            <>
+              {/* Subtle High-Tech Blueprint Grid & Radial Glow fallback */}
+              <div className="absolute inset-0 opacity-[0.04] bg-[linear-gradient(to_right,#0066ff_1px,transparent_1px),linear-gradient(to_bottom,#0066ff_1px,transparent_1px)] bg-[size:3.5rem_3.5rem] pointer-events-none" />
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(0,102,255,0.08),transparent_70%)] pointer-events-none" />
+            </>
+          )}
 
           <div className="container relative mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl text-center space-y-6">
-            {/* Official Dual Logos in Hero (tightly fitted without large empty white padding) */}
-            <div className="flex items-center justify-center gap-4 sm:gap-6 pb-2">
-              <div className="relative h-16 w-20 sm:h-20 sm:w-24 overflow-hidden rounded-xl bg-white p-1 border border-slate-200 shadow-xs shrink-0 flex items-center justify-center">
+            {/* Grand Dual Logos in Hero (Transparent background, no text, increased size) */}
+            <div className="flex items-center justify-center gap-6 sm:gap-10 pb-2">
+              <div className="relative h-20 w-40 sm:h-28 sm:w-56 md:h-32 md:w-64 shrink-0 flex items-center justify-center transition-transform hover:scale-105">
                 <Image
                   src={BRANDING.kukkiwon.logoPath}
                   alt={BRANDING.kukkiwon.name}
@@ -69,8 +85,8 @@ export default async function HomePage() {
                   priority
                 />
               </div>
-              <span className="text-2xl font-light text-slate-300">×</span>
-              <div className="relative h-16 w-16 sm:h-20 sm:w-20 overflow-hidden rounded-xl bg-white p-1 border border-slate-200 shadow-xs shrink-0 flex items-center justify-center">
+              <span className="text-3xl sm:text-4xl font-extralight text-slate-300 select-none">×</span>
+              <div className="relative h-20 w-24 sm:h-28 sm:w-32 md:h-32 md:w-36 shrink-0 flex items-center justify-center transition-transform hover:scale-105">
                 <Image
                   src={BRANDING.kyorix.logoPath}
                   alt={BRANDING.kyorix.name}
@@ -79,33 +95,6 @@ export default async function HomePage() {
                   priority
                 />
               </div>
-            </div>
-
-            {/* Subtitle / Governing Banner & Live Registration Status */}
-            <div className="flex flex-wrap items-center justify-center gap-2.5">
-              <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3.5 py-1 text-xs font-semibold text-blue-700">
-                <Shield className="h-3.5 w-3.5 text-blue-600" />
-                <span>World Taekwondo Headquarters Sanctioned Championship</span>
-              </div>
-
-              {availability.status === "OPEN" && (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 px-3.5 py-1 text-xs font-bold text-emerald-700 shadow-xs">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                  REGISTRATION OPEN
-                </span>
-              )}
-              {availability.status === "COMING_SOON" && (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3.5 py-1 text-xs font-bold text-amber-700">
-                  <Clock className="h-3.5 w-3.5 text-amber-600" />
-                  REGISTRATION OPENS SOON
-                </span>
-              )}
-              {availability.status === "CLOSED" && (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-300 bg-rose-50 px-3.5 py-1 text-xs font-bold text-rose-700">
-                  <AlertCircle className="h-3.5 w-3.5 text-rose-600" />
-                  REGISTRATION CLOSED
-                </span>
-              )}
             </div>
 
             {/* Main Championship Title */}
@@ -220,7 +209,7 @@ export default async function HomePage() {
               <div className="p-8 rounded-2xl border border-slate-200 bg-white space-y-5 flex flex-col justify-between shadow-xs">
                 <div className="space-y-4">
                   <div className="flex items-center gap-4">
-                    <div className="relative h-16 w-20 overflow-hidden rounded-xl bg-white p-1 border border-slate-200 shadow-xs shrink-0 flex items-center justify-center">
+                    <div className="relative h-16 w-32 shrink-0 flex items-center justify-center">
                       <Image
                         src={BRANDING.kukkiwon.logoPath}
                         alt={BRANDING.kukkiwon.name}
@@ -266,7 +255,7 @@ export default async function HomePage() {
               <div className="p-8 rounded-2xl border border-blue-200 bg-white space-y-5 flex flex-col justify-between shadow-sm shadow-blue-500/5">
                 <div className="space-y-4">
                   <div className="flex items-center gap-4">
-                    <div className="relative h-16 w-16 overflow-hidden rounded-xl bg-white p-1 border border-slate-200 shadow-xs shrink-0 flex items-center justify-center">
+                    <div className="relative h-16 w-20 shrink-0 flex items-center justify-center">
                       <Image
                         src={BRANDING.kyorix.logoPath}
                         alt={BRANDING.kyorix.name}
@@ -433,10 +422,6 @@ export default async function HomePage() {
             ========================================================================= */}
         <section className="py-16 sm:py-24 border-b border-slate-200 bg-gradient-to-b from-blue-50/70 via-white to-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl text-center space-y-6">
-            <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-1 text-xs font-semibold text-blue-700">
-              <Shield className="h-3.5 w-3.5 text-blue-600" />
-              <span>Official Entries Open • National Participation</span>
-            </div>
 
             <div className="space-y-3">
               <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-slate-950 font-sans">

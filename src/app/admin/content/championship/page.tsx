@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert } from "@/components/ui/alert";
+import Image from "next/image";
 import {
   Trophy,
   ArrowLeft,
@@ -25,6 +26,7 @@ import {
   Globe,
   Upload,
   Sparkles,
+  ImageIcon,
 } from "lucide-react";
 
 export default function ChampionshipEditorPage() {
@@ -226,6 +228,77 @@ export default function ChampionshipEditorPage() {
               rows={3}
               className="w-full rounded-lg border border-slate-800 bg-slate-950 p-3 text-xs text-white focus:outline-none focus:border-amber-400"
             />
+          </div>
+        </Card>
+
+        {/* Section: Hero Background Image & Theme */}
+        <Card className="border-slate-800 bg-slate-900/60 p-6 space-y-4">
+          <div className="border-b border-slate-800 pb-3">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <ImageIcon className="h-4 w-4 text-cyan-400" />
+              <span>Hero Background Image / Banner</span>
+            </h3>
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              Customize the backdrop image displayed behind the championship hero section on the homepage.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <Input
+                label="Hero Background Image URL"
+                placeholder="e.g. /branding/hero-banner.jpg or https://images.unsplash.com/..."
+                value={form.bannerUrl || ""}
+                onChange={(e) => handleChange("bannerUrl", e.target.value)}
+              />
+              <span className="text-[11px] text-slate-500 mt-1 block">
+                Supports relative paths (like <code>/branding/hero-banner.jpg</code>) or any external image URL.
+              </span>
+            </div>
+
+            <div>
+              <span className="text-xs font-semibold text-slate-400 block mb-2">Preset Quick Actions:</span>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="text-xs border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200"
+                  onClick={() => handleChange("bannerUrl", "/branding/hero-banner.jpg")}
+                >
+                  🏟️ Stadium Arena Banner
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="text-xs border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200"
+                  onClick={() => handleChange("bannerUrl", "")}
+                >
+                  ⚪ Clean Minimalist (No Image)
+                </Button>
+              </div>
+            </div>
+
+            {form.bannerUrl && (
+              <div className="space-y-1.5 pt-2">
+                <span className="text-xs font-semibold text-slate-400 block">Current Preview:</span>
+                <div className="relative w-full h-44 rounded-xl overflow-hidden border border-slate-700 bg-slate-950">
+                  <Image
+                    src={form.bannerUrl}
+                    alt="Hero Background Preview"
+                    fill
+                    className="object-cover object-center"
+                    unoptimized
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end p-3">
+                    <span className="text-[11px] font-mono text-cyan-300 bg-black/60 px-2.5 py-1 rounded">
+                      Homepage Hero Background Preview
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </Card>
 

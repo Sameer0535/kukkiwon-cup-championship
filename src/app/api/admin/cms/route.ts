@@ -82,7 +82,8 @@ export async function PATCH(req: NextRequest) {
       body.registrationOpen ||
       body.registrationClose ||
       body.venue ||
-      body.city
+      body.city ||
+      body.bannerUrl !== undefined
     ) {
       await CmsService.updateChampionship(championshipId, body, admin);
     }

@@ -150,6 +150,7 @@ export default function AdminCmsPage() {
           registrationOpen: championship.registrationOpen,
           registrationClose: championship.registrationClose,
           lateRegistrationDeadline: championship.lateRegistrationDeadline,
+          bannerUrl: championship.bannerUrl,
         }),
       });
       const data = await res.json();
@@ -544,7 +545,7 @@ export default function AdminCmsPage() {
       )}
 
       {/* Tab 2: Hero Section */}
-      {activeTab === "hero" && content && (
+      {activeTab === "hero" && content && championship && (
         <Card className="bg-slate-900/60 border-slate-800">
           <CardHeader>
             <CardTitle className="text-white text-xl">Hero & Banner Configuration</CardTitle>
@@ -571,6 +572,40 @@ export default function AdminCmsPage() {
                   onChange={(e) => setContent({ ...content, heroSubtitle: e.target.value })}
                   placeholder="Sanctioned by World Taekwondo Headquarters Kukkiwon India North Branch"
                 />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">
+                  Hero Background Image URL (Banner Backdrop)
+                </label>
+                <Input
+                  value={championship.bannerUrl || ""}
+                  onChange={(e) => setChampionship((prev) => prev ? { ...prev, bannerUrl: e.target.value } : null)}
+                  placeholder="/branding/hero-banner.jpg or https://images.unsplash.com/..."
+                />
+                <span className="text-[11px] text-slate-400 mt-1 block">
+                  Backdrop photo displayed behind the hero logos and championship title on the public homepage.
+                </span>
+                <div className="flex gap-2 mt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="text-xs border-slate-700 bg-slate-800 text-slate-200"
+                    onClick={() => setChampionship((prev) => prev ? { ...prev, bannerUrl: "/branding/hero-banner.jpg" } : null)}
+                  >
+                    🏟️ Arena Preset
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="text-xs border-slate-700 bg-slate-800 text-slate-200"
+                    onClick={() => setChampionship((prev) => prev ? { ...prev, bannerUrl: "" } : null)}
+                  >
+                    ⚪ Clean (No Image)
+                  </Button>
+                </div>
               </div>
 
               <div>

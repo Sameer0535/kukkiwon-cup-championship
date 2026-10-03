@@ -13,7 +13,7 @@ export const BRANDING = {
     name: "Kukkiwon",
     branch: "India North Branch",
     title: "World Taekwondo Headquarters",
-    logoPath: "/branding/kukkiwon-logo.jpg",
+    logoPath: "/branding/kukkiwon-logo.png",
     accentColor: "#0066FF", // Royal Blue
     primaryColor: "#0A2540", // Deep Navy
   },

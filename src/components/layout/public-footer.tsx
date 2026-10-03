@@ -18,7 +18,7 @@ export function PublicFooter() {
           {/* Column 1: Kyorix Sports Technology Organization & Identity */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="relative h-14 w-14 overflow-hidden rounded-xl bg-white p-1.5 border border-slate-200 shadow-md shrink-0">
+              <div className="relative h-14 w-16 shrink-0 flex items-center justify-center">
                 <Image
                   src={BRANDING.kyorix.logoPath}
                   alt={BRANDING.kyorix.name}

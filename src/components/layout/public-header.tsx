@@ -58,7 +58,7 @@ export function PublicHeader() {
         <div className="container mx-auto flex h-20 items-center justify-between px-3 sm:px-6 lg:px-8">
           {/* LEFT & CENTER: Kukkiwon Emblem + Championship Title */}
           <Link href="/" className="flex items-center gap-3 sm:gap-3.5 group min-w-0">
-            <div className="relative h-11 w-11 sm:h-12 sm:w-12 overflow-hidden rounded-xl bg-white p-1 border border-slate-200 shadow-xs group-hover:border-blue-400 transition-colors shrink-0">
+            <div className="relative h-9 w-20 sm:h-10 sm:w-24 shrink-0 transition-transform group-hover:scale-105 flex items-center justify-center">
               <Image
                 src={BRANDING.kukkiwon.logoPath}
                 alt={BRANDING.kukkiwon.name}
@@ -150,7 +150,7 @@ export function PublicHeader() {
               {/* Drawer Header */}
               <div className="flex items-center justify-between border-b border-slate-200 pb-4">
                 <div className="flex items-center gap-2.5">
-                  <div className="relative h-10 w-10 overflow-hidden rounded-lg bg-white p-1 border border-slate-200 shrink-0">
+                  <div className="relative h-8 w-16 shrink-0 flex items-center justify-center">
                     <Image
                       src={BRANDING.kukkiwon.logoPath}
                       alt={BRANDING.kukkiwon.name}
