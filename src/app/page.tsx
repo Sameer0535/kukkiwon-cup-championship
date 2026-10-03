@@ -81,17 +81,17 @@ export default async function HomePage() {
                   src={BRANDING.kukkiwon.logoPath}
                   alt={BRANDING.kukkiwon.name}
                   fill
-                  className="object-contain"
+                  className="object-contain drop-shadow-sm"
                   priority
                 />
               </div>
               <span className="text-3xl sm:text-4xl font-extralight text-slate-300 select-none">×</span>
-              <div className="relative h-20 w-24 sm:h-28 sm:w-32 md:h-32 md:w-36 shrink-0 flex items-center justify-center transition-transform hover:scale-105">
+              <div className="relative h-20 w-20 sm:h-28 sm:w-28 md:h-32 md:w-32 shrink-0 flex items-center justify-center transition-transform hover:scale-105">
                 <Image
                   src={BRANDING.kyorix.logoPath}
                   alt={BRANDING.kyorix.name}
                   fill
-                  className="object-contain"
+                  className="object-contain drop-shadow-sm"
                   priority
                 />
               </div>

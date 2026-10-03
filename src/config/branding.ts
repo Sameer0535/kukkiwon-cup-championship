@@ -13,7 +13,7 @@ export const BRANDING = {
     name: "Kukkiwon",
     branch: "India North Branch",
     title: "World Taekwondo Headquarters",
-    logoPath: "/branding/kukkiwon-logo.png",
+    logoPath: "/branding/kukkiwon-crest.png",
     accentColor: "#0066FF", // Royal Blue
     primaryColor: "#0A2540", // Deep Navy
   },
@@ -22,7 +22,7 @@ export const BRANDING = {
   kyorix: {
     name: "Kyorix",
     subtitle: "Sport Technology",
-    logoPath: "/branding/kyorix-logo.png",
+    logoPath: "/branding/kyorix-emblem.png",
     accentColor: "#00E5FF", // Vibrant Cyan
     primaryColor: "#0066FF", // Royal Blue
   },
