@@ -4,6 +4,7 @@
 // ==============================================================================
 
 import prisma from "@/lib/db";
+import { PersistenceGuard } from "./persistence-guard";
 import { DocumentStorageService } from "./document-storage.service";
 import {
   DEFAULT_DOCUMENT_REQUIREMENTS,
@@ -513,6 +514,7 @@ export class DocumentManagementService {
     }
 
     if (!createdDoc) {
+      PersistenceGuard.assertWritePersistence(false, "Document.upload");
       // Fallback in-memory
       if (existingCurrentDoc) {
         existingCurrentDoc.is_current = false;
@@ -801,6 +803,7 @@ export class DocumentManagementService {
     }
 
     if (!updated) {
+      PersistenceGuard.assertWritePersistence(false, "Document.markUnderReview");
       const doc = FALLBACK_DOCUMENTS_STORE.get(documentId);
       if (!doc) throw new Error("Document not found.");
       doc.verification_status = "UNDER_REVIEW";
@@ -861,6 +864,7 @@ export class DocumentManagementService {
     }
 
     if (!updated) {
+      PersistenceGuard.assertWritePersistence(false, "Document.verifyDocument");
       const doc = FALLBACK_DOCUMENTS_STORE.get(documentId);
       if (!doc) throw new Error("Document not found.");
       doc.verification_status = "VERIFIED";
@@ -930,6 +934,7 @@ export class DocumentManagementService {
     }
 
     if (!updated) {
+      PersistenceGuard.assertWritePersistence(false, "Document.rejectDocument");
       const doc = FALLBACK_DOCUMENTS_STORE.get(documentId);
       if (!doc) throw new Error("Document not found.");
       doc.verification_status = "REJECTED";

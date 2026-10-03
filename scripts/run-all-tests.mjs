@@ -1,5 +1,5 @@
 // ==============================================================================
-// CUMULATIVE REGRESSION TEST RUNNER: PHASES 4 - 12
+// CUMULATIVE REGRESSION TEST RUNNER: PHASES 4 - 13
 // Executes all milestone suites and verifies zero regressions
 // ==============================================================================
 
@@ -15,10 +15,11 @@ const SUITES = [
   { phase: "Phase 10", cmd: "npx tsx scripts/test-phase10.mjs", desc: "Kyorix Integration Layer" },
   { phase: "Phase 11", cmd: "npx tsx scripts/test-phase11.mjs", desc: "Security Audit & Hardening" },
   { phase: "Phase 12", cmd: "node scripts/test-phase12.mjs", desc: "Responsive & Device Validation" },
+  { phase: "Phase 13", cmd: "npx tsx scripts/test-phase13.mjs", desc: "Production Readiness & Deployment" },
 ];
 
 console.log("==================================================================");
-console.log("🏆 EXECUTING CUMULATIVE REGRESSION TEST SUITE (PHASES 4–12)");
+console.log("🏆 EXECUTING CUMULATIVE REGRESSION TEST SUITE (PHASES 4–13)");
 console.log("==================================================================\n");
 
 let totalPassed = 0;

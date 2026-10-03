@@ -6,6 +6,7 @@
 import crypto from "crypto";
 import Razorpay from "razorpay";
 import prisma from "@/lib/db";
+import { PersistenceGuard } from "./persistence-guard";
 import { FeeService, formatPaiseToInr } from "./fee.service";
 import {
   PaymentOrderDetails,
@@ -378,6 +379,7 @@ export class PaymentService {
         console.warn("[PaymentService] Could not log audit:", auditErr);
       }
     } else {
+      PersistenceGuard.assertWritePersistence(online, "PaymentOrder.create");
       orderId = `ord-${crypto.randomUUID()}`;
       FALLBACK_ORDERS.set(orderId, {
         id: orderId,
@@ -629,6 +631,7 @@ export class PaymentService {
         });
       });
     } else {
+      PersistenceGuard.assertWritePersistence(online, "PaymentOrder.verifyAndCapture");
       // Offline fallback state update
       order.status = "PAID";
       order.paid_at = now;
@@ -885,6 +888,7 @@ export class PaymentService {
                 });
               });
             } else {
+              PersistenceGuard.assertWritePersistence(online, "PaymentWebhook.process");
               order.status = "PAID";
               FALLBACK_ORDERS.set(order.id, order as FallbackPaymentOrder);
             }
@@ -1102,6 +1106,7 @@ export class PaymentService {
         });
       });
     } else {
+      PersistenceGuard.assertWritePersistence(online, "PaymentRefund.create");
       order.status = newOrderStatus;
       FALLBACK_ORDERS.set(order.id, order as FallbackPaymentOrder);
 

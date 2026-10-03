@@ -278,18 +278,25 @@ export class AdminService {
     }
 
     if (!adminRecord) {
-      adminRecord = FALLBACK_ADMINS.get(cleanEmail);
+      if (process.env.NODE_ENV !== "production") {
+        adminRecord = FALLBACK_ADMINS.get(cleanEmail);
+      } else {
+        throw new AuthError("Invalid administrative credentials.", 401);
+      }
     }
 
     if (!adminRecord || !adminRecord.is_active) {
       throw new AuthError("Invalid administrative credentials.", 401);
     }
 
-    // Verify password (supports stored PBKDF2 hash, or plain test credentials)
+    // Verify password (supports stored PBKDF2 hash, or plain test credentials in dev)
     let passwordMatches = false;
     if (adminRecord.password_hash.includes(":")) {
       passwordMatches = await verifyPassword(password, adminRecord.password_hash);
     } else {
+      if (process.env.NODE_ENV === "production") {
+        throw new AuthError("Invalid administrative credentials.", 401);
+      }
       passwordMatches = adminRecord.password_hash === password || password === "admin123456" || password === "password123";
     }
 

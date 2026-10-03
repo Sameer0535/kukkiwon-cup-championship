@@ -13,6 +13,7 @@ import {
   isCredentialActive,
 } from "@/lib/qr";
 import { AuditService } from "@/server/services/audit.service";
+import { PersistenceGuard } from "./persistence-guard";
 import {
   AthleteIdCardDetails,
   IdCardEligibilityResult,
@@ -465,6 +466,7 @@ export class IdCardService {
     }
 
     // Fallback in-memory card generation
+    PersistenceGuard.assertWritePersistence(false, "IdCard.generateCard");
     const athleteId = await this.generateAthleteId("KKC26");
     const fallbackId = `card-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
     const now = new Date();
@@ -880,6 +882,7 @@ export class IdCardService {
     }
 
     // Fallback revocation
+    PersistenceGuard.assertWritePersistence(online, "IdCard.revokeCard");
     for (const card of FALLBACK_ID_CARDS.values()) {
       if (card.id === cardIdOrAthleteId || card.athlete_id === cardIdOrAthleteId) {
         card.card_status = "REVOKED";
@@ -1002,6 +1005,7 @@ export class IdCardService {
     }
 
     // Fallback reissuance
+    PersistenceGuard.assertWritePersistence(online, "IdCard.reissueCard");
     for (const card of FALLBACK_ID_CARDS.values()) {
       if (card.id === cardIdOrAthleteId || card.athlete_id === cardIdOrAthleteId) {
         card.version += 1;

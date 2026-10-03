@@ -47,11 +47,11 @@ export default function AdminReconciliationPage() {
           ? `/api/admin/reconciliation?status=${selectedStatus}`
           : `/api/admin/reconciliation`;
 
-      const res = await fetch(url, {
-        headers: {
-          "x-admin-secret": "kukkiwon-bootstrap-admin-secret-2026",
-        },
-      });
+      const bearer = typeof window !== "undefined" ? sessionStorage.getItem("kukkiwon_admin_bearer") : null;
+      const headers: Record<string, string> = {};
+      if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
+
+      const res = await fetch(url, { headers });
 
       const data = await res.json();
       if (!res.ok) {
@@ -86,12 +86,15 @@ export default function AdminReconciliationPage() {
         payload.amountPaise = Number(refundAmountPaise) * 100; // Convert to paise
       }
 
+      const bearer = typeof window !== "undefined" ? sessionStorage.getItem("kukkiwon_admin_bearer") : null;
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
+
       const res = await fetch(`/api/admin/payments/${refundModalOrder.orderId}/refund`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-admin-secret": "kukkiwon-bootstrap-admin-secret-2026",
-        },
+        headers,
         body: JSON.stringify(payload),
       });
 

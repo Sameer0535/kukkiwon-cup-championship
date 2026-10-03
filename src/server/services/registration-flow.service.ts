@@ -21,6 +21,7 @@ import {
 import { CategoryService } from "./category.service";
 import { AcademyService } from "./academy.service";
 import { CmsService } from "./cms.service";
+import { PersistenceGuard } from "./persistence-guard";
 
 // In-memory fallback registry for dev mode
 interface FallbackRegistration {
@@ -204,6 +205,8 @@ export class RegistrationFlowService {
         }
         regNumber = prev.registration_number;
       }
+
+      PersistenceGuard.assertWritePersistence(false, "Registration.saveDraft");
 
       FALLBACK_REGISTRATIONS_STORE.set(id, {
         id,
@@ -643,6 +646,7 @@ export class RegistrationFlowService {
         }
         regNumber = existing.registration_number;
       }
+      PersistenceGuard.assertWritePersistence(false, "Registration.submit");
       FALLBACK_REGISTRATIONS_STORE.set(fbId, {
         id: fbId,
         user_id: userId,
