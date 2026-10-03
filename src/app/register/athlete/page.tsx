@@ -979,15 +979,15 @@ function AthleteRegistrationContent() {
             )}
 
             {/* Stepper Navigation Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-800 pt-6">
-              <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t border-slate-800 pt-6">
+              <div className="flex flex-col xs:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                 {currentStep > 1 && (
                   <Button
                     type="button"
                     variant="outline"
                     size="md"
                     onClick={handleBack}
-                    className="w-full sm:w-auto text-xs uppercase font-bold text-slate-300 border-slate-700"
+                    className="w-full xs:w-auto sm:w-auto text-xs uppercase font-bold text-slate-300 border-slate-700 min-h-[44px]"
                   >
                     <ArrowLeft className="h-4 w-4 mr-1.5" />
                     <span>Back</span>
@@ -1000,7 +1000,7 @@ function AthleteRegistrationContent() {
                   size="md"
                   onClick={handleSaveDraft}
                   isLoading={loading && pendingAction === "save"}
-                  className="w-full sm:w-auto text-xs uppercase font-bold text-[#D4AF37] hover:bg-slate-900"
+                  className="w-full xs:w-auto sm:w-auto text-xs uppercase font-bold text-[#D4AF37] hover:bg-slate-900 min-h-[44px]"
                 >
                   <Save className="h-4 w-4 mr-1.5" />
                   <span>Save & Continue Later</span>

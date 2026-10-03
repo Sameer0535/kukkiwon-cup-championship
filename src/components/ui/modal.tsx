@@ -60,11 +60,11 @@ export function Modal({
       {/* Modal Dialog */}
       <div
         className={cn(
-          "relative w-full rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl z-10 animate-in fade-in zoom-in-95 duration-150",
+          "relative w-full rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl z-10 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] flex flex-col",
           maxWidthStyles[maxWidth]
         )}
       >
-        <div className="flex items-start justify-between border-b border-slate-800 pb-4">
+        <div className="flex items-start justify-between border-b border-slate-800 pb-4 shrink-0">
           <div>
             <h3 className="text-lg font-bold text-slate-100">{title}</h3>
             {description && (
@@ -73,16 +73,17 @@ export function Modal({
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors cursor-pointer"
+            className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center -mr-2 -mt-2"
+            aria-label="Close dialog"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="py-4">{children}</div>
+        <div className="py-4 overflow-y-auto flex-1">{children}</div>
 
         {footer && (
-          <div className="flex items-center justify-end gap-3 border-t border-slate-800 pt-4 mt-2">
+          <div className="flex items-center justify-end gap-3 border-t border-slate-800 pt-4 mt-2 shrink-0">
             {footer}
           </div>
         )}

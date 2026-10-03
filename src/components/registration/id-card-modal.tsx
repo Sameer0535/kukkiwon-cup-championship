@@ -96,25 +96,26 @@ export function IdCardModal({ registrationId, isOpen, onClose }: IdCardModalProp
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-[#0A0F1D] border-2 border-[#D4AF37]/40 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      <div className="relative w-full max-w-lg bg-[#0A0F1D] border-2 border-[#D4AF37]/40 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-[#0A192F]">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 border-b border-slate-800 bg-[#0A192F] shrink-0">
           <div className="flex items-center gap-2">
             <Award className="h-5 w-5 text-[#D4AF37]" />
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+            <h3 className="text-xs sm:text-sm font-bold text-white uppercase tracking-wider truncate">
               Official Athlete Accreditation Card
             </h3>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center -mr-2"
+            aria-label="Close accreditation card modal"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 overflow-y-auto space-y-6 flex-1 flex flex-col items-center justify-center">
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-6 flex-1 flex flex-col items-center justify-center">
           {loading ? (
             <div className="py-16 text-center space-y-3">
               <div className="animate-spin w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full mx-auto" />
@@ -139,7 +140,7 @@ export function IdCardModal({ registrationId, isOpen, onClose }: IdCardModalProp
             </div>
           ) : card ? (
             /* Rendered Accreditation Card */
-            <div className="w-full max-w-sm space-y-4">
+            <div className="w-full max-w-[340px] sm:max-w-sm space-y-4 mx-auto">
               <div className="w-full rounded-2xl overflow-hidden border-2 border-[#D4AF37] shadow-2xl bg-white text-slate-900 flex flex-col">
                 {/* Badge Top Banner */}
                 <div className="bg-[#0A192F] p-4 text-center border-b-2 border-[#D4AF37]">
@@ -270,23 +271,23 @@ export function IdCardModal({ registrationId, isOpen, onClose }: IdCardModalProp
 
         {/* Modal Actions Footer */}
         {card && (
-          <div className="px-6 py-4 border-t border-slate-800 bg-[#0A192F] flex flex-wrap items-center justify-between gap-3">
+          <div className="px-4 sm:px-6 py-3.5 border-t border-slate-800 bg-[#0A192F] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0">
             <a
               href={card.verificationUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs font-semibold text-[#D4AF37] hover:underline flex items-center gap-1"
+              className="text-xs font-semibold text-[#D4AF37] hover:underline flex items-center justify-center sm:justify-start gap-1 py-1"
             >
               <span>Public Verification Link</span>
               <ExternalLink className="h-3.5 w-3.5" />
             </a>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-end gap-2 w-full sm:w-auto">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={onClose}
-                className="text-xs border-slate-700 text-slate-300"
+                className="flex-1 sm:flex-initial text-xs border-slate-700 text-slate-300"
               >
                 Close
               </Button>
@@ -294,10 +295,10 @@ export function IdCardModal({ registrationId, isOpen, onClose }: IdCardModalProp
                 variant="primary"
                 size="sm"
                 onClick={handlePrint}
-                className="text-xs font-bold uppercase"
+                className="flex-1 sm:flex-initial text-xs font-bold uppercase"
               >
                 <Printer className="h-3.5 w-3.5 mr-1.5" />
-                <span>Print / Download PDF</span>
+                <span>Print / PDF</span>
               </Button>
             </div>
           </div>

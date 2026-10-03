@@ -25,11 +25,39 @@
   --kyorix-cyan: #00e5ff;
 }
 
+html {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
   min-height: 100vh;
+  overflow-x: hidden;
+  max-width: 100vw;
   font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+/* Touch momentum scrolling for scroll containers */
+.overflow-x-auto,
+.overflow-y-auto,
+.overflow-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Print utility styles */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  header,
+  footer,
+  aside,
+  .no-print {
+    display: none !important;
+  }
 }
 
 /* Custom Scrollbars */

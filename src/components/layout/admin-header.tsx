@@ -8,10 +8,12 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ExternalLink, Shield, LogOut, Trophy, ChevronDown } from "lucide-react";
+import { ExternalLink, Shield, LogOut, Trophy, ChevronDown, Menu } from "lucide-react";
+import { useAdminNav } from "@/components/layout/admin-nav-context";
 
 export function AdminHeader({ title = "Tournament Management" }: { title?: string }) {
   const router = useRouter();
+  const { toggleSidebar } = useAdminNav();
   const [championships, setChampionships] = React.useState<any[]>([]);
   const [selectedChamp, setSelectedChamp] = React.useState<string>("champ-kukkiwon-2026");
 
@@ -35,11 +37,21 @@ export function AdminHeader({ title = "Tournament Management" }: { title?: strin
   };
 
   return (
-    <header className="h-16 border-b border-slate-800 bg-slate-950/90 px-4 sm:px-6 flex items-center justify-between backdrop-blur-md sticky top-0 z-30">
-      <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-        <h1 className="text-sm font-bold text-slate-100 uppercase tracking-wide truncate">
+    <header className="h-16 border-b border-slate-800 bg-slate-950/90 px-3 sm:px-6 flex items-center justify-between backdrop-blur-md sticky top-0 z-30">
+      <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+        <button
+          type="button"
+          onClick={toggleSidebar}
+          className="lg:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center -ml-1"
+          aria-label="Toggle admin navigation"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+
+        <h1 className="text-xs sm:text-sm font-bold text-slate-100 uppercase tracking-wide truncate">
           {title}
         </h1>
+
 
         {/* Phase 8 Requirement 25: Championship Selector */}
         <div className="hidden md:flex items-center gap-2 pl-3 border-l border-slate-800">

@@ -38,16 +38,16 @@ export function PublicHeader() {
   return (
     <>
       {/* Top Institutional Bar */}
-      <div className="w-full bg-[#050912] border-b border-slate-800/80 text-[11px] text-slate-300 py-1.5 px-4 sm:px-8">
-        <div className="container mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400" />
-            <span className="font-semibold text-slate-200">World Taekwondo Headquarters</span>
-            <span className="text-slate-500 hidden sm:inline">•</span>
-            <span className="text-amber-400/90 hidden sm:inline font-medium">India North Branch Sanctioned Event</span>
+      <div className="w-full bg-[#050912] border-b border-slate-800/80 text-[10px] sm:text-[11px] text-slate-300 py-1.5 px-3 sm:px-8">
+        <div className="container mx-auto flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 truncate">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+            <span className="font-semibold text-slate-200 truncate">World Taekwondo Headquarters</span>
+            <span className="text-slate-500 hidden md:inline">•</span>
+            <span className="text-amber-400/90 hidden md:inline font-medium">India North Branch Sanctioned Event</span>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="text-slate-300 font-medium">Tech Partner:</span>
+          <div className="hidden sm:flex items-center gap-2 shrink-0">
+            <span className="text-slate-400 font-medium">Tech Partner:</span>
             <span className="text-cyan-400 font-semibold tracking-wide">Kyorix Sports Technology</span>
           </div>
         </div>
@@ -55,10 +55,10 @@ export function PublicHeader() {
 
       {/* Main Header */}
       <header className="sticky top-0 z-40 w-full border-b border-slate-800 bg-[#090D16]/95 backdrop-blur-md">
-        <div className="container mx-auto flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="container mx-auto flex h-20 items-center justify-between px-3 sm:px-6 lg:px-8">
           {/* LEFT & CENTER: Kukkiwon Emblem + Championship Title */}
-          <Link href="/" className="flex items-center gap-3.5 group">
-            <div className="relative h-12 w-12 overflow-hidden rounded-xl bg-white p-1 border border-slate-700/80 shadow-md group-hover:border-amber-500/50 transition-colors shrink-0">
+          <Link href="/" className="flex items-center gap-2.5 sm:gap-3.5 group min-w-0">
+            <div className="relative h-10 w-10 sm:h-12 sm:w-12 overflow-hidden rounded-xl bg-white p-1 border border-slate-700/80 shadow-md group-hover:border-amber-500/50 transition-colors shrink-0">
               <Image
                 src={BRANDING.kukkiwon.logoPath}
                 alt={BRANDING.kukkiwon.name}
@@ -67,16 +67,16 @@ export function PublicHeader() {
                 priority
               />
             </div>
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <span className="text-base sm:text-lg font-extrabold tracking-wider text-white uppercase font-sans">
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="text-sm sm:text-base lg:text-lg font-extrabold tracking-wider text-white uppercase font-sans truncate">
                   KUKKIWON CUP
                 </span>
-                <span className="text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-widest px-1 sm:px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0">
                   {BRANDING.edition}
                 </span>
               </div>
-              <span className="text-[11px] text-slate-400 font-medium tracking-wide">
+              <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium tracking-wide truncate">
                 India North Branch <span className="text-slate-600">×</span> <span className="text-cyan-400">Kyorix</span>
               </span>
             </div>
@@ -123,15 +123,15 @@ export function PublicHeader() {
           </div>
 
           {/* MOBILE ACTIONS: Mobile Register Button + Hamburger */}
-          <div className="flex items-center gap-2 sm:hidden">
+          <div className="flex items-center gap-1.5 sm:hidden shrink-0">
             <Link href="/register">
-              <Button variant="gold" size="sm" className="text-[11px] font-bold uppercase tracking-wider px-3">
+              <Button variant="gold" size="sm" className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider px-2.5 h-8">
                 Register
               </Button>
             </Link>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-colors focus:outline-none"
+              className="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-colors focus:outline-none min-h-[44px] min-w-[44px] flex items-center justify-center -mr-1"
               aria-label={mobileMenuOpen ? "Close navigation" : "Open navigation"}
             >
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -174,7 +174,8 @@ export function PublicHeader() {
                 </div>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white"
+                  className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white min-h-[44px] min-w-[44px] flex items-center justify-center -mr-2"
+                  aria-label="Close navigation menu"
                 >
                   <X className="h-5 w-5" />
                 </button>

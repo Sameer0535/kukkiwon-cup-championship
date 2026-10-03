@@ -5,10 +5,12 @@
 
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BrandLogo } from "@/components/branding/brand-logo";
 import { ADMIN_NAV_ITEMS } from "@/config/navigation";
+import { useAdminNav } from "@/components/layout/admin-nav-context";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -21,6 +23,7 @@ import {
   FileText,
   ShieldAlert,
   Settings,
+  X,
 } from "lucide-react";
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -38,12 +41,45 @@ const ICON_MAP: Record<string, React.ElementType> = {
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const { sidebarOpen, setSidebarOpen } = useAdminNav();
 
-  return (
-    <aside className="w-64 border-r border-slate-800 bg-slate-950 flex flex-col shrink-0 min-h-screen">
+  // Close drawer on path change
+  React.useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname, setSidebarOpen]);
+
+  // Handle escape key and prevent body scroll when open on mobile
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSidebarOpen(false);
+    };
+
+    if (sidebarOpen) {
+      document.body.style.overflow = "hidden";
+      window.addEventListener("keydown", handleKeyDown);
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    return () => {
+      document.body.style.overflow = "unset";
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [sidebarOpen, setSidebarOpen]);
+
+  const sidebarContent = (
+    <>
       {/* Brand Header */}
-      <div className="h-20 flex items-center px-6 border-b border-slate-800">
+      <div className="h-20 flex items-center justify-between px-6 border-b border-slate-800">
         <BrandLogo variant="compact" />
+        {/* Mobile close button */}
+        <button
+          onClick={() => setSidebarOpen(false)}
+          className="lg:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center -mr-2"
+          aria-label="Close admin navigation"
+        >
+          <X className="h-5 w-5" />
+        </button>
       </div>
 
       <div className="px-4 py-3 border-b border-slate-800/80">
@@ -62,8 +98,9 @@ export function AdminSidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={() => setSidebarOpen(false)}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium transition-all group",
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium transition-all group min-h-[44px]",
                 isActive
                   ? "bg-sky-500/15 text-sky-400 font-semibold border border-sky-500/30"
                   : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
@@ -97,6 +134,33 @@ export function AdminSidebar() {
           </div>
         </div>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Desktop Persistent Sidebar */}
+      <aside className="hidden lg:flex w-64 border-r border-slate-800 bg-slate-950 flex-col shrink-0 min-h-screen">
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile Drawer (Visible on screens < lg when opened) */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity"
+            onClick={() => setSidebarOpen(false)}
+            aria-hidden="true"
+          />
+
+          {/* Slide-out Drawer */}
+          <aside className="fixed inset-y-0 left-0 w-72 max-w-[85vw] border-r border-slate-800 bg-slate-950 flex flex-col shadow-2xl z-10 animate-in slide-in-from-left duration-200">
+            {sidebarContent}
+          </aside>
+        </div>
+      )}
+    </>
   );
 }
+

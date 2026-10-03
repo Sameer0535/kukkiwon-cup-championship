@@ -682,15 +682,16 @@ export default function MyRegistrationDashboardPage() {
       {/* VIEW DETAILS MODAL */}
       {selectedReg && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-lg rounded-2xl border border-slate-800 bg-[#0C1222] p-6 sm:p-8 shadow-2xl text-slate-100 space-y-6">
+          <div className="relative w-full max-w-lg rounded-2xl border border-slate-800 bg-[#0C1222] p-5 sm:p-8 shadow-2xl text-slate-100 space-y-5 max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setSelectedReg(null)}
-              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800/60"
+              className="absolute top-3.5 right-3.5 p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800/60 min-h-[44px] min-w-[44px] flex items-center justify-center"
+              aria-label="Close details"
             >
               <X className="h-5 w-5" />
             </button>
 
-            <div className="space-y-1">
+            <div className="space-y-1 pr-8">
               <Badge variant="gold">Official Accreditation Record</Badge>
               <h3 className="text-xl font-black uppercase text-white">
                 Registration Overview
@@ -753,8 +754,8 @@ export default function MyRegistrationDashboardPage() {
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                 {(selectedReg.paymentStatus === "PAID" || selectedReg.status === "PAID" || selectedReg.status === "CONFIRMED") && (
                   <Button
                     variant="outline"
@@ -763,17 +764,17 @@ export default function MyRegistrationDashboardPage() {
                       setCardModalRegId(selectedReg.id);
                       setCardModalOpen(true);
                     }}
-                    className="text-xs uppercase font-bold border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10"
+                    className="text-xs uppercase font-bold border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10 w-full sm:w-auto"
                   >
                     <Award className="h-4 w-4 mr-1.5" />
                     <span>View ID Card</span>
                   </Button>
                 )}
-                <Link href={`/my-registration/${selectedReg.id}/payment`}>
+                <Link href={`/my-registration/${selectedReg.id}/payment`} className="w-full sm:w-auto">
                   <Button
                     variant={selectedReg.paymentStatus === "PAID" ? "outline" : "primary"}
                     size="md"
-                    className="text-xs uppercase font-bold"
+                    className="text-xs uppercase font-bold w-full sm:w-auto"
                   >
                     {selectedReg.paymentStatus === "PAID" ? (
                       <>
@@ -788,11 +789,11 @@ export default function MyRegistrationDashboardPage() {
                     )}
                   </Button>
                 </Link>
-                <Link href={`/my-registration/${selectedReg.id}/documents`}>
+                <Link href={`/my-registration/${selectedReg.id}/documents`} className="w-full sm:w-auto">
                   <Button
                     variant="outline"
                     size="md"
-                    className="text-xs uppercase font-bold border-slate-700"
+                    className="text-xs uppercase font-bold border-slate-700 w-full sm:w-auto"
                   >
                     <FileText className="h-4 w-4 mr-1.5" />
                     <span>Documents</span>
@@ -803,7 +804,7 @@ export default function MyRegistrationDashboardPage() {
                 variant="outline"
                 size="md"
                 onClick={() => setSelectedReg(null)}
-                className="text-xs uppercase font-bold border-slate-700"
+                className="text-xs uppercase font-bold border-slate-700 w-full sm:w-auto"
               >
                 Close
               </Button>
