@@ -29,12 +29,12 @@ export function Stepper({ steps, currentStep, onStepClick, className }: StepperP
   return (
     <div className={cn("w-full space-y-4", className)}>
       {/* Mobile Stepper (Condensed) */}
-      <div className="md:hidden flex items-center justify-between p-4 rounded-xl border border-slate-800 bg-[#0A0F1D]">
+      <div className="md:hidden flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-white shadow-xs">
         <div className="space-y-0.5">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-[#D4AF37]">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-blue-600">
             Step {currentStep} of {steps.length}
           </span>
-          <h4 className="text-sm font-bold text-white uppercase">
+          <h4 className="text-sm font-bold text-slate-900 uppercase">
             {currentStepObj.title}
           </h4>
         </div>
@@ -45,10 +45,10 @@ export function Stepper({ steps, currentStep, onStepClick, className }: StepperP
               className={cn(
                 "h-1.5 rounded-full transition-all",
                 step.id === currentStep
-                  ? "w-6 bg-[#D4AF37]"
+                  ? "w-6 bg-blue-600"
                   : step.id < currentStep
                   ? "w-3 bg-emerald-500"
-                  : "w-2 bg-slate-800"
+                  : "w-2 bg-slate-200"
               )}
             />
           ))}
@@ -57,9 +57,9 @@ export function Stepper({ steps, currentStep, onStepClick, className }: StepperP
 
       {/* Desktop Stepper */}
       <div className="hidden md:flex items-center justify-between relative">
-        <div className="absolute top-5 left-8 right-8 h-0.5 bg-slate-800 -z-0" />
+        <div className="absolute top-5 left-8 right-8 h-0.5 bg-slate-200 -z-0" />
         <div
-          className="absolute top-5 left-8 h-0.5 bg-[#D4AF37] transition-all duration-300 -z-0"
+          className="absolute top-5 left-8 h-0.5 bg-blue-600 transition-all duration-300 -z-0"
           style={{
             width: `${((Math.min(currentStep, steps.length) - 1) / (steps.length - 1)) * 100}%`,
           }}
@@ -83,10 +83,10 @@ export function Stepper({ steps, currentStep, onStepClick, className }: StepperP
                 className={cn(
                   "w-10 h-10 rounded-full flex items-center justify-center font-mono text-xs font-bold transition-all duration-200 border-2",
                   isCompleted
-                    ? "bg-emerald-500/20 border-emerald-500 text-emerald-400"
+                    ? "bg-emerald-50 border-emerald-500 text-emerald-600"
                     : isActive
-                    ? "bg-[#D4AF37] border-[#D4AF37] text-slate-950 shadow-[0_0_15px_rgba(212,175,55,0.4)]"
-                    : "bg-[#090D16] border-slate-800 text-slate-500"
+                    ? "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/25"
+                    : "bg-white border-slate-300 text-slate-400"
                 )}
               >
                 {isCompleted ? <Check className="h-4 w-4 stroke-[3]" /> : `0${step.id}`}
@@ -97,10 +97,10 @@ export function Stepper({ steps, currentStep, onStepClick, className }: StepperP
                   className={cn(
                     "text-xs font-bold uppercase tracking-wider block",
                     isActive
-                      ? "text-white"
+                      ? "text-blue-600 font-extrabold"
                       : isCompleted
-                      ? "text-emerald-400"
-                      : "text-slate-500"
+                      ? "text-slate-800"
+                      : "text-slate-400"
                   )}
                 >
                   {step.shortTitle || step.title}

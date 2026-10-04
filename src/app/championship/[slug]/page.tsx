@@ -47,53 +47,53 @@ export default async function ChampionshipDetailsPage({
   ];
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#070B14] text-slate-100 selection:bg-amber-400 selection:text-slate-950 font-sans">
+    <div className="flex min-h-screen flex-col bg-slate-50/70 text-slate-900 font-sans">
       <PublicHeader />
 
       <main className="flex-1">
         {/* Championship Header Banner */}
-        <section className="relative overflow-hidden border-b border-slate-800/80 bg-[#090D16] py-14 sm:py-20">
+        <section className="relative overflow-hidden border-b border-slate-200 bg-white py-14 sm:py-20">
           <div className="container relative mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-6 text-center sm:text-left">
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">
-              <Badge variant="gold">Official Championship</Badge>
+              <Badge variant="blue">Official Championship</Badge>
               <Badge variant="success">Registration Open</Badge>
-              <span className="text-xs font-mono text-slate-400">
-                Slug: <strong className="text-amber-400">{tournament.slug}</strong>
+              <span className="text-xs font-mono text-slate-500">
+                Slug: <strong className="text-blue-600">{tournament.slug}</strong>
               </span>
             </div>
 
             <div className="space-y-2">
-              <h1 className="text-3xl sm:text-5xl font-extrabold uppercase tracking-tight text-white">
+              <h1 className="text-3xl sm:text-5xl font-extrabold uppercase tracking-tight text-slate-900">
                 {tournament.name}
               </h1>
-              <p className="text-sm sm:text-base text-amber-300/90 font-medium">
+              <p className="text-sm sm:text-base text-blue-600 font-medium">
                 {tournament.subtitle}
               </p>
             </div>
 
             {/* Quick Metadata Bar */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-800 text-xs text-slate-300">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-200 text-xs text-slate-600">
               <div className="flex items-center gap-2.5">
-                <Calendar className="h-4 w-4 text-amber-400 shrink-0" />
+                <Calendar className="h-4 w-4 text-blue-600 shrink-0" />
                 <span>
                   {formatDate(tournament.startDate)} – {formatDate(tournament.endDate)}
                 </span>
               </div>
               <div className="flex items-center gap-2.5">
-                <MapPin className="h-4 w-4 text-sky-400 shrink-0" />
+                <MapPin className="h-4 w-4 text-blue-600 shrink-0" />
                 <span>
                   {tournament.venue}, {tournament.city}
                 </span>
               </div>
               <div className="flex items-center gap-2.5">
-                <Clock className="h-4 w-4 text-emerald-400 shrink-0" />
+                <Clock className="h-4 w-4 text-emerald-600 shrink-0" />
                 <span>Registration Closes: {formatDate(tournament.registrationClose)}</span>
               </div>
             </div>
 
             <div className="pt-2">
               <Link href="/register">
-                <Button variant="gold" size="lg" className="text-xs uppercase font-extrabold px-8">
+                <Button variant="primary" size="lg" className="text-xs uppercase font-extrabold px-8">
                   <span>Register Competitor Now</span>
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
@@ -103,13 +103,13 @@ export default async function ChampionshipDetailsPage({
         </section>
 
         {/* Schedule & Event Outline */}
-        <section className="py-16 border-b border-slate-800/80 bg-[#060A13]">
+        <section className="py-16 border-b border-slate-200 bg-slate-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-10">
             <div className="space-y-2">
-              <span className="text-xs font-bold uppercase tracking-widest text-[#D4AF37]">
+              <span className="text-xs font-bold uppercase tracking-widest text-blue-600">
                 Official Program
               </span>
-              <h2 className="text-2xl sm:text-3xl font-bold uppercase text-white">
+              <h2 className="text-2xl sm:text-3xl font-bold uppercase text-slate-900">
                 Tournament Schedule & Itinerary
               </h2>
             </div>
@@ -118,15 +118,15 @@ export default async function ChampionshipDetailsPage({
               {scheduleItems.map((item) => (
                 <div
                   key={item.day}
-                  className="p-5 rounded-xl border border-slate-800 bg-[#0A0F1D] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                  className="p-5 rounded-xl border border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-sm"
                 >
                   <div className="space-y-0.5 sm:w-1/4">
-                    <span className="font-bold text-amber-400 uppercase tracking-wide block">
+                    <span className="font-bold text-blue-600 uppercase tracking-wide block">
                       {item.day}
                     </span>
-                    <span className="text-slate-400">{item.date}</span>
+                    <span className="text-slate-500">{item.date}</span>
                   </div>
-                  <div className="sm:w-3/4 font-medium text-slate-200">
+                  <div className="sm:w-3/4 font-medium text-slate-800">
                     {item.activity}
                   </div>
                 </div>
@@ -136,13 +136,13 @@ export default async function ChampionshipDetailsPage({
         </section>
 
         {/* Age & Division Categories */}
-        <section className="py-16 border-b border-slate-800/80 bg-[#090D16]">
+        <section className="py-16 border-b border-slate-200 bg-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-10">
             <div className="space-y-2">
-              <span className="text-xs font-bold uppercase tracking-widest text-[#00E5FF]">
+              <span className="text-xs font-bold uppercase tracking-widest text-blue-600">
                 Eligibility
               </span>
-              <h2 className="text-2xl sm:text-3xl font-bold uppercase text-white">
+              <h2 className="text-2xl sm:text-3xl font-bold uppercase text-slate-900">
                 Competition Divisions & Belt Criteria
               </h2>
             </div>
@@ -151,15 +151,15 @@ export default async function ChampionshipDetailsPage({
               {divisions.map((div) => (
                 <div
                   key={div.name}
-                  className="p-6 rounded-xl border border-slate-800 bg-[#0C1222] space-y-3 text-xs"
+                  className="p-6 rounded-xl border border-slate-200 bg-slate-50 space-y-3 text-xs shadow-sm"
                 >
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-bold text-white uppercase">{div.name}</h3>
-                    <Badge variant="cyan">{div.age}</Badge>
+                    <h3 className="text-sm font-bold text-slate-900 uppercase">{div.name}</h3>
+                    <Badge variant="blue">{div.age}</Badge>
                   </div>
-                  <div className="space-y-1 text-slate-400">
-                    <div>Belt Requirement: <strong className="text-slate-200">{div.belt}</strong></div>
-                    <div>Rules: <strong className="text-slate-200">{div.rules}</strong></div>
+                  <div className="space-y-1 text-slate-600">
+                    <div>Belt Requirement: <strong className="text-slate-900">{div.belt}</strong></div>
+                    <div>Rules: <strong className="text-slate-900">{div.rules}</strong></div>
                   </div>
                 </div>
               ))}
@@ -168,45 +168,45 @@ export default async function ChampionshipDetailsPage({
         </section>
 
         {/* Fees & Technical Rules */}
-        <section id="rules" className="py-16 bg-[#060A13]">
+        <section id="rules" className="py-16 bg-slate-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-8">
             <div className="space-y-2">
-              <span className="text-xs font-bold uppercase tracking-widest text-[#D4AF37]">
+              <span className="text-xs font-bold uppercase tracking-widest text-blue-600">
                 Financial & Regulatory Outline
               </span>
-              <h2 className="text-2xl sm:text-3xl font-bold uppercase text-white">
+              <h2 className="text-2xl sm:text-3xl font-bold uppercase text-slate-900">
                 Accreditation Fees & Guidelines
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-300">
-              <div className="p-6 rounded-xl border border-slate-800 bg-[#0A0F1D] space-y-4">
-                <h3 className="text-sm font-bold text-white uppercase flex items-center gap-2">
-                  <CreditCard className="h-4 w-4 text-amber-400" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-700">
+              <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-4 shadow-sm">
+                <h3 className="text-sm font-bold text-slate-900 uppercase flex items-center gap-2">
+                  <CreditCard className="h-4 w-4 text-blue-600" />
                   <span>Entry Fee Structure</span>
                 </h3>
                 <div className="space-y-2">
-                  <div className="flex justify-between py-1.5 border-b border-slate-800">
+                  <div className="flex justify-between py-1.5 border-b border-slate-200">
                     <span>Athlete Entry (per discipline)</span>
-                    <span className="font-bold text-white">{formatCurrency(tournament.entryFeeAthlete, tournament.currency)}</span>
+                    <span className="font-bold text-slate-900">{formatCurrency(tournament.entryFeeAthlete, tournament.currency)}</span>
                   </div>
-                  <div className="flex justify-between py-1.5 border-b border-slate-800">
+                  <div className="flex justify-between py-1.5 border-b border-slate-200">
                     <span>Coach Accreditation Mat Pass</span>
-                    <span className="font-bold text-white">{formatCurrency(tournament.entryFeeCoach, tournament.currency)}</span>
+                    <span className="font-bold text-slate-900">{formatCurrency(tournament.entryFeeCoach, tournament.currency)}</span>
                   </div>
                   <div className="flex justify-between py-1.5">
                     <span>Referees, Jury & Board Members</span>
-                    <span className="font-bold text-emerald-400">Complimentary</span>
+                    <span className="font-bold text-emerald-600">Complimentary</span>
                   </div>
                 </div>
               </div>
 
-              <div className="p-6 rounded-xl border border-slate-800 bg-[#0A0F1D] space-y-4">
-                <h3 className="text-sm font-bold text-white uppercase flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-sky-400" />
+              <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-4 shadow-sm">
+                <h3 className="text-sm font-bold text-slate-900 uppercase flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-blue-600" />
                   <span>Technical Rules Summary</span>
                 </h3>
-                <ul className="space-y-1.5 text-slate-400">
+                <ul className="space-y-1.5 text-slate-600">
                   <li>• World Taekwondo Competition Rules strictly apply.</li>
                   <li>• Electronic body protector and sensor scoring provided by Kyorix.</li>
                   <li>• Mandatory mouthguard, groin guard, shin/forearm guards, and WT gloves.</li>
@@ -217,7 +217,7 @@ export default async function ChampionshipDetailsPage({
 
             <div className="text-center pt-4">
               <Link href="/register">
-                <Button variant="gold" size="lg" className="text-xs uppercase font-extrabold px-10">
+                <Button variant="primary" size="lg" className="text-xs uppercase font-extrabold px-10">
                   <span>Register Now for {tournament.name}</span>
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>

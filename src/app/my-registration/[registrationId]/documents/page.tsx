@@ -161,7 +161,7 @@ export default function ParticipantDocumentsPage({ params }: PageProps) {
   const otherReqs = requirements.filter((r) => r.id !== photoReq?.id);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-amber-500 selection:text-slate-950">
+    <div className="min-h-screen bg-slate-50/70 text-slate-900 flex flex-col font-sans">
       <PublicHeader />
 
       <main className="flex-1 pb-24 pt-8 md:pt-12 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto w-full">
@@ -169,27 +169,27 @@ export default function ParticipantDocumentsPage({ params }: PageProps) {
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <Link
             href="/my-registration"
-            className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-amber-400 transition-colors font-medium group"
+            className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-blue-600 transition-colors font-medium group"
           >
             <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
             <span>Return to Registration Dashboard</span>
           </Link>
 
-          <div className="text-xs font-mono text-slate-500 bg-slate-900 px-3 py-1 rounded-full border border-slate-800">
+          <div className="text-xs font-mono text-slate-500 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
             Reg ID: {registrationId.substring(0, 18)}...
           </div>
         </div>
 
         {/* Header (Requirement 8) */}
         <div className="mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20 mb-3">
-            <ShieldCheck className="w-4 h-4 text-amber-400" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase bg-blue-50 text-blue-700 border border-blue-200 mb-3">
+            <ShieldCheck className="w-4 h-4 text-blue-600" />
             Official Accreditation Portal
           </div>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight">
             DOCUMENTS & ACCREDITATION REQUIREMENTS
           </h1>
-          <p className="text-sm sm:text-base text-slate-400 mt-2 max-w-3xl leading-relaxed">
+          <p className="text-sm sm:text-base text-slate-600 mt-2 max-w-3xl leading-relaxed">
             Upload the official identity, age verification, and sport credentials required for championship validation.
             All documents are stored privately in encrypted storage and reviewed by the accreditation committee.
           </p>
@@ -197,8 +197,8 @@ export default function ParticipantDocumentsPage({ params }: PageProps) {
 
         {/* Error Banner */}
         {errorMsg && (
-          <div className="mb-8 p-4 rounded-2xl bg-rose-950/40 border border-rose-800 text-sm text-rose-300 flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-rose-400 flex-shrink-0 mt-0.5" />
+          <div className="mb-8 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-sm text-rose-700 flex items-start gap-3 shadow-sm">
+            <AlertTriangle className="w-5 h-5 text-rose-500 flex-shrink-0 mt-0.5" />
             <div>
               <p className="font-bold">Notice</p>
               <p className="mt-1">{errorMsg}</p>
@@ -209,26 +209,26 @@ export default function ParticipantDocumentsPage({ params }: PageProps) {
         {/* Loading State */}
         {isLoading ? (
           <div className="py-20 text-center flex flex-col items-center justify-center">
-            <RefreshCw className="w-8 h-8 text-amber-400 animate-spin mb-4" />
-            <p className="text-slate-400 text-sm">Loading accreditation requirements...</p>
+            <RefreshCw className="w-8 h-8 text-blue-600 animate-spin mb-4" />
+            <p className="text-slate-500 text-sm">Loading accreditation requirements...</p>
           </div>
         ) : (
           <div className="space-y-8">
             {/* PROGRESS SUMMARY BANNER (Requirement 8 & 11) */}
             {readiness && (
-              <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl">
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                   <div>
-                    <div className="text-xs uppercase tracking-wider font-semibold text-slate-400 mb-1">
+                    <div className="text-xs uppercase tracking-wider font-semibold text-slate-500 mb-1">
                       Accreditation Progress Summary
                     </div>
-                    <div className="text-2xl sm:text-3xl font-extrabold text-white flex items-center gap-3">
+                    <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 flex items-center gap-3">
                       <span>{readiness.uploaded} of {readiness.required} required documents uploaded</span>
                       {readiness.uploaded === readiness.required && readiness.required > 0 && (
-                        <FileCheck2 className="w-7 h-7 text-emerald-400" />
+                        <FileCheck2 className="w-7 h-7 text-emerald-600" />
                       )}
                     </div>
-                    <p className="text-xs sm:text-sm text-slate-400 mt-2">
+                    <p className="text-xs sm:text-sm text-slate-600 mt-2">
                       {readiness.verified} verified • {readiness.uploaded - readiness.verified} under review •{" "}
                       {readiness.missing} missing • {readiness.rejected} rejected
                     </p>
@@ -237,14 +237,14 @@ export default function ParticipantDocumentsPage({ params }: PageProps) {
                   {/* Readiness Badge */}
                   <div className="self-start sm:self-auto flex flex-col items-start sm:items-end gap-2">
                     <span
-                      className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border shadow-md flex items-center gap-2 ${
+                      className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border shadow-sm flex items-center gap-2 ${
                         readiness.readinessStatus === "DOCUMENTS_VERIFIED"
-                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                           : readiness.readinessStatus === "ACTION_REQUIRED"
-                          ? "bg-rose-500/10 text-rose-400 border-rose-500/30 animate-pulse"
+                          ? "bg-rose-50 text-rose-700 border-rose-200 animate-pulse"
                           : readiness.readinessStatus === "DOCUMENTS_IN_REVIEW"
-                          ? "bg-amber-500/10 text-amber-400 border-amber-500/30"
-                          : "bg-slate-800 text-slate-300 border-slate-700"
+                          ? "bg-amber-50 text-amber-700 border-amber-200"
+                          : "bg-slate-100 text-slate-700 border-slate-200"
                       }`}
                     >
                       {readiness.readinessStatus === "DOCUMENTS_VERIFIED" && <ShieldCheck className="w-4 h-4" />}
@@ -259,14 +259,14 @@ export default function ParticipantDocumentsPage({ params }: PageProps) {
                 </div>
 
                 {/* Progress bar */}
-                <div className="mt-6 w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                <div className="mt-6 w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
                   <div
                     className={`h-full transition-all duration-500 rounded-full ${
                       readiness.verified === readiness.required && readiness.required > 0
-                        ? "bg-emerald-500"
+                        ? "bg-emerald-600"
                         : readiness.rejected > 0
-                        ? "bg-rose-500"
-                        : "bg-amber-500"
+                        ? "bg-rose-600"
+                        : "bg-blue-600"
                     }`}
                     style={{
                       width: `${
@@ -283,7 +283,7 @@ export default function ParticipantDocumentsPage({ params }: PageProps) {
             {/* SECTION 1: ACCREDITATION PHOTOGRAPH (Requirement 7) */}
             {photoReq && (
               <div>
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400 mb-3">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-600 mb-3">
                   <Sparkles className="w-4 h-4" />
                   <span>Participant Badge Photo</span>
                 </div>
@@ -307,7 +307,7 @@ export default function ParticipantDocumentsPage({ params }: PageProps) {
 
             {/* SECTION 2: IDENTITY & SPORT ACCREDITATION DOCUMENTS */}
             <div>
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-cyan-400 mb-3">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-600 mb-3">
                 <FileText className="w-4 h-4" />
                 <span>Identification & Eligibility Credentials</span>
               </div>
@@ -345,11 +345,11 @@ export default function ParticipantDocumentsPage({ params }: PageProps) {
             </div>
 
             {/* Bottom Guidance Box */}
-            <div className="p-6 rounded-2xl bg-slate-900/50 border border-slate-800 text-xs text-slate-400 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="p-6 rounded-2xl bg-white border border-slate-200 text-xs text-slate-600 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
               <div className="flex items-start gap-3">
-                <ShieldCheck className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                <ShieldCheck className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-semibold text-slate-200">Institutional Review Policy</p>
+                  <p className="font-semibold text-slate-900">Institutional Review Policy</p>
                   <p className="mt-1 leading-relaxed">
                     Uploading documents does not immediately grant accredited status. All submitted files will be
                     reviewed by the Kukkiwon Cup Technical Secretariat. Please check back regularly for status updates.
@@ -359,10 +359,10 @@ export default function ParticipantDocumentsPage({ params }: PageProps) {
 
               <Link
                 href="/my-registration"
-                className="self-start sm:self-auto px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs transition-colors whitespace-nowrap flex items-center gap-2"
+                className="self-start sm:self-auto px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition-colors whitespace-nowrap flex items-center gap-2 shadow-sm"
               >
                 <span>Dashboard</span>
-                <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                <ExternalLink className="w-3.5 h-3.5 text-white/80" />
               </Link>
             </div>
           </div>

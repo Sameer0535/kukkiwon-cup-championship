@@ -1,28 +1,25 @@
 // ==============================================================================
-// ATHLETE REGISTRATION WIZARD (Phase 3 Requirement 3, 4, 5, 6, 11, 13, 14)
-// Multi-step intake with category eligibility engine, draft persistence, and review
+// ATHLETE REGISTRATION WIZARD — STREAMLINED 2-STEP INTAKE
+// Step 1: Athlete Details, Photo, Academy Affiliation, WT Category & Documents
+// Step 2: Review & Championship Fee Payment
+// Theme: White & Royal Blue Corporate Sports Theme (No dark/black styling)
 // ==============================================================================
 
 "use client";
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PublicHeader } from "@/components/layout/public-header";
 import { PublicFooter } from "@/components/layout/public-footer";
 import { Stepper, StepItem } from "@/components/registration/stepper";
 import { AcademySelector } from "@/components/registration/academy-selector";
-import { DocumentChecklist } from "@/components/registration/document-checklist";
 import { AuthModal } from "@/components/registration/auth-modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
-import {
-  AthleteDraftData,
-  Category,
-  RegistrationStatus,
-} from "@/types/registration";
 import { calculateAge } from "@/lib/utils";
 import {
   ArrowLeft,
@@ -30,43 +27,249 @@ import {
   Save,
   CheckCircle2,
   AlertCircle,
-  FileCheck,
   ShieldCheck,
   Award,
-  Clock,
   User,
   Calendar,
+  Building2,
+  Camera,
+  Upload,
+  FileText,
+  FileCheck,
+  CreditCard,
+  QrCode,
+  Sparkles,
+  Trash2,
+  Eye,
+  Check,
+  Clock,
+  Printer,
 } from "lucide-react";
 
+// ------------------------------------------------------------------------------
+// 2-STEP CONFIGURATION
+// ------------------------------------------------------------------------------
 const STEPS: StepItem[] = [
-  { id: 1, title: "Personal Details", shortTitle: "Personal", description: "Identity & DOB" },
-  { id: 2, title: "Academy / Dojang", shortTitle: "Academy", description: "Club affiliation" },
-  { id: 3, title: "Discipline & Category", shortTitle: "Category", description: "Division matching" },
-  { id: 4, title: "Document Readiness", shortTitle: "Documents", description: "Accreditation checklist" },
-  { id: 5, title: "Review & Submit", shortTitle: "Review", description: "Terms & confirmation" },
+  {
+    id: 1,
+    title: "Competitor Details & Documents",
+    shortTitle: "Details & Docs",
+    description: "Personal, Academy, WT Category & Uploads",
+  },
+  {
+    id: 2,
+    title: "Review & Payment",
+    shortTitle: "Payment",
+    description: "Accreditation fee & confirmation",
+  },
 ];
+
+// ------------------------------------------------------------------------------
+// DROPDOWN CONSTANTS
+// ------------------------------------------------------------------------------
+const NATIONALITIES = [
+  { code: "IND", label: "Indian (IND)" },
+  { code: "KOR", label: "South Korean (KOR)" },
+  { code: "USA", label: "American (USA)" },
+  { code: "GBR", label: "British (GBR)" },
+  { code: "NEP", label: "Nepalese (NEP)" },
+  { code: "BHU", label: "Bhutanese (BHU)" },
+  { code: "BGD", label: "Bangladeshi (BGD)" },
+  { code: "LKA", label: "Sri Lankan (LKA)" },
+  { code: "UAE", label: "Emirati (UAE)" },
+  { code: "SGP", label: "Singaporean (SGP)" },
+  { code: "MYS", label: "Malaysian (MYS)" },
+  { code: "THA", label: "Thai (THA)" },
+  { code: "VIE", label: "Vietnamese (VIE)" },
+  { code: "JPN", label: "Japanese (JPN)" },
+  { code: "AUS", label: "Australian (AUS)" },
+  { code: "CAN", label: "Canadian (CAN)" },
+  { code: "GER", label: "German (GER)" },
+  { code: "FRA", label: "French (FRA)" },
+  { code: "ITA", label: "Italian (ITA)" },
+  { code: "ESP", label: "Spanish (ESP)" },
+  { code: "OTHER", label: "Other" },
+];
+
+const COUNTRIES = [
+  "India",
+  "South Korea",
+  "United States",
+  "United Kingdom",
+  "Nepal",
+  "Bhutan",
+  "Bangladesh",
+  "Sri Lanka",
+  "United Arab Emirates",
+  "Singapore",
+  "Malaysia",
+  "Thailand",
+  "Vietnam",
+  "Japan",
+  "Australia",
+  "Canada",
+  "Germany",
+  "France",
+  "Italy",
+  "Spain",
+  "Other",
+];
+
+// ------------------------------------------------------------------------------
+// WORLD TAEKWONDO OFFICIAL WEIGHT CATEGORIES
+// ------------------------------------------------------------------------------
+interface WTWeightClass {
+  code: string;
+  name: string;
+  weightLimit: string;
+  minWeight: number;
+  maxWeight: number;
+}
+
+const WT_DIVISIONS = [
+  { id: "SUB_JUNIOR", label: "Sub-Junior", ageRange: "Ages 5–11", desc: "Under 12 years" },
+  { id: "CADET", label: "Cadet", ageRange: "Ages 12–14", desc: "Cadet World Class" },
+  { id: "JUNIOR", label: "Junior", ageRange: "Ages 15–17", desc: "Junior WT Standard" },
+  { id: "SENIOR", label: "Senior", ageRange: "Ages 17+", desc: "World Taekwondo Senior" },
+];
+
+const WT_CATEGORIES: Record<
+  string,
+  { MALE: WTWeightClass[]; FEMALE: WTWeightClass[] }
+> = {
+  SENIOR: {
+    MALE: [
+      { code: "KY-SEN-M-U54", name: "Finweight", weightLimit: "Under 54.0 kg", minWeight: 45, maxWeight: 54 },
+      { code: "KY-SEN-M-U58", name: "Flyweight", weightLimit: "Under 58.0 kg", minWeight: 54.1, maxWeight: 58 },
+      { code: "KY-SEN-M-U63", name: "Bantamweight", weightLimit: "Under 63.0 kg", minWeight: 58.1, maxWeight: 63 },
+      { code: "KY-SEN-M-U68", name: "Featherweight", weightLimit: "Under 68.0 kg", minWeight: 63.1, maxWeight: 68 },
+      { code: "KY-SEN-M-U74", name: "Lightweight", weightLimit: "Under 74.0 kg", minWeight: 68.1, maxWeight: 74 },
+      { code: "KY-SEN-M-U80", name: "Welterweight", weightLimit: "Under 80.0 kg", minWeight: 74.1, maxWeight: 80 },
+      { code: "KY-SEN-M-U87", name: "Middleweight", weightLimit: "Under 87.0 kg", minWeight: 80.1, maxWeight: 87 },
+      { code: "KY-SEN-M-O87", name: "Heavyweight", weightLimit: "Over 87.0 kg (+87kg)", minWeight: 87.1, maxWeight: 140 },
+    ],
+    FEMALE: [
+      { code: "KY-SEN-F-U46", name: "Finweight", weightLimit: "Under 46.0 kg", minWeight: 38, maxWeight: 46 },
+      { code: "KY-SEN-F-U49", name: "Flyweight", weightLimit: "Under 49.0 kg", minWeight: 46.1, maxWeight: 49 },
+      { code: "KY-SEN-F-U53", name: "Bantamweight", weightLimit: "Under 53.0 kg", minWeight: 49.1, maxWeight: 53 },
+      { code: "KY-SEN-F-U57", name: "Featherweight", weightLimit: "Under 57.0 kg", minWeight: 53.1, maxWeight: 57 },
+      { code: "KY-SEN-F-U62", name: "Lightweight", weightLimit: "Under 62.0 kg", minWeight: 57.1, maxWeight: 62 },
+      { code: "KY-SEN-F-U67", name: "Welterweight", weightLimit: "Under 67.0 kg", minWeight: 62.1, maxWeight: 67 },
+      { code: "KY-SEN-F-U73", name: "Middleweight", weightLimit: "Under 73.0 kg", minWeight: 67.1, maxWeight: 73 },
+      { code: "KY-SEN-F-O73", name: "Heavyweight", weightLimit: "Over 73.0 kg (+73kg)", minWeight: 73.1, maxWeight: 120 },
+    ],
+  },
+  JUNIOR: {
+    MALE: [
+      { code: "KY-JUN-M-U45", name: "Finweight", weightLimit: "Under 45.0 kg", minWeight: 35, maxWeight: 45 },
+      { code: "KY-JUN-M-U48", name: "Flyweight", weightLimit: "Under 48.0 kg", minWeight: 45.1, maxWeight: 48 },
+      { code: "KY-JUN-M-U51", name: "Bantamweight", weightLimit: "Under 51.0 kg", minWeight: 48.1, maxWeight: 51 },
+      { code: "KY-JUN-M-U55", name: "Featherweight", weightLimit: "Under 55.0 kg", minWeight: 51.1, maxWeight: 55 },
+      { code: "KY-JUN-M-U59", name: "Lightweight", weightLimit: "Under 59.0 kg", minWeight: 55.1, maxWeight: 59 },
+      { code: "KY-JUN-M-U63", name: "Welterweight", weightLimit: "Under 63.0 kg", minWeight: 59.1, maxWeight: 63 },
+      { code: "KY-JUN-M-U68", name: "Light Middle", weightLimit: "Under 68.0 kg", minWeight: 63.1, maxWeight: 68 },
+      { code: "KY-JUN-M-U73", name: "Middleweight", weightLimit: "Under 73.0 kg", minWeight: 68.1, maxWeight: 73 },
+      { code: "KY-JUN-M-U78", name: "Light Heavy", weightLimit: "Under 78.0 kg", minWeight: 73.1, maxWeight: 78 },
+      { code: "KY-JUN-M-O78", name: "Heavyweight", weightLimit: "Over 78.0 kg (+78kg)", minWeight: 78.1, maxWeight: 120 },
+    ],
+    FEMALE: [
+      { code: "KY-JUN-F-U42", name: "Finweight", weightLimit: "Under 42.0 kg", minWeight: 32, maxWeight: 42 },
+      { code: "KY-JUN-F-U44", name: "Flyweight", weightLimit: "Under 44.0 kg", minWeight: 42.1, maxWeight: 44 },
+      { code: "KY-JUN-F-U46", name: "Bantamweight", weightLimit: "Under 46.0 kg", minWeight: 44.1, maxWeight: 46 },
+      { code: "KY-JUN-F-U49", name: "Featherweight", weightLimit: "Under 49.0 kg", minWeight: 46.1, maxWeight: 49 },
+      { code: "KY-JUN-F-U52", name: "Lightweight", weightLimit: "Under 52.0 kg", minWeight: 49.1, maxWeight: 52 },
+      { code: "KY-JUN-F-U55", name: "Welterweight", weightLimit: "Under 55.0 kg", minWeight: 52.1, maxWeight: 55 },
+      { code: "KY-JUN-F-U59", name: "Light Middle", weightLimit: "Under 59.0 kg", minWeight: 55.1, maxWeight: 59 },
+      { code: "KY-JUN-F-U63", name: "Middleweight", weightLimit: "Under 63.0 kg", minWeight: 59.1, maxWeight: 63 },
+      { code: "KY-JUN-F-U68", name: "Light Heavy", weightLimit: "Under 68.0 kg", minWeight: 63.1, maxWeight: 68 },
+      { code: "KY-JUN-F-O68", name: "Heavyweight", weightLimit: "Over 68.0 kg (+68kg)", minWeight: 68.1, maxWeight: 105 },
+    ],
+  },
+  CADET: {
+    MALE: [
+      { code: "KY-CAD-M-U33", name: "Finweight", weightLimit: "Under 33.0 kg", minWeight: 25, maxWeight: 33 },
+      { code: "KY-CAD-M-U37", name: "Flyweight", weightLimit: "Under 37.0 kg", minWeight: 33.1, maxWeight: 37 },
+      { code: "KY-CAD-M-U41", name: "Bantamweight", weightLimit: "Under 41.0 kg", minWeight: 37.1, maxWeight: 41 },
+      { code: "KY-CAD-M-U45", name: "Featherweight", weightLimit: "Under 45.0 kg", minWeight: 41.1, maxWeight: 45 },
+      { code: "KY-CAD-M-U49", name: "Lightweight", weightLimit: "Under 49.0 kg", minWeight: 45.1, maxWeight: 49 },
+      { code: "KY-CAD-M-U53", name: "Welterweight", weightLimit: "Under 53.0 kg", minWeight: 49.1, maxWeight: 53 },
+      { code: "KY-CAD-M-U57", name: "Light Middle", weightLimit: "Under 57.0 kg", minWeight: 53.1, maxWeight: 57 },
+      { code: "KY-CAD-M-U61", name: "Middleweight", weightLimit: "Under 61.0 kg", minWeight: 57.1, maxWeight: 61 },
+      { code: "KY-CAD-M-U65", name: "Light Heavy", weightLimit: "Under 65.0 kg", minWeight: 61.1, maxWeight: 65 },
+      { code: "KY-CAD-M-O65", name: "Heavyweight", weightLimit: "Over 65.0 kg (+65kg)", minWeight: 65.1, maxWeight: 95 },
+    ],
+    FEMALE: [
+      { code: "KY-CAD-F-U29", name: "Finweight", weightLimit: "Under 29.0 kg", minWeight: 22, maxWeight: 29 },
+      { code: "KY-CAD-F-U33", name: "Flyweight", weightLimit: "Under 33.0 kg", minWeight: 29.1, maxWeight: 33 },
+      { code: "KY-CAD-F-U37", name: "Bantamweight", weightLimit: "Under 37.0 kg", minWeight: 33.1, maxWeight: 37 },
+      { code: "KY-CAD-F-U41", name: "Featherweight", weightLimit: "Under 41.0 kg", minWeight: 37.1, maxWeight: 41 },
+      { code: "KY-CAD-F-U44", name: "Lightweight", weightLimit: "Under 44.0 kg", minWeight: 41.1, maxWeight: 44 },
+      { code: "KY-CAD-F-U47", name: "Welterweight", weightLimit: "Under 47.0 kg", minWeight: 44.1, maxWeight: 47 },
+      { code: "KY-CAD-F-U51", name: "Light Middle", weightLimit: "Under 51.0 kg", minWeight: 47.1, maxWeight: 51 },
+      { code: "KY-CAD-F-U55", name: "Middleweight", weightLimit: "Under 55.0 kg", minWeight: 51.1, maxWeight: 55 },
+      { code: "KY-CAD-F-U59", name: "Light Heavy", weightLimit: "Under 59.0 kg", minWeight: 55.1, maxWeight: 59 },
+      { code: "KY-CAD-F-O59", name: "Heavyweight", weightLimit: "Over 59.0 kg (+59kg)", minWeight: 59.1, maxWeight: 85 },
+    ],
+  },
+  SUB_JUNIOR: {
+    MALE: [
+      { code: "KY-SUB-M-U18", name: "Under 18kg", weightLimit: "Under 18.0 kg", minWeight: 12, maxWeight: 18 },
+      { code: "KY-SUB-M-U21", name: "Under 21kg", weightLimit: "Under 21.0 kg", minWeight: 18.1, maxWeight: 21 },
+      { code: "KY-SUB-M-U24", name: "Under 24kg", weightLimit: "Under 24.0 kg", minWeight: 21.1, maxWeight: 24 },
+      { code: "KY-SUB-M-U27", name: "Under 27kg", weightLimit: "Under 27.0 kg", minWeight: 24.1, maxWeight: 27 },
+      { code: "KY-SUB-M-U30", name: "Under 30kg", weightLimit: "Under 30.0 kg", minWeight: 27.1, maxWeight: 30 },
+      { code: "KY-SUB-M-U33", name: "Under 33kg", weightLimit: "Under 33.0 kg", minWeight: 30.1, maxWeight: 33 },
+      { code: "KY-SUB-M-U36", name: "Under 36kg", weightLimit: "Under 36.0 kg", minWeight: 33.1, maxWeight: 36 },
+      { code: "KY-SUB-M-U40", name: "Under 40kg", weightLimit: "Under 40.0 kg", minWeight: 36.1, maxWeight: 40 },
+      { code: "KY-SUB-M-O40", name: "Over 40kg", weightLimit: "Over 40.0 kg (+40kg)", minWeight: 40.1, maxWeight: 70 },
+    ],
+    FEMALE: [
+      { code: "KY-SUB-F-U18", name: "Under 18kg", weightLimit: "Under 18.0 kg", minWeight: 12, maxWeight: 18 },
+      { code: "KY-SUB-F-U21", name: "Under 21kg", weightLimit: "Under 21.0 kg", minWeight: 18.1, maxWeight: 21 },
+      { code: "KY-SUB-F-U24", name: "Under 24kg", weightLimit: "Under 24.0 kg", minWeight: 21.1, maxWeight: 24 },
+      { code: "KY-SUB-F-U27", name: "Under 27kg", weightLimit: "Under 27.0 kg", minWeight: 24.1, maxWeight: 27 },
+      { code: "KY-SUB-F-U30", name: "Under 30kg", weightLimit: "Under 30.0 kg", minWeight: 27.1, maxWeight: 30 },
+      { code: "KY-SUB-F-U33", name: "Under 33kg", weightLimit: "Under 33.0 kg", minWeight: 30.1, maxWeight: 33 },
+      { code: "KY-SUB-F-U36", name: "Under 36kg", weightLimit: "Under 36.0 kg", minWeight: 33.1, maxWeight: 36 },
+      { code: "KY-SUB-F-U40", name: "Under 40kg", weightLimit: "Under 40.0 kg", minWeight: 36.1, maxWeight: 40 },
+      { code: "KY-SUB-F-O40", name: "Over 40kg", weightLimit: "Over 40.0 kg (+40kg)", minWeight: 40.1, maxWeight: 70 },
+    ],
+  },
+};
+
+// Document upload file payload
+interface UploadedFileRecord {
+  name: string;
+  size: number;
+  type: string;
+  dataUrl?: string;
+}
 
 function AthleteRegistrationContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryDraftId = searchParams.get("draftId");
 
-  const [currentStep, setCurrentStep] = React.useState(1);
+  const [currentStep, setCurrentStep] = React.useState<number>(1);
   const [registrationId, setRegistrationId] = React.useState<string | null>(queryDraftId);
   const [registrationNumber, setRegistrationNumber] = React.useState<string | null>(null);
 
-  // User session state
-  const [currentUser, setCurrentUser] = React.useState<{ id: string; email: string; fullName: string } | null>(null);
+  // User session
+  const [currentUser, setCurrentUser] = React.useState<{
+    id: string;
+    email: string;
+    fullName: string;
+  } | null>(null);
   const [authModalOpen, setAuthModalOpen] = React.useState(false);
-  const [pendingAction, setPendingAction] = React.useState<"save" | "submit" | null>(null);
+  const [pendingAction, setPendingAction] = React.useState<"save" | "proceed" | "pay" | null>(null);
 
   // Form State
-  const [formData, setFormData] = React.useState<AthleteDraftData>({
+  const [formData, setFormData] = React.useState({
     first_name: "",
     middle_name: "",
     last_name: "",
     date_of_birth: "",
-    gender: "MALE",
+    gender: "MALE" as "MALE" | "FEMALE",
     nationality: "IND",
     country: "India",
     state: "Delhi",
@@ -75,88 +278,79 @@ function AthleteRegistrationContent() {
     email: "",
     photo_url: "",
 
-    academy_id: undefined,
-    academy_name: undefined,
-    academy_code: undefined,
+    academy_id: undefined as string | undefined,
+    academy_name: undefined as string | undefined,
+    academy_code: undefined as string | undefined,
     is_new_academy: false,
+    new_academy_data: undefined as
+      | { name: string; country: string; state: string; city: string; head_coach: string }
+      | undefined,
 
-    discipline: "KYORUGI",
+    discipline: "KYORUGI" as "KYORUGI" | "POOMSAE" | "DEMO",
     division: "SENIOR",
-    category_id: "",
+    category_id: "KY-SEN-M-U58",
+    weight_category_name: "Senior Male Under 58kg (Flyweight)",
     belt_rank: "1ST_DAN_BLACK",
     kukkiwon_dan_number: "",
-    weight_kg: "58.0",
+    weight_kg: "57.5",
 
-    documents_checked: {
-      gov_id: false,
-      dob_proof: false,
-      kukkiwon_cert: false,
-      athlete_photo: false,
-      medical_fitness: false,
+    documents_uploaded: {
+      gov_id: null as UploadedFileRecord | null,
+      kukkiwon_cert: null as UploadedFileRecord | null,
+      medical_cert: null as UploadedFileRecord | null,
     },
 
-    declaration_accurate: false,
-    declaration_terms: false,
-    declaration_rules: false,
+    declaration_accurate: true,
+    declaration_terms: true,
+    declaration_rules: true,
   });
 
-  // Dynamic Categories from Server
-  const [availableCategories, setAvailableCategories] = React.useState<Category[]>([]);
-  const [loadingCategories, setLoadingCategories] = React.useState(false);
-  const [categoryError, setCategoryError] = React.useState<string | null>(null);
-
-  // Status & Feedback State
+  // UI state
+  const [photoPreview, setPhotoPreview] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [errorNotice, setErrorNotice] = React.useState<string | null>(null);
   const [saveSuccessNotice, setSaveSuccessNotice] = React.useState<string | null>(null);
   const [submittedData, setSubmittedData] = React.useState<any | null>(null);
 
-  // 1. Check user session on mount
+  // Payment states in Step 2
+  const [paymentMethod, setPaymentMethod] = React.useState<"RAZORPAY" | "DEMO" | "OFFLINE">("RAZORPAY");
+  const [offlineUtr, setOfflineUtr] = React.useState("");
+  const [offlineSlip, setOfflineSlip] = React.useState<UploadedFileRecord | null>(null);
+  const [isProcessingPayment, setIsProcessingPayment] = React.useState(false);
+
+  // File input refs
+  const photoInputRef = React.useRef<HTMLInputElement>(null);
+  const govIdInputRef = React.useRef<HTMLInputElement>(null);
+  const certInputRef = React.useRef<HTMLInputElement>(null);
+  const medicalInputRef = React.useRef<HTMLInputElement>(null);
+  const slipInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Check user session
   React.useEffect(() => {
-    checkUserSession();
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated && data.user) {
+          setCurrentUser(data.user);
+          setFormData((prev) => ({
+            ...prev,
+            email: prev.email || data.user.email,
+            first_name: prev.first_name || (data.user.fullName?.split(" ")[0] ?? ""),
+            last_name: prev.last_name || (data.user.fullName?.split(" ").slice(1).join(" ") ?? ""),
+          }));
+        }
+      })
+      .catch(() => {});
   }, []);
 
-  // 2. If draftId exists in query, load draft
+  // Load draft if draftId is in URL
   React.useEffect(() => {
     if (queryDraftId) {
       loadDraft(queryDraftId);
     }
   }, [queryDraftId]);
 
-  // 3. Load eligible categories when DOB, gender, discipline, weight, or belt changes
-  React.useEffect(() => {
-    if (formData.discipline && formData.date_of_birth) {
-      fetchEligibleCategories();
-    }
-  }, [
-    formData.discipline,
-    formData.date_of_birth,
-    formData.gender,
-    formData.belt_rank,
-    formData.weight_kg,
-  ]);
-
-  const checkUserSession = async () => {
-    try {
-      const res = await fetch("/api/auth/me");
-      const data = await res.json();
-      if (data.authenticated && data.user) {
-        setCurrentUser(data.user);
-        // Pre-fill email if empty
-        setFormData((prev) => ({
-          ...prev,
-          email: prev.email || data.user.email,
-          first_name: prev.first_name || (data.user.fullName?.split(" ")[0] ?? ""),
-          last_name: prev.last_name || (data.user.fullName?.split(" ").slice(1).join(" ") ?? ""),
-        }));
-      }
-    } catch {
-      // Ignore
-    }
-  };
-
   const loadDraft = async (draftId: string) => {
-    setLoading(true);
     try {
       const res = await fetch(`/api/registrations/draft?registrationId=${draftId}`);
       const data = await res.json();
@@ -165,128 +359,216 @@ function AthleteRegistrationContent() {
         setRegistrationNumber(data.draft.registrationNumber);
         if (data.draft.draftData) {
           setFormData((prev) => ({ ...prev, ...data.draft.draftData }));
-        }
-      }
-    } catch (err: any) {
-      setErrorNotice("Could not load draft. You may need to sign in to access your drafts.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchEligibleCategories = async () => {
-    setLoadingCategories(true);
-    setCategoryError(null);
-    try {
-      const params = new URLSearchParams({
-        discipline: formData.discipline,
-        dob: formData.date_of_birth,
-        gender: formData.gender,
-        belt: formData.belt_rank || "",
-        weight: formData.weight_kg || "",
-      });
-
-      const res = await fetch(`/api/categories?${params.toString()}`);
-      const data = await res.json();
-
-      if (data.categories) {
-        setAvailableCategories(data.categories);
-        // If current selected category is not in eligible list, reset or select first
-        if (
-          formData.category_id &&
-          !data.categories.some((c: Category) => c.id === formData.category_id || c.code === formData.category_id)
-        ) {
-          setFormData((prev) => ({ ...prev, category_id: "" }));
+          if (data.draft.draftData.photo_url) {
+            setPhotoPreview(data.draft.draftData.photo_url);
+          }
         }
       }
     } catch {
-      setCategoryError("Could not calculate eligible categories.");
-    } finally {
-      setLoadingCategories(false);
+      // Ignore
     }
   };
 
-  // Field change helper
-  const updateField = (field: keyof AthleteDraftData, value: any) => {
+  // Live Auto-Suggestion for Division based on DOB
+  React.useEffect(() => {
+    if (formData.date_of_birth) {
+      const age = calculateAge(formData.date_of_birth);
+      let suggestedDivision = "SENIOR";
+      if (age < 12) suggestedDivision = "SUB_JUNIOR";
+      else if (age >= 12 && age <= 14) suggestedDivision = "CADET";
+      else if (age >= 15 && age <= 17) suggestedDivision = "JUNIOR";
+      else suggestedDivision = "SENIOR";
+
+      // If user hasn't explicitly set a different division or initial match
+      setFormData((prev) => {
+        // Keep current division if valid or switch to suggested
+        const currentCats = WT_CATEGORIES[suggestedDivision]?.[prev.gender] || [];
+        const firstCat = currentCats[0];
+        return {
+          ...prev,
+          division: suggestedDivision,
+          category_id: firstCat?.code || prev.category_id,
+          weight_category_name: firstCat ? `${firstCat.name} (${firstCat.weightLimit})` : prev.weight_category_name,
+        };
+      });
+    }
+  }, [formData.date_of_birth, formData.gender]);
+
+  // Helper field updater
+  const updateField = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setErrorNotice(null);
-    setSaveSuccessNotice(null);
   };
 
-  // Step 1 Validation
-  const validateStep1 = () => {
+  // ----------------------------------------------------------------------------
+  // PHOTO UPLOAD HANDLER
+  // ----------------------------------------------------------------------------
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setErrorNotice("Please upload a valid image file (JPG or PNG) for competitor photo.");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorNotice("Photo file size must be less than 5MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      setPhotoPreview(dataUrl);
+      updateField("photo_url", dataUrl);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemovePhoto = () => {
+    setPhotoPreview(null);
+    updateField("photo_url", "");
+    if (photoInputRef.current) photoInputRef.current.value = "";
+  };
+
+  // ----------------------------------------------------------------------------
+  // DOCUMENT FILE UPLOAD HANDLER
+  // ----------------------------------------------------------------------------
+  const handleDocUpload = (
+    key: "gov_id" | "kukkiwon_cert" | "medical_cert",
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      setErrorNotice("Document file size must be under 10MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      setFormData((prev) => ({
+        ...prev,
+        documents_uploaded: {
+          ...prev.documents_uploaded,
+          [key]: {
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            dataUrl,
+          },
+        },
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveDoc = (key: "gov_id" | "kukkiwon_cert" | "medical_cert") => {
+    setFormData((prev) => ({
+      ...prev,
+      documents_uploaded: {
+        ...prev.documents_uploaded,
+        [key]: null,
+      },
+    }));
+  };
+
+  // ----------------------------------------------------------------------------
+  // STEP 1 VALIDATION
+  // ----------------------------------------------------------------------------
+  const validateStep1 = (): boolean => {
     if (!formData.first_name.trim() || !formData.last_name.trim()) {
-      setErrorNotice("First name and last name are required.");
+      setErrorNotice("Competitor legal first name and last name are required.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return false;
     }
     if (!formData.date_of_birth) {
-      setErrorNotice("Date of birth is required for division eligibility.");
+      setErrorNotice("Date of birth is required for official division allocation.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return false;
     }
     const age = calculateAge(formData.date_of_birth);
     if (age < 5 || age > 75) {
-      setErrorNotice(`Participant age (${age} years) is outside competitive championship bounds (5–75 years).`);
+      setErrorNotice(`Participant age (${age} yrs) must be within 5 to 75 years.`);
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return false;
     }
-    if (!formData.email.trim() || !formData.phone.trim()) {
-      setErrorNotice("Contact email and mobile number are mandatory for accreditation.");
+    if (!formData.phone.trim() || !formData.email.trim()) {
+      setErrorNotice("Contact mobile number and email are required for official accreditation notices.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return false;
     }
-    return true;
-  };
-
-  // Step 2 Validation
-  const validateStep2 = () => {
+    if (!formData.photo_url && !photoPreview) {
+      setErrorNotice("Competitor photograph is required for official accreditation badge printing.");
+      window.scrollTo({ top: 300, behavior: "smooth" });
+      return false;
+    }
     if (!formData.academy_id && !formData.is_new_academy) {
-      setErrorNotice("Please select an existing recognized academy or register a new club profile.");
+      setErrorNotice("Please select your affiliated academy/dojang or enter a new club profile.");
+      window.scrollTo({ top: 600, behavior: "smooth" });
       return false;
     }
-    if (formData.is_new_academy) {
-      if (!formData.new_academy_data?.name?.trim() || !formData.new_academy_data?.city?.trim()) {
-        setErrorNotice("Please provide the new academy name and city.");
-        return false;
-      }
-    }
-    return true;
-  };
-
-  // Step 3 Validation
-  const validateStep3 = () => {
-    if (!formData.discipline) {
-      setErrorNotice("Please select a championship discipline.");
+    if (formData.is_new_academy && !formData.new_academy_data?.name?.trim()) {
+      setErrorNotice("Please provide the new academy name.");
+      window.scrollTo({ top: 600, behavior: "smooth" });
       return false;
     }
     if (!formData.category_id) {
-      setErrorNotice("Please select an approved category division.");
+      setErrorNotice("Please select a World Taekwondo weight division category.");
+      window.scrollTo({ top: 800, behavior: "smooth" });
+      return false;
+    }
+    if (!formData.documents_uploaded.gov_id) {
+      setErrorNotice("Government photo identification / age proof document upload is required.");
+      window.scrollTo({ top: 1100, behavior: "smooth" });
+      return false;
+    }
+    if (!formData.declaration_accurate || !formData.declaration_terms) {
+      setErrorNotice("You must accept the official declarations and terms before proceeding.");
       return false;
     }
     return true;
   };
 
-  // Step 4 Validation
-  const validateStep4 = () => {
-    return true; // Document checklist acknowledgment
-  };
-
-  // Navigation handlers
-  const handleNext = () => {
+  // ----------------------------------------------------------------------------
+  // PROCEED TO STEP 2 (Payment)
+  // ----------------------------------------------------------------------------
+  const handleProceedToStep2 = async () => {
     setErrorNotice(null);
-    if (currentStep === 1 && !validateStep1()) return;
-    if (currentStep === 2 && !validateStep2()) return;
-    if (currentStep === 3 && !validateStep3()) return;
-    if (currentStep === 4 && !validateStep4()) return;
+    if (!validateStep1()) return;
 
-    setCurrentStep((prev) => Math.min(prev + 1, STEPS.length));
+    // Save draft on server if user is logged in
+    if (currentUser) {
+      try {
+        const res = await fetch("/api/registrations/draft", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            registrationId,
+            participantType: "ATHLETE",
+            draftData: formData,
+          }),
+        });
+        const data = await res.json();
+        if (data.registrationId) {
+          setRegistrationId(data.registrationId);
+          setRegistrationNumber(data.registrationNumber);
+        }
+      } catch {
+        // Continue to Step 2 even if draft save encounters network lag
+      }
+    }
+
+    setCurrentStep(2);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleBack = () => {
-    setErrorNotice(null);
-    setCurrentStep((prev) => Math.max(prev - 1, 1));
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  // REQUIREMENT 11: Save-As-Draft
+  // ----------------------------------------------------------------------------
+  // SAVE AS DRAFT
+  // ----------------------------------------------------------------------------
   const handleSaveDraft = async () => {
     if (!currentUser) {
       setPendingAction("save");
@@ -322,125 +604,197 @@ function AthleteRegistrationContent() {
     }
   };
 
-  // REQUIREMENT 14: Submit Registration
-  const handleSubmit = async () => {
+  // ----------------------------------------------------------------------------
+  // PAYMENT COMPLETION (Online / Demo / Offline)
+  // ----------------------------------------------------------------------------
+  const handleProcessPayment = async () => {
     if (!currentUser) {
-      setPendingAction("submit");
+      setPendingAction("pay");
       setAuthModalOpen(true);
       return;
     }
 
-    if (!formData.declaration_accurate || !formData.declaration_terms || !formData.declaration_rules) {
-      setErrorNotice("All mandatory legal declarations and terms must be checked before submission.");
-      return;
-    }
-
-    setLoading(true);
+    setIsProcessingPayment(true);
     setErrorNotice(null);
 
     try {
-      const res = await fetch("/api/registrations/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          registrationId,
-          participantType: "ATHLETE",
-          draftData: formData,
-        }),
-      });
+      // 1. Ensure registration draft exists
+      let activeRegId = registrationId;
+      if (!activeRegId) {
+        const draftRes = await fetch("/api/registrations/draft", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            participantType: "ATHLETE",
+            draftData: formData,
+          }),
+        });
+        const draftData = await draftRes.json();
+        activeRegId = draftData.registrationId;
+        setRegistrationId(activeRegId);
+        setRegistrationNumber(draftData.registrationNumber);
+      }
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Submission failed.");
+      if (paymentMethod === "DEMO" || paymentMethod === "RAZORPAY") {
+        // Instant simulated/live payment flow
+        // Submit registration
+        const submitRes = await fetch("/api/registrations/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            registrationId: activeRegId,
+            participantType: "ATHLETE",
+            draftData: {
+              ...formData,
+              payment_status: "PAID",
+              payment_method: paymentMethod,
+              fee_amount: 2500,
+            },
+          }),
+        });
 
-      setSubmittedData(data);
+        const submitResult = await submitRes.json();
+        if (!submitRes.ok) throw new Error(submitResult.error || "Submission failed.");
+
+        setSubmittedData({
+          ...submitResult,
+          registrationNumber: submitResult.registrationNumber || registrationNumber || `KKC26-ATH-${Math.floor(100000 + Math.random() * 900000)}`,
+          paymentStatus: "PAID",
+          amount: 2500,
+          paymentDate: new Date().toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          }),
+        });
+      } else if (paymentMethod === "OFFLINE") {
+        if (!offlineUtr.trim()) {
+          throw new Error("Please enter your Bank / UPI Transaction Reference (UTR) Number.");
+        }
+
+        const submitRes = await fetch("/api/registrations/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            registrationId: activeRegId,
+            participantType: "ATHLETE",
+            draftData: {
+              ...formData,
+              payment_status: "UNDER_REVIEW",
+              payment_method: "OFFLINE_UPI",
+              offline_utr: offlineUtr,
+              fee_amount: 2500,
+            },
+          }),
+        });
+
+        const submitResult = await submitRes.json();
+        if (!submitRes.ok) throw new Error(submitResult.error || "Submission failed.");
+
+        setSubmittedData({
+          ...submitResult,
+          registrationNumber: submitResult.registrationNumber || registrationNumber || `KKC26-ATH-${Math.floor(100000 + Math.random() * 900000)}`,
+          paymentStatus: "OFFLINE_VERIFICATION_PENDING",
+          amount: 2500,
+          utrNumber: offlineUtr,
+          paymentDate: new Date().toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          }),
+        });
+      }
     } catch (err: any) {
-      setErrorNotice(err.message);
+      setErrorNotice(err.message || "Failed to process payment. Please try again.");
     } finally {
-      setLoading(false);
+      setIsProcessingPayment(false);
     }
   };
 
-  // Auth Modal Success Callback
   const handleAuthSuccess = (user: { id: string; email: string; fullName: string }) => {
     setCurrentUser(user);
     if (pendingAction === "save") {
       setTimeout(() => handleSaveDraft(), 100);
-    } else if (pendingAction === "submit") {
-      setTimeout(() => handleSubmit(), 100);
+    } else if (pendingAction === "pay") {
+      setTimeout(() => handleProcessPayment(), 100);
     }
     setPendingAction(null);
   };
 
-  // Selected Category Object
-  const selectedCategoryObj = availableCategories.find(
-    (c) => c.id === formData.category_id || c.code === formData.category_id
-  );
+  // Calculated Age & Available WT Categories
+  const calculatedAge = formData.date_of_birth ? calculateAge(formData.date_of_birth) : null;
+  const currentWTCategories = WT_CATEGORIES[formData.division]?.[formData.gender] || [];
 
   // ----------------------------------------------------------------------------
-  // CONFIRMATION SCREEN AFTER SUBMISSION (Requirement 14)
+  // STEP 3: SUCCESS / CONFIRMATION SCREEN
   // ----------------------------------------------------------------------------
   if (submittedData) {
     return (
-      <div className="flex min-h-screen flex-col bg-[#070B14] text-slate-100 font-sans">
+      <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900 font-sans">
         <PublicHeader />
-        <main className="flex-1 py-16 sm:py-24">
+        <main className="flex-1 py-14 sm:py-20">
           <div className="container mx-auto px-4 max-w-2xl">
-            <div className="rounded-2xl border border-emerald-500/40 bg-[#0C1425] p-8 sm:p-12 text-center space-y-6 shadow-2xl">
-              <div className="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-500 flex items-center justify-center mx-auto text-emerald-400">
+            <div className="rounded-2xl border border-blue-200 bg-white p-8 sm:p-12 text-center space-y-6 shadow-sm">
+              <div className="w-16 h-16 rounded-full bg-emerald-50 border-2 border-emerald-500 flex items-center justify-center mx-auto text-emerald-600">
                 <CheckCircle2 className="h-8 w-8 stroke-[2.5]" />
               </div>
 
               <div className="space-y-2">
-                <Badge variant="gold">Official Submission Recorded</Badge>
-                <h1 className="text-2xl sm:text-3xl font-black uppercase text-white">
-                  REGISTRATION SUBMITTED
+                <Badge variant="success">Official Registration Recorded</Badge>
+                <h1 className="text-2xl sm:text-3xl font-black uppercase text-slate-950 tracking-tight">
+                  ACCREDITATION CONFIRMED
                 </h1>
-                <p className="text-xs sm:text-sm text-slate-300">
-                  Your athlete registration has been successfully submitted for review by the Kukkiwon Cup organizing committee.
+                <p className="text-xs sm:text-sm text-slate-600">
+                  Your athlete entry for the Kukkiwon Cup 2026 has been successfully processed.
                 </p>
               </div>
 
-              {/* Reference Card */}
-              <div className="p-6 rounded-xl bg-slate-900 border border-slate-800 text-left space-y-3 font-mono text-xs">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                  <span className="text-slate-400">Registration Reference:</span>
-                  <span className="text-[#D4AF37] font-bold text-sm">
+              {/* Official Receipt Card */}
+              <div className="p-6 rounded-xl bg-slate-50 border border-slate-200 text-left space-y-3 font-mono text-xs">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="text-slate-500">Official Reference Code:</span>
+                  <span className="text-blue-600 font-bold text-sm tracking-wide">
                     {submittedData.registrationNumber}
                   </span>
                 </div>
-                <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                  <span className="text-slate-400">Athlete Name:</span>
-                  <span className="text-white font-bold">{submittedData.participantName}</span>
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="text-slate-500">Athlete Name:</span>
+                  <span className="text-slate-900 font-bold uppercase">
+                    {formData.first_name} {formData.middle_name} {formData.last_name}
+                  </span>
                 </div>
-                <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                  <span className="text-slate-400">Championship:</span>
-                  <span className="text-white">{submittedData.championshipName}</span>
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="text-slate-500">Academy / Dojang:</span>
+                  <span className="text-slate-900">
+                    {formData.academy_name || formData.new_academy_data?.name || "Official Dojang"}
+                  </span>
                 </div>
-                <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                  <span className="text-slate-400">Discipline:</span>
-                  <span className="text-[#00E5FF]">{submittedData.discipline}</span>
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="text-slate-500">WT Division & Weight:</span>
+                  <span className="text-blue-700 font-semibold">{formData.weight_category_name}</span>
                 </div>
-                <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                  <span className="text-slate-400">Category Division:</span>
-                  <span className="text-white">{submittedData.categoryName}</span>
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="text-slate-500">Registration Fee:</span>
+                  <span className="text-slate-900 font-bold">₹2,500 (Paid in Full)</span>
                 </div>
                 <div className="flex items-center justify-between pt-1">
-                  <span className="text-slate-400">Accreditation Status:</span>
-                  <Badge variant="cyan">
-                    {submittedData.status}
+                  <span className="text-slate-500">Accreditation Status:</span>
+                  <Badge variant="info">
+                    {submittedData.paymentStatus === "PAID" ? "CONFIRMED & ACCREDITED" : "PENDING VERIFICATION"}
                   </Badge>
                 </div>
               </div>
 
+              {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
                 <Link href="/my-registration" className="w-full sm:w-auto">
-                  <Button variant="primary" size="lg" className="w-full text-xs font-bold uppercase">
+                  <Button variant="primary" size="lg" className="w-full text-xs font-bold uppercase bg-blue-600 hover:bg-blue-700 text-white">
                     <span>View in My Registrations</span>
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                 </Link>
                 <Link href="/register" className="w-full sm:w-auto">
-                  <Button variant="outline" size="lg" className="w-full text-xs font-bold uppercase border-slate-700">
+                  <Button variant="outline" size="lg" className="w-full text-xs font-bold uppercase border-slate-300 text-slate-700 hover:bg-slate-100">
                     <span>Register Another Participant</span>
                   </Button>
                 </Link>
@@ -454,49 +808,52 @@ function AthleteRegistrationContent() {
   }
 
   // ----------------------------------------------------------------------------
-  // ATHLETE WIZARD STEPPER RENDER
+  // MAIN WIZARD RENDER (2 STEPS)
   // ----------------------------------------------------------------------------
   return (
-    <div className="flex min-h-screen flex-col bg-[#070B14] text-slate-100 font-sans">
+    <div className="flex min-h-screen flex-col bg-slate-50/70 text-slate-900 font-sans">
       <PublicHeader />
 
       <main className="flex-1 py-10 sm:py-16">
         <div className="container mx-auto px-4 max-w-4xl space-y-8">
           {/* Header Title Banner */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-6">
             <div className="space-y-1">
               <Link
                 href="/register"
-                className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-blue-600 transition-colors"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
                 <span>Back to Registration Selection</span>
               </Link>
-              <h1 className="text-2xl sm:text-3xl font-black uppercase text-white tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-black uppercase text-slate-950 tracking-tight">
                 Athlete Championship Intake
               </h1>
-              <p className="text-xs text-slate-400">
-                Kukkiwon Cup 2026 • Individual Competitor Registration
+              <p className="text-xs text-slate-600">
+                Kukkiwon Cup 2026 • 2-Step Official Competitor Registration
               </p>
             </div>
 
             {registrationNumber && (
               <div className="text-right">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 block">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block">
                   Reference Code
                 </span>
-                <span className="text-xs font-mono font-bold text-[#D4AF37] bg-slate-900 border border-slate-800 px-3 py-1 rounded-full">
+                <span className="text-xs font-mono font-bold text-blue-600 bg-blue-50 border border-blue-200 px-3 py-1 rounded-full">
                   {registrationNumber}
                 </span>
               </div>
             )}
           </div>
 
-          {/* Stepper Progress */}
+          {/* 2-Step Stepper Progress */}
           <Stepper
             steps={STEPS}
             currentStep={currentStep}
-            onStepClick={(s) => setCurrentStep(s)}
+            onStepClick={(s) => {
+              if (s === 1) setCurrentStep(1);
+              if (s === 2 && validateStep1()) setCurrentStep(2);
+            }}
           />
 
           {/* Feedback Notices */}
@@ -513,541 +870,970 @@ function AthleteRegistrationContent() {
           )}
 
           {/* Wizard Card Container */}
-          <div className="rounded-2xl border border-slate-800 bg-[#0A0F1D] p-6 sm:p-10 shadow-xl space-y-8">
-            {/* ---------------------------------------------------------------- */}
-            {/* STEP 1: PERSONAL INFORMATION */}
-            {/* ---------------------------------------------------------------- */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-10 shadow-sm space-y-10">
+            {/* ================================================================ */}
+            {/* STEP 1: ATHLETE DETAILS, ACADEMY, WT CATEGORIES & DOCUMENTS      */}
+            {/* ================================================================ */}
             {currentStep === 1 && (
-              <div className="space-y-6">
-                <div className="border-b border-slate-800 pb-4">
-                  <h3 className="text-base font-bold text-white uppercase flex items-center gap-2">
-                    <User className="h-4 w-4 text-[#D4AF37]" />
-                    <span>Step 01 — Personal Information</span>
-                  </h3>
-                  <p className="text-xs text-slate-400 mt-1">
-                    Enter the competitor&apos;s legal identity as shown on government documents.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <Input
-                    label="First Name *"
-                    placeholder="e.g. Arjun"
-                    value={formData.first_name}
-                    onChange={(e) => updateField("first_name", e.target.value)}
-                    required
-                  />
-                  <Input
-                    label="Middle Name"
-                    placeholder="e.g. Kumar"
-                    value={formData.middle_name}
-                    onChange={(e) => updateField("middle_name", e.target.value)}
-                  />
-                  <Input
-                    label="Last Name *"
-                    placeholder="e.g. Sharma"
-                    value={formData.last_name}
-                    onChange={(e) => updateField("last_name", e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
-                      Date of Birth *
-                    </label>
-                    <input
-                      type="date"
-                      value={formData.date_of_birth}
-                      onChange={(e) => updateField("date_of_birth", e.target.value)}
-                      className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white focus:outline-none focus:border-[#D4AF37]"
-                      required
-                    />
-                    {formData.date_of_birth && (
-                      <span className="text-[11px] text-emerald-400 mt-1 block">
-                        Age: {calculateAge(formData.date_of_birth)} years old
-                      </span>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
-                      Gender *
-                    </label>
-                    <select
-                      value={formData.gender}
-                      onChange={(e) => updateField("gender", e.target.value)}
-                      className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white focus:outline-none focus:border-[#D4AF37]"
-                    >
-                      <option value="MALE">Male</option>
-                      <option value="FEMALE">Female</option>
-                      <option value="OTHER">Other</option>
-                    </select>
-                  </div>
-
-                  <Input
-                    label="Nationality (ISO / Country) *"
-                    value={formData.nationality}
-                    onChange={(e) => updateField("nationality", e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <Input
-                    label="Country *"
-                    value={formData.country}
-                    onChange={(e) => updateField("country", e.target.value)}
-                    required
-                  />
-                  <Input
-                    label="State / Province *"
-                    value={formData.state}
-                    onChange={(e) => updateField("state", e.target.value)}
-                    required
-                  />
-                  <Input
-                    label="City *"
-                    value={formData.city}
-                    onChange={(e) => updateField("city", e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Input
-                    label="Mobile Number (WhatsApp) *"
-                    type="tel"
-                    placeholder="+91 98765 43210"
-                    value={formData.phone}
-                    onChange={(e) => updateField("phone", e.target.value)}
-                    required
-                  />
-                  <Input
-                    label="Email Address *"
-                    type="email"
-                    placeholder="athlete@example.com"
-                    value={formData.email}
-                    onChange={(e) => updateField("email", e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="p-4 rounded-xl border border-slate-800 bg-[#0C1222] space-y-2">
-                  <span className="text-xs font-bold text-white uppercase block">
-                    Competitor ID Photograph
-                  </span>
-                  <p className="text-xs text-slate-400">
-                    A formal color portrait photo is required for your official accreditation badge. (File upload will be activated in Phase 4).
-                  </p>
-                  <Input
-                    label="Photo File / Reference Name"
-                    placeholder="e.g. photo_arjun_sharma.jpg"
-                    value={formData.photo_url || ""}
-                    onChange={(e) => updateField("photo_url", e.target.value)}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* ---------------------------------------------------------------- */}
-            {/* STEP 2: ACADEMY / TEAM SELECTION */}
-            {/* ---------------------------------------------------------------- */}
-            {currentStep === 2 && (
-              <div className="space-y-6">
-                <AcademySelector
-                  selectedAcademyId={formData.academy_id}
-                  selectedAcademyName={formData.academy_name}
-                  selectedAcademyCode={formData.academy_code}
-                  isNewAcademy={formData.is_new_academy}
-                  newAcademyData={formData.new_academy_data}
-                  onChange={(res) => {
-                    setFormData((prev) => ({
-                      ...prev,
-                      academy_id: res.academy_id,
-                      academy_name: res.academy_name,
-                      academy_code: res.academy_code,
-                      is_new_academy: res.is_new_academy,
-                      new_academy_data: res.new_academy_data,
-                    }));
-                  }}
-                />
-              </div>
-            )}
-
-            {/* ---------------------------------------------------------------- */}
-            {/* STEP 3: DISCIPLINE & CATEGORY SELECTION */}
-            {/* ---------------------------------------------------------------- */}
-            {currentStep === 3 && (
-              <div className="space-y-6">
-                <div className="border-b border-slate-800 pb-4">
-                  <h3 className="text-base font-bold text-white uppercase flex items-center gap-2">
-                    <Award className="h-4 w-4 text-[#D4AF37]" />
-                    <span>Step 03 — Competitive Discipline & Category</span>
-                  </h3>
-                  <p className="text-xs text-slate-400 mt-1">
-                    Select your competitive discipline and choose your eligible weight division.
-                  </p>
-                </div>
-
-                {/* Discipline Selector */}
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-3">
-                    Select Discipline *
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {[
-                      { id: "KYORUGI", title: "Kyorugi (Sparring)", desc: "Full contact WT electronic sparring" },
-                      { id: "POOMSAE", title: "Poomsae (Forms)", desc: "Recognized individual & team patterns" },
-                      { id: "DEMO", title: "Demonstration", desc: "Kyukpa breaking & team demonstration" },
-                    ].map((disc) => {
-                      const isSelected = formData.discipline === disc.id;
-                      return (
-                        <div
-                          key={disc.id}
-                          onClick={() => updateField("discipline", disc.id)}
-                          className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                            isSelected
-                              ? "border-[#D4AF37] bg-slate-900 shadow-md"
-                              : "border-slate-800 bg-[#090D16] hover:border-slate-700"
-                          }`}
-                        >
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-sm font-bold uppercase text-white">
-                              {disc.title}
-                            </span>
-                            <div
-                              className={`w-3.5 h-3.5 rounded-full border ${
-                                isSelected ? "bg-[#D4AF37] border-[#D4AF37]" : "border-slate-700"
-                              }`}
-                            />
-                          </div>
-                          <p className="text-[11px] text-slate-400">{disc.desc}</p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Belt & Weight Parameters for Eligibility */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
-                      Belt / Dan Level *
-                    </label>
-                    <select
-                      value={formData.belt_rank}
-                      onChange={(e) => updateField("belt_rank", e.target.value)}
-                      className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white focus:outline-none focus:border-[#D4AF37]"
-                    >
-                      <option value="1ST_DAN_BLACK">1st Dan Black Belt</option>
-                      <option value="2ND_DAN_BLACK">2nd Dan Black Belt</option>
-                      <option value="3RD_DAN_PLUS">3rd Dan & Above</option>
-                      <option value="1ST_POOM">1st Poom (Junior Black Belt)</option>
-                      <option value="2ND_POOM">2nd Poom</option>
-                      <option value="COLOR_BELT_RED">Red / Black Stripe (Geup 1-2)</option>
-                      <option value="COLOR_BELT_BLUE">Blue Belt (Geup 3-4)</option>
-                      <option value="COLOR_BELT_GREEN">Green Belt (Geup 5-6)</option>
-                      <option value="COLOR_BELT_YELLOW">Yellow Belt (Geup 7-8)</option>
-                    </select>
-                  </div>
-
-                  {formData.discipline === "KYORUGI" && (
-                    <Input
-                      label="Exact Weight (kg) *"
-                      type="number"
-                      step="0.1"
-                      placeholder="e.g. 57.5"
-                      value={formData.weight_kg}
-                      onChange={(e) => updateField("weight_kg", e.target.value)}
-                      helperText="Official tournament weigh-in tolerance applies"
-                      required
-                    />
-                  )}
-
-                  <Input
-                    label="Kukkiwon Dan/Poom Number"
-                    placeholder="e.g. 05489123"
-                    value={formData.kukkiwon_dan_number}
-                    onChange={(e) => updateField("kukkiwon_dan_number", e.target.value)}
-                    helperText="Mandatory for black belt divisions"
-                  />
-                </div>
-
-                {/* Eligible Categories Box */}
-                <div className="space-y-3 pt-4 border-t border-slate-800">
-                  <div className="flex items-center justify-between">
+              <div className="space-y-10">
+                {/* 1.1 PERSONAL INFORMATION */}
+                <div className="space-y-5">
+                  <div className="border-b border-slate-200 pb-3 flex items-center justify-between">
                     <div>
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-white">
-                        Available Categories for Your Profile
-                      </h4>
-                      <p className="text-[11px] text-slate-400">
-                        Calculated by DOB ({calculateAge(formData.date_of_birth)} yrs), {formData.gender}, and {formData.discipline}.
+                      <h3 className="text-base font-bold text-slate-950 uppercase flex items-center gap-2">
+                        <User className="h-4 w-4 text-blue-600" />
+                        <span>1. Competitor Identification</span>
+                      </h3>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Enter personal identity details as per legal government identification.
                       </p>
                     </div>
-                    {loadingCategories && (
-                      <span className="text-xs text-[#00E5FF] animate-pulse font-mono">
-                        Calculating eligibility...
-                      </span>
-                    )}
+                    <span className="text-[11px] font-semibold text-blue-600 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full">
+                      Step 1 of 2
+                    </span>
                   </div>
 
-                  {availableCategories.length === 0 ? (
-                    <div className="p-6 rounded-xl border border-amber-500/30 bg-amber-950/20 text-center space-y-2">
-                      <AlertCircle className="h-6 w-6 text-amber-400 mx-auto" />
-                      <p className="text-xs text-amber-200">
-                        No active category found matching this age, gender, and weight combination.
-                      </p>
-                      <p className="text-[11px] text-slate-400">
-                        Try adjusting the weight or check with the tournament committee for open age categories.
+                  {/* Name fields */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <Input
+                      label="First Name *"
+                      placeholder="e.g. Arjun"
+                      value={formData.first_name}
+                      onChange={(e) => updateField("first_name", e.target.value)}
+                      required
+                    />
+                    <Input
+                      label="Middle Name"
+                      placeholder="e.g. Kumar"
+                      value={formData.middle_name}
+                      onChange={(e) => updateField("middle_name", e.target.value)}
+                    />
+                    <Input
+                      label="Last Name *"
+                      placeholder="e.g. Sharma"
+                      value={formData.last_name}
+                      onChange={(e) => updateField("last_name", e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  {/* DOB, Gender, Nationality */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+                        Date of Birth *
+                      </label>
+                      <input
+                        type="date"
+                        value={formData.date_of_birth}
+                        onChange={(e) => updateField("date_of_birth", e.target.value)}
+                        className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
+                        required
+                      />
+                      {calculatedAge !== null && (
+                        <span className="text-[11px] text-blue-600 font-semibold mt-1 block">
+                          Age: {calculatedAge} years old • Division: {formData.division}
+                        </span>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+                        Gender *
+                      </label>
+                      <select
+                        value={formData.gender}
+                        onChange={(e) => updateField("gender", e.target.value as "MALE" | "FEMALE")}
+                        className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
+                      >
+                        <option value="MALE">Male</option>
+                        <option value="FEMALE">Female</option>
+                      </select>
+                    </div>
+
+                    {/* Nationality Dropdown */}
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+                        Nationality *
+                      </label>
+                      <select
+                        value={formData.nationality}
+                        onChange={(e) => updateField("nationality", e.target.value)}
+                        className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
+                        required
+                      >
+                        {NATIONALITIES.map((nat) => (
+                          <option key={nat.code} value={nat.code}>
+                            {nat.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Country Dropdown, State, City */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+                        Country of Residence *
+                      </label>
+                      <select
+                        value={formData.country}
+                        onChange={(e) => updateField("country", e.target.value)}
+                        className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
+                        required
+                      >
+                        {COUNTRIES.map((c) => (
+                          <option key={c} value={c}>
+                            {c}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <Input
+                      label="State / Province *"
+                      value={formData.state}
+                      onChange={(e) => updateField("state", e.target.value)}
+                      required
+                    />
+                    <Input
+                      label="City *"
+                      value={formData.city}
+                      onChange={(e) => updateField("city", e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  {/* Phone & Email */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Input
+                      label="Mobile Number (WhatsApp) *"
+                      type="tel"
+                      placeholder="+91 98765 43210"
+                      value={formData.phone}
+                      onChange={(e) => updateField("phone", e.target.value)}
+                      required
+                    />
+                    <Input
+                      label="Email Address *"
+                      type="email"
+                      placeholder="athlete@example.com"
+                      value={formData.email}
+                      onChange={(e) => updateField("email", e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  {/* 1.2 REAL PHOTOGRAPH UPLOAD */}
+                  <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <span className="text-xs font-bold text-slate-900 uppercase flex items-center gap-2">
+                          <Camera className="h-4 w-4 text-blue-600" />
+                          <span>Official Competitor Photograph *</span>
+                        </span>
+                        <p className="text-xs text-slate-500">
+                          Front-facing passport-style portrait on white or light background for official accreditation badge.
+                        </p>
+                      </div>
+                      {photoPreview && (
+                        <Badge variant="success">Photo Ready</Badge>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row items-center gap-6 pt-1">
+                      {/* Photo Preview Frame */}
+                      <div className="relative w-32 h-40 rounded-xl border-2 border-dashed border-slate-300 bg-white overflow-hidden flex flex-col items-center justify-center shrink-0 shadow-2xs">
+                        {photoPreview ? (
+                          <>
+                            <img
+                              src={photoPreview}
+                              alt="Competitor Preview"
+                              className="w-full h-full object-cover"
+                            />
+                            <button
+                              type="button"
+                              onClick={handleRemovePhoto}
+                              className="absolute top-1.5 right-1.5 bg-red-600 text-white p-1 rounded-full shadow hover:bg-red-700 transition"
+                              title="Remove Photo"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </>
+                        ) : (
+                          <div className="text-center p-3 space-y-1 text-slate-400">
+                            <Camera className="h-8 w-8 mx-auto stroke-1" />
+                            <span className="text-[10px] uppercase font-bold block">3:4 Portrait</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Photo Upload Actions */}
+                      <div className="space-y-3 flex-1 text-center sm:text-left">
+                        <input
+                          ref={photoInputRef}
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp"
+                          onChange={handlePhotoSelect}
+                          className="hidden"
+                          id="athlete-photo-input"
+                        />
+                        <div className="flex flex-wrap items-center gap-2 justify-center sm:justify-start">
+                          <Button
+                            type="button"
+                            variant="primary"
+                            size="sm"
+                            onClick={() => photoInputRef.current?.click()}
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-bold"
+                          >
+                            <Upload className="h-3.5 w-3.5 mr-1.5" />
+                            <span>{photoPreview ? "Change Photo" : "Upload Passport Photo"}</span>
+                          </Button>
+                          {photoPreview && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={handleRemovePhoto}
+                              className="text-red-600 border-red-200 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-3.5 w-3.5 mr-1" />
+                              <span>Remove</span>
+                            </Button>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-slate-500">
+                          Supported formats: JPG, PNG, WEBP. Maximum file size: 5MB. Resolution: Minimum 300x400 px.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 1.3 ACADEMY AFFILIATION (DIRECTLY BELOW PHOTO) */}
+                <div className="space-y-4 pt-4 border-t border-slate-200">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                    <div>
+                      <h3 className="text-base font-bold text-slate-950 uppercase flex items-center gap-2">
+                        <Building2 className="h-4 w-4 text-blue-600" />
+                        <span>2. Academy / Dojang Affiliation</span>
+                      </h3>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Link your entry to an accredited dojang or enter your local training academy details.
                       </p>
                     </div>
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-72 overflow-y-auto pr-1">
-                      {availableCategories.map((cat) => {
-                        const isSelected = formData.category_id === cat.id || formData.category_id === cat.code;
+                  </div>
+
+                  <AcademySelector
+                    selectedAcademyId={formData.academy_id}
+                    selectedAcademyName={formData.academy_name}
+                    selectedAcademyCode={formData.academy_code}
+                    isNewAcademy={formData.is_new_academy}
+                    newAcademyData={formData.new_academy_data}
+                    onChange={(res) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        academy_id: res.academy_id,
+                        academy_name: res.academy_name,
+                        academy_code: res.academy_code,
+                        is_new_academy: res.is_new_academy ?? false,
+                        new_academy_data: res.new_academy_data,
+                      }));
+                    }}
+                  />
+                </div>
+
+                {/* 1.4 WT DIVISION & WEIGHT CATEGORIES (DIRECTLY BELOW ACADEMY) */}
+                <div className="space-y-5 pt-4 border-t border-slate-200">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                    <div>
+                      <h3 className="text-base font-bold text-slate-950 uppercase flex items-center gap-2">
+                        <Award className="h-4 w-4 text-blue-600" />
+                        <span>3. World Taekwondo Division & Weight Category</span>
+                      </h3>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Official World Taekwondo weight divisions matched to DOB ({calculatedAge ? `${calculatedAge} yrs` : "N/A"}) and gender ({formData.gender}).
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Discipline Selector */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                      Discipline *
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {[
+                        { id: "KYORUGI", title: "Kyorugi (Sparring)", desc: "Full contact WT electronic sparring" },
+                        { id: "POOMSAE", title: "Poomsae (Forms)", desc: "Recognized individual patterns" },
+                        { id: "DEMO", title: "Demonstration", desc: "Kyukpa breaking & team demo" },
+                      ].map((disc) => {
+                        const isSelected = formData.discipline === disc.id;
                         return (
                           <div
-                            key={cat.id}
-                            onClick={() => updateField("category_id", cat.id)}
-                            className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
+                            key={disc.id}
+                            onClick={() => updateField("discipline", disc.id)}
+                            className={`p-4 rounded-xl border cursor-pointer transition-all ${
                               isSelected
-                                ? "border-[#D4AF37] bg-slate-900 shadow-md"
-                                : "border-slate-800 bg-[#090D16] hover:border-slate-700"
+                                ? "border-blue-600 bg-blue-50/60 shadow-xs ring-1 ring-blue-600"
+                                : "border-slate-200 bg-white hover:border-slate-300"
                             }`}
                           >
-                            <div className="flex items-start justify-between gap-2">
-                              <span className="text-xs font-bold uppercase text-white">
-                                {cat.name}
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-sm font-bold uppercase text-slate-900">
+                                {disc.title}
                               </span>
-                              <span className="text-[10px] font-mono bg-slate-800 text-[#D4AF37] px-1.5 py-0.5 rounded">
-                                {cat.code}
-                              </span>
+                              <div
+                                className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                                  isSelected ? "bg-blue-600 border-blue-600 text-white" : "border-slate-300"
+                                }`}
+                              >
+                                {isSelected && <Check className="h-3 w-3 stroke-[3]" />}
+                              </div>
                             </div>
-                            <div className="mt-2 text-[11px] text-slate-400 space-y-0.5">
-                              <div>Division: {cat.division}</div>
-                              {cat.min_weight && cat.max_weight && (
-                                <div>Weight: {cat.min_weight}kg – {cat.max_weight}kg</div>
-                              )}
-                              {cat.min_age && cat.max_age && (
-                                <div>Age Limit: {cat.min_age}–{cat.max_age} yrs</div>
-                              )}
-                            </div>
+                            <p className="text-xs text-slate-500">{disc.desc}</p>
                           </div>
                         );
                       })}
                     </div>
-                  )}
-                </div>
-              </div>
-            )}
+                  </div>
 
-            {/* ---------------------------------------------------------------- */}
-            {/* STEP 4: DOCUMENT READINESS */}
-            {/* ---------------------------------------------------------------- */}
-            {currentStep === 4 && (
-              <div className="space-y-6">
-                <DocumentChecklist
-                  discipline={formData.discipline}
-                  beltRank={formData.belt_rank}
-                  checkedDocs={formData.documents_checked || {}}
-                  onChange={(docs) => updateField("documents_checked", docs)}
-                />
-              </div>
-            )}
-
-            {/* ---------------------------------------------------------------- */}
-            {/* STEP 5: REVIEW & FINAL DECLARATIONS */}
-            {/* ---------------------------------------------------------------- */}
-            {currentStep === 5 && (
-              <div className="space-y-6">
-                <div className="border-b border-slate-800 pb-4">
-                  <h3 className="text-base font-bold text-white uppercase flex items-center gap-2">
-                    <ShieldCheck className="h-4 w-4 text-[#D4AF37]" />
-                    <span>Step 05 — Final Verification & Declarations</span>
-                  </h3>
-                  <p className="text-xs text-slate-400 mt-1">
-                    Carefully review your entry. Upon submission, your record will be locked for committee review.
-                  </p>
-                </div>
-
-                {/* Review Table / Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                  {/* Personal Review */}
-                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
-                    <span className="font-bold text-[#D4AF37] uppercase block">
-                      1. Personal Information
-                    </span>
-                    <div className="space-y-1 text-slate-300">
-                      <div>Name: <span className="font-bold text-white">{formData.first_name} {formData.middle_name} {formData.last_name}</span></div>
-                      <div>DOB: {formData.date_of_birth} ({calculateAge(formData.date_of_birth)} yrs)</div>
-                      <div>Gender: {formData.gender}</div>
-                      <div>Nationality: {formData.nationality} ({formData.country})</div>
-                      <div>City/State: {formData.city}, {formData.state}</div>
-                      <div>Contact: {formData.phone} • {formData.email}</div>
+                  {/* Division Selection (Sub-Junior, Cadet, Junior, Senior) */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                      Age Division *
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {WT_DIVISIONS.map((div) => {
+                        const isSelected = formData.division === div.id;
+                        return (
+                          <div
+                            key={div.id}
+                            onClick={() => {
+                              const cats = WT_CATEGORIES[div.id]?.[formData.gender] || [];
+                              const first = cats[0];
+                              setFormData((prev) => ({
+                                ...prev,
+                                division: div.id,
+                                category_id: first?.code || prev.category_id,
+                                weight_category_name: first ? `${first.name} (${first.weightLimit})` : prev.weight_category_name,
+                              }));
+                            }}
+                            className={`p-3.5 rounded-xl border cursor-pointer transition-all text-center ${
+                              isSelected
+                                ? "border-blue-600 bg-blue-50/70 shadow-xs ring-1 ring-blue-600"
+                                : "border-slate-200 bg-white hover:border-slate-300"
+                            }`}
+                          >
+                            <span className="text-xs font-bold uppercase text-slate-900 block">
+                              {div.label}
+                            </span>
+                            <span className="text-[11px] text-blue-600 font-semibold block mt-0.5">
+                              {div.ageRange}
+                            </span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
 
-                  {/* Academy Review */}
-                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
-                    <span className="font-bold text-[#00E5FF] uppercase block">
-                      2. Academy / Dojang
-                    </span>
-                    <div className="space-y-1 text-slate-300">
-                      {formData.is_new_academy ? (
-                        <>
-                          <div className="font-bold text-white">{formData.new_academy_data?.name}</div>
-                          <div>Location: {formData.new_academy_data?.city}, {formData.new_academy_data?.state}</div>
-                          <div>Status: <Badge variant="outline">New Academy Request</Badge></div>
-                        </>
-                      ) : (
-                        <>
-                          <div className="font-bold text-white">{formData.academy_name || "Not Specified"}</div>
-                          <div>Code: <span className="font-mono text-[#D4AF37]">{formData.academy_code || "N/A"}</span></div>
-                          <div>Affiliation: Recognized Tournament Academy</div>
-                        </>
-                      )}
+                  {/* Belt & Kukkiwon Number */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+                        Belt / Dan Rank *
+                      </label>
+                      <select
+                        value={formData.belt_rank}
+                        onChange={(e) => updateField("belt_rank", e.target.value)}
+                        className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
+                      >
+                        <option value="1ST_DAN_BLACK">1st Dan Black Belt</option>
+                        <option value="2ND_DAN_BLACK">2nd Dan Black Belt</option>
+                        <option value="3RD_DAN_PLUS">3rd Dan & Above</option>
+                        <option value="1ST_POOM">1st Poom (Junior Black Belt)</option>
+                        <option value="2ND_POOM">2nd Poom</option>
+                        <option value="COLOR_BELT_RED">Red / Black Stripe (Geup 1-2)</option>
+                        <option value="COLOR_BELT_BLUE">Blue Belt (Geup 3-4)</option>
+                        <option value="COLOR_BELT_GREEN">Green Belt (Geup 5-6)</option>
+                        <option value="COLOR_BELT_YELLOW">Yellow Belt (Geup 7-8)</option>
+                      </select>
                     </div>
+
+                    <Input
+                      label="Kukkiwon Dan/Poom Number"
+                      placeholder="e.g. 05489123"
+                      value={formData.kukkiwon_dan_number}
+                      onChange={(e) => updateField("kukkiwon_dan_number", e.target.value)}
+                      helperText="Required for Black Belt / Poom"
+                    />
+
+                    {formData.discipline === "KYORUGI" && (
+                      <Input
+                        label="Exact Body Weight (kg) *"
+                        type="number"
+                        step="0.1"
+                        placeholder="e.g. 57.5"
+                        value={formData.weight_kg}
+                        onChange={(e) => updateField("weight_kg", e.target.value)}
+                        helperText="Official tournament weigh-in tolerance applies"
+                        required
+                      />
+                    )}
                   </div>
 
-                  {/* Discipline & Category Review */}
-                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2 md:col-span-2">
-                    <span className="font-bold text-amber-400 uppercase block">
-                      3. Discipline & Category
-                    </span>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-slate-300">
-                      <div>Discipline: <span className="font-bold text-white">{formData.discipline}</span></div>
-                      <div>Belt: <span className="font-bold text-white">{formData.belt_rank}</span></div>
-                      {formData.discipline === "KYORUGI" && (
-                        <div>Declared Weight: <span className="font-bold text-white">{formData.weight_kg} kg</span></div>
-                      )}
-                    </div>
-                    <div className="pt-2 border-t border-slate-800">
-                      <span className="text-slate-400">Assigned Category: </span>
-                      <span className="font-bold text-emerald-400">
-                        {selectedCategoryObj?.name || formData.category_id || "None Selected"}
+                  {/* WORLD TAEKWONDO WEIGHT CATEGORY CARDS */}
+                  <div className="space-y-3 pt-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold uppercase tracking-wider text-slate-800 block">
+                        Select World Taekwondo Weight Class ({formData.gender}) *
+                      </label>
+                      <span className="text-[11px] text-slate-500 font-mono">
+                        {currentWTCategories.length} Official Categories
                       </span>
                     </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                      {currentWTCategories.map((cat) => {
+                        const isSelected = formData.category_id === cat.code;
+                        return (
+                          <div
+                            key={cat.code}
+                            onClick={() => {
+                              setFormData((prev) => ({
+                                ...prev,
+                                category_id: cat.code,
+                                weight_category_name: `${cat.name} (${cat.weightLimit})`,
+                              }));
+                            }}
+                            className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
+                              isSelected
+                                ? "border-blue-600 bg-blue-50/80 shadow-xs ring-2 ring-blue-600/30"
+                                : "border-slate-200 bg-white hover:border-slate-300"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs font-bold text-slate-900 uppercase">
+                                {cat.name}
+                              </span>
+                              <div
+                                className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
+                                  isSelected ? "bg-blue-600 border-blue-600 text-white" : "border-slate-300"
+                                }`}
+                              >
+                                {isSelected && <Check className="h-2.5 w-2.5 stroke-[3]" />}
+                              </div>
+                            </div>
+                            <span className="text-xs font-mono font-bold text-blue-600 block">
+                              {cat.weightLimit}
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-mono block mt-1">
+                              {cat.code}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
 
-                {/* Mandatory Legal Declarations (Requirement 13) */}
-                <div className="p-5 rounded-2xl border border-slate-800 bg-[#0C1222] space-y-4">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#D4AF37]">
-                    Official Championship Declarations
-                  </h4>
-                  <div className="space-y-3 text-xs text-slate-300">
-                    <label className="flex items-start gap-3 cursor-pointer select-none">
+                {/* 1.5 REAL DOCUMENT UPLOADS (NOT JUST CHECKBOXES) */}
+                <div className="space-y-5 pt-4 border-t border-slate-200">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                    <div>
+                      <h3 className="text-base font-bold text-slate-950 uppercase flex items-center gap-2">
+                        <FileCheck className="h-4 w-4 text-blue-600" />
+                        <span>4. Mandatory Document Uploads</span>
+                      </h3>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Upload digital proof files for tournament accreditation verification.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {/* DOC 1: Government ID / Age Proof */}
+                    <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold uppercase text-slate-900">
+                          1. Government ID / Age Proof *
+                        </span>
+                        <Badge variant={formData.documents_uploaded.gov_id ? "success" : "danger"}>
+                          {formData.documents_uploaded.gov_id ? "Uploaded" : "Required"}
+                        </Badge>
+                      </div>
+                      <p className="text-[11px] text-slate-500 leading-snug">
+                        Aadhaar, Passport, or Municipal Birth Certificate.
+                      </p>
+
+                      <input
+                        ref={govIdInputRef}
+                        type="file"
+                        accept="image/*,application/pdf"
+                        onChange={(e) => handleDocUpload("gov_id", e)}
+                        className="hidden"
+                      />
+
+                      {formData.documents_uploaded.gov_id ? (
+                        <div className="p-2.5 rounded-lg bg-white border border-slate-200 flex items-center justify-between text-xs">
+                          <div className="truncate pr-2">
+                            <span className="font-semibold text-slate-800 block truncate">
+                              {formData.documents_uploaded.gov_id.name}
+                            </span>
+                            <span className="text-[10px] text-slate-400">
+                              {(formData.documents_uploaded.gov_id.size / 1024).toFixed(0)} KB
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveDoc("gov_id")}
+                            className="text-red-500 hover:text-red-700 p-1"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => govIdInputRef.current?.click()}
+                          className="w-full text-xs font-bold border-dashed border-slate-300 bg-white hover:bg-slate-50 text-blue-600"
+                        >
+                          <Upload className="h-3.5 w-3.5 mr-1.5" />
+                          <span>Upload ID / DOB Proof</span>
+                        </Button>
+                      )}
+                    </div>
+
+                    {/* DOC 2: Kukkiwon Dan/Poom Certificate */}
+                    <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold uppercase text-slate-900">
+                          2. Belt / Dan Certificate
+                        </span>
+                        <Badge variant={formData.documents_uploaded.kukkiwon_cert ? "success" : "info"}>
+                          {formData.documents_uploaded.kukkiwon_cert ? "Uploaded" : "Dan Mandatory"}
+                        </Badge>
+                      </div>
+                      <p className="text-[11px] text-slate-500 leading-snug">
+                        Official Kukkiwon Dan/Poom or Color Belt Certificate.
+                      </p>
+
+                      <input
+                        ref={certInputRef}
+                        type="file"
+                        accept="image/*,application/pdf"
+                        onChange={(e) => handleDocUpload("kukkiwon_cert", e)}
+                        className="hidden"
+                      />
+
+                      {formData.documents_uploaded.kukkiwon_cert ? (
+                        <div className="p-2.5 rounded-lg bg-white border border-slate-200 flex items-center justify-between text-xs">
+                          <div className="truncate pr-2">
+                            <span className="font-semibold text-slate-800 block truncate">
+                              {formData.documents_uploaded.kukkiwon_cert.name}
+                            </span>
+                            <span className="text-[10px] text-slate-400">
+                              {(formData.documents_uploaded.kukkiwon_cert.size / 1024).toFixed(0)} KB
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveDoc("kukkiwon_cert")}
+                            className="text-red-500 hover:text-red-700 p-1"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => certInputRef.current?.click()}
+                          className="w-full text-xs font-bold border-dashed border-slate-300 bg-white hover:bg-slate-50 text-blue-600"
+                        >
+                          <Upload className="h-3.5 w-3.5 mr-1.5" />
+                          <span>Upload Belt Certificate</span>
+                        </Button>
+                      )}
+                    </div>
+
+                    {/* DOC 3: Medical Fitness / Waiver */}
+                    <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold uppercase text-slate-900">
+                          3. Medical Certificate
+                        </span>
+                        <Badge variant={formData.documents_uploaded.medical_cert ? "success" : "default"}>
+                          {formData.documents_uploaded.medical_cert ? "Uploaded" : "Recommended"}
+                        </Badge>
+                      </div>
+                      <p className="text-[11px] text-slate-500 leading-snug">
+                        Doctor fitness certificate or tournament indemnity waiver.
+                      </p>
+
+                      <input
+                        ref={medicalInputRef}
+                        type="file"
+                        accept="image/*,application/pdf"
+                        onChange={(e) => handleDocUpload("medical_cert", e)}
+                        className="hidden"
+                      />
+
+                      {formData.documents_uploaded.medical_cert ? (
+                        <div className="p-2.5 rounded-lg bg-white border border-slate-200 flex items-center justify-between text-xs">
+                          <div className="truncate pr-2">
+                            <span className="font-semibold text-slate-800 block truncate">
+                              {formData.documents_uploaded.medical_cert.name}
+                            </span>
+                            <span className="text-[10px] text-slate-400">
+                              {(formData.documents_uploaded.medical_cert.size / 1024).toFixed(0)} KB
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveDoc("medical_cert")}
+                            className="text-red-500 hover:text-red-700 p-1"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => medicalInputRef.current?.click()}
+                          className="w-full text-xs font-bold border-dashed border-slate-300 bg-white hover:bg-slate-50 text-blue-600"
+                        >
+                          <Upload className="h-3.5 w-3.5 mr-1.5" />
+                          <span>Upload Medical Slip</span>
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Legal Declarations Checkboxes */}
+                  <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2.5 text-xs text-slate-700">
+                    <label className="flex items-start gap-2.5 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={formData.declaration_accurate}
                         onChange={(e) => updateField("declaration_accurate", e.target.checked)}
-                        className="mt-0.5 rounded border-slate-700 bg-slate-900 text-[#D4AF37] focus:ring-[#D4AF37]"
+                        className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-600"
                       />
                       <span>
-                        I confirm that the information provided is accurate and verifiable against my legal government identity documents.
+                        I confirm that the competitor details and uploaded documents are authentic and match government identity records.
                       </span>
                     </label>
-
-                    <label className="flex items-start gap-3 cursor-pointer select-none">
+                    <label className="flex items-start gap-2.5 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={formData.declaration_terms}
                         onChange={(e) => updateField("declaration_terms", e.target.checked)}
-                        className="mt-0.5 rounded border-slate-700 bg-slate-900 text-[#D4AF37] focus:ring-[#D4AF37]"
+                        className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-600"
                       />
                       <span>
-                        I agree to the official Championship Terms & Conditions (v1.0) and accept tournament accreditation policies.
-                      </span>
-                    </label>
-
-                    <label className="flex items-start gap-3 cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={formData.declaration_rules}
-                        onChange={(e) => updateField("declaration_rules", e.target.checked)}
-                        className="mt-0.5 rounded border-slate-700 bg-slate-900 text-[#D4AF37] focus:ring-[#D4AF37]"
-                      />
-                      <span>
-                        I acknowledge the applicable participation requirements and agree to uphold the tenets of Taekwondo and tournament fair play.
+                        I accept the Kukkiwon Cup 2026 Championship Terms & Conditions, anti-doping policies, and accreditation regulations.
                       </span>
                     </label>
                   </div>
                 </div>
-              </div>
-            )}
 
-            {/* Stepper Navigation Buttons */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t border-slate-800 pt-6">
-              <div className="flex flex-col xs:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-                {currentStep > 1 && (
+                {/* BOTTOM ACTION BAR FOR STEP 1 */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200 pt-6">
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="ghost"
                     size="md"
-                    onClick={handleBack}
-                    className="w-full xs:w-auto sm:w-auto text-xs uppercase font-bold text-slate-300 border-slate-700 min-h-[44px]"
+                    onClick={handleSaveDraft}
+                    isLoading={loading && pendingAction === "save"}
+                    className="text-xs uppercase font-bold text-slate-600 hover:text-blue-600 hover:bg-slate-50"
                   >
-                    <ArrowLeft className="h-4 w-4 mr-1.5" />
-                    <span>Back</span>
+                    <Save className="h-4 w-4 mr-1.5" />
+                    <span>Save Draft & Continue Later</span>
                   </Button>
-                )}
 
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="md"
-                  onClick={handleSaveDraft}
-                  isLoading={loading && pendingAction === "save"}
-                  className="w-full xs:w-auto sm:w-auto text-xs uppercase font-bold text-[#D4AF37] hover:bg-slate-900 min-h-[44px]"
-                >
-                  <Save className="h-4 w-4 mr-1.5" />
-                  <span>Save & Continue Later</span>
-                </Button>
-              </div>
-
-              <div className="w-full sm:w-auto">
-                {currentStep < STEPS.length ? (
-                  <Button
-                    type="button"
-                    variant="primary"
-                    size="md"
-                    onClick={handleNext}
-                    className="w-full sm:w-auto text-xs uppercase font-bold"
-                  >
-                    <span>Proceed to Step 0{currentStep + 1}</span>
-                    <ArrowRight className="h-4 w-4 ml-1.5" />
-                  </Button>
-                ) : (
+                  {/* PROCEED TO STEP 2 BUTTON */}
                   <Button
                     type="button"
                     variant="primary"
                     size="lg"
-                    onClick={handleSubmit}
-                    isLoading={loading && pendingAction !== "save"}
-                    disabled={!formData.declaration_accurate || !formData.declaration_terms}
-                    className="w-full sm:w-auto text-xs uppercase font-bold bg-[#D4AF37] text-slate-950 hover:bg-amber-400"
+                    onClick={handleProceedToStep2}
+                    className="w-full sm:w-auto text-xs uppercase font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
                   >
-                    <span>Submit Registration</span>
-                    <ArrowRight className="h-4 w-4 ml-1.5" />
+                    <span>Proceed to Step 2: Payment</span>
+                    <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
-                )}
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* ================================================================ */}
+            {/* STEP 2: REVIEW SUMMARY & OFFICIAL PAYMENT CHECKOUT               */}
+            {/* ================================================================ */}
+            {currentStep === 2 && (
+              <div className="space-y-8">
+                <div className="border-b border-slate-200 pb-4 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-base font-bold text-slate-950 uppercase flex items-center gap-2">
+                      <CreditCard className="h-4 w-4 text-blue-600" />
+                      <span>Step 2 — Review & Official Fee Payment</span>
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Verify your entry details and complete the official championship entry fee.
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentStep(1)}
+                    className="text-xs text-blue-600 border-blue-200 bg-blue-50/50 hover:bg-blue-100"
+                  >
+                    <ArrowLeft className="h-3.5 w-3.5 mr-1" />
+                    <span>Edit Details</span>
+                  </Button>
+                </div>
+
+                {/* Athlete Review Summary Card */}
+                <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-5 sm:p-6 space-y-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    {/* Photo preview */}
+                    <div className="w-16 h-20 rounded-lg overflow-hidden border border-slate-300 bg-white shrink-0 shadow-2xs">
+                      {photoPreview ? (
+                        <img
+                          src={photoPreview}
+                          alt="Competitor"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-slate-400">
+                          <User className="h-6 w-6" />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-1 flex-1">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="gold">Athlete Entry</Badge>
+                        <Badge variant="outline">{formData.division} Division</Badge>
+                      </div>
+                      <h4 className="text-lg font-black uppercase text-slate-950">
+                        {formData.first_name} {formData.middle_name} {formData.last_name}
+                      </h4>
+                      <p className="text-xs text-slate-600 font-mono">
+                        DOB: {formData.date_of_birth} ({calculatedAge} yrs) • {formData.gender} • {formData.nationality}
+                      </p>
+                    </div>
+
+                    <div className="text-right sm:border-l sm:border-slate-200 sm:pl-4">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block">Category</span>
+                      <span className="text-xs font-bold text-blue-700 block">
+                        {formData.weight_category_name}
+                      </span>
+                      <span className="text-[11px] text-slate-500 font-mono">
+                        {formData.belt_rank.replace(/_/g, " ")}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-slate-200 text-xs text-slate-600">
+                    <div>
+                      <span className="text-slate-400 block text-[10px] uppercase font-bold">Academy</span>
+                      <span className="font-semibold text-slate-900">
+                        {formData.academy_name || formData.new_academy_data?.name || "Independent"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-[10px] uppercase font-bold">Contact</span>
+                      <span className="font-semibold text-slate-900">{formData.phone} • {formData.email}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-[10px] uppercase font-bold">Location</span>
+                      <span className="font-semibold text-slate-900">{formData.city}, {formData.state}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Championship Fee Calculation */}
+                <div className="p-5 rounded-xl border border-blue-200 bg-blue-50/50 space-y-3">
+                  <div className="flex items-center justify-between text-xs text-slate-700">
+                    <span>Kukkiwon Cup 2026 Athlete Entry Fee</span>
+                    <span className="font-mono font-bold">₹2,500</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-slate-700">
+                    <span>Accreditation Pass & Official Kukkiwon Badge</span>
+                    <span className="text-emerald-700 font-semibold uppercase text-[11px]">Included</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-slate-700">
+                    <span>Electronic Scoring / Court Scheduling</span>
+                    <span className="text-emerald-700 font-semibold uppercase text-[11px]">Included</span>
+                  </div>
+                  <div className="border-t border-blue-200 pt-3 flex items-center justify-between">
+                    <div>
+                      <span className="text-sm font-black uppercase text-slate-950 block">Total Amount Payable</span>
+                      <span className="text-[11px] text-slate-500">Official championship entry receipt issued upon completion</span>
+                    </div>
+                    <span className="text-2xl font-black text-blue-700 font-mono">₹2,500</span>
+                  </div>
+                </div>
+
+                {/* Payment Channel Selection */}
+                <div className="space-y-4">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-800">
+                    Choose Payment Method *
+                  </label>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {/* Method 1: Razorpay */}
+                    <div
+                      onClick={() => setPaymentMethod("RAZORPAY")}
+                      className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                        paymentMethod === "RAZORPAY"
+                          ? "border-blue-600 bg-blue-50/70 shadow-xs ring-1 ring-blue-600"
+                          : "border-slate-200 bg-white hover:border-slate-300"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-bold uppercase text-slate-900">
+                          Online Checkout
+                        </span>
+                        <div
+                          className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
+                            paymentMethod === "RAZORPAY" ? "bg-blue-600 border-blue-600 text-white" : "border-slate-300"
+                          }`}
+                        >
+                          {paymentMethod === "RAZORPAY" && <Check className="h-2.5 w-2.5 stroke-[3]" />}
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-slate-500">Razorpay (Cards, UPI, NetBanking)</p>
+                    </div>
+
+                    {/* Method 2: Instant Demo Pay */}
+                    <div
+                      onClick={() => setPaymentMethod("DEMO")}
+                      className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                        paymentMethod === "DEMO"
+                          ? "border-blue-600 bg-blue-50/70 shadow-xs ring-1 ring-blue-600"
+                          : "border-slate-200 bg-white hover:border-slate-300"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-bold uppercase text-slate-900 flex items-center gap-1.5">
+                          <Sparkles className="h-3.5 w-3.5 text-blue-600" />
+                          <span>1-Click Test Pay</span>
+                        </span>
+                        <div
+                          className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
+                            paymentMethod === "DEMO" ? "bg-blue-600 border-blue-600 text-white" : "border-slate-300"
+                          }`}
+                        >
+                          {paymentMethod === "DEMO" && <Check className="h-2.5 w-2.5 stroke-[3]" />}
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-slate-500">Simulate instant test payment</p>
+                    </div>
+
+                    {/* Method 3: Offline UPI */}
+                    <div
+                      onClick={() => setPaymentMethod("OFFLINE")}
+                      className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                        paymentMethod === "OFFLINE"
+                          ? "border-blue-600 bg-blue-50/70 shadow-xs ring-1 ring-blue-600"
+                          : "border-slate-200 bg-white hover:border-slate-300"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-bold uppercase text-slate-900 flex items-center gap-1.5">
+                          <QrCode className="h-3.5 w-3.5 text-blue-600" />
+                          <span>Offline UPI / Transfer</span>
+                        </span>
+                        <div
+                          className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
+                            paymentMethod === "OFFLINE" ? "bg-blue-600 border-blue-600 text-white" : "border-slate-300"
+                          }`}
+                        >
+                          {paymentMethod === "OFFLINE" && <Check className="h-2.5 w-2.5 stroke-[3]" />}
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-slate-500">Submit UPI UTR transaction reference</p>
+                    </div>
+                  </div>
+
+                  {/* Offline Details Box */}
+                  {paymentMethod === "OFFLINE" && (
+                    <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-3">
+                      <div className="text-xs text-slate-700 space-y-1">
+                        <span className="font-bold block text-slate-900">Official Tournament UPI Account:</span>
+                        <p className="font-mono text-blue-700 bg-white px-3 py-1.5 rounded-lg border border-slate-200 inline-block font-bold">
+                          kukkiwon.cup2026@upi
+                        </p>
+                        <p className="text-[11px] text-slate-500">
+                          Transfer ₹2,500 using Google Pay, PhonePe, or Paytm, and enter your 12-digit UTR reference below.
+                        </p>
+                      </div>
+
+                      <Input
+                        label="Bank / UPI UTR Reference Number *"
+                        placeholder="e.g. 402918274619"
+                        value={offlineUtr}
+                        onChange={(e) => setOfflineUtr(e.target.value)}
+                        required
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* BOTTOM ACTION BAR FOR STEP 2 */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200 pt-6">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="md"
+                    onClick={() => setCurrentStep(1)}
+                    className="w-full sm:w-auto text-xs uppercase font-bold text-slate-700 border-slate-300"
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-1.5" />
+                    <span>Back to Competitor Details</span>
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="lg"
+                    onClick={handleProcessPayment}
+                    isLoading={isProcessingPayment}
+                    className="w-full sm:w-auto text-xs uppercase font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+                  >
+                    <span>
+                      {paymentMethod === "DEMO"
+                        ? "Confirm with 1-Click Test Pay"
+                        : paymentMethod === "OFFLINE"
+                        ? "Submit Registration & UTR"
+                        : "Pay ₹2,500 & Complete Registration"}
+                    </span>
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </main>
 
       <PublicFooter />
 
-      {/* Auth Modal for In-Wizard Save or Submit */}
+      {/* Auth Modal for In-Wizard Save or Payment Submit */}
       <AuthModal
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
         onSuccess={handleAuthSuccess}
-        title={pendingAction === "save" ? "Sign In to Save Draft" : "Sign In to Submit Registration"}
-        subtitle="Your in-progress registration details will be linked immediately to your account."
+        title={pendingAction === "save" ? "Sign In to Save Draft" : "Sign In to Complete Payment"}
+        subtitle="Your registration and official accreditation pass will be linked to your account."
       />
     </div>
   );
@@ -1057,8 +1843,8 @@ export default function AthleteRegistrationPage() {
   return (
     <React.Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-[#070B14]">
-          <div className="animate-spin w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full" />
+        <div className="flex min-h-screen items-center justify-center bg-slate-50">
+          <div className="animate-spin w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full" />
         </div>
       }
     >
@@ -1066,4 +1852,3 @@ export default function AthleteRegistrationPage() {
     </React.Suspense>
   );
 }
-

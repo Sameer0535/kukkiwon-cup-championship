@@ -187,21 +187,21 @@ export function AcademySelector({
     <div className="space-y-6">
       {/* Selected Academy Banner */}
       {selectedAcademyName && !isNewAcademy && (
-        <div className="p-5 rounded-xl border border-emerald-500/40 bg-emerald-950/20 flex items-start justify-between gap-4">
+        <div className="p-5 rounded-xl border border-emerald-200 bg-emerald-50/80 flex items-start justify-between gap-4 shadow-2xs">
           <div className="flex items-start gap-3">
-            <CheckCircle2 className="h-5 w-5 text-emerald-400 mt-0.5 shrink-0" />
+            <CheckCircle2 className="h-5 w-5 text-emerald-600 mt-0.5 shrink-0" />
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-white uppercase">
+                <span className="text-sm font-bold text-slate-900 uppercase">
                   {selectedAcademyName}
                 </span>
                 {selectedAcademyCode && (
-                  <span className="text-[10px] font-mono font-bold bg-slate-900 border border-slate-700 text-[#D4AF37] px-2 py-0.5 rounded">
+                  <span className="text-[10px] font-mono font-bold bg-white border border-emerald-200 text-emerald-700 px-2 py-0.5 rounded">
                     {selectedAcademyCode}
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-600">
                 Officially recognized tournament dojang affiliation
               </p>
             </div>
@@ -209,10 +209,10 @@ export function AcademySelector({
 
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={handleClearSelection}
-            className="text-xs text-slate-400 hover:text-white"
+            className="text-xs text-slate-600 hover:text-slate-900 border-slate-200 bg-white"
           >
             <X className="h-4 w-4 mr-1" />
             <span>Change</span>
@@ -221,12 +221,12 @@ export function AcademySelector({
       )}
 
       {/* Mode Toggle: Existing vs Register New */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-slate-200 pb-4">
         <div className="space-y-0.5">
-          <h4 className="text-sm font-bold text-white uppercase">
+          <h4 className="text-sm font-bold text-slate-900 uppercase">
             Academy / Dojang Affiliation
           </h4>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500">
             Select your accredited academy or register a new club profile
           </p>
         </div>
@@ -234,7 +234,7 @@ export function AcademySelector({
         <div className="flex items-center gap-2">
           <Button
             type="button"
-            variant={mode === "select" ? "secondary" : "outline"}
+            variant={mode === "select" ? "primary" : "outline"}
             size="sm"
             onClick={() => {
               setMode("select");
@@ -281,7 +281,7 @@ export function AcademySelector({
       {mode === "select" && (
         <div className="space-y-4">
           <div className="relative">
-            <Search className="absolute left-3.5 top-3 h-4 w-4 text-slate-500" />
+            <Search className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
             <input
               type="text"
               placeholder="Search academy by name, city, or code (e.g. Delhi, KKC26)..."
@@ -290,14 +290,14 @@ export function AcademySelector({
                 setSearchQuery(e.target.value);
                 handleSearch(e.target.value);
               }}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#D4AF37]"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 shadow-2xs"
             />
           </div>
 
           <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
             {searchResults.length === 0 ? (
-              <div className="p-6 text-center rounded-xl border border-slate-800 bg-[#090D16] space-y-2">
-                <p className="text-xs text-slate-400">
+              <div className="p-6 text-center rounded-xl border border-slate-200 bg-slate-50 space-y-2">
+                <p className="text-xs text-slate-500">
                   No registered academy found matching &quot;{searchQuery}&quot;.
                 </p>
                 <Button
@@ -305,7 +305,7 @@ export function AcademySelector({
                   variant="outline"
                   size="sm"
                   onClick={() => setMode("create")}
-                  className="text-xs font-bold uppercase text-[#D4AF37] border-slate-700"
+                  className="text-xs font-bold uppercase text-blue-600 border-blue-200 hover:bg-blue-50"
                 >
                   <PlusCircle className="h-3.5 w-3.5 mr-1.5" />
                   <span>Register &quot;{searchQuery}&quot; as New Academy</span>
@@ -320,22 +320,22 @@ export function AcademySelector({
                     onClick={() => handleSelectAcademy(academy)}
                     className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-center justify-between gap-4 ${
                       isSelected
-                        ? "border-[#D4AF37] bg-slate-900 shadow-md"
-                        : "border-slate-800 bg-[#0A0F1D] hover:border-slate-700 hover:bg-slate-900/60"
+                        ? "border-blue-600 bg-blue-50/60 shadow-xs"
+                        : "border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50"
                     }`}
                   >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold text-white">
+                        <span className="text-sm font-bold text-slate-900">
                           {academy.name}
                         </span>
-                        <span className="text-[10px] font-mono bg-slate-800 text-[#00E5FF] px-1.5 py-0.5 rounded">
+                        <span className="text-[10px] font-mono bg-blue-50 text-blue-700 font-bold px-1.5 py-0.5 rounded border border-blue-200">
                           {academy.code}
                         </span>
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-slate-400">
+                      <div className="flex items-center gap-3 text-xs text-slate-500">
                         <span className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3 text-slate-500" />
+                          <MapPin className="h-3 w-3 text-slate-400" />
                           {academy.city}, {academy.state}
                         </span>
                         {academy.head_coach_name && (
@@ -362,26 +362,26 @@ export function AcademySelector({
 
       {/* MODE 2: REGISTER NEW ACADEMY WITH DUPLICATE PROTECTION */}
       {mode === "create" && (
-        <div className="space-y-4 p-5 rounded-2xl border border-slate-800 bg-[#0A0F1D]">
+        <div className="space-y-4 p-5 rounded-2xl border border-slate-200 bg-slate-50/70">
           <div className="space-y-1">
-            <h5 className="text-xs font-bold uppercase tracking-wider text-[#D4AF37]">
+            <h5 className="text-xs font-bold uppercase tracking-wider text-blue-600">
               New Academy Intake Form
             </h5>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-slate-500">
               Provide official club credentials. A unique academy identifier will be provisioned.
             </p>
           </div>
 
           {/* DUPLICATE WARNING BOX */}
           {duplicateWarning && duplicateMatches.length > 0 && (
-            <div className="p-4 rounded-xl border border-amber-500/50 bg-amber-950/20 space-y-3">
+            <div className="p-4 rounded-xl border border-amber-200 bg-amber-50 space-y-3">
               <div className="flex items-start gap-2.5">
-                <AlertTriangle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
+                <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
                 <div className="space-y-1">
-                  <h6 className="text-xs font-bold text-amber-200 uppercase">
+                  <h6 className="text-xs font-bold text-amber-900 uppercase">
                     An academy with similar information already exists.
                   </h6>
-                  <p className="text-[11px] text-slate-300 leading-relaxed">
+                  <p className="text-[11px] text-amber-800 leading-relaxed">
                     We found an existing recognized academy in our directory. To avoid duplicate accreditation records, please confirm:
                   </p>
                 </div>
@@ -391,12 +391,12 @@ export function AcademySelector({
                 {duplicateMatches.map((m) => (
                   <div
                     key={m.id}
-                    className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-between text-xs"
+                    className="p-2.5 rounded-lg bg-white border border-amber-200 flex items-center justify-between text-xs shadow-2xs"
                   >
                     <div>
-                      <span className="font-bold text-white">{m.name}</span>
-                      <span className="text-slate-400 ml-2">({m.city}, {m.state})</span>
-                      <span className="text-amber-400 font-mono ml-2">[{m.code}]</span>
+                      <span className="font-bold text-slate-900">{m.name}</span>
+                      <span className="text-slate-500 ml-2">({m.city}, {m.state})</span>
+                      <span className="text-blue-600 font-mono ml-2">[{m.code}]</span>
                     </div>
                     <Button
                       type="button"
@@ -413,7 +413,7 @@ export function AcademySelector({
                   <button
                     type="button"
                     onClick={() => setDuplicateWarning(false)}
-                    className="text-[11px] text-slate-400 hover:text-white underline"
+                    className="text-[11px] text-slate-500 hover:text-slate-900 underline"
                   >
                     Continue with new academy request anyway
                   </button>

@@ -1,6 +1,7 @@
 // ==============================================================================
-// ACADEMY / TEAM REGISTRATION (Phase 3 Requirements 8, 9, 10, 14)
+// ACADEMY / TEAM REGISTRATION
 // Institutional registration for clubs, dojangs, and teams with duplicate protection
+// Theme: White & Royal Blue Corporate Sports Theme (No dark/black styling)
 // ==============================================================================
 
 "use client";
@@ -62,7 +63,7 @@ export default function AcademyRegistrationPage() {
   const [duplicateWarning, setDuplicateWarning] = React.useState(false);
   const [duplicateMatches, setDuplicateMatches] = React.useState<Academy[]>([]);
 
-  // Feedback State
+  // UI state
   const [loading, setLoading] = React.useState(false);
   const [errorNotice, setErrorNotice] = React.useState<string | null>(null);
   const [submittedData, setSubmittedData] = React.useState<any | null>(null);
@@ -92,63 +93,57 @@ export default function AcademyRegistrationPage() {
   const updateField = (field: keyof AcademyDraftData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setErrorNotice(null);
-
-    // Duplicate check on name & city
-    if (field === "name" || field === "city") {
-      const n = field === "name" ? value : formData.name;
-      const c = field === "city" ? value : formData.city;
-      checkDuplicate(n, c);
-    }
+    setDuplicateWarning(false);
   };
 
-  const checkDuplicate = async (name: string, city: string) => {
-    if (name.length < 3 || city.length < 2) {
-      setDuplicateWarning(false);
-      setDuplicateMatches([]);
-      return;
-    }
-
+  const checkDuplicates = async () => {
+    if (!formData.name || formData.name.length < 3) return false;
     try {
-      const res = await fetch("/api/academies/check-duplicate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, city, country: formData.country, email: formData.email }),
-      });
+      const res = await fetch(`/api/academies?q=${encodeURIComponent(formData.name)}`);
       const data = await res.json();
-      if (data.isDuplicate && data.matches?.length > 0) {
-        setDuplicateMatches(data.matches);
-        setDuplicateWarning(true);
-      } else {
-        setDuplicateWarning(false);
-        setDuplicateMatches([]);
+      if (data.academies && data.academies.length > 0) {
+        const matches = data.academies.filter(
+          (a: Academy) =>
+            a.name.toLowerCase().includes(formData.name.toLowerCase()) ||
+            (formData.city && a.city.toLowerCase() === formData.city.toLowerCase() && a.name.toLowerCase() === formData.name.toLowerCase())
+        );
+        if (matches.length > 0) {
+          setDuplicateMatches(matches);
+          setDuplicateWarning(true);
+          return true;
+        }
       }
     } catch {
       // Ignore
     }
+    return false;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name.trim() || !formData.city.trim() || !formData.state.trim()) {
-      setErrorNotice("Academy Name, City, and State are mandatory.");
-      return;
-    }
-
-    if (!formData.representative_first_name.trim() || !formData.representative_email.trim()) {
-      setErrorNotice("Official representative details are mandatory.");
-      return;
-    }
-
-    if (!formData.declaration_accurate || !formData.declaration_terms) {
-      setErrorNotice("Please confirm all required declarations and agreements.");
-      return;
-    }
-
     if (!currentUser) {
       setPendingAction("submit");
       setAuthModalOpen(true);
       return;
+    }
+
+    if (!formData.name.trim() || !formData.city.trim() || !formData.head_coach_name.trim()) {
+      setErrorNotice("Academy name, city, and head coach name are mandatory.");
+      return;
+    }
+
+    if (!formData.declaration_accurate || !formData.declaration_terms) {
+      setErrorNotice("Please review and accept all legal declarations.");
+      return;
+    }
+
+    if (!duplicateWarning) {
+      const hasDupes = await checkDuplicates();
+      if (hasDupes) {
+        setErrorNotice("Potential duplicate academy detected. Please verify below.");
+        return;
+      }
     }
 
     setLoading(true);
@@ -163,16 +158,6 @@ export default function AcademyRegistrationPage() {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Academy registration failed.");
-
-      // Also create registration record for dashboard tracking
-      await fetch("/api/registrations/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          participantType: "ACADEMY_TEAM",
-          draftData: formData,
-        }),
-      });
 
       setSubmittedData(data.academy);
     } catch (err: any) {
@@ -198,64 +183,64 @@ export default function AcademyRegistrationPage() {
   // ----------------------------------------------------------------------------
   if (submittedData) {
     return (
-      <div className="flex min-h-screen flex-col bg-[#070B14] text-slate-100 font-sans">
+      <div className="flex min-h-screen flex-col bg-slate-50/70 text-slate-900 font-sans">
         <PublicHeader />
         <main className="flex-1 py-16 sm:py-24">
           <div className="container mx-auto px-4 max-w-2xl">
-            <div className="rounded-2xl border border-slate-700 bg-[#0C1425] p-8 sm:p-12 text-center space-y-6 shadow-2xl">
-              <div className="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-500 flex items-center justify-center mx-auto text-emerald-400">
+            <div className="rounded-2xl border border-blue-200 bg-white p-8 sm:p-12 text-center space-y-6 shadow-sm">
+              <div className="w-16 h-16 rounded-full bg-emerald-50 border-2 border-emerald-500 flex items-center justify-center mx-auto text-emerald-600">
                 <CheckCircle2 className="h-8 w-8 stroke-[2.5]" />
               </div>
 
               <div className="space-y-2">
-                <Badge variant="gold">Institutional Dojang Record Created</Badge>
-                <h1 className="text-2xl sm:text-3xl font-black uppercase text-white">
+                <Badge variant="info">Institutional Dojang Record Created</Badge>
+                <h1 className="text-2xl sm:text-3xl font-black uppercase text-slate-950 tracking-tight">
                   ACADEMY REGISTERED
                 </h1>
-                <p className="text-xs sm:text-sm text-slate-300">
+                <p className="text-xs sm:text-sm text-slate-600">
                   Your academy or team has been enrolled into the official Kukkiwon Cup directory.
                 </p>
               </div>
 
-              <div className="p-6 rounded-xl bg-slate-900 border border-slate-800 text-left space-y-3 font-mono text-xs">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                  <span className="text-slate-400">Academy Code:</span>
-                  <span className="text-[#D4AF37] font-bold text-sm">
+              <div className="p-6 rounded-xl bg-slate-50 border border-slate-200 text-left space-y-3 font-mono text-xs">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="text-slate-500">Academy Code:</span>
+                  <span className="text-blue-600 font-bold text-sm tracking-wide">
                     {submittedData.code}
                   </span>
                 </div>
-                <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                  <span className="text-slate-400">Academy Name:</span>
-                  <span className="text-white font-bold">{submittedData.name}</span>
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="text-slate-500">Academy Name:</span>
+                  <span className="text-slate-900 font-bold">{submittedData.name}</span>
                 </div>
-                <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                  <span className="text-slate-400">City / State:</span>
-                  <span className="text-white">{submittedData.city}, {submittedData.state}</span>
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="text-slate-500">City / State:</span>
+                  <span className="text-slate-900">{submittedData.city}, {submittedData.state}</span>
                 </div>
                 <div className="flex items-center justify-between pt-1">
-                  <span className="text-slate-400">Status:</span>
-                  <Badge variant="cyan">
+                  <span className="text-slate-500">Status:</span>
+                  <Badge variant="info">
                     {submittedData.status}
                   </Badge>
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-[#0A0F1D] border border-slate-800 text-xs text-slate-400 text-left space-y-1">
-                <span className="font-bold text-white block">Next Steps for Academy Managers:</span>
+              <div className="p-4 rounded-xl bg-blue-50/50 border border-blue-200 text-xs text-slate-600 text-left space-y-1">
+                <span className="font-bold text-slate-900 block">Next Steps for Academy Managers:</span>
                 <p>
-                  Share your unique Academy Code (<span className="text-[#D4AF37] font-mono">{submittedData.code}</span>) with your students and coaches. When registering, they can search and select your academy directly.
+                  Share your unique Academy Code (<span className="text-blue-600 font-mono font-bold">{submittedData.code}</span>) with your students and coaches. When registering, they can search and select your academy directly.
                 </p>
               </div>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
                 <Link href="/my-registration" className="w-full sm:w-auto">
-                  <Button variant="primary" size="lg" className="w-full text-xs font-bold uppercase">
+                  <Button variant="primary" size="lg" className="w-full text-xs font-bold uppercase bg-blue-600 hover:bg-blue-700 text-white">
                     <span>View in My Registrations</span>
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                 </Link>
                 <Link href="/register" className="w-full sm:w-auto">
-                  <Button variant="outline" size="lg" className="w-full text-xs font-bold uppercase border-slate-700">
+                  <Button variant="outline" size="lg" className="w-full text-xs font-bold uppercase border-slate-300 text-slate-700 hover:bg-slate-100">
                     <span>Register Competitors</span>
                   </Button>
                 </Link>
@@ -272,23 +257,23 @@ export default function AcademyRegistrationPage() {
   // ACADEMY FORM RENDER
   // ----------------------------------------------------------------------------
   return (
-    <div className="flex min-h-screen flex-col bg-[#070B14] text-slate-100 font-sans">
+    <div className="flex min-h-screen flex-col bg-slate-50/70 text-slate-900 font-sans">
       <PublicHeader />
 
       <main className="flex-1 py-10 sm:py-16">
         <div className="container mx-auto px-4 max-w-4xl space-y-8">
-          <div className="space-y-1 border-b border-slate-800 pb-6">
+          <div className="space-y-1 border-b border-slate-200 pb-6">
             <Link
               href="/register"
-              className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-blue-600 transition-colors"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               <span>Back to Registration Selection</span>
             </Link>
-            <h1 className="text-2xl sm:text-3xl font-black uppercase text-white tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black uppercase text-slate-950 tracking-tight">
               Academy & Team Registration
             </h1>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-600">
               Kukkiwon Cup 2026 • Official Organization & Dojang Profile Intake
             </p>
           </div>
@@ -301,14 +286,14 @@ export default function AcademyRegistrationPage() {
 
           {/* DUPLICATE WARNING BOX */}
           {duplicateWarning && duplicateMatches.length > 0 && (
-            <div className="p-5 rounded-2xl border border-amber-500/50 bg-amber-950/20 space-y-3">
+            <div className="p-5 rounded-2xl border border-amber-300 bg-amber-50 space-y-3">
               <div className="flex items-start gap-3">
-                <AlertTriangle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
+                <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
                 <div className="space-y-1">
-                  <h4 className="text-xs font-bold text-amber-200 uppercase">
+                  <h4 className="text-xs font-bold text-amber-900 uppercase">
                     An academy with similar information already exists.
                   </h4>
-                  <p className="text-xs text-slate-300 leading-relaxed">
+                  <p className="text-xs text-slate-700 leading-relaxed">
                     We found an existing recognized academy in our directory. To prevent duplicate team accounts, verify if your club is already registered:
                   </p>
                 </div>
@@ -318,19 +303,19 @@ export default function AcademyRegistrationPage() {
                 {duplicateMatches.map((m) => (
                   <div
                     key={m.id}
-                    className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between text-xs"
+                    className="p-3 rounded-xl bg-white border border-slate-200 flex items-center justify-between text-xs"
                   >
                     <div>
-                      <span className="font-bold text-white">{m.name}</span>
-                      <span className="text-slate-400 ml-2">({m.city}, {m.state})</span>
-                      <span className="text-[#D4AF37] font-mono ml-2">[{m.code}]</span>
+                      <span className="font-bold text-slate-900">{m.name}</span>
+                      <span className="text-slate-500 ml-2">({m.city}, {m.state})</span>
+                      <span className="text-blue-600 font-mono font-bold ml-2">[{m.code}]</span>
                     </div>
                     <Link href={`/register/athlete`}>
                       <Button
                         type="button"
                         size="sm"
                         variant="primary"
-                        className="text-[10px] uppercase font-bold py-1 h-7"
+                        className="text-[10px] uppercase font-bold py-1 h-7 bg-blue-600 hover:bg-blue-700 text-white"
                       >
                         Register Athletes Under This Academy
                       </Button>
@@ -341,7 +326,7 @@ export default function AcademyRegistrationPage() {
                   <button
                     type="button"
                     onClick={() => setDuplicateWarning(false)}
-                    className="text-[11px] text-slate-400 hover:text-white underline"
+                    className="text-[11px] text-slate-600 hover:text-slate-900 underline"
                   >
                     Continue with new academy registration anyway
                   </button>
@@ -352,13 +337,13 @@ export default function AcademyRegistrationPage() {
 
           <form id="academy-form" onSubmit={handleSubmit} className="space-y-8">
             {/* 1. ORGANIZATION INFORMATION */}
-            <div className="rounded-2xl border border-slate-800 bg-[#0A0F1D] p-6 sm:p-8 space-y-6">
-              <div className="border-b border-slate-800 pb-3">
-                <h3 className="text-sm font-bold text-white uppercase flex items-center gap-2">
-                  <Building2 className="h-4 w-4 text-[#D4AF37]" />
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 space-y-6 shadow-sm">
+              <div className="border-b border-slate-200 pb-3">
+                <h3 className="text-sm font-bold text-slate-950 uppercase flex items-center gap-2">
+                  <Building2 className="h-4 w-4 text-blue-600" />
                   <span>1. Organization Information</span>
                 </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-500 mt-0.5">
                   Official club details for accreditation and certificate issuance.
                 </p>
               </div>
@@ -403,7 +388,7 @@ export default function AcademyRegistrationPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
                   Dojang Full Address
                 </label>
                 <textarea
@@ -411,7 +396,7 @@ export default function AcademyRegistrationPage() {
                   placeholder="Street address, building, sports center name..."
                   value={formData.address || ""}
                   onChange={(e) => updateField("address", e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white focus:outline-none focus:border-[#D4AF37]"
+                  className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
                 />
               </div>
 
@@ -450,13 +435,13 @@ export default function AcademyRegistrationPage() {
             </div>
 
             {/* 2. REPRESENTATIVE INFORMATION */}
-            <div className="rounded-2xl border border-slate-800 bg-[#0A0F1D] p-6 sm:p-8 space-y-6">
-              <div className="border-b border-slate-800 pb-3">
-                <h3 className="text-sm font-bold text-white uppercase flex items-center gap-2">
-                  <UserCheck className="h-4 w-4 text-[#00E5FF]" />
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 space-y-6 shadow-sm">
+              <div className="border-b border-slate-200 pb-3">
+                <h3 className="text-sm font-bold text-slate-950 uppercase flex items-center gap-2">
+                  <UserCheck className="h-4 w-4 text-blue-600" />
                   <span>2. Official Representative Information</span>
                 </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-500 mt-0.5">
                   The primary authorized point of contact for tournament notifications and inquiries.
                 </p>
               </div>
@@ -506,17 +491,17 @@ export default function AcademyRegistrationPage() {
             </div>
 
             {/* 3. DECLARATIONS & SUBMIT */}
-            <div className="p-5 rounded-2xl border border-slate-800 bg-[#0C1222] space-y-4">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#D4AF37]">
+            <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-4">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900">
                 Institutional Undertaking
               </h4>
-              <div className="space-y-3 text-xs text-slate-300">
+              <div className="space-y-3 text-xs text-slate-700">
                 <label className="flex items-start gap-3 cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={formData.declaration_accurate}
                     onChange={(e) => updateField("declaration_accurate", e.target.checked)}
-                    className="mt-0.5 rounded border-slate-700 bg-slate-900 text-[#D4AF37] focus:ring-[#D4AF37]"
+                    className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-600"
                   />
                   <span>
                     I confirm that I am authorized to register this academy and that all provided organization credentials are true and accurate.
@@ -528,7 +513,7 @@ export default function AcademyRegistrationPage() {
                     type="checkbox"
                     checked={formData.declaration_terms}
                     onChange={(e) => updateField("declaration_terms", e.target.checked)}
-                    className="mt-0.5 rounded border-slate-700 bg-slate-900 text-[#D4AF37] focus:ring-[#D4AF37]"
+                    className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-600"
                   />
                   <span>
                     I accept the Kukkiwon Cup 2026 Championship regulations and agree to manage our club participants in accordance with official technical guidelines.
@@ -536,14 +521,14 @@ export default function AcademyRegistrationPage() {
                 </label>
               </div>
 
-              <div className="pt-4 border-t border-slate-800 flex justify-end">
+              <div className="pt-4 border-t border-slate-200 flex justify-end">
                 <Button
                   type="submit"
                   variant="primary"
                   size="lg"
                   isLoading={loading}
                   disabled={!formData.declaration_accurate || !formData.declaration_terms}
-                  className="text-xs uppercase font-bold"
+                  className="text-xs uppercase font-bold bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   <span>Submit Academy Registration</span>
                   <ArrowRight className="h-4 w-4 ml-2" />

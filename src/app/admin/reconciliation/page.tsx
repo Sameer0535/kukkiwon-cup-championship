@@ -331,17 +331,17 @@ export default function AdminReconciliationPage() {
 
       {/* REFUND MODAL */}
       {refundModalOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="relative w-full max-w-md rounded-2xl border border-slate-800 bg-[#0C1222] p-6 shadow-2xl text-slate-100 space-y-5">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <RotateCcw className="w-4 h-4 text-purple-400" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div className="relative w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl text-slate-900 space-y-5">
+            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <RotateCcw className="w-4 h-4 text-purple-600" />
               Administrative Refund Execution
             </h3>
 
-            <div className="bg-slate-950 p-4 rounded-lg border border-slate-800 text-xs space-y-1">
-              <div>Order: <strong className="text-[#D4AF37]">{refundModalOrder.orderNumber}</strong></div>
+            <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 text-xs space-y-1">
+              <div>Order: <strong className="text-blue-600">{refundModalOrder.orderNumber}</strong></div>
               <div>Participant: <strong>{refundModalOrder.participantName}</strong></div>
-              <div>Original Amount: <strong className="text-emerald-400">{refundModalOrder.amountFormatted}</strong></div>
+              <div>Original Amount: <strong className="text-emerald-600">{refundModalOrder.amountFormatted}</strong></div>
             </div>
 
             {refundFeedback && (

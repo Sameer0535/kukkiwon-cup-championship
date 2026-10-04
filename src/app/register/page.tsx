@@ -33,8 +33,8 @@ export default function RegisterEntryPage() {
         "For individual competitors participating in Kyorugi, Poomsae, or other available championship disciplines.",
       buttonText: "REGISTER AS ATHLETE",
       href: "/register/athlete",
-      accentBorder: "hover:border-[#D4AF37]/60",
-      accentText: "text-[#D4AF37]",
+      accentBorder: "hover:border-blue-500 hover:shadow-md",
+      accentText: "text-blue-600",
       specs: [
         "Age & weight division matching",
         "Kukkiwon Dan/Poom or Color Belt entry",
@@ -52,8 +52,8 @@ export default function RegisterEntryPage() {
         "For officially registered coaches accompanying participating athletes and dojang delegations.",
       buttonText: "REGISTER AS COACH",
       href: "/register/coach",
-      accentBorder: "hover:border-[#00E5FF]/60",
-      accentText: "text-[#00E5FF]",
+      accentBorder: "hover:border-blue-500 hover:shadow-md",
+      accentText: "text-blue-600",
       specs: [
         "Official corner coach accreditation",
         "Academy & team delegation linkage",
@@ -65,14 +65,14 @@ export default function RegisterEntryPage() {
       title: "ACADEMY / TEAM",
       category: "Club & Dojang Directory",
       badge: "Team Management",
-      badgeVariant: "outline" as const,
+      badgeVariant: "info" as const,
       icon: Building2,
       description:
         "For academies or teams registering participants and managing collective tournament entries.",
       buttonText: "REGISTER ACADEMY / TEAM",
       href: "/register/academy",
-      accentBorder: "hover:border-slate-500",
-      accentText: "text-slate-200",
+      accentBorder: "hover:border-blue-500 hover:shadow-md",
+      accentText: "text-blue-600",
       specs: [
         "Unique institutional code (e.g. KKC26-ACA-XXXXXX)",
         "Accredited delegation management",
@@ -198,9 +198,9 @@ export default function RegisterEntryPage() {
                     <div className="pt-8">
                       <Link href={card.href} className="block">
                         <Button
-                          variant={card.id === "athlete" ? "primary" : card.id === "coach" ? "secondary" : "outline"}
+                          variant="primary"
                           size="lg"
-                          className="w-full text-xs font-bold uppercase tracking-wider justify-between group shadow-sm"
+                          className="w-full text-xs font-bold uppercase tracking-wider justify-between group shadow-sm bg-blue-600 hover:bg-blue-700 text-white"
                         >
                           <span>{card.buttonText}</span>
                           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

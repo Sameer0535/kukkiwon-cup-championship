@@ -1,6 +1,7 @@
 // ==============================================================================
-// COACH REGISTRATION WIZARD (Phase 3 Requirement 7, 10, 11, 13, 14)
-// Multi-step intake for accredited corner coaches & delegation officials
+// COACH REGISTRATION WIZARD
+// Official intake for accredited corner coaches & delegation officials
+// Theme: White & Royal Blue Corporate Sports Theme (No dark/black styling)
 // ==============================================================================
 
 "use client";
@@ -87,10 +88,12 @@ function CoachRegistrationContent() {
   const [saveSuccessNotice, setSaveSuccessNotice] = React.useState<string | null>(null);
   const [submittedData, setSubmittedData] = React.useState<any | null>(null);
 
+  // 1. Check user session
   React.useEffect(() => {
     checkUserSession();
   }, []);
 
+  // 2. Load draft if present
   React.useEffect(() => {
     if (queryDraftId) {
       loadDraft(queryDraftId);
@@ -151,11 +154,11 @@ function CoachRegistrationContent() {
     }
     const age = calculateAge(formData.date_of_birth);
     if (age < 18) {
-      setErrorNotice("Accredited tournament coaches must be at least 18 years of age.");
+      setErrorNotice("Accredited coaches must be at least 18 years of age.");
       return false;
     }
-    if (!formData.email.trim() || !formData.phone.trim()) {
-      setErrorNotice("Contact email and mobile number are mandatory.");
+    if (!formData.phone.trim() || !formData.email.trim()) {
+      setErrorNotice("Mobile number and email are required.");
       return false;
     }
     return true;
@@ -163,15 +166,19 @@ function CoachRegistrationContent() {
 
   const validateStep2 = () => {
     if (!formData.academy_id && !formData.is_new_academy) {
-      setErrorNotice("Please select an existing recognized academy or request a new club registration.");
+      setErrorNotice("Please select an affiliated academy or register a new academy.");
+      return false;
+    }
+    if (formData.is_new_academy && !formData.new_academy_data?.name?.trim()) {
+      setErrorNotice("Please provide the new academy name.");
       return false;
     }
     return true;
   };
 
   const validateStep3 = () => {
-    if (!formData.coach_role || !formData.qualification.trim()) {
-      setErrorNotice("Coaching role and qualification details are required.");
+    if (!formData.qualification.trim()) {
+      setErrorNotice("Coaching qualification is required.");
       return false;
     }
     return true;
@@ -280,43 +287,43 @@ function CoachRegistrationContent() {
   // ----------------------------------------------------------------------------
   if (submittedData) {
     return (
-      <div className="flex min-h-screen flex-col bg-[#070B14] text-slate-100 font-sans">
+      <div className="flex min-h-screen flex-col bg-slate-50/70 text-slate-900 font-sans">
         <PublicHeader />
         <main className="flex-1 py-16 sm:py-24">
           <div className="container mx-auto px-4 max-w-2xl">
-            <div className="rounded-2xl border border-[#00E5FF]/40 bg-[#0C1425] p-8 sm:p-12 text-center space-y-6 shadow-2xl">
-              <div className="w-16 h-16 rounded-full bg-[#00E5FF]/20 border-2 border-[#00E5FF] flex items-center justify-center mx-auto text-[#00E5FF]">
+            <div className="rounded-2xl border border-blue-200 bg-white p-8 sm:p-12 text-center space-y-6 shadow-sm">
+              <div className="w-16 h-16 rounded-full bg-emerald-50 border-2 border-emerald-500 flex items-center justify-center mx-auto text-emerald-600">
                 <CheckCircle2 className="h-8 w-8 stroke-[2.5]" />
               </div>
 
               <div className="space-y-2">
-                <Badge variant="cyan">Official Coach Accreditation Recorded</Badge>
-                <h1 className="text-2xl sm:text-3xl font-black uppercase text-white">
+                <Badge variant="info">Official Coach Accreditation Recorded</Badge>
+                <h1 className="text-2xl sm:text-3xl font-black uppercase text-slate-950 tracking-tight">
                   COACH REGISTRATION SUBMITTED
                 </h1>
-                <p className="text-xs sm:text-sm text-slate-300">
+                <p className="text-xs sm:text-sm text-slate-600">
                   Your coach accreditation application has been recorded for technical verification.
                 </p>
               </div>
 
-              <div className="p-6 rounded-xl bg-slate-900 border border-slate-800 text-left space-y-3 font-mono text-xs">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                  <span className="text-slate-400">Coach Reference:</span>
-                  <span className="text-[#00E5FF] font-bold text-sm">
+              <div className="p-6 rounded-xl bg-slate-50 border border-slate-200 text-left space-y-3 font-mono text-xs">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="text-slate-500">Coach Reference:</span>
+                  <span className="text-blue-600 font-bold text-sm tracking-wide">
                     {submittedData.registrationNumber}
                   </span>
                 </div>
-                <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                  <span className="text-slate-400">Coach Name:</span>
-                  <span className="text-white font-bold">{submittedData.participantName}</span>
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="text-slate-500">Coach Name:</span>
+                  <span className="text-slate-900 font-bold">{submittedData.participantName}</span>
                 </div>
-                <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                  <span className="text-slate-400">Role:</span>
-                  <span className="text-white">{submittedData.categoryName}</span>
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="text-slate-500">Role:</span>
+                  <span className="text-slate-900">{submittedData.categoryName}</span>
                 </div>
                 <div className="flex items-center justify-between pt-1">
-                  <span className="text-slate-400">Status:</span>
-                  <Badge variant="cyan">
+                  <span className="text-slate-500">Status:</span>
+                  <Badge variant="info">
                     {submittedData.status}
                   </Badge>
                 </div>
@@ -324,13 +331,13 @@ function CoachRegistrationContent() {
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
                 <Link href="/my-registration" className="w-full sm:w-auto">
-                  <Button variant="primary" size="lg" className="w-full text-xs font-bold uppercase">
+                  <Button variant="primary" size="lg" className="w-full text-xs font-bold uppercase bg-blue-600 hover:bg-blue-700 text-white">
                     <span>View in My Registrations</span>
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                 </Link>
                 <Link href="/register" className="w-full sm:w-auto">
-                  <Button variant="outline" size="lg" className="w-full text-xs font-bold uppercase border-slate-700">
+                  <Button variant="outline" size="lg" className="w-full text-xs font-bold uppercase border-slate-300 text-slate-700 hover:bg-slate-100">
                     <span>Back to Portal</span>
                   </Button>
                 </Link>
@@ -347,34 +354,34 @@ function CoachRegistrationContent() {
   // COACH WIZARD RENDER
   // ----------------------------------------------------------------------------
   return (
-    <div className="flex min-h-screen flex-col bg-[#070B14] text-slate-100 font-sans">
+    <div className="flex min-h-screen flex-col bg-slate-50/70 text-slate-900 font-sans">
       <PublicHeader />
 
       <main className="flex-1 py-10 sm:py-16">
         <div className="container mx-auto px-4 max-w-4xl space-y-8">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-6">
             <div className="space-y-1">
               <Link
                 href="/register"
-                className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-blue-600 transition-colors"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
                 <span>Back to Registration Selection</span>
               </Link>
-              <h1 className="text-2xl sm:text-3xl font-black uppercase text-white tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-black uppercase text-slate-950 tracking-tight">
                 Coach Accreditation Intake
               </h1>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-600">
                 Kukkiwon Cup 2026 • Official Coach Accreditation
               </p>
             </div>
 
             {registrationNumber && (
               <div className="text-right">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 block">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block">
                   Reference Code
                 </span>
-                <span className="text-xs font-mono font-bold text-[#00E5FF] bg-slate-900 border border-slate-800 px-3 py-1 rounded-full">
+                <span className="text-xs font-mono font-bold text-blue-600 bg-blue-50 border border-blue-200 px-3 py-1 rounded-full">
                   {registrationNumber}
                 </span>
               </div>
@@ -399,16 +406,16 @@ function CoachRegistrationContent() {
             </Alert>
           )}
 
-          <div className="rounded-2xl border border-slate-800 bg-[#0A0F1D] p-6 sm:p-10 shadow-xl space-y-8">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-10 shadow-sm space-y-8">
             {/* STEP 1: PERSONAL INFORMATION */}
             {currentStep === 1 && (
               <div className="space-y-6">
-                <div className="border-b border-slate-800 pb-4">
-                  <h3 className="text-base font-bold text-white uppercase flex items-center gap-2">
-                    <User className="h-4 w-4 text-[#00E5FF]" />
+                <div className="border-b border-slate-200 pb-4">
+                  <h3 className="text-base font-bold text-slate-950 uppercase flex items-center gap-2">
+                    <User className="h-4 w-4 text-blue-600" />
                     <span>Step 01 — Personal Information</span>
                   </h3>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs text-slate-500 mt-1">
                     Enter the legal identity details of the accompanying coach.
                   </p>
                 </div>
@@ -438,31 +445,31 @@ function CoachRegistrationContent() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
                       Date of Birth *
                     </label>
                     <input
                       type="date"
                       value={formData.date_of_birth}
                       onChange={(e) => updateField("date_of_birth", e.target.value)}
-                      className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white focus:outline-none focus:border-[#00E5FF]"
+                      className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
                       required
                     />
                     {formData.date_of_birth && (
-                      <span className="text-[11px] text-emerald-400 mt-1 block">
+                      <span className="text-[11px] text-blue-600 font-semibold mt-1 block">
                         Age: {calculateAge(formData.date_of_birth)} yrs (Min 18 required)
                       </span>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
                       Gender *
                     </label>
                     <select
                       value={formData.gender}
                       onChange={(e) => updateField("gender", e.target.value)}
-                      className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white focus:outline-none focus:border-[#00E5FF]"
+                      className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
                     >
                       <option value="MALE">Male</option>
                       <option value="FEMALE">Female</option>
@@ -546,25 +553,25 @@ function CoachRegistrationContent() {
             {/* STEP 3: PROFESSIONAL INFORMATION */}
             {currentStep === 3 && (
               <div className="space-y-6">
-                <div className="border-b border-slate-800 pb-4">
-                  <h3 className="text-base font-bold text-white uppercase flex items-center gap-2">
-                    <Briefcase className="h-4 w-4 text-[#00E5FF]" />
+                <div className="border-b border-slate-200 pb-4">
+                  <h3 className="text-base font-bold text-slate-950 uppercase flex items-center gap-2">
+                    <Briefcase className="h-4 w-4 text-blue-600" />
                     <span>Step 03 — Professional Coaching Qualifications</span>
                   </h3>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs text-slate-500 mt-1">
                     Provide recognized credentials and tournament delegation role.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
                       Role within Academy / Delegation *
                     </label>
                     <select
                       value={formData.coach_role}
                       onChange={(e) => updateField("coach_role", e.target.value)}
-                      className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white focus:outline-none focus:border-[#00E5FF]"
+                      className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
                     >
                       <option value="HEAD_COACH">Head Coach</option>
                       <option value="CORNER_COACH">Accredited Corner Coach</option>
@@ -601,7 +608,7 @@ function CoachRegistrationContent() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
                     Additional Certification Details
                   </label>
                   <textarea
@@ -609,7 +616,7 @@ function CoachRegistrationContent() {
                     placeholder="List official seminars, sports medicine, or referee qualifications..."
                     value={formData.certification_details || ""}
                     onChange={(e) => updateField("certification_details", e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white focus:outline-none focus:border-[#00E5FF]"
+                    className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
                   />
                 </div>
               </div>
@@ -618,53 +625,53 @@ function CoachRegistrationContent() {
             {/* STEP 4: REVIEW & DECLARATIONS */}
             {currentStep === 4 && (
               <div className="space-y-6">
-                <div className="border-b border-slate-800 pb-4">
-                  <h3 className="text-base font-bold text-white uppercase flex items-center gap-2">
-                    <ShieldCheck className="h-4 w-4 text-[#00E5FF]" />
+                <div className="border-b border-slate-200 pb-4">
+                  <h3 className="text-base font-bold text-slate-950 uppercase flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-blue-600" />
                     <span>Step 04 — Review & Declarations</span>
                   </h3>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs text-slate-500 mt-1">
                     Confirm your coach accreditation details.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
-                    <span className="font-bold text-[#00E5FF] uppercase block">
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                    <span className="font-bold text-blue-600 uppercase block">
                       1. Coach Profile
                     </span>
-                    <div className="space-y-1 text-slate-300">
-                      <div>Name: <span className="font-bold text-white">{formData.first_name} {formData.last_name}</span></div>
+                    <div className="space-y-1 text-slate-700">
+                      <div>Name: <span className="font-bold text-slate-900">{formData.first_name} {formData.last_name}</span></div>
                       <div>DOB: {formData.date_of_birth} ({calculateAge(formData.date_of_birth)} yrs)</div>
                       <div>Contact: {formData.phone} • {formData.email}</div>
                       <div>City/State: {formData.city}, {formData.state}</div>
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
-                    <span className="font-bold text-[#D4AF37] uppercase block">
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                    <span className="font-bold text-blue-600 uppercase block">
                       2. Academy & Credentials
                     </span>
-                    <div className="space-y-1 text-slate-300">
-                      <div>Academy: <span className="font-bold text-white">{formData.academy_name || "New Academy"}</span></div>
-                      <div>Role: <span className="font-bold text-white">{formData.coach_role}</span></div>
+                    <div className="space-y-1 text-slate-700">
+                      <div>Academy: <span className="font-bold text-slate-900">{formData.academy_name || "New Academy"}</span></div>
+                      <div>Role: <span className="font-bold text-slate-900">{formData.coach_role}</span></div>
                       <div>Qualification: {formData.qualification}</div>
                       <div>Kukkiwon Dan: {formData.kukkiwon_dan_number || "N/A"}</div>
                     </div>
                   </div>
                 </div>
 
-                <div className="p-5 rounded-2xl border border-slate-800 bg-[#0C1222] space-y-4">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#00E5FF]">
+                <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50 space-y-4">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900">
                     Accredited Coach Undertaking
                   </h4>
-                  <div className="space-y-3 text-xs text-slate-300">
+                  <div className="space-y-3 text-xs text-slate-700">
                     <label className="flex items-start gap-3 cursor-pointer select-none">
                       <input
                         type="checkbox"
                         checked={formData.declaration_accurate}
                         onChange={(e) => updateField("declaration_accurate", e.target.checked)}
-                        className="mt-0.5 rounded border-slate-700 bg-slate-900 text-[#00E5FF] focus:ring-[#00E5FF]"
+                        className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-600"
                       />
                       <span>
                         I confirm that the credentials and experience provided are true and complete.
@@ -676,7 +683,7 @@ function CoachRegistrationContent() {
                         type="checkbox"
                         checked={formData.declaration_terms}
                         onChange={(e) => updateField("declaration_terms", e.target.checked)}
-                        className="mt-0.5 rounded border-slate-700 bg-slate-900 text-[#00E5FF] focus:ring-[#00E5FF]"
+                        className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-600"
                       />
                       <span>
                         I agree to uphold official World Taekwondo coach decorum and accept the tournament terms and disciplinary regulations.
@@ -688,7 +695,7 @@ function CoachRegistrationContent() {
             )}
 
             {/* Stepper Navigation Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-800 pt-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200 pt-6">
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 {currentStep > 1 && (
                   <Button
@@ -696,7 +703,7 @@ function CoachRegistrationContent() {
                     variant="outline"
                     size="md"
                     onClick={handleBack}
-                    className="w-full sm:w-auto text-xs uppercase font-bold text-slate-300 border-slate-700"
+                    className="w-full sm:w-auto text-xs uppercase font-bold text-slate-700 border-slate-300 hover:bg-slate-50"
                   >
                     <ArrowLeft className="h-4 w-4 mr-1.5" />
                     <span>Back</span>
@@ -709,7 +716,7 @@ function CoachRegistrationContent() {
                   size="md"
                   onClick={handleSaveDraft}
                   isLoading={loading && pendingAction === "save"}
-                  className="w-full sm:w-auto text-xs uppercase font-bold text-[#00E5FF] hover:bg-slate-900"
+                  className="w-full sm:w-auto text-xs uppercase font-bold text-blue-600 hover:bg-blue-50"
                 >
                   <Save className="h-4 w-4 mr-1.5" />
                   <span>Save & Continue Later</span>
@@ -720,10 +727,10 @@ function CoachRegistrationContent() {
                 {currentStep < STEPS.length ? (
                   <Button
                     type="button"
-                    variant="secondary"
+                    variant="primary"
                     size="md"
                     onClick={handleNext}
-                    className="w-full sm:w-auto text-xs uppercase font-bold bg-[#00E5FF] text-slate-950 hover:bg-[#00cce6]"
+                    className="w-full sm:w-auto text-xs uppercase font-bold bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     <span>Proceed to Step 0{currentStep + 1}</span>
                     <ArrowRight className="h-4 w-4 ml-1.5" />
@@ -731,12 +738,12 @@ function CoachRegistrationContent() {
                 ) : (
                   <Button
                     type="button"
-                    variant="secondary"
+                    variant="primary"
                     size="lg"
                     onClick={handleSubmit}
                     isLoading={loading && pendingAction !== "save"}
                     disabled={!formData.declaration_accurate || !formData.declaration_terms}
-                    className="w-full sm:w-auto text-xs uppercase font-bold bg-[#00E5FF] text-slate-950 hover:bg-[#00cce6]"
+                    className="w-full sm:w-auto text-xs uppercase font-bold bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     <span>Submit Coach Registration</span>
                     <ArrowRight className="h-4 w-4 ml-1.5" />
@@ -766,8 +773,8 @@ export default function CoachRegistrationPage() {
   return (
     <React.Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-[#070B14]">
-          <div className="animate-spin w-8 h-8 border-2 border-[#00E5FF] border-t-transparent rounded-full" />
+        <div className="flex min-h-screen items-center justify-center bg-slate-50">
+          <div className="animate-spin w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full" />
         </div>
       }
     >
@@ -775,4 +782,3 @@ export default function CoachRegistrationPage() {
     </React.Suspense>
   );
 }
-

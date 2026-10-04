@@ -129,19 +129,19 @@ export function PhotoUpload({
   };
 
   return (
-    <div className="bg-slate-900/90 rounded-2xl border border-slate-800 p-6 md:p-8 backdrop-blur-sm shadow-xl">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800/80">
+    <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200">
         <div>
           <div className="flex items-center gap-3">
-            <h3 className="text-xl font-bold text-white tracking-wide">Accreditation Photograph</h3>
+            <h3 className="text-xl font-bold text-slate-900 tracking-wide">Accreditation Photograph</h3>
             {getStatusBadge(status)}
           </div>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-slate-500 mt-1">
             Official headshot for championship accreditation badge and ID card. Plain light background required.
           </p>
         </div>
         {currentDocument?.version && (
-          <div className="text-xs text-slate-400 bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700 self-start sm:self-auto">
+          <div className="text-xs text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 self-start sm:self-auto">
             Version {currentDocument.version}
           </div>
         )}
@@ -149,12 +149,12 @@ export function PhotoUpload({
 
       {/* Rejection Alert */}
       {status === "REJECTED" && rejectionReason && (
-        <div className="mt-6 p-4 rounded-xl bg-rose-950/40 border border-rose-800/50 flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-rose-400 flex-shrink-0 mt-0.5" />
+        <div className="mt-6 p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-rose-500 flex-shrink-0 mt-0.5" />
           <div className="text-sm">
-            <p className="font-semibold text-rose-300">Document Rejected by Official Verifier</p>
-            <p className="text-rose-200/90 mt-1">{rejectionReason}</p>
-            <p className="text-xs text-rose-400/80 mt-2">
+            <p className="font-semibold text-rose-700">Document Rejected by Official Verifier</p>
+            <p className="text-rose-600 mt-1">{rejectionReason}</p>
+            <p className="text-xs text-rose-500 mt-2">
               Please review the feedback above and upload a replacement photograph below.
             </p>
           </div>
@@ -165,7 +165,7 @@ export function PhotoUpload({
       <div className="mt-6 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
         {/* Photo Frame / Preview */}
         <div className="md:col-span-4 flex flex-col items-center">
-          <div className="relative w-44 h-56 rounded-2xl overflow-hidden border-2 border-dashed border-amber-500/40 bg-slate-950 flex flex-col items-center justify-center group shadow-2xl">
+          <div className="relative w-44 h-56 rounded-2xl overflow-hidden border-2 border-dashed border-blue-400 bg-slate-50 flex flex-col items-center justify-center group shadow-sm">
             {previewUrl ? (
               // New selected preview
               <div className="relative w-full h-full">
@@ -175,8 +175,8 @@ export function PhotoUpload({
                   alt="Selected Preview"
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute top-2 right-2 bg-slate-900/80 rounded-full p-1 text-slate-300">
-                  <span className="text-[10px] px-1 font-mono">NEW</span>
+                <div className="absolute top-2 right-2 bg-blue-600 rounded-full p-1 text-white">
+                  <span className="text-[10px] px-1 font-mono font-bold">NEW</span>
                 </div>
               </div>
             ) : currentDocument?.signed_url ? (
@@ -192,17 +192,17 @@ export function PhotoUpload({
             ) : (
               // Placeholder
               <div className="flex flex-col items-center justify-center p-4 text-center">
-                <div className="w-16 h-16 rounded-full bg-slate-800/80 flex items-center justify-center text-slate-500 mb-3 group-hover:text-amber-400 transition-colors">
+                <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-3 group-hover:text-blue-600 transition-colors">
                   <Camera className="w-8 h-8" />
                 </div>
-                <p className="text-xs font-semibold text-slate-300">No Photo Uploaded</p>
-                <p className="text-[11px] text-slate-500 mt-1">Portrait (3:4 ratio)</p>
+                <p className="text-xs font-semibold text-slate-700">No Photo Uploaded</p>
+                <p className="text-[11px] text-slate-400 mt-1">Portrait (3:4 ratio)</p>
               </div>
             )}
           </div>
 
           {imageDimensions && (
-            <p className="text-[11px] text-slate-400 mt-2 font-mono">
+            <p className="text-[11px] text-slate-500 mt-2 font-mono">
               {imageDimensions.width} × {imageDimensions.height} px
             </p>
           )}
@@ -210,9 +210,9 @@ export function PhotoUpload({
 
         {/* Controls & Instructions */}
         <div className="md:col-span-8 flex flex-col justify-between h-full space-y-4">
-          <div className="space-y-3 bg-slate-950/60 p-4 rounded-xl border border-slate-800">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-amber-400">Accreditation Standards</h4>
-            <ul className="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
+          <div className="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600">Accreditation Standards</h4>
+            <ul className="text-xs text-slate-600 space-y-1.5 list-disc list-inside">
               <li>Direct forward-facing portrait with clear focus on eyes and face.</li>
               <li>Plain neutral background (white, off-white, or light grey).</li>
               <li>No sunglasses, hats, or heavy facial coverings.</li>
@@ -221,7 +221,7 @@ export function PhotoUpload({
           </div>
 
           {validationError && (
-            <div className="p-3 rounded-lg bg-rose-950/50 border border-rose-800/60 text-xs text-rose-300 flex items-center gap-2">
+            <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 flex-shrink-0" />
               <span>{validationError}</span>
             </div>
@@ -244,7 +244,7 @@ export function PhotoUpload({
                   type="button"
                   onClick={handleConfirmUpload}
                   disabled={isUploading}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-sm shadow-lg shadow-amber-500/20 transition-all flex items-center gap-2 disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-sm transition-all flex items-center gap-2 disabled:opacity-50"
                 >
                   {isUploading ? (
                     <>
@@ -262,7 +262,7 @@ export function PhotoUpload({
                   type="button"
                   onClick={handleCancelSelected}
                   disabled={isUploading}
-                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold transition-colors flex items-center gap-1.5"
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-sm font-semibold transition-colors flex items-center gap-1.5"
                 >
                   <X className="w-4 h-4" />
                   Cancel
@@ -275,7 +275,7 @@ export function PhotoUpload({
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploading}
-                  className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm shadow-md transition-all flex items-center gap-2"
+                  className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-sm transition-all flex items-center gap-2"
                 >
                   <Upload className="w-4 h-4" />
                   {currentDocument ? "Replace Photograph" : "Upload Photograph"}
@@ -285,9 +285,9 @@ export function PhotoUpload({
                   <button
                     type="button"
                     onClick={onView}
-                    className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold transition-colors flex items-center gap-2 border border-slate-700"
+                    className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold transition-colors flex items-center gap-2 border border-slate-300"
                   >
-                    <Eye className="w-4 h-4 text-cyan-400" />
+                    <Eye className="w-4 h-4 text-blue-600" />
                     View Full Size
                   </button>
                 )}

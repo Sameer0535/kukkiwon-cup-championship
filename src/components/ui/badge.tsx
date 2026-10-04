@@ -13,6 +13,7 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
     | "warning"
     | "danger"
     | "info"
+    | "blue"
     | "gold"
     | "cyan"
     | "outline";
@@ -30,6 +31,7 @@ export function Badge({
     warning: "bg-amber-50 text-amber-700 border-amber-200",
     danger: "bg-red-50 text-red-700 border-red-200",
     info: "bg-blue-50 text-blue-700 border-blue-200",
+    blue: "bg-blue-50 text-blue-700 border-blue-200 font-bold",
     gold: "bg-blue-50 text-blue-700 border-blue-200 font-bold",
     cyan: "bg-cyan-50 text-cyan-700 border-cyan-200 font-bold",
     outline: "bg-white text-slate-700 border-slate-300",

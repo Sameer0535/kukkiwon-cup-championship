@@ -95,19 +95,19 @@ export function IdCardModal({ registrationId, isOpen, onClose }: IdCardModalProp
   if (!isOpen || !registrationId) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-[#0A0F1D] border-2 border-[#D4AF37]/40 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-lg bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 border-b border-slate-800 bg-[#0A192F] shrink-0">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 border-b border-slate-200 bg-slate-50 shrink-0">
           <div className="flex items-center gap-2">
-            <Award className="h-5 w-5 text-[#D4AF37]" />
-            <h3 className="text-xs sm:text-sm font-bold text-white uppercase tracking-wider truncate">
+            <Award className="h-5 w-5 text-blue-600" />
+            <h3 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wider truncate">
               Official Athlete Accreditation Card
             </h3>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center -mr-2"
+            className="p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center -mr-2"
             aria-label="Close accreditation card modal"
           >
             <X className="h-5 w-5" />
@@ -115,24 +115,24 @@ export function IdCardModal({ registrationId, isOpen, onClose }: IdCardModalProp
         </div>
 
         {/* Modal Body */}
-        <div className="p-4 sm:p-6 overflow-y-auto space-y-6 flex-1 flex flex-col items-center justify-center">
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-6 flex-1 flex flex-col items-center justify-center bg-slate-50/50">
           {loading ? (
             <div className="py-16 text-center space-y-3">
-              <div className="animate-spin w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full mx-auto" />
-              <p className="text-xs text-slate-400 font-medium">Retrieving accreditation credential...</p>
+              <div className="animate-spin w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto" />
+              <p className="text-xs text-slate-500 font-medium">Retrieving accreditation credential...</p>
             </div>
           ) : error ? (
             <div className="p-6 text-center space-y-3 max-w-md">
-              <div className="w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center mx-auto text-rose-400">
+              <div className="w-12 h-12 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center mx-auto text-rose-500">
                 <AlertCircle className="h-6 w-6" />
               </div>
-              <h4 className="text-base font-bold text-white">Accreditation Unavailable</h4>
-              <p className="text-xs text-slate-300">{error}</p>
+              <h4 className="text-base font-bold text-slate-900">Accreditation Unavailable</h4>
+              <p className="text-xs text-slate-600">{error}</p>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => loadCardDetails(registrationId)}
-                className="mt-2 text-xs"
+                className="mt-2 text-xs border-slate-300 text-slate-700 hover:bg-slate-100"
               >
                 <RefreshCw className="h-3.5 w-3.5 mr-1" />
                 Retry
@@ -141,13 +141,13 @@ export function IdCardModal({ registrationId, isOpen, onClose }: IdCardModalProp
           ) : card ? (
             /* Rendered Accreditation Card */
             <div className="w-full max-w-[340px] sm:max-w-sm space-y-4 mx-auto">
-              <div className="w-full rounded-2xl overflow-hidden border-2 border-[#D4AF37] shadow-2xl bg-white text-slate-900 flex flex-col">
+              <div className="w-full rounded-2xl overflow-hidden border-2 border-blue-600 shadow-xl bg-white text-slate-900 flex flex-col">
                 {/* Badge Top Banner */}
-                <div className="bg-[#0A192F] p-4 text-center border-b-2 border-[#D4AF37]">
-                  <h4 className="text-xs font-black tracking-widest text-[#D4AF37] uppercase">
+                <div className="bg-blue-600 p-4 text-center border-b-2 border-blue-700 text-white">
+                  <h4 className="text-xs font-black tracking-widest uppercase">
                     KUKKIWON CUP CHAMPIONSHIP
                   </h4>
-                  <p className="text-[9px] font-semibold text-slate-300 tracking-wider uppercase">
+                  <p className="text-[9px] font-semibold text-blue-100 tracking-wider uppercase">
                     Official Athlete Accreditation
                   </p>
                 </div>
@@ -155,7 +155,7 @@ export function IdCardModal({ registrationId, isOpen, onClose }: IdCardModalProp
                 {/* Badge Center */}
                 <div className="p-4 flex flex-col items-center space-y-3 bg-white">
                   {/* Photo Frame */}
-                  <div className="w-24 h-24 rounded-xl border-2 border-[#D4AF37] overflow-hidden bg-slate-50 flex items-center justify-center shadow-md">
+                  <div className="w-24 h-24 rounded-xl border-2 border-blue-600 overflow-hidden bg-slate-50 flex items-center justify-center shadow-md">
                     {card.photoUrl ? (
                       <img
                         src={card.photoUrl}
@@ -169,10 +169,10 @@ export function IdCardModal({ registrationId, isOpen, onClose }: IdCardModalProp
 
                   {/* Athlete Identity */}
                   <div className="text-center space-y-0.5">
-                    <h5 className="text-base font-black text-[#0A192F] uppercase tracking-tight">
+                    <h5 className="text-base font-black text-slate-900 uppercase tracking-tight">
                       {card.athleteName}
                     </h5>
-                    <div className="inline-block bg-[#0A192F] text-[#D4AF37] text-[11px] font-mono font-bold px-2.5 py-0.5 rounded tracking-wider">
+                    <div className="inline-block bg-blue-50 text-blue-700 text-[11px] font-mono font-bold px-2.5 py-0.5 rounded tracking-wider border border-blue-200">
                       {card.athleteId}
                     </div>
                   </div>
@@ -210,28 +210,28 @@ export function IdCardModal({ registrationId, isOpen, onClose }: IdCardModalProp
                         <span className="text-[9px] text-slate-400">QR Loading</span>
                       )}
                     </div>
-                    <span className="text-[8px] font-extrabold uppercase tracking-widest text-[#0A192F] mt-1">
+                    <span className="text-[8px] font-extrabold uppercase tracking-widest text-slate-900 mt-1">
                       Scan to Verify Identity
                     </span>
                   </div>
                 </div>
 
                 {/* Badge Bottom Footer */}
-                <div className="bg-[#0A192F] px-4 py-2 flex items-center justify-between text-[8px] text-slate-300 border-t border-slate-700">
+                <div className="bg-slate-900 px-4 py-2 flex items-center justify-between text-[8px] text-slate-300 border-t border-slate-800">
                   <span>REF: {card.registrationNumber}</span>
-                  <span className="text-[#D4AF37] font-bold">STATUS: {card.cardStatus} • V{card.version}</span>
+                  <span className="text-blue-400 font-bold">STATUS: {card.cardStatus} • V{card.version}</span>
                 </div>
               </div>
             </div>
           ) : eligibility?.isEligible ? (
             /* Eligible but ID card record not yet created -> Action to Generate */
             <div className="text-center py-8 space-y-4 max-w-sm">
-              <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto text-emerald-400">
+              <div className="w-14 h-14 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center mx-auto text-blue-600">
                 <Sparkles className="h-7 w-7" />
               </div>
               <div className="space-y-1">
-                <h4 className="text-lg font-bold text-white">Your ID Card is Ready</h4>
-                <p className="text-xs text-slate-400">
+                <h4 className="text-lg font-bold text-slate-900">Your ID Card is Ready</h4>
+                <p className="text-xs text-slate-500">
                   Your registration fee is confirmed. Generate your official digital ID card with a high-entropy scannable QR verification code.
                 </p>
               </div>
@@ -258,11 +258,11 @@ export function IdCardModal({ registrationId, isOpen, onClose }: IdCardModalProp
           ) : (
             /* Not eligible */
             <div className="text-center py-8 space-y-3 max-w-sm">
-              <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
+              <div className="w-12 h-12 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto text-amber-500">
                 <AlertCircle className="h-6 w-6" />
               </div>
-              <h4 className="text-base font-bold text-white">ID Card Locked</h4>
-              <p className="text-xs text-slate-400">
+              <h4 className="text-base font-bold text-slate-900">ID Card Locked</h4>
+              <p className="text-xs text-slate-500">
                 {eligibility?.reason || "ID card generation requires a verified registration and completed fee payment."}
               </p>
             </div>
@@ -271,12 +271,12 @@ export function IdCardModal({ registrationId, isOpen, onClose }: IdCardModalProp
 
         {/* Modal Actions Footer */}
         {card && (
-          <div className="px-4 sm:px-6 py-3.5 border-t border-slate-800 bg-[#0A192F] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0">
+          <div className="px-4 sm:px-6 py-3.5 border-t border-slate-200 bg-slate-50 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0">
             <a
               href={card.verificationUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs font-semibold text-[#D4AF37] hover:underline flex items-center justify-center sm:justify-start gap-1 py-1"
+              className="text-xs font-semibold text-blue-600 hover:underline flex items-center justify-center sm:justify-start gap-1 py-1"
             >
               <span>Public Verification Link</span>
               <ExternalLink className="h-3.5 w-3.5" />
@@ -287,7 +287,7 @@ export function IdCardModal({ registrationId, isOpen, onClose }: IdCardModalProp
                 variant="outline"
                 size="sm"
                 onClick={onClose}
-                className="flex-1 sm:flex-initial text-xs border-slate-700 text-slate-300"
+                className="flex-1 sm:flex-initial text-xs border-slate-300 text-slate-700 hover:bg-slate-100"
               >
                 Close
               </Button>
