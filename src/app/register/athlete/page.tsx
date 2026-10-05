@@ -289,7 +289,7 @@ function AthleteRegistrationContent() {
     discipline: "KYORUGI" as "KYORUGI" | "POOMSAE" | "DEMO",
     division: "SENIOR",
     category_id: "KY-SEN-M-U58",
-    weight_category_name: "Senior Male Under 58kg (Flyweight)",
+    weight_category_name: "Under 58.0 kg",
     belt_rank: "1ST_DAN_BLACK",
     kukkiwon_dan_number: "",
     weight_kg: "57.5",
@@ -321,8 +321,6 @@ function AthleteRegistrationContent() {
   // File input refs
   const photoInputRef = React.useRef<HTMLInputElement>(null);
   const govIdInputRef = React.useRef<HTMLInputElement>(null);
-  const certInputRef = React.useRef<HTMLInputElement>(null);
-  const medicalInputRef = React.useRef<HTMLInputElement>(null);
   const slipInputRef = React.useRef<HTMLInputElement>(null);
 
   // Check user session
@@ -388,7 +386,7 @@ function AthleteRegistrationContent() {
           ...prev,
           division: suggestedDivision,
           category_id: firstCat?.code || prev.category_id,
-          weight_category_name: firstCat ? `${firstCat.name} (${firstCat.weightLimit})` : prev.weight_category_name,
+          weight_category_name: firstCat ? firstCat.weightLimit : prev.weight_category_name,
         };
       });
     }
@@ -1217,7 +1215,7 @@ function AthleteRegistrationContent() {
                                 ...prev,
                                 division: div.id,
                                 category_id: first?.code || prev.category_id,
-                                weight_category_name: first ? `${first.name} (${first.weightLimit})` : prev.weight_category_name,
+                                weight_category_name: first ? first.weightLimit : prev.weight_category_name,
                               }));
                             }}
                             className={`p-3.5 rounded-xl border cursor-pointer transition-all text-center ${
@@ -1238,8 +1236,8 @@ function AthleteRegistrationContent() {
                     </div>
                   </div>
 
-                  {/* Belt & Kukkiwon Number */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {/* Belt & Exact Body Weight */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
                         Belt / Dan Rank *
@@ -1261,14 +1259,6 @@ function AthleteRegistrationContent() {
                       </select>
                     </div>
 
-                    <Input
-                      label="Kukkiwon Dan/Poom Number"
-                      placeholder="e.g. 05489123"
-                      value={formData.kukkiwon_dan_number}
-                      onChange={(e) => updateField("kukkiwon_dan_number", e.target.value)}
-                      helperText="Required for Black Belt / Poom"
-                    />
-
                     {formData.discipline === "KYORUGI" && (
                       <Input
                         label="Exact Body Weight (kg) *"
@@ -1283,6 +1273,32 @@ function AthleteRegistrationContent() {
                     )}
                   </div>
 
+                  {/* Kukkiwon ID */}
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                      Kukkiwon ID <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter KKWID-260901-1430-7788..."
+                      value={formData.kukkiwon_dan_number}
+                      onChange={(e) => updateField("kukkiwon_dan_number", e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 transition-all shadow-2xs"
+                    />
+                    <p className="text-xs text-slate-600 leading-normal">
+                      Do not have a Kukkiwon ID?{" "}
+                      <a
+                        href="https://kukkiwon-india.org/services/register-individual?next=register-dojang"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 underline font-medium"
+                      >
+                        Register for individual membership first
+                      </a>
+                      . What you have entered here is kept for your return — you will need to verify your e-mail address again afterwards.
+                    </p>
+                  </div>
+
                   {/* WORLD TAEKWONDO WEIGHT CATEGORY CARDS */}
                   <div className="space-y-3 pt-2">
                     <div className="flex items-center justify-between">
@@ -1294,7 +1310,7 @@ function AthleteRegistrationContent() {
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                       {currentWTCategories.map((cat) => {
                         const isSelected = formData.category_id === cat.code;
                         return (
@@ -1304,33 +1320,29 @@ function AthleteRegistrationContent() {
                               setFormData((prev) => ({
                                 ...prev,
                                 category_id: cat.code,
-                                weight_category_name: `${cat.name} (${cat.weightLimit})`,
+                                weight_category_name: cat.weightLimit,
                               }));
                             }}
-                            className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
+                            className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
                               isSelected
                                 ? "border-blue-600 bg-blue-50/80 shadow-xs ring-2 ring-blue-600/30"
-                                : "border-slate-200 bg-white hover:border-slate-300"
+                                : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
                             }`}
                           >
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-xs font-bold text-slate-900 uppercase">
-                                {cat.name}
-                              </span>
-                              <div
-                                className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
-                                  isSelected ? "bg-blue-600 border-blue-600 text-white" : "border-slate-300"
-                                }`}
-                              >
-                                {isSelected && <Check className="h-2.5 w-2.5 stroke-[3]" />}
-                              </div>
-                            </div>
-                            <span className="text-xs font-mono font-bold text-blue-600 block">
+                            <span
+                              className={`text-xs sm:text-sm font-bold font-mono ${
+                                isSelected ? "text-blue-700" : "text-slate-800"
+                              }`}
+                            >
                               {cat.weightLimit}
                             </span>
-                            <span className="text-[10px] text-slate-400 font-mono block mt-1">
-                              {cat.code}
-                            </span>
+                            <div
+                              className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ml-2 ${
+                                isSelected ? "bg-blue-600 border-blue-600 text-white" : "border-slate-300 bg-white"
+                              }`}
+                            >
+                              {isSelected && <Check className="h-2.5 w-2.5 stroke-[3]" />}
+                            </div>
                           </div>
                         );
                       })}
@@ -1338,13 +1350,13 @@ function AthleteRegistrationContent() {
                   </div>
                 </div>
 
-                {/* 1.5 REAL DOCUMENT UPLOADS (NOT JUST CHECKBOXES) */}
+                {/* 1.5 REAL DOCUMENT UPLOADS */}
                 <div className="space-y-5 pt-4 border-t border-slate-200">
                   <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                     <div>
                       <h3 className="text-base font-bold text-slate-950 uppercase flex items-center gap-2">
                         <FileCheck className="h-4 w-4 text-blue-600" />
-                        <span>4. Mandatory Document Uploads</span>
+                        <span>4. Mandatory Document Upload</span>
                       </h3>
                       <p className="text-xs text-slate-500 mt-0.5">
                         Upload digital proof files for tournament accreditation verification.
@@ -1352,7 +1364,7 @@ function AthleteRegistrationContent() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {/* DOC 1: Government ID / Age Proof */}
                     <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-3">
                       <div className="flex items-center justify-between">
@@ -1403,114 +1415,6 @@ function AthleteRegistrationContent() {
                         >
                           <Upload className="h-3.5 w-3.5 mr-1.5" />
                           <span>Upload ID / DOB Proof</span>
-                        </Button>
-                      )}
-                    </div>
-
-                    {/* DOC 2: Kukkiwon Dan/Poom Certificate */}
-                    <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold uppercase text-slate-900">
-                          2. Belt / Dan Certificate
-                        </span>
-                        <Badge variant={formData.documents_uploaded.kukkiwon_cert ? "success" : "info"}>
-                          {formData.documents_uploaded.kukkiwon_cert ? "Uploaded" : "Dan Mandatory"}
-                        </Badge>
-                      </div>
-                      <p className="text-[11px] text-slate-500 leading-snug">
-                        Official Kukkiwon Dan/Poom or Color Belt Certificate.
-                      </p>
-
-                      <input
-                        ref={certInputRef}
-                        type="file"
-                        accept="image/*,application/pdf"
-                        onChange={(e) => handleDocUpload("kukkiwon_cert", e)}
-                        className="hidden"
-                      />
-
-                      {formData.documents_uploaded.kukkiwon_cert ? (
-                        <div className="p-2.5 rounded-lg bg-white border border-slate-200 flex items-center justify-between text-xs">
-                          <div className="truncate pr-2">
-                            <span className="font-semibold text-slate-800 block truncate">
-                              {formData.documents_uploaded.kukkiwon_cert.name}
-                            </span>
-                            <span className="text-[10px] text-slate-400">
-                              {(formData.documents_uploaded.kukkiwon_cert.size / 1024).toFixed(0)} KB
-                            </span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveDoc("kukkiwon_cert")}
-                            className="text-red-500 hover:text-red-700 p-1"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      ) : (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => certInputRef.current?.click()}
-                          className="w-full text-xs font-bold border-dashed border-slate-300 bg-white hover:bg-slate-50 text-blue-600"
-                        >
-                          <Upload className="h-3.5 w-3.5 mr-1.5" />
-                          <span>Upload Belt Certificate</span>
-                        </Button>
-                      )}
-                    </div>
-
-                    {/* DOC 3: Medical Fitness / Waiver */}
-                    <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold uppercase text-slate-900">
-                          3. Medical Certificate
-                        </span>
-                        <Badge variant={formData.documents_uploaded.medical_cert ? "success" : "default"}>
-                          {formData.documents_uploaded.medical_cert ? "Uploaded" : "Recommended"}
-                        </Badge>
-                      </div>
-                      <p className="text-[11px] text-slate-500 leading-snug">
-                        Doctor fitness certificate or tournament indemnity waiver.
-                      </p>
-
-                      <input
-                        ref={medicalInputRef}
-                        type="file"
-                        accept="image/*,application/pdf"
-                        onChange={(e) => handleDocUpload("medical_cert", e)}
-                        className="hidden"
-                      />
-
-                      {formData.documents_uploaded.medical_cert ? (
-                        <div className="p-2.5 rounded-lg bg-white border border-slate-200 flex items-center justify-between text-xs">
-                          <div className="truncate pr-2">
-                            <span className="font-semibold text-slate-800 block truncate">
-                              {formData.documents_uploaded.medical_cert.name}
-                            </span>
-                            <span className="text-[10px] text-slate-400">
-                              {(formData.documents_uploaded.medical_cert.size / 1024).toFixed(0)} KB
-                            </span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveDoc("medical_cert")}
-                            className="text-red-500 hover:text-red-700 p-1"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      ) : (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => medicalInputRef.current?.click()}
-                          className="w-full text-xs font-bold border-dashed border-slate-300 bg-white hover:bg-slate-50 text-blue-600"
-                        >
-                          <Upload className="h-3.5 w-3.5 mr-1.5" />
-                          <span>Upload Medical Slip</span>
                         </Button>
                       )}
                     </div>
