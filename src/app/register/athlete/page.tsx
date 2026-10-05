@@ -1163,34 +1163,31 @@ function AthleteRegistrationContent() {
                     </label>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       {[
-                        { id: "KYORUGI", title: "Kyorugi (Sparring)", desc: "Full contact WT electronic sparring" },
-                        { id: "POOMSAE", title: "Poomsae (Forms)", desc: "Recognized individual patterns" },
-                        { id: "DEMO", title: "Demonstration", desc: "Kyukpa breaking & team demo" },
+                        { id: "KYORUGI", title: "Kyorugi (Sparring)" },
+                        { id: "POOMSAE", title: "Poomsae" },
+                        { id: "DEMO", title: "Demonstration" },
                       ].map((disc) => {
                         const isSelected = formData.discipline === disc.id;
                         return (
                           <div
                             key={disc.id}
                             onClick={() => updateField("discipline", disc.id)}
-                            className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                            className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
                               isSelected
                                 ? "border-blue-600 bg-blue-50/60 shadow-xs ring-1 ring-blue-600"
-                                : "border-slate-200 bg-white hover:border-slate-300"
+                                : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
                             }`}
                           >
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-sm font-bold uppercase text-slate-900">
-                                {disc.title}
-                              </span>
-                              <div
-                                className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                                  isSelected ? "bg-blue-600 border-blue-600 text-white" : "border-slate-300"
-                                }`}
-                              >
-                                {isSelected && <Check className="h-3 w-3 stroke-[3]" />}
-                              </div>
+                            <span className="text-sm font-bold uppercase text-slate-900">
+                              {disc.title}
+                            </span>
+                            <div
+                              className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ml-2 ${
+                                isSelected ? "bg-blue-600 border-blue-600 text-white" : "border-slate-300 bg-white"
+                              }`}
+                            >
+                              {isSelected && <Check className="h-3 w-3 stroke-[3]" />}
                             </div>
-                            <p className="text-xs text-slate-500">{disc.desc}</p>
                           </div>
                         );
                       })}
@@ -1236,41 +1233,26 @@ function AthleteRegistrationContent() {
                     </div>
                   </div>
 
-                  {/* Belt & Exact Body Weight */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
-                        Belt / Dan Rank *
-                      </label>
-                      <select
-                        value={formData.belt_rank}
-                        onChange={(e) => updateField("belt_rank", e.target.value)}
-                        className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
-                      >
-                        <option value="1ST_DAN_BLACK">1st Dan Black Belt</option>
-                        <option value="2ND_DAN_BLACK">2nd Dan Black Belt</option>
-                        <option value="3RD_DAN_PLUS">3rd Dan & Above</option>
-                        <option value="1ST_POOM">1st Poom (Junior Black Belt)</option>
-                        <option value="2ND_POOM">2nd Poom</option>
-                        <option value="COLOR_BELT_RED">Red / Black Stripe (Geup 1-2)</option>
-                        <option value="COLOR_BELT_BLUE">Blue Belt (Geup 3-4)</option>
-                        <option value="COLOR_BELT_GREEN">Green Belt (Geup 5-6)</option>
-                        <option value="COLOR_BELT_YELLOW">Yellow Belt (Geup 7-8)</option>
-                      </select>
-                    </div>
-
-                    {formData.discipline === "KYORUGI" && (
-                      <Input
-                        label="Exact Body Weight (kg) *"
-                        type="number"
-                        step="0.1"
-                        placeholder="e.g. 57.5"
-                        value={formData.weight_kg}
-                        onChange={(e) => updateField("weight_kg", e.target.value)}
-                        helperText="Official tournament weigh-in tolerance applies"
-                        required
-                      />
-                    )}
+                  {/* Belt / Dan Rank */}
+                  <div className="w-full">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+                      Belt / Dan Rank *
+                    </label>
+                    <select
+                      value={formData.belt_rank}
+                      onChange={(e) => updateField("belt_rank", e.target.value)}
+                      className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
+                    >
+                      <option value="1ST_DAN_BLACK">1st Dan Black Belt</option>
+                      <option value="2ND_DAN_BLACK">2nd Dan Black Belt</option>
+                      <option value="3RD_DAN_PLUS">3rd Dan & Above</option>
+                      <option value="1ST_POOM">1st Poom (Junior Black Belt)</option>
+                      <option value="2ND_POOM">2nd Poom</option>
+                      <option value="COLOR_BELT_RED">Red / Black Stripe (Geup 1-2)</option>
+                      <option value="COLOR_BELT_BLUE">Blue Belt (Geup 3-4)</option>
+                      <option value="COLOR_BELT_GREEN">Green Belt (Geup 5-6)</option>
+                      <option value="COLOR_BELT_YELLOW">Yellow Belt (Geup 7-8)</option>
+                    </select>
                   </div>
 
                   {/* Kukkiwon ID */}
