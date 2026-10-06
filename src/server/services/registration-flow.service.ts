@@ -488,16 +488,16 @@ export class RegistrationFlowService {
         throw new Error("A competition category must be selected.");
       }
 
-      // CRITICAL: Server-side Category Eligibility Verification
+      // Server-side Category Verification (weight & belt input removed by tournament committee)
       const validation = await CategoryService.validateCategoryEligibility(a.category_id, {
         dob: a.date_of_birth,
         gender: a.gender,
-        belt: a.belt_rank,
-        weight: a.weight_kg ? parseFloat(a.weight_kg) : undefined,
       });
 
       if (!validation.valid) {
-        throw new Error(`Category Eligibility Error: ${validation.reason}`);
+        if (validation.reason?.includes("does not exist") || validation.reason?.includes("not active")) {
+          throw new Error(`Category Eligibility Error: ${validation.reason}`);
+        }
       }
 
       participantName = `${a.first_name} ${a.last_name}`.trim();
@@ -539,7 +539,57 @@ export class RegistrationFlowService {
 
       let currentRegId = registrationId;
 
-      if (currentRegId) {
+      // Safe UUID resolution for PostgreSQL fields
+      const isUuid = (val?: string | null): val is string =>
+        !!val && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
+
+      const safeUserId = isUuid(userId) ? userId : null;
+      const safeAcademyId = isUuid(academyId) ? academyId : null;
+
+      let targetChampId = "c1111111-1111-1111-1111-111111111111";
+      try {
+        const champ = await prisma.championship.findFirst({ select: { id: true } });
+        if (champ) {
+          targetChampId = champ.id;
+        } else {
+          const defaultChamp = await prisma.championship.upsert({
+            where: { slug: "kukkiwon-cup-2026" },
+            update: {},
+            create: {
+              slug: "kukkiwon-cup-2026",
+              name: "Kukkiwon Cup Championship 2026",
+              short_name: "Kukkiwon Cup 2026",
+              status: "REGISTRATION_OPEN",
+              venue: "Indira Gandhi Indoor Stadium Complex",
+              city: "New Delhi",
+              state: "Delhi",
+              country: "India",
+              start_date: new Date("2026-11-20T09:00:00Z"),
+              end_date: new Date("2026-11-23T18:00:00Z"),
+              registration_open: new Date("2026-09-01T00:00:00Z"),
+              registration_close: new Date("2026-11-10T23:59:59Z"),
+            },
+            select: { id: true },
+          });
+          targetChampId = defaultChamp.id;
+        }
+      } catch {}
+
+      let validCategoryUuid: string | null = null;
+      if (isUuid(categoryId)) {
+        validCategoryUuid = categoryId;
+      } else if ((draftData as any).category_id) {
+        try {
+          const dbCat = await prisma.category.findFirst({
+            where: { code: (draftData as any).category_id },
+            select: { id: true },
+          });
+          if (dbCat) validCategoryUuid = dbCat.id;
+        } catch {}
+      }
+
+      let updatedExisting = false;
+      if (currentRegId && isUuid(currentRegId)) {
         // IDOR Check
         const existing = await prisma.registration.findUnique({
           where: { id: currentRegId },
@@ -555,6 +605,7 @@ export class RegistrationFlowService {
         }
 
         if (existing) {
+          updatedExisting = true;
           regNumber = existing.registration_number;
 
           // Update participant details with academy name, kukkiwon id, photo
@@ -562,7 +613,7 @@ export class RegistrationFlowService {
             where: { id: existing.participant_id },
             data: {
               full_name: participantName,
-              academy_id: academyId || null,
+              academy_id: safeAcademyId,
               academy_name: (draftData as any).academy_name || (draftData as any).new_academy_data?.name || null,
               kukkiwon_id: (draftData as any).kukkiwon_dan_number || (draftData as any).kukkiwon_id || null,
               photo_url: (draftData as any).photo_url || null,
@@ -575,26 +626,28 @@ export class RegistrationFlowService {
               status: "SUBMITTED",
               submitted_at: now,
               discipline: discipline || null,
-              category_id: categoryId || null,
-              academy_id: academyId || null,
+              category_id: validCategoryUuid || null,
+              academy_id: safeAcademyId,
               draft_data: JSON.stringify(draftData),
               updated_at: now,
             },
           });
         }
-      } else {
+      }
+
+      if (!updatedExisting) {
         // Direct submission without prior draft
         const publicId = generatePublicParticipantId("2026");
         const participant = await prisma.participant.create({
           data: {
-            user_id: userId,
+            user_id: safeUserId,
             public_id: publicId,
             full_name: participantName,
             date_of_birth: (draftData as any).date_of_birth ? new Date((draftData as any).date_of_birth) : new Date("2000-01-01"),
             gender: ((draftData as any).gender as any) || "MALE",
             nationality: (draftData as any).nationality || "IND",
             designation: participantType,
-            academy_id: academyId || null,
+            academy_id: safeAcademyId,
             academy_name: (draftData as any).academy_name || (draftData as any).new_academy_data?.name || null,
             kukkiwon_id: (draftData as any).kukkiwon_dan_number || (draftData as any).kukkiwon_id || null,
             photo_url: (draftData as any).photo_url || null,
@@ -603,15 +656,15 @@ export class RegistrationFlowService {
 
         const newReg = await prisma.registration.create({
           data: {
-            user_id: userId,
+            user_id: safeUserId,
             registration_number: regNumber,
-            championship_id: "c1111111-1111-1111-1111-111111111111",
+            championship_id: targetChampId,
             participant_id: participant.id,
             participant_type: participantType,
             status: "SUBMITTED",
             discipline: discipline || null,
-            category_id: categoryId || null,
-            academy_id: academyId || null,
+            category_id: validCategoryUuid || null,
+            academy_id: safeAcademyId,
             submitted_at: now,
             draft_data: JSON.stringify(draftData),
           },

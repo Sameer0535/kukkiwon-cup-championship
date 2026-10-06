@@ -245,6 +245,63 @@ interface UploadedFileRecord {
   dataUrl?: string;
 }
 
+/**
+ * Flexible Kukkiwon ID formatter:
+ * 1. Allows users to type "-" manually without stripping.
+ * 2. If the user omits hyphens (or pastes numbers), automatically inserts hyphens at
+ *    standard KKID-XXXXXX-XXXX-XXXX segment boundaries.
+ * 3. Does not block backspacing over hyphens.
+ */
+function formatKukkiwonIdInput(val: string, prev = ""): string {
+  if (!val.trim()) return "";
+  const upper = val.toUpperCase();
+
+  // If user is deleting/backspacing, respect deletion without force-inserting
+  if (upper.length < prev.length) {
+    return upper.replace(/[^A-Z0-9-]/g, "").slice(0, 21);
+  }
+
+  // If user entered only digits (or pasted raw digits like 12345612341234)
+  const rawDigits = upper.replace(/\D/g, "");
+  if (!upper.startsWith("K") && rawDigits.length > 0) {
+    let formatted = "KKID";
+    if (rawDigits.length > 0) formatted += "-" + rawDigits.slice(0, 6);
+    if (rawDigits.length > 6) formatted += "-" + rawDigits.slice(6, 10);
+    if (rawDigits.length > 10) formatted += "-" + rawDigits.slice(10, 14);
+    return formatted.slice(0, 21);
+  }
+
+  // If user entered "KKID" followed by digits without hyphens (e.g. KKID123456...)
+  if (upper.startsWith("KKID") && !upper.includes("-") && upper.length > 4) {
+    const d = upper.slice(4).replace(/\D/g, "");
+    let formatted = "KKID";
+    if (d.length > 0) formatted += "-" + d.slice(0, 6);
+    if (d.length > 6) formatted += "-" + d.slice(6, 10);
+    if (d.length > 10) formatted += "-" + d.slice(10, 14);
+    return formatted.slice(0, 21);
+  }
+
+  // User is typing manually (allowing characters and hyphens)
+  const cleaned = upper.replace(/[^A-Z0-9-]/g, "");
+  const singleHyphens = cleaned.replace(/-{2,}/g, "-");
+
+  // Auto-insert hyphen if the user typed next digits but omitted hyphen at boundaries
+  let result = singleHyphens;
+  if (/^KKID[0-9]/.test(result)) {
+    result = "KKID-" + result.slice(4);
+  }
+  const matchSegment2 = result.match(/^(KKID-[0-9]{6})([0-9].*)$/);
+  if (matchSegment2) {
+    result = matchSegment2[1] + "-" + matchSegment2[2];
+  }
+  const matchSegment3 = result.match(/^(KKID-[0-9]{6}-[0-9]{4})([0-9].*)$/);
+  if (matchSegment3) {
+    result = matchSegment3[1] + "-" + matchSegment3[2];
+  }
+
+  return result.slice(0, 21);
+}
+
 function AthleteRegistrationContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -292,7 +349,7 @@ function AthleteRegistrationContent() {
     weight_category_name: "Under 58.0 kg",
     belt_rank: "1ST_DAN_BLACK",
     kukkiwon_dan_number: "",
-    weight_kg: "57.5",
+    weight_kg: undefined as string | undefined,
 
     documents_uploaded: {
       gov_id: null as UploadedFileRecord | null,
@@ -618,13 +675,14 @@ function AthleteRegistrationContent() {
     try {
       if (paymentMethod === "OFFLINE") {
         const cleanUtr = offlineUtr.trim().toUpperCase();
-        if (cleanUtr.length !== 12) {
-          throw new Error("Please enter a valid 12-character Bank / UPI Transaction Reference (UTR) Number.");
+        if (cleanUtr.length < 8 || cleanUtr.length > 25) {
+          throw new Error("Please enter a valid Bank / UPI Transaction Reference (UTR) Number (minimum 8 characters).");
         }
       }
 
+      const { weight_kg: _unusedWeight, ...cleanFormData } = formData;
       const payloadDraftData = {
-        ...formData,
+        ...cleanFormData,
         payment_status: paymentMethod === "OFFLINE" ? "UNDER_REVIEW" : "PAID",
         payment_method: paymentMethod === "OFFLINE" ? "OFFLINE_UPI" : paymentMethod,
         offline_utr: offlineUtr.trim().toUpperCase(),
@@ -675,7 +733,7 @@ function AthleteRegistrationContent() {
       });
     } catch (err: any) {
       setErrorNotice(err.message || "Failed to process payment. Please try again.");
-      window.scrollTo({ top: 500, behavior: "smooth" });
+      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
     } finally {
       setIsProcessingPayment(false);
     }
@@ -1258,23 +1316,22 @@ function AthleteRegistrationContent() {
                       placeholder="KKID-123456-1234-1234"
                       value={formData.kukkiwon_dan_number}
                       onChange={(e) => {
-                        const val = e.target.value.toUpperCase();
-                        let clean = val.replace(/[^A-Z0-9]/g, "");
-                        if (clean.startsWith("KKID")) {
-                          clean = clean.slice(4);
+                        const formatted = formatKukkiwonIdInput(
+                          e.target.value,
+                          formData.kukkiwon_dan_number
+                        );
+                        updateField("kukkiwon_dan_number", formatted);
+                      }}
+                      onBlur={(e) => {
+                        const val = e.target.value.trim().toUpperCase();
+                        if (!val) return;
+                        const digits = val.replace(/\D/g, "").slice(0, 14);
+                        if (digits.length === 14) {
+                          updateField(
+                            "kukkiwon_dan_number",
+                            `KKID-${digits.slice(0, 6)}-${digits.slice(6, 10)}-${digits.slice(10, 14)}`
+                          );
                         }
-                        const digits = clean.replace(/\D/g, "").slice(0, 14);
-                        let formatted = "KKID";
-                        if (digits.length > 0) {
-                          formatted += "-" + digits.slice(0, 6);
-                        }
-                        if (digits.length > 6) {
-                          formatted += "-" + digits.slice(6, 10);
-                        }
-                        if (digits.length > 10) {
-                          formatted += "-" + digits.slice(10, 14);
-                        }
-                        updateField("kukkiwon_dan_number", digits.length === 0 && !val.startsWith("K") ? "" : formatted);
                       }}
                       className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-sm font-mono tracking-wider text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 transition-all shadow-2xs"
                       required
@@ -1532,9 +1589,6 @@ function AthleteRegistrationContent() {
                       <span className="text-[10px] uppercase font-bold text-slate-400 block">Category</span>
                       <span className="text-xs font-bold text-blue-700 block">
                         {formData.weight_category_name}
-                      </span>
-                      <span className="text-[11px] text-slate-500 font-mono">
-                        {formData.belt_rank.replace(/_/g, " ")}
                       </span>
                     </div>
                   </div>

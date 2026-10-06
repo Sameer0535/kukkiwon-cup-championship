@@ -144,7 +144,24 @@ export class CategoryService {
     }
   ): Promise<{ valid: boolean; reason?: string; category?: Category }> {
     const all = await this.listCategories();
-    const category = all.find((c) => c.id === categoryId || c.code === categoryId);
+    let category = all.find(
+      (c) =>
+        c.id === categoryId ||
+        c.code.toUpperCase() === categoryId.toUpperCase()
+    );
+
+    if (!category) {
+      const fromConfig = INITIAL_CATEGORIES.find(
+        (c) => c.code.toUpperCase() === categoryId.toUpperCase()
+      );
+      if (fromConfig) {
+        category = {
+          ...fromConfig,
+          id: `cat-${fromConfig.code.toLowerCase()}`,
+          championship_id: "default-championship-id",
+        };
+      }
+    }
 
     if (!category) {
       return { valid: false, reason: "Specified category does not exist in the championship configuration." };

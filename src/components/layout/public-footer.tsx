@@ -130,7 +130,7 @@ export function PublicFooter() {
               </div>
               <div className="pt-2">
                 <a
-                  href="https://kyorix.com"
+                  href="https://kyorixsport.in"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-[11px] text-cyan-400 hover:underline"
