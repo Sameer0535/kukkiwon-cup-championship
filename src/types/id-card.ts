@@ -36,6 +36,7 @@ export interface AthleteIdCardDetails {
   championshipName: string;
   photoUrl?: string | null;
   registrationNumber: string;
+  kukkiwonId?: string | null;
 }
 
 export interface IdCardEligibilityResult {

@@ -279,6 +279,13 @@ export interface ChampionshipContentDTO {
   updatedAt: string;
   publishedAt: string | null;
   updatedBy: string | null;
+  partnershipHeading?: string | null;
+  partnershipDescription?: string | null;
+  kukkiwonDescription?: string | null;
+  kyorixDescription?: string | null;
+  ctaTitle?: string | null;
+  ctaDescription?: string | null;
+  disciplinesJson?: string | null;
 }
 
 export interface ChampionshipImportantDateDTO {
@@ -369,6 +376,13 @@ export interface CreateOrUpdateContentInput {
   contactEmail?: string;
   contactPhone?: string;
   websiteStatus?: PublicationStatus;
+  partnershipHeading?: string;
+  partnershipDescription?: string;
+  kukkiwonDescription?: string;
+  kyorixDescription?: string;
+  ctaTitle?: string;
+  ctaDescription?: string;
+  disciplinesJson?: string;
 }
 
 export interface CreateDateInput {

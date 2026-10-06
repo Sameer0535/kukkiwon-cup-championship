@@ -29,6 +29,7 @@ import {
   RefreshCw,
   X,
   FileText,
+  Layout,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -59,7 +60,7 @@ import {
   RegistrationState,
 } from "@/types/cms";
 
-type TabKey = "info" | "hero" | "dates" | "announcements" | "faqs" | "contact" | "publishing";
+type TabKey = "info" | "hero" | "sections" | "dates" | "announcements" | "faqs" | "contact" | "publishing";
 
 export default function AdminCmsPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("info");
@@ -151,6 +152,13 @@ export default function AdminCmsPage() {
           registrationClose: championship.registrationClose,
           lateRegistrationDeadline: championship.lateRegistrationDeadline,
           bannerUrl: championship.bannerUrl,
+          partnershipHeading: content.partnershipHeading,
+          partnershipDescription: content.partnershipDescription,
+          kukkiwonDescription: content.kukkiwonDescription,
+          kyorixDescription: content.kyorixDescription,
+          ctaTitle: content.ctaTitle,
+          ctaDescription: content.ctaDescription,
+          disciplinesJson: content.disciplinesJson,
         }),
       });
       const data = await res.json();
@@ -389,6 +397,7 @@ export default function AdminCmsPage() {
         {[
           { key: "info", label: "Championship Info", icon: FileText },
           { key: "hero", label: "Hero & Banner", icon: Sparkles },
+          { key: "sections", label: "Website Sections", icon: Layout },
           { key: "dates", label: "Important Dates", icon: Calendar, badge: dates.length },
           { key: "announcements", label: "Announcements", icon: Megaphone, badge: announcements.length },
           { key: "faqs", label: "FAQ Management", icon: HelpCircle, badge: faqs.length },
@@ -628,6 +637,120 @@ export default function AdminCmsPage() {
               <Button type="submit" disabled={saving} className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold flex items-center gap-2">
                 <Save className="w-4 h-4" />
                 {saving ? "Saving..." : "Save Hero Settings"}
+              </Button>
+            </CardFooter>
+          </form>
+        </Card>
+      )}
+
+      {/* Tab: Website Sections Configuration */}
+      {activeTab === "sections" && content && (
+        <Card className="bg-slate-900/60 border-slate-800">
+          <CardHeader>
+            <CardTitle className="text-white text-xl">All Website Sections Content</CardTitle>
+            <CardDescription className="text-slate-400">
+              Live authoring for Partnership, About, Registration CTA, and Disciplines sections.
+            </CardDescription>
+          </CardHeader>
+          <form onSubmit={handleSaveInfo}>
+            <CardContent className="space-y-8">
+              {/* 1. Partnership / About Section */}
+              <div className="space-y-4 p-5 rounded-xl bg-slate-950/60 border border-slate-800">
+                <h4 className="text-sm font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
+                  <span>1. Partnership & Organization Section</span>
+                </h4>
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">Partnership Section Heading</label>
+                    <Input
+                      value={content.partnershipHeading || "Presented in Partnership"}
+                      onChange={(e) => setContent({ ...content, partnershipHeading: e.target.value })}
+                      placeholder="Presented in Partnership"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">Partnership Section Subtitle</label>
+                    <Input
+                      value={content.partnershipDescription || "A strategic sporting union combining authentic martial arts governance with modern tournament technology."}
+                      onChange={(e) => setContent({ ...content, partnershipDescription: e.target.value })}
+                      placeholder="Section introductory description..."
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">Kukkiwon India North Branch Description</label>
+                    <Textarea
+                      rows={3}
+                      value={content.kukkiwonDescription || ""}
+                      onChange={(e) => setContent({ ...content, kukkiwonDescription: e.target.value })}
+                      placeholder="Official governing authority details..."
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">Kyorix Sports Technology Description</label>
+                    <Textarea
+                      rows={3}
+                      value={content.kyorixDescription || ""}
+                      onChange={(e) => setContent({ ...content, kyorixDescription: e.target.value })}
+                      placeholder="Competition electronics and accreditation details..."
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. Registration Call to Action */}
+              <div className="space-y-4 p-5 rounded-xl bg-slate-950/60 border border-slate-800">
+                <h4 className="text-sm font-bold uppercase tracking-wider text-blue-400 flex items-center gap-2">
+                  <span>2. Registration Call-to-Action (CTA) Section</span>
+                </h4>
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">CTA Headline</label>
+                    <Input
+                      value={content.ctaTitle || "Ready to Take Part?"}
+                      onChange={(e) => setContent({ ...content, ctaTitle: e.target.value })}
+                      placeholder="Ready to Take Part?"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">CTA Description Paragraph</label>
+                    <Textarea
+                      rows={2}
+                      value={content.ctaDescription || ""}
+                      onChange={(e) => setContent({ ...content, ctaDescription: e.target.value })}
+                      placeholder="Call to action invitation text..."
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 3. Tournament Disciplines Overview */}
+              <div className="space-y-4 p-5 rounded-xl bg-slate-950/60 border border-slate-800">
+                <h4 className="text-sm font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
+                  <span>3. Disciplines & Structure Overview</span>
+                </h4>
+                <p className="text-xs text-slate-400">
+                  Custom descriptions for Kyorugi (Sparring), Poomsae, and Demo/Breaking displayed on the homepage.
+                </p>
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Disciplines JSON (Optional Override)</label>
+                  <Textarea
+                    rows={4}
+                    value={content.disciplinesJson || ""}
+                    onChange={(e) => setContent({ ...content, disciplinesJson: e.target.value })}
+                    placeholder='[{"title":"Kyorugi (Sparring)","category":"Senior, Junior, Cadet","description":"..."},{"title":"Poomsae","category":"Individual, Pair & Team","description":"..."}]'
+                    className="font-mono text-xs"
+                  />
+                  <span className="text-[11px] text-slate-500 mt-1 block">
+                    Leave blank to use official championship default disciplines structure.
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter className="flex justify-end border-t border-slate-800 pt-4">
+              <Button type="submit" disabled={saving} className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold flex items-center gap-2">
+                <Save className="w-4 h-4" />
+                {saving ? "Saving..." : "Save Website Sections"}
               </Button>
             </CardFooter>
           </form>

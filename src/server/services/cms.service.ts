@@ -97,6 +97,13 @@ interface FallbackChampionshipData {
   website_status?: PublicationStatus;
   published_at?: string | null;
   updated_by?: string | null;
+  partnership_heading?: string;
+  partnership_description?: string;
+  kukkiwon_description?: string;
+  kyorix_description?: string;
+  cta_title?: string;
+  cta_description?: string;
+  disciplines_json?: string;
 }
 
 const FALLBACK_CHAMPIONSHIPS: Map<string, FallbackChampionshipData> = new Map([
@@ -1850,6 +1857,13 @@ export class CmsService {
       updatedAt: champ.updatedAt,
       publishedAt: fallback?.published_at || (champ.status === "PUBLISHED" ? champ.updatedAt : null),
       updatedBy: fallback?.updated_by || null,
+      partnershipHeading: fallback?.partnership_heading || "Presented in Partnership",
+      partnershipDescription: fallback?.partnership_description || "A strategic sporting union combining authentic martial arts governance with modern tournament technology.",
+      kukkiwonDescription: fallback?.kukkiwon_description || "Established under the authority of World Taekwondo Headquarters Kukkiwon (Seoul, South Korea). The India North Branch is the official governing authority responsible for Dan promotions, black belt certifications, instructor seminars, and sanctioned championships across Northern India.",
+      kyorixDescription: fallback?.kyorix_description || "Pioneers in martial arts competition electronics, Kyorix Sports Technology engineers wireless electronic chest and head protectors, multi-mat management software, real-time judge scoring consoles, and secure cryptographic accreditation ensuring flawless event execution.",
+      ctaTitle: fallback?.cta_title || "Ready to Take Part?",
+      ctaDescription: fallback?.cta_description || "Register for the Kukkiwon Cup Championship. Compete under official Kukkiwon sanction and secure your certified tournament accreditation badge.",
+      disciplinesJson: fallback?.disciplines_json || null,
     };
   }
 
@@ -1892,6 +1906,13 @@ export class CmsService {
         existingFallback.status = input.websiteStatus;
         existingFallback.is_published = input.websiteStatus === "PUBLISHED";
       }
+      if (input.partnershipHeading !== undefined) existingFallback.partnership_heading = input.partnershipHeading;
+      if (input.partnershipDescription !== undefined) existingFallback.partnership_description = input.partnershipDescription;
+      if (input.kukkiwonDescription !== undefined) existingFallback.kukkiwon_description = input.kukkiwonDescription;
+      if (input.kyorixDescription !== undefined) existingFallback.kyorix_description = input.kyorixDescription;
+      if (input.ctaTitle !== undefined) existingFallback.cta_title = input.ctaTitle;
+      if (input.ctaDescription !== undefined) existingFallback.cta_description = input.ctaDescription;
+      if (input.disciplinesJson !== undefined) existingFallback.disciplines_json = input.disciplinesJson;
       existingFallback.updated_at = new Date().toISOString();
       if (adminSession?.email) existingFallback.updated_by = adminSession.email;
     }

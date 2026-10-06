@@ -161,6 +161,11 @@ function CoachRegistrationContent() {
       setErrorNotice("Mobile number and email are required.");
       return false;
     }
+    const cleanPhone = formData.phone.replace(/\D/g, "");
+    if (cleanPhone.length !== 10) {
+      setErrorNotice("Mobile number must be exactly 10 digits.");
+      return false;
+    }
     return true;
   };
 
@@ -236,12 +241,6 @@ function CoachRegistrationContent() {
   };
 
   const handleSubmit = async () => {
-    if (!currentUser) {
-      setPendingAction("submit");
-      setAuthModalOpen(true);
-      return;
-    }
-
     if (!formData.declaration_accurate || !formData.declaration_terms) {
       setErrorNotice("All mandatory legal declarations and terms must be checked.");
       return;
@@ -510,9 +509,10 @@ function CoachRegistrationContent() {
                   <Input
                     label="Mobile Number (WhatsApp) *"
                     type="tel"
-                    placeholder="+91 98765 43210"
+                    placeholder="10-digit mobile number"
+                    maxLength={10}
                     value={formData.phone}
-                    onChange={(e) => updateField("phone", e.target.value)}
+                    onChange={(e) => updateField("phone", e.target.value.replace(/\D/g, "").slice(0, 10))}
                     required
                   />
                   <Input

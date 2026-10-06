@@ -9,16 +9,11 @@ import { getRegistrantSession } from "@/lib/server-auth";
 import { RegistrationFlowService } from "@/server/services/registration-flow.service";
 import { ParticipantType } from "@/types/registration";
 
+import prisma from "@/lib/db";
+
 export async function POST(req: NextRequest) {
   try {
     const session = await getRegistrantSession();
-    if (!session) {
-      return NextResponse.json(
-        { error: "Authentication required to save registration drafts. Please sign in or create an account." },
-        { status: 401 }
-      );
-    }
-
     const body = await req.json();
     const { registrationId, participantType, championshipId, draftData } = body;
 
@@ -29,8 +24,33 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    let userId = session?.userId;
+    if (!userId) {
+      const email = (draftData.email || "").trim().toLowerCase() || `draft_${Date.now()}@kukkiwoncup.local`;
+      const name = `${draftData.first_name || ""} ${draftData.last_name || ""}`.trim() || "Competitor";
+      try {
+        const existing = await prisma.user.findUnique({ where: { email } });
+        if (existing) {
+          userId = existing.id;
+        } else {
+          const created = await prisma.user.create({
+            data: {
+              email,
+              full_name: name,
+              phone: draftData.phone || null,
+              password_hash: "draft_" + Date.now(),
+              role: "ATHLETE",
+            },
+          });
+          userId = created.id;
+        }
+      } catch {
+        userId = `guest-${Date.now()}`;
+      }
+    }
+
     const result = await RegistrationFlowService.saveDraft({
-      userId: session.userId,
+      userId,
       registrationId,
       participantType: participantType as ParticipantType,
       championshipId,

@@ -49,6 +49,7 @@ interface FallbackIdCard {
   registration_number?: string;
   photo_url?: string | null;
   user_id?: string | null;
+  kukkiwon_id?: string | null;
 }
 
 const FALLBACK_ID_CARDS: Map<string, FallbackIdCard> = new Map();
@@ -459,6 +460,7 @@ export class IdCardService {
           championshipName: reg.championship.name,
           photoUrl: reg.participant.photo_url || null,
           registrationNumber: reg.registration_number,
+          kukkiwonId: reg.participant.kukkiwon_id || null,
         };
       } catch (error) {
         console.error("[IdCardService.generateCard] DB error, falling back to memory:", error);
@@ -588,6 +590,7 @@ export class IdCardService {
           championshipName: card.registration.championship.name,
           photoUrl: card.participant.photo_url || null,
           registrationNumber: card.registration.registration_number,
+          kukkiwonId: card.participant.kukkiwon_id || null,
         };
       } catch (error: any) {
         if (error.message?.includes("Unauthorized")) throw error;
@@ -1001,6 +1004,7 @@ export class IdCardService {
         championshipName: card.registration.championship.name,
         photoUrl: card.participant.photo_url || null,
         registrationNumber: card.registration.registration_number,
+        kukkiwonId: card.participant.kukkiwon_id || null,
       };
     }
 
@@ -1053,10 +1057,71 @@ export class IdCardService {
   }
 
   /**
-   * Generates a high-resolution, print-ready badge HTML representation (Requirements 8 & 9)
-   * Formatted with official Kukkiwon Cup design tokens (#0A192F navy, #D4AF37 gold)
+  /**
+   * Generates markup for an athlete ID badge containing strictly:
+   * 1. Athlete Photo
+   * 2. Name
+   * 3. Academy
+   * 4. Generated Athlete ID Number
+   * 5. Submitted Kukkiwon ID
+   * With support for custom uploaded background template
    */
-  static generatePrintableHtml(card: AthleteIdCardDetails): string {
+  static generateCardMarkup(card: AthleteIdCardDetails, templateBgUrl?: string | null): string {
+    const hasTemplate = Boolean(templateBgUrl);
+    const bgStyle = hasTemplate
+      ? `background-image: url('${templateBgUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat;`
+      : `background: #ffffff; border: 2px solid #0A192F;`;
+
+    return `
+    <div class="badge-card" style="${bgStyle}">
+      ${!hasTemplate ? `
+      <div class="badge-header">
+        <div class="badge-header-title">KUKKIWON CUP 2026</div>
+        <div class="badge-header-sub">OFFICIAL ATHLETE ACCREDITATION</div>
+      </div>
+      ` : ''}
+
+      <div class="badge-body ${hasTemplate ? 'has-template' : ''}">
+        <!-- 1. Athlete Photo -->
+        <div class="photo-wrapper">
+          ${card.photoUrl
+            ? `<img src="${card.photoUrl}" alt="${card.athleteName}" class="athlete-photo" />`
+            : `<div class="photo-placeholder">🥋</div>`
+          }
+        </div>
+
+        <!-- 2. Athlete Name -->
+        <div class="field-item name-item">
+          <div class="field-label">NAME</div>
+          <div class="field-value athlete-name">${card.athleteName.toUpperCase()}</div>
+        </div>
+
+        <!-- 3. Academy -->
+        <div class="field-item">
+          <div class="field-label">ACADEMY / CLUB</div>
+          <div class="field-value">${card.academyName || "Independent"}</div>
+        </div>
+
+        <!-- 4. Generated Athlete ID Number -->
+        <div class="field-item">
+          <div class="field-label">ATHLETE ID NUMBER</div>
+          <div class="field-value font-mono athlete-id">${card.athleteId}</div>
+        </div>
+
+        <!-- 5. Submitted Kukkiwon ID -->
+        <div class="field-item">
+          <div class="field-label">KUKKIWON ID</div>
+          <div class="field-value font-mono">${card.kukkiwonId || "N/A"}</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  /**
+   * Generates print-ready HTML for a single ID Card
+   */
+  static generatePrintableHtml(card: AthleteIdCardDetails, templateBgUrl?: string | null): string {
+    const cardHtml = this.generateCardMarkup(card, templateBgUrl);
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1078,162 +1143,11 @@ export class IdCardService {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background: #F3F4F6;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
+      justify-content: center;
       min-height: 100vh;
       padding: 20px;
-    }
-    .badge-card {
-      width: 100mm;
-      height: 150mm;
-      background: #FFFFFF;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      border: 1px solid #E5E7EB;
-    }
-    .badge-header {
-      background: #0A192F;
-      color: #FFFFFF;
-      padding: 16px 12px;
-      text-align: center;
-      border-bottom: 3px solid #D4AF37;
-    }
-    .badge-header h1 {
-      font-size: 14px;
-      font-weight: 800;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: #D4AF37;
-      margin-bottom: 4px;
-    }
-    .badge-header h2 {
-      font-size: 10px;
-      font-weight: 500;
-      letter-spacing: 0.5px;
-      color: #E2E8F0;
-    }
-    .badge-body {
-      padding: 14px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .photo-container {
-      width: 80px;
-      height: 80px;
-      border-radius: 8px;
-      border: 2px solid #D4AF37;
-      background: #F8FAFC;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 12px;
-      overflow: hidden;
-    }
-    .photo-container img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .photo-placeholder {
-      font-size: 28px;
-      color: #94A3B8;
-    }
-    .athlete-name {
-      font-size: 16px;
-      font-weight: 800;
-      color: #0A192F;
-      text-transform: uppercase;
-      text-align: center;
-      margin-bottom: 2px;
-    }
-    .badge-id {
-      background: #0A192F;
-      color: #D4AF37;
-      font-family: "Courier New", Courier, monospace;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 4px;
-      margin-bottom: 12px;
-      letter-spacing: 1px;
-    }
-    .meta-grid {
-      width: 100%;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 12px;
-      background: #F8FAFC;
-      padding: 8px 10px;
-      border-radius: 6px;
-      border: 1px solid #E2E8F0;
-    }
-    .meta-item {
-      display: flex;
-      flex-direction: column;
-    }
-    .meta-label {
-      font-size: 8px;
-      font-weight: 700;
-      text-transform: uppercase;
-      color: #64748B;
-      letter-spacing: 0.5px;
-    }
-    .meta-value {
-      font-size: 10px;
-      font-weight: 700;
-      color: #1E293B;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .qr-section {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-top: auto;
-    }
-    .qr-container {
-      width: 85px;
-      height: 85px;
-      background: #FFFFFF;
-      padding: 4px;
-      border: 1px solid #CBD5E1;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .qr-container img {
-      width: 100%;
-      height: 100%;
-    }
-    .qr-instruction {
-      font-size: 8px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: #0A192F;
-      margin-top: 4px;
-    }
-    .badge-footer {
-      background: #F1F5F9;
-      border-top: 1px solid #E2E8F0;
-      padding: 6px 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .badge-footer span {
-      font-size: 7.5px;
-      color: #64748B;
-      font-weight: 600;
     }
     .print-controls {
       position: fixed;
@@ -1245,17 +1159,121 @@ export class IdCardService {
     }
     .print-btn {
       background: #0A192F;
-      color: #FFFFFF;
-      border: none;
-      padding: 8px 16px;
+      color: #D4AF37;
+      border: 1px solid #D4AF37;
+      padding: 10px 20px;
       font-size: 13px;
-      font-weight: 600;
-      border-radius: 6px;
+      font-weight: 700;
+      border-radius: 8px;
       cursor: pointer;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
     .print-btn:hover {
       background: #1E293B;
+    }
+    .badge-card {
+      width: 100mm;
+      height: 150mm;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      page-break-after: always;
+      break-after: page;
+    }
+    .badge-header {
+      background: #0A192F;
+      color: #FFFFFF;
+      padding: 14px 10px;
+      text-align: center;
+      border-bottom: 3px solid #D4AF37;
+    }
+    .badge-header-title {
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      color: #D4AF37;
+    }
+    .badge-header-sub {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: #E2E8F0;
+      margin-top: 2px;
+    }
+    .badge-body {
+      flex: 1;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-around;
+      background: rgba(255,255,255,0.92);
+    }
+    .badge-body.has-template {
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(2px);
+      margin: 15mm 8mm 12mm 8mm;
+      border-radius: 10px;
+      border: 1px solid rgba(212,175,55,0.4);
+    }
+    .photo-wrapper {
+      width: 90px;
+      height: 90px;
+      border-radius: 10px;
+      border: 3px solid #D4AF37;
+      background: #F8FAFC;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .athlete-photo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .photo-placeholder {
+      font-size: 36px;
+      color: #94A3B8;
+    }
+    .field-item {
+      width: 100%;
+      text-align: center;
+      margin-top: 4px;
+    }
+    .field-label {
+      font-size: 8px;
+      font-weight: 800;
+      color: #64748B;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .field-value {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0A192F;
+      margin-top: 2px;
+    }
+    .athlete-name {
+      font-size: 16px;
+      font-weight: 900;
+      color: #0A192F;
+      letter-spacing: 0.5px;
+    }
+    .athlete-id {
+      color: #B45309;
+      background: #FEF3C7;
+      padding: 3px 10px;
+      border-radius: 6px;
+      display: inline-block;
+      border: 1px solid #FDE68A;
+    }
+    .font-mono {
+      font-family: "Courier New", Courier, monospace;
     }
     @media print {
       body {
@@ -1265,8 +1283,7 @@ export class IdCardService {
       .badge-card {
         box-shadow: none;
         border: none;
-        width: 100mm;
-        height: 150mm;
+        margin: 0;
       }
       .print-controls {
         display: none !important;
@@ -1278,69 +1295,193 @@ export class IdCardService {
   <div class="print-controls">
     <button class="print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
   </div>
-
-  <div class="badge-card">
-    <div class="badge-header">
-      <h1>${card.championshipName.toUpperCase()}</h1>
-      <h2>OFFICIAL ATHLETE ACCREDITATION</h2>
-    </div>
-
-    <div class="badge-body">
-      <div class="photo-container">
-        ${
-          card.photoUrl
-            ? `<img src="${card.photoUrl}" alt="${card.athleteName}" />`
-            : `<div class="photo-placeholder">🥋</div>`
-        }
-      </div>
-
-      <div class="athlete-name">${card.athleteName}</div>
-      <div class="badge-id">${card.athleteId}</div>
-
-      <div class="meta-grid">
-        <div class="meta-item">
-          <span class="meta-label">Category</span>
-          <span class="meta-value">${card.categoryName || "Official Entry"}</span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-label">Discipline</span>
-          <span class="meta-value">${card.discipline || "KYORUGI"}</span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-label">Academy / Club</span>
-          <span class="meta-value">${card.academyName || "Independent"}</span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-label">Nationality</span>
-          <span class="meta-value">${card.nationality}</span>
-        </div>
-      </div>
-
-      <div class="qr-section">
-        <div class="qr-container">
-          ${
-            card.qrCodeDataUrl
-              ? `<img src="${card.qrCodeDataUrl}" alt="Scan to verify accreditation" />`
-              : `<div style="font-size: 8px;">QR Unavailable</div>`
-          }
-        </div>
-        <div class="qr-instruction">Scan to Verify Identity</div>
-      </div>
-    </div>
-
-    <div class="badge-footer">
-      <span>REF: ${card.registrationNumber}</span>
-      <span>STATUS: ${card.cardStatus} • V${card.version}</span>
-      <span>KUKKIWON CUP</span>
-    </div>
-  </div>
-
+  ${cardHtml}
   <script>
-    // Auto-trigger print if requested via query param ?autoprint=1
     if (window.location.search.includes('autoprint=1')) {
       window.addEventListener('load', () => setTimeout(() => window.print(), 300));
     }
   </script>
+</body>
+</html>`;
+  }
+
+  /**
+   * Generates print-ready HTML for bulk download of multiple ID Cards
+   */
+  static generateBulkPrintableHtml(cards: AthleteIdCardDetails[], templateBgUrl?: string | null): string {
+    const cardsHtml = cards.map((c) => this.generateCardMarkup(c, templateBgUrl)).join("\n");
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bulk Athlete ID Cards (${cards.length} Cards)</title>
+  <style>
+    @page {
+      size: 100mm 150mm;
+      margin: 0;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #F3F4F6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding: 20px;
+    }
+    .print-controls {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      display: flex;
+      gap: 8px;
+      z-index: 100;
+    }
+    .print-btn {
+      background: #0A192F;
+      color: #D4AF37;
+      border: 1px solid #D4AF37;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .badge-card {
+      width: 100mm;
+      height: 150mm;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      page-break-after: always;
+      break-after: page;
+      margin-bottom: 20px;
+    }
+    .badge-header {
+      background: #0A192F;
+      color: #FFFFFF;
+      padding: 14px 10px;
+      text-align: center;
+      border-bottom: 3px solid #D4AF37;
+    }
+    .badge-header-title {
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      color: #D4AF37;
+    }
+    .badge-header-sub {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: #E2E8F0;
+      margin-top: 2px;
+    }
+    .badge-body {
+      flex: 1;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-around;
+      background: rgba(255,255,255,0.92);
+    }
+    .badge-body.has-template {
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(2px);
+      margin: 15mm 8mm 12mm 8mm;
+      border-radius: 10px;
+      border: 1px solid rgba(212,175,55,0.4);
+    }
+    .photo-wrapper {
+      width: 90px;
+      height: 90px;
+      border-radius: 10px;
+      border: 3px solid #D4AF37;
+      background: #F8FAFC;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .athlete-photo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .photo-placeholder {
+      font-size: 36px;
+      color: #94A3B8;
+    }
+    .field-item {
+      width: 100%;
+      text-align: center;
+      margin-top: 4px;
+    }
+    .field-label {
+      font-size: 8px;
+      font-weight: 800;
+      color: #64748B;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .field-value {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0A192F;
+      margin-top: 2px;
+    }
+    .athlete-name {
+      font-size: 16px;
+      font-weight: 900;
+      color: #0A192F;
+      letter-spacing: 0.5px;
+    }
+    .athlete-id {
+      color: #B45309;
+      background: #FEF3C7;
+      padding: 3px 10px;
+      border-radius: 6px;
+      display: inline-block;
+      border: 1px solid #FDE68A;
+    }
+    .font-mono {
+      font-family: "Courier New", Courier, monospace;
+    }
+    @media print {
+      body {
+        background: none;
+        padding: 0;
+        gap: 0;
+      }
+      .badge-card {
+        box-shadow: none;
+        border: none;
+        margin: 0;
+      }
+      .print-controls {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="print-controls">
+    <button class="print-btn" onclick="window.print()">🖨️ Print All ${cards.length} Cards / Save as PDF</button>
+  </div>
+  ${cardsHtml}
 </body>
 </html>`;
   }

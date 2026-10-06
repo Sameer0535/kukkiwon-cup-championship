@@ -5,7 +5,7 @@
 // ==============================================================================
 
 import { NextRequest, NextResponse } from "next/server";
-import { getRegistrantSession } from "@/lib/server-auth";
+import { getAdminSession } from "@/lib/server-auth";
 import { IdCardService } from "@/server/services/id-card.service";
 
 interface RouteContext {
@@ -14,11 +14,11 @@ interface RouteContext {
 
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
-    const session = await getRegistrantSession(request);
-    if (!session) {
+    const adminSession = await getAdminSession(request);
+    if (!adminSession) {
       return NextResponse.json(
-        { error: "Authentication required to generate athlete ID card." },
-        { status: 401 }
+        { error: "Unauthorized: Athlete ID cards can only be generated in the admin panel by administrators once payment is verified." },
+        { status: 403 }
       );
     }
 
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
 
-    const card = await IdCardService.generateCard(registrationId, session.userId);
+    const card = await IdCardService.generateCard(registrationId, adminSession.user_id);
 
     return NextResponse.json({
       success: true,
@@ -57,11 +57,11 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
 export async function GET(request: NextRequest, context: RouteContext) {
   try {
-    const session = await getRegistrantSession(request);
-    if (!session) {
+    const adminSession = await getAdminSession(request);
+    if (!adminSession) {
       return NextResponse.json(
-        { error: "Authentication required to view athlete ID card." },
-        { status: 401 }
+        { error: "Unauthorized: Athlete ID cards can only be accessed by administrators." },
+        { status: 403 }
       );
     }
 
@@ -73,8 +73,8 @@ export async function GET(request: NextRequest, context: RouteContext) {
       );
     }
 
-    const eligibility = await IdCardService.canGenerateAthleteIdCard(registrationId, session.userId);
-    const card = await IdCardService.getCardByRegistrationId(registrationId, session.userId);
+    const eligibility = await IdCardService.canGenerateAthleteIdCard(registrationId, adminSession.user_id);
+    const card = await IdCardService.getCardByRegistrationId(registrationId, adminSession.user_id);
 
     return NextResponse.json({
       success: true,

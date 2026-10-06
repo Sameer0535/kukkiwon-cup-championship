@@ -197,10 +197,10 @@ export default async function HomePage() {
                 Collaboration & Leadership
               </span>
               <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-slate-950">
-                Presented in Partnership
+                {tournament.partnershipHeading || "Presented in Partnership"}
               </h2>
               <p className="text-xs sm:text-sm text-slate-600">
-                A strategic sporting union combining authentic martial arts governance with modern tournament technology.
+                {tournament.partnershipDescription || "A strategic sporting union combining authentic martial arts governance with modern tournament technology."}
               </p>
             </div>
 
@@ -231,9 +231,7 @@ export default async function HomePage() {
                   </div>
 
                   <p className="text-xs text-slate-600 leading-relaxed pt-2">
-                    Established under the authority of World Taekwondo Headquarters Kukkiwon (Seoul, South Korea).
-                    The India North Branch is the official governing authority responsible for Dan promotions,
-                    black belt certifications, instructor seminars, and sanctioned championships across Northern India.
+                    {tournament.kukkiwonDescription || "Established under the authority of World Taekwondo Headquarters Kukkiwon (Seoul, South Korea). The India North Branch is the official governing authority responsible for Dan promotions, black belt certifications, instructor seminars, and sanctioned championships across Northern India."}
                   </p>
                 </div>
 
@@ -277,9 +275,7 @@ export default async function HomePage() {
                   </div>
 
                   <p className="text-xs text-slate-600 leading-relaxed pt-2">
-                    Pioneers in martial arts competition electronics, Kyorix Sports Technology engineers wireless
-                    electronic chest and head protectors, multi-mat management software, real-time judge scoring consoles,
-                    and secure cryptographic QR credentials ensuring flawless event execution.
+                    {tournament.kyorixDescription || "Pioneers in martial arts competition electronics, Kyorix Sports Technology engineers wireless electronic chest and head protectors, multi-mat management software, real-time judge scoring consoles, and secure cryptographic accreditation ensuring flawless event execution."}
                   </p>
                 </div>
 
@@ -425,11 +421,10 @@ export default async function HomePage() {
 
             <div className="space-y-3">
               <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-slate-950 font-sans">
-                Ready to Take Part?
+                {tournament.ctaTitle || "Ready to Take Part?"}
               </h2>
               <p className="text-sm sm:text-base text-slate-600 max-w-xl mx-auto leading-relaxed">
-                Register for the Kukkiwon Cup Championship. Compete under official Kukkiwon sanction
-                and secure your certified tournament accreditation badge.
+                {tournament.ctaDescription || "Register for the Kukkiwon Cup Championship. Compete under official Kukkiwon sanction and secure your certified tournament accreditation badge."}
               </p>
             </div>
 

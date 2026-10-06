@@ -1,24 +1,27 @@
 // ==============================================================================
-// ADMIN ID CARDS & QR ACCREDITATION (Phase 8 Implementation)
-// Digital ID badge generation, revocation, reissuance & public QR validation links
+// ADMIN ID CARDS & QR ACCREDITATION
+// Badge generation, template customization, bulk printing & lifecycle controls
 // ==============================================================================
 
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import {
   IdCard,
   QrCode,
-  ExternalLink,
   RefreshCw,
-  Ban,
-  RotateCw,
   Download,
   Filter,
   Loader2,
   ChevronLeft,
   ChevronRight,
+  Upload,
+  Image as ImageIcon,
+  Trash2,
+  PlusCircle,
+  CheckCircle2,
+  AlertCircle,
+  FileText,
 } from "lucide-react";
 import type { AdminIdCardSummary } from "@/types/admin";
 
@@ -31,6 +34,18 @@ export default function AdminIdCardsPage() {
   const [statusFilter, setStatusFilter] = React.useState("");
   const [loading, setLoading] = React.useState(true);
   const [actionLoading, setActionLoading] = React.useState(false);
+
+  // Template State
+  const [templateUrl, setTemplateUrl] = React.useState<string | null>(null);
+  const [templateLoading, setTemplateLoading] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  // Single Card Generation Modal
+  const [genModalOpen, setGenModalOpen] = React.useState(false);
+  const [genRegId, setGenRegId] = React.useState("");
+  const [genLoading, setGenLoading] = React.useState(false);
+  const [genError, setGenError] = React.useState<string | null>(null);
+  const [genSuccess, setGenSuccess] = React.useState<string | null>(null);
 
   const loadCards = React.useCallback(async () => {
     setLoading(true);
@@ -59,9 +74,133 @@ export default function AdminIdCardsPage() {
     }
   }, [page, pageSize, statusFilter]);
 
+  const loadTemplate = async () => {
+    try {
+      const bearer = sessionStorage.getItem("kukkiwon_admin_bearer");
+      const headers: Record<string, string> = {};
+      if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
+
+      const res = await fetch("/api/admin/id-cards/template", { headers });
+      const data = await res.json();
+      if (data.success && data.templateUrl) {
+        setTemplateUrl(data.templateUrl);
+      } else {
+        setTemplateUrl(null);
+      }
+    } catch {
+      // Ignore
+    }
+  };
+
   React.useEffect(() => {
     loadCards();
+    loadTemplate();
   }, [loadCards]);
+
+  const handleTemplateUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload a valid image file (PNG, JPG, or WEBP).");
+      return;
+    }
+
+    setTemplateLoading(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = reader.result as string;
+        const bearer = sessionStorage.getItem("kukkiwon_admin_bearer");
+        const headers: Record<string, string> = { "Content-Type": "application/json" };
+        if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
+
+        const res = await fetch("/api/admin/id-cards/template", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ templateUrl: base64 }),
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          setTemplateUrl(base64);
+          alert("ID card background template uploaded successfully!");
+        } else {
+          alert(data.error || "Failed to upload template.");
+        }
+        setTemplateLoading(false);
+      };
+      reader.readAsDataURL(file);
+    } catch {
+      alert("Error reading file.");
+      setTemplateLoading(false);
+    }
+  };
+
+  const handleRemoveTemplate = async () => {
+    if (!confirm("Are you sure you want to remove the custom ID card template? The default institutional design will be restored.")) {
+      return;
+    }
+
+    setTemplateLoading(true);
+    try {
+      const bearer = sessionStorage.getItem("kukkiwon_admin_bearer");
+      const headers: Record<string, string> = {};
+      if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
+
+      const res = await fetch("/api/admin/id-cards/template", {
+        method: "DELETE",
+        headers,
+      });
+
+      if (res.ok) {
+        setTemplateUrl(null);
+        alert("Custom template removed. Default design restored.");
+      }
+    } catch {
+      alert("Error removing template.");
+    } finally {
+      setTemplateLoading(false);
+    }
+  };
+
+  const handleGenerateCard = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!genRegId.trim()) return;
+
+    setGenLoading(true);
+    setGenError(null);
+    setGenSuccess(null);
+
+    try {
+      const bearer = sessionStorage.getItem("kukkiwon_admin_bearer");
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
+
+      const res = await fetch("/api/admin/id-cards/generate", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ registrationId: genRegId.trim() }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to generate ID card.");
+      }
+
+      setGenSuccess(`ID Card successfully generated! Athlete ID: ${data.card.athleteId}`);
+      setGenRegId("");
+      loadCards();
+      setTimeout(() => {
+        setGenModalOpen(false);
+        setGenSuccess(null);
+      }, 2000);
+    } catch (err: any) {
+      setGenError(err.message || "Failed to generate ID card.");
+    } finally {
+      setGenLoading(false);
+    }
+  };
 
   const handleRevoke = async (athleteId: string) => {
     const reason = window.prompt("Enter mandatory reason for ID Card revocation:");
@@ -116,7 +255,7 @@ export default function AdminIdCardsPage() {
         return;
       }
 
-      alert("Card reissued with incremented version and rotated QR token.");
+      alert("Card reissued with incremented version.");
       loadCards();
     } catch {
       alert("Network error reissuing card.");
@@ -132,21 +271,111 @@ export default function AdminIdCardsPage() {
         <div>
           <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white flex items-center gap-2.5">
             <IdCard className="h-6 w-6 text-[#D4AF37]" />
-            <span>Digital ID Cards & QR Accreditation</span>
+            <span>Digital ID Cards & Accreditation</span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Official badge credential lifecycle, public QR verification links, and versioning controls
+            Institutional badge generation, background template uploads, and verified bulk printing
           </p>
         </div>
 
-        <button
-          onClick={() => loadCards()}
-          disabled={loading}
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs font-semibold text-slate-200 hover:bg-slate-800 transition disabled:opacity-50 self-start sm:self-auto"
-        >
-          <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
-          <span>Refresh</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            onClick={() => setGenModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold uppercase transition"
+          >
+            <PlusCircle className="h-3.5 w-3.5" />
+            <span>Generate ID Card</span>
+          </button>
+
+          <a
+            href="/api/admin/id-cards/bulk-download"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase transition"
+          >
+            <Download className="h-3.5 w-3.5" />
+            <span>Bulk Download / Print All</span>
+          </a>
+
+          <button
+            onClick={() => loadCards()}
+            disabled={loading}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs font-semibold text-slate-200 hover:bg-slate-800 transition disabled:opacity-50"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+            <span>Refresh</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Template Management Card */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 space-y-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="space-y-1">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <ImageIcon className="h-4 w-4 text-[#D4AF37]" />
+              <span>ID Card Background Template</span>
+            </h3>
+            <p className="text-xs text-slate-400">
+              Upload a custom tournament graphic template (PNG/JPG 100mm × 150mm). The 5 mandatory fields (Photo, Name, Academy, Athlete ID, Kukkiwon ID) will be rendered over it.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleTemplateUpload}
+              accept="image/*"
+              className="hidden"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={templateLoading}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-xs font-bold text-amber-300 uppercase transition disabled:opacity-50"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              <span>{templateUrl ? "Replace Template" : "Upload Template"}</span>
+            </button>
+
+            {templateUrl && (
+              <button
+                onClick={handleRemoveTemplate}
+                disabled={templateLoading}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-rose-900/60 bg-rose-950/30 hover:bg-rose-900 text-xs font-bold text-rose-300 uppercase transition disabled:opacity-50"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                <span>Remove</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {templateUrl ? (
+          <div className="flex items-center gap-4 p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+            <div className="relative w-16 h-24 rounded-lg overflow-hidden border border-amber-500/30 bg-slate-900 shrink-0">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={templateUrl}
+                alt="ID Card Template Thumbnail"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="space-y-0.5 text-xs">
+              <div className="font-bold text-emerald-400 flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                <span>Custom ID Card Template Active</span>
+              </div>
+              <p className="text-slate-400">
+                All single downloads and bulk print batches will render with this background design.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 text-xs text-slate-400">
+            No custom template uploaded. Badges are currently rendered using the standard Kukkiwon Cup navy & gold corporate frame.
+          </div>
+        )}
       </div>
 
       {/* Filter Bar */}
@@ -187,7 +416,6 @@ export default function AdminIdCardsPage() {
                 <th className="p-3.5">Athlete ID</th>
                 <th className="p-3.5">Athlete Name</th>
                 <th className="p-3.5">Academy</th>
-                <th className="p-3.5">Category</th>
                 <th className="p-3.5">Version</th>
                 <th className="p-3.5">Status</th>
                 <th className="p-3.5">Generated</th>
@@ -197,15 +425,18 @@ export default function AdminIdCardsPage() {
             <tbody className="divide-y divide-slate-800/60 text-slate-300">
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="p-8 text-center text-slate-400">
+                  <td colSpan={7} className="p-8 text-center text-slate-400">
                     <Loader2 className="h-6 w-6 animate-spin mx-auto text-[#D4AF37] mb-2" />
                     <span>Loading athlete ID cards...</span>
                   </td>
                 </tr>
               ) : cards.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="p-8 text-center text-slate-400">
+                  <td colSpan={7} className="p-8 text-center text-slate-400">
                     <p className="font-semibold text-white">No ID cards found.</p>
+                    <p className="text-xs text-slate-500 mt-1">
+                      Click &ldquo;Generate ID Card&rdquo; above to generate cards for verified/paid registrations.
+                    </p>
                   </td>
                 </tr>
               ) : (
@@ -219,9 +450,6 @@ export default function AdminIdCardsPage() {
                     </td>
                     <td className="p-3.5 text-slate-300 whitespace-nowrap">
                       {c.academyName}
-                    </td>
-                    <td className="p-3.5 text-slate-300 whitespace-nowrap">
-                      {c.categoryName}
                     </td>
                     <td className="p-3.5 font-mono text-white font-bold whitespace-nowrap">
                       v{c.version}
@@ -244,24 +472,15 @@ export default function AdminIdCardsPage() {
                     </td>
                     <td className="p-3.5 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-1.5">
-                        {/* Phase 8 Requirement 11: Direct Public QR Verification Link */}
                         <a
-                          href={c.verificationUrl}
+                          href={`/api/registrations/${c.registrationId}/id-card/download?autoprint=1`}
                           target="_blank"
-                          rel="noreferrer"
-                          title="View Public QR Verification"
-                          className="p-1.5 rounded bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 transition"
+                          rel="noopener noreferrer"
+                          title="Print / Download Single Card"
+                          className="inline-flex items-center gap-1 px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] font-bold uppercase transition"
                         >
-                          <QrCode className="h-3.5 w-3.5" />
-                        </a>
-
-                        <a
-                          href={`/api/registrations/${c.registrationId}/id-card/download`}
-                          target="_blank"
-                          title="Download Printable Badge"
-                          className="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 transition"
-                        >
-                          <Download className="h-3.5 w-3.5" />
+                          <Download className="h-3 w-3" />
+                          <span>Download</span>
                         </a>
 
                         {c.status === "GENERATED" || c.status === "REISSUED" ? (
@@ -320,6 +539,74 @@ export default function AdminIdCardsPage() {
           </div>
         </div>
       </div>
+
+      {/* Manual Generation Modal */}
+      {genModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 text-white space-y-5 shadow-2xl">
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <IdCard className="h-5 w-5 text-amber-400" />
+                <span>Generate Athlete ID Card</span>
+              </h3>
+              <p className="text-xs text-slate-400">
+                Only registrations with verified payments can be issued an institutional ID card.
+              </p>
+            </div>
+
+            {genError && (
+              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <span>{genError}</span>
+              </div>
+            )}
+
+            {genSuccess && (
+              <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
+                <span>{genSuccess}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleGenerateCard} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                  Registration ID *
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. reg_123 or UUID"
+                  value={genRegId}
+                  onChange={(e) => setGenRegId(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setGenModalOpen(false);
+                    setGenError(null);
+                    setGenSuccess(null);
+                  }}
+                  className="px-4 py-2 rounded-xl border border-slate-700 text-xs font-semibold text-slate-300 hover:bg-slate-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={genLoading}
+                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold uppercase transition disabled:opacity-50"
+                >
+                  {genLoading ? "Generating..." : "Generate Card"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

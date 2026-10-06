@@ -35,6 +35,12 @@ export interface PublicChampionshipContent {
   contactPhone: string;
   contactAddress: string;
   disciplines: { title: string; category: string; description: string }[];
+  partnershipHeading?: string;
+  partnershipDescription?: string;
+  kukkiwonDescription?: string;
+  kyorixDescription?: string;
+  ctaTitle?: string;
+  ctaDescription?: string;
 }
 
 const DEFAULT_CHAMPIONSHIP_DATA: PublicChampionshipContent = {
@@ -66,6 +72,12 @@ const DEFAULT_CHAMPIONSHIP_DATA: PublicChampionshipContent = {
   contactEmail: SITE_CONFIG.contact.email,
   contactPhone: SITE_CONFIG.contact.phone,
   contactAddress: SITE_CONFIG.contact.address,
+  partnershipHeading: "Presented in Partnership",
+  partnershipDescription: "A strategic sporting union combining authentic martial arts governance with modern tournament technology.",
+  kukkiwonDescription: "Established under the authority of World Taekwondo Headquarters Kukkiwon (Seoul, South Korea). The India North Branch is the official governing authority responsible for Dan promotions, black belt certifications, instructor seminars, and sanctioned championships across Northern India.",
+  kyorixDescription: "Pioneers in martial arts competition electronics, Kyorix Sports Technology engineers wireless electronic chest and head protectors, multi-mat management software, real-time judge scoring consoles, and secure cryptographic accreditation ensuring flawless event execution.",
+  ctaTitle: "Ready to Take Part?",
+  ctaDescription: "Register for the Kukkiwon Cup Championship. Compete under official Kukkiwon sanction and secure your certified tournament accreditation badge.",
   disciplines: [
     {
       title: "Kyorugi (Sparring)",
@@ -73,7 +85,7 @@ const DEFAULT_CHAMPIONSHIP_DATA: PublicChampionshipContent = {
       description: "Official full-contact Olympic-style sparring conducted under World Taekwondo competition rules with Kyorix electronic body protector and headgear scoring.",
     },
     {
-      title: "Poomsae (Forms)",
+      title: "Poomsae",
       category: "Individual, Pair & Team Divisions",
       description: "Recognized and Freestyle Poomsae evaluated by certified Kukkiwon North India judges on technical accuracy, power balance, rhythm, and expression.",
     },
@@ -105,6 +117,14 @@ export async function getPublicChampionshipData(
 ): Promise<PublicChampionshipContent> {
   try {
     const cmsChamp = await CmsService.getChampionship(slug, false);
+    const content = await CmsService.getContent(cmsChamp?.id || "champ-kukkiwon-2026").catch(() => null);
+
+    let parsedDisciplines = DEFAULT_CHAMPIONSHIP_DATA.disciplines;
+    if (content?.disciplinesJson) {
+      try {
+        parsedDisciplines = JSON.parse(content.disciplinesJson);
+      } catch {}
+    }
 
     if (cmsChamp) {
       return {
@@ -129,12 +149,18 @@ export async function getPublicChampionshipData(
         posterUrl: cmsChamp.posterUrl,
         bannerUrl: cmsChamp.bannerUrl,
         rulesDocumentUrl: cmsChamp.rulesDocumentUrl,
-        heroHeadline: cmsChamp.heroHeadline,
-        heroDescription: cmsChamp.heroDescription,
-        contactEmail: cmsChamp.contactEmail,
-        contactPhone: cmsChamp.contactPhone,
+        heroHeadline: content?.heroTitle || cmsChamp.heroHeadline,
+        heroDescription: content?.heroSubtitle || cmsChamp.heroDescription,
+        contactEmail: content?.contactEmail || cmsChamp.contactEmail,
+        contactPhone: content?.contactPhone || cmsChamp.contactPhone,
         contactAddress: cmsChamp.contactAddress,
-        disciplines: DEFAULT_CHAMPIONSHIP_DATA.disciplines,
+        partnershipHeading: content?.partnershipHeading || DEFAULT_CHAMPIONSHIP_DATA.partnershipHeading,
+        partnershipDescription: content?.partnershipDescription || DEFAULT_CHAMPIONSHIP_DATA.partnershipDescription,
+        kukkiwonDescription: content?.kukkiwonDescription || DEFAULT_CHAMPIONSHIP_DATA.kukkiwonDescription,
+        kyorixDescription: content?.kyorixDescription || DEFAULT_CHAMPIONSHIP_DATA.kyorixDescription,
+        ctaTitle: content?.ctaTitle || DEFAULT_CHAMPIONSHIP_DATA.ctaTitle,
+        ctaDescription: content?.ctaDescription || DEFAULT_CHAMPIONSHIP_DATA.ctaDescription,
+        disciplines: parsedDisciplines,
       };
     }
 

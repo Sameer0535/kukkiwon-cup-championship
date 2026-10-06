@@ -5,7 +5,7 @@
 // ==============================================================================
 
 import { NextRequest, NextResponse } from "next/server";
-import { getRegistrantSession } from "@/lib/server-auth";
+import { getAdminSession } from "@/lib/server-auth";
 import { IdCardService } from "@/server/services/id-card.service";
 import { AuditService } from "@/server/services/audit.service";
 
@@ -15,11 +15,11 @@ interface RouteContext {
 
 export async function GET(request: NextRequest, context: RouteContext) {
   try {
-    const session = await getRegistrantSession(request);
-    if (!session) {
+    const adminSession = await getAdminSession(request);
+    if (!adminSession) {
       return NextResponse.json(
-        { error: "Authentication required to download athlete ID card." },
-        { status: 401 }
+        { error: "Unauthorized: Athlete ID cards are only generated and downloadable by tournament administrators in the admin portal once payment is verified." },
+        { status: 403 }
       );
     }
 
@@ -32,10 +32,10 @@ export async function GET(request: NextRequest, context: RouteContext) {
     }
 
     // Retrieve or generate card
-    let card = await IdCardService.getCardByRegistrationId(registrationId, session.userId);
+    let card = await IdCardService.getCardByRegistrationId(registrationId, adminSession.user_id);
     if (!card) {
       // Attempt generation if eligible
-      card = await IdCardService.generateCard(registrationId, session.userId);
+      card = await IdCardService.generateCard(registrationId, adminSession.user_id);
     }
 
     if (card.cardStatus === "REVOKED") {
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
     // Record download audit event
     await AuditService.logAction({
-      adminUserId: session.userId,
+      adminUserId: adminSession.user_id,
       action: "ATHLETE_ID_CARD_DOWNLOADED",
       entityType: "IdCard",
       entityId: card.id,

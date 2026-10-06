@@ -44,6 +44,7 @@ import {
   Check,
   Clock,
   Printer,
+  Mail,
 } from "lucide-react";
 
 // ------------------------------------------------------------------------------
@@ -496,7 +497,12 @@ function AthleteRegistrationContent() {
     }
     if (!formData.phone.trim() || !formData.email.trim()) {
       setErrorNotice("Contact mobile number and email are required for official accreditation notices.");
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 300, behavior: "smooth" });
+      return false;
+    }
+    if (!/^\d{10}$/.test(formData.phone.trim())) {
+      setErrorNotice("Please enter a valid strict 10-digit mobile number.");
+      window.scrollTo({ top: 300, behavior: "smooth" });
       return false;
     }
     if (!formData.photo_url && !photoPreview) {
@@ -606,12 +612,6 @@ function AthleteRegistrationContent() {
   // PAYMENT COMPLETION (Online / Demo / Offline)
   // ----------------------------------------------------------------------------
   const handleProcessPayment = async () => {
-    if (!currentUser) {
-      setPendingAction("pay");
-      setAuthModalOpen(true);
-      return;
-    }
-
     setIsProcessingPayment(true);
     setErrorNotice(null);
 
@@ -666,8 +666,8 @@ function AthleteRegistrationContent() {
           }),
         });
       } else if (paymentMethod === "OFFLINE") {
-        if (!offlineUtr.trim()) {
-          throw new Error("Please enter your Bank / UPI Transaction Reference (UTR) Number.");
+        if (offlineUtr.trim().length !== 12) {
+          throw new Error("Please enter a valid strict 12-digit Bank / UPI Transaction Reference (UTR) Number.");
         }
 
         const submitRes = await fetch("/api/registrations/submit", {
@@ -738,13 +738,24 @@ function AthleteRegistrationContent() {
               </div>
 
               <div className="space-y-2">
-                <Badge variant="success">Official Registration Recorded</Badge>
+                <Badge variant="success">Payment & Registration Received</Badge>
                 <h1 className="text-2xl sm:text-3xl font-black uppercase text-slate-950 tracking-tight">
-                  ACCREDITATION CONFIRMED
+                  THANK YOU FOR YOUR PAYMENT
                 </h1>
-                <p className="text-xs sm:text-sm text-slate-600">
-                  Your athlete entry for the Kukkiwon Cup 2026 has been successfully processed.
+                <p className="text-sm text-slate-700 font-medium max-w-lg mx-auto leading-relaxed">
+                  Thank you for submitting your payment and tournament registration! The tournament organizing committee will verify your payment and send your official Athlete ID Card / Accreditation Pass directly to your registered email address (<strong className="text-blue-700">{formData.email}</strong>) once verified.
                 </p>
+              </div>
+
+              {/* Prominent Official Email Delivery Notice */}
+              <div className="p-4 rounded-xl bg-blue-50/80 border border-blue-200 text-left flex items-start gap-3">
+                <Mail className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
+                <div className="space-y-1 text-xs text-blue-950">
+                  <span className="font-bold uppercase tracking-wider block">Official ID Card Issuance Notice</span>
+                  <p className="text-slate-700 leading-relaxed">
+                    Official athlete ID cards are only generated and issued in the admin panel after payment verification. Registered athletes will not view or download the ID card on the public website; the organizing team will deliver your verified pass directly to <strong>{formData.email}</strong> upon payment verification.
+                  </p>
+                </div>
               </div>
 
               {/* Official Receipt Card */}
@@ -762,6 +773,12 @@ function AthleteRegistrationContent() {
                   </span>
                 </div>
                 <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="text-slate-500">Kukkiwon ID:</span>
+                  <span className="text-slate-900 font-bold">
+                    {formData.kukkiwon_dan_number || "Submitted"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
                   <span className="text-slate-500">Academy / Dojang:</span>
                   <span className="text-slate-900">
                     {formData.academy_name || formData.new_academy_data?.name || "Official Dojang"}
@@ -773,26 +790,31 @@ function AthleteRegistrationContent() {
                 </div>
                 <div className="flex items-center justify-between border-b border-slate-200 pb-2">
                   <span className="text-slate-500">Registration Fee:</span>
-                  <span className="text-slate-900 font-bold">₹2,500 (Paid in Full)</span>
+                  <span className="text-slate-900 font-bold">₹2,500</span>
                 </div>
+                {submittedData.utrNumber && (
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                    <span className="text-slate-500">Submitted UTR Reference:</span>
+                    <span className="text-slate-900 font-bold tracking-wider">{submittedData.utrNumber}</span>
+                  </div>
+                )}
                 <div className="flex items-center justify-between pt-1">
                   <span className="text-slate-500">Accreditation Status:</span>
-                  <Badge variant="info">
-                    {submittedData.paymentStatus === "PAID" ? "CONFIRMED & ACCREDITED" : "PENDING VERIFICATION"}
+                  <Badge variant="warning">
+                    PENDING PAYMENT VERIFICATION
                   </Badge>
                 </div>
               </div>
 
-              {/* Action Buttons */}
+              {/* Action Buttons (Strictly NO ID Card buttons on website) */}
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
-                <Link href="/my-registration" className="w-full sm:w-auto">
-                  <Button variant="primary" size="lg" className="w-full text-xs font-bold uppercase bg-blue-600 hover:bg-blue-700 text-white">
-                    <span>View in My Registrations</span>
-                    <ArrowRight className="h-4 w-4 ml-2" />
+                <Link href="/" className="w-full sm:w-auto">
+                  <Button variant="outline" size="lg" className="w-full text-xs font-bold uppercase border-slate-300 text-slate-700 hover:bg-slate-100">
+                    <span>Return to Home</span>
                   </Button>
                 </Link>
                 <Link href="/register" className="w-full sm:w-auto">
-                  <Button variant="outline" size="lg" className="w-full text-xs font-bold uppercase border-slate-300 text-slate-700 hover:bg-slate-100">
+                  <Button variant="primary" size="lg" className="w-full text-xs font-bold uppercase bg-blue-600 hover:bg-blue-700 text-white">
                     <span>Register Another Participant</span>
                   </Button>
                 </Link>
@@ -1008,9 +1030,11 @@ function AthleteRegistrationContent() {
                     <Input
                       label="Mobile Number (WhatsApp) *"
                       type="tel"
-                      placeholder="+91 98765 43210"
+                      placeholder="10-digit number (e.g. 9876543210)"
+                      maxLength={10}
                       value={formData.phone}
-                      onChange={(e) => updateField("phone", e.target.value)}
+                      onChange={(e) => updateField("phone", e.target.value.replace(/\D/g, "").slice(0, 10))}
+                      helperText={`Strict 10 digits (${formData.phone.length}/10)`}
                       required
                     />
                     <Input
@@ -1663,13 +1687,23 @@ function AthleteRegistrationContent() {
                         </p>
                       </div>
 
-                      <Input
-                        label="Bank / UPI UTR Reference Number *"
-                        placeholder="e.g. 402918274619"
-                        value={offlineUtr}
-                        onChange={(e) => setOfflineUtr(e.target.value)}
-                        required
-                      />
+                      <div className="space-y-1.5 max-w-md">
+                        <label className="block text-xs font-bold tracking-wide uppercase text-slate-700">
+                          Bank / UPI UTR Reference Number (Strict 12 Digits) <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          maxLength={12}
+                          placeholder="e.g. 402918274619"
+                          value={offlineUtr}
+                          onChange={(e) => setOfflineUtr(e.target.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 12))}
+                          className="flex h-10 w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-mono tracking-widest text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 transition-colors shadow-2xs"
+                          required
+                        />
+                        <p className="text-[11px] text-slate-500 font-mono">
+                          Must be exactly 12 alphanumeric characters ({offlineUtr.length}/12 entered)
+                        </p>
+                      </div>
                     </div>
                   )}
                 </div>
