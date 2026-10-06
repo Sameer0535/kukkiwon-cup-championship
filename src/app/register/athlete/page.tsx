@@ -683,6 +683,7 @@ function AthleteRegistrationContent() {
       const { weight_kg: _unusedWeight, ...cleanFormData } = formData;
       const payloadDraftData = {
         ...cleanFormData,
+        photo_url: photoPreview || formData.photo_url,
         payment_status: paymentMethod === "OFFLINE" ? "UNDER_REVIEW" : "PAID",
         payment_method: paymentMethod === "OFFLINE" ? "OFFLINE_UPI" : paymentMethod,
         offline_utr: offlineUtr.trim().toUpperCase(),
@@ -775,17 +776,6 @@ function AthleteRegistrationContent() {
                 <p className="text-sm text-slate-700 font-medium max-w-lg mx-auto leading-relaxed">
                   Thank you for submitting your payment and tournament registration! The tournament organizing committee will verify your payment and send your official Athlete ID Card / Accreditation Pass directly to your registered email address (<strong className="text-blue-700">{formData.email}</strong>) once verified.
                 </p>
-              </div>
-
-              {/* Prominent Official Email Delivery Notice */}
-              <div className="p-4 rounded-xl bg-blue-50/80 border border-blue-200 text-left flex items-start gap-3">
-                <Mail className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
-                <div className="space-y-1 text-xs text-blue-950">
-                  <span className="font-bold uppercase tracking-wider block">Official ID Card Issuance Notice</span>
-                  <p className="text-slate-700 leading-relaxed">
-                    Official athlete ID cards are only generated and issued in the admin panel after payment verification. Registered athletes will not view or download the ID card on the public website; the organizing team will deliver your verified pass directly to <strong>{formData.email}</strong> upon payment verification.
-                  </p>
-                </div>
               </div>
 
               {/* Official Receipt Card */}
@@ -1089,14 +1079,16 @@ function AthleteRegistrationContent() {
                           Front-facing passport-style portrait on white or light background for official accreditation badge.
                         </p>
                       </div>
-                      {photoPreview && (
-                        <Badge variant="success">Photo Ready</Badge>
+                      {photoPreview ? (
+                        <Badge variant="success">Photo Uploaded</Badge>
+                      ) : (
+                        <Badge variant="danger">Photo Required *</Badge>
                       )}
                     </div>
 
                     <div className="flex flex-col sm:flex-row items-center gap-6 pt-1">
                       {/* Photo Preview Frame */}
-                      <div className="relative w-32 h-40 rounded-xl border-2 border-dashed border-slate-300 bg-white overflow-hidden flex flex-col items-center justify-center shrink-0 shadow-2xs">
+                      <div className={`relative w-32 h-40 rounded-xl border-2 ${photoPreview ? "border-solid border-slate-300" : "border-dashed border-red-300 bg-red-50/20"} bg-white overflow-hidden flex flex-col items-center justify-center shrink-0 shadow-2xs`}>
                         {photoPreview ? (
                           <>
                             <img

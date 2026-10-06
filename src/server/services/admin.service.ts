@@ -21,6 +21,7 @@ import { AuditService } from "@/server/services/audit.service";
 import { formatPaiseToInr } from "@/server/services/fee.service";
 import { buildVerificationUrl } from "@/lib/qr";
 import { hashPassword, verifyPassword, createAdminToken } from "@/lib/auth";
+import { LiveSyncService } from "@/server/services/live-sync.service";
 
 // Database liveness check helper
 let dbOnlineStatus: boolean | null = null;
@@ -457,28 +458,15 @@ export class AdminService {
       }
     }
 
-    // Fallback store calculation
-    let regs = Array.from(FALLBACK_REGISTRATIONS.values());
-    if (effectiveChampId) {
-      regs = regs.filter((r) => r.championship_id === effectiveChampId);
-    }
+    // Live synchronized store calculation
+    const liveMetrics = LiveSyncService.getMetrics();
+    const liveRegs = LiveSyncService.listRegistrations();
 
-    const totalRegistrations = regs.length;
-    const paidRegistrations = regs.filter((r) => r.payment_status === "PAID").length;
-    const pendingPayments = regs.filter((r) => r.payment_status === "PENDING").length;
-    const failedPayments = regs.filter((r) => r.payment_status === "FAILED").length;
-    const documentsPending = regs.filter((r) => r.document_status === "UNDER_REVIEW" || r.document_status === "UPLOADED").length;
-    const documentsApproved = regs.filter((r) => r.document_status === "VERIFIED").length;
-    const documentsRejected = regs.filter((r) => r.document_status === "REJECTED").length;
-    const idCardsGenerated = regs.filter((r) => r.id_card_status === "GENERATED" || r.id_card_status === "REISSUED").length;
-    const idCardsRevoked = regs.filter((r) => r.id_card_status === "REVOKED").length;
-    const idCardsPending = regs.filter((r) => r.id_card_status === "READY").length;
-
-    const recentSummaries: AdminRegistrationSummary[] = regs.slice(0, 5).map((r) => ({
+    const recentSummaries: AdminRegistrationSummary[] = liveRegs.slice(0, 5).map((r) => ({
       id: r.id,
       registrationNumber: r.registration_number,
-      championshipId: r.championship_id,
-      championshipName: r.championship_name,
+      championshipId: "champ-kukkiwon-2026",
+      championshipName: "Kukkiwon Cup Championship 2026",
       athleteId: r.athlete_id,
       athleteName: r.athlete_name,
       academyName: r.academy_name,
@@ -496,17 +484,17 @@ export class AdminService {
     }));
 
     return {
-      totalRegistrations,
-      totalAthletes: totalRegistrations,
-      paidRegistrations,
-      pendingPayments,
-      failedPayments,
-      documentsPending,
-      documentsApproved,
-      documentsRejected,
-      idCardsGenerated,
-      idCardsRevoked,
-      idCardsPending,
+      totalRegistrations: liveMetrics.totalRegistrations,
+      totalAthletes: liveMetrics.totalAthletes,
+      paidRegistrations: liveMetrics.paidRegistrations,
+      pendingPayments: liveMetrics.pendingPayments,
+      failedPayments: 0,
+      documentsPending: liveMetrics.documentsPending,
+      documentsApproved: liveMetrics.documentsApproved,
+      documentsRejected: liveMetrics.documentsRejected,
+      idCardsGenerated: liveMetrics.idCardsGenerated,
+      idCardsRevoked: liveMetrics.idCardsRevoked,
+      idCardsPending: liveMetrics.idCardsPending,
       activeChampionships: 1,
       recentRegistrations: recentSummaries,
       recentAuditLogs: FALLBACK_AUDIT_LOGS.slice(0, 5),
@@ -608,37 +596,12 @@ export class AdminService {
       }
     }
 
-    // Fallback in-memory query
-    let all = Array.from(FALLBACK_REGISTRATIONS.values());
-
-    if (effectiveChampId) {
-      all = all.filter((r) => r.championship_id === effectiveChampId);
-    }
-    if (params.status) {
-      all = all.filter((r) => r.status.toUpperCase() === params.status?.toUpperCase());
-    }
-    if (params.paymentStatus) {
-      all = all.filter((r) => r.payment_status.toUpperCase() === params.paymentStatus?.toUpperCase());
-    }
-    if (params.documentStatus) {
-      all = all.filter((r) => r.document_status.toUpperCase() === params.documentStatus?.toUpperCase());
-    }
-    if (params.idCardStatus) {
-      all = all.filter((r) => r.id_card_status.toUpperCase() === params.idCardStatus?.toUpperCase());
-    }
-    if (params.country) {
-      all = all.filter((r) => r.country.toLowerCase() === params.country?.toLowerCase());
-    }
-    if (params.q) {
-      const q = params.q.toLowerCase().trim();
-      all = all.filter(
-        (r) =>
-          r.athlete_name.toLowerCase().includes(q) ||
-          r.athlete_id.toLowerCase().includes(q) ||
-          r.registration_number.toLowerCase().includes(q) ||
-          r.academy_name.toLowerCase().includes(q)
-      );
-    }
+    // Live synchronized registrations query
+    const all = LiveSyncService.listRegistrations({
+      status: params.status,
+      paymentStatus: params.paymentStatus,
+      q: params.q,
+    });
 
     const total = all.length;
     const start = (page - 1) * pageSize;
@@ -647,8 +610,8 @@ export class AdminService {
     const mapped: AdminRegistrationSummary[] = pageItems.map((r) => ({
       id: r.id,
       registrationNumber: r.registration_number,
-      championshipId: r.championship_id,
-      championshipName: r.championship_name,
+      championshipId: "champ-kukkiwon-2026",
+      championshipName: "Kukkiwon Cup Championship 2026",
       athleteId: r.athlete_id,
       athleteName: r.athlete_name,
       academyName: r.academy_name,
@@ -1091,43 +1054,18 @@ export class AdminService {
       }
     }
 
-    // Fallback store
-    const regs = Array.from(FALLBACK_REGISTRATIONS.values());
-    const mapped: AdminPaymentSummary[] = regs.map((r, i) => ({
-      id: `ord-${r.id}`,
-      orderNumber: `KKC26-ORD-00${1001 + i}`,
-      registrationId: r.id,
-      championshipId: r.championship_id,
-      championshipName: r.championship_name,
-      athleteId: r.athlete_id,
-      athleteName: r.athlete_name,
-      provider: "RAZORPAY",
-      providerOrderId: `order_mock_${r.id}`,
-      amountPaise: r.amount_paise,
-      amountInrFormatted: formatPaiseToInr(r.amount_paise),
-      currency: "INR",
-      status: r.payment_status,
-      createdAt: r.registered_at,
-      paidAt: r.payment_status === "PAID" ? r.registered_at : null,
-      invoiceNumber: `KKC26-INV-00${1001 + i}`,
-      refundStatus: null,
-      refundedAmountPaise: 0,
-    }));
-
-    let filtered = mapped;
-    if (params.status) {
-      filtered = filtered.filter((p) => p.status === params.status);
-    }
-    if (effectiveChampId) {
-      filtered = filtered.filter((p) => p.championshipId === effectiveChampId);
-    }
+    // Live synchronized payments store
+    const mapped = LiveSyncService.listPayments({
+      status: params.status,
+      q: params.q,
+    });
 
     return {
-      items: filtered.slice((page - 1) * pageSize, page * pageSize),
-      total: filtered.length,
+      items: mapped.slice((page - 1) * pageSize, page * pageSize),
+      total: mapped.length,
       page,
       pageSize,
-      totalPages: Math.ceil(filtered.length / pageSize) || 1,
+      totalPages: Math.ceil(mapped.length / pageSize) || 1,
     };
   }
 
@@ -1207,24 +1145,11 @@ export class AdminService {
       }
     }
 
-    // Fallback
-    const regs = Array.from(FALLBACK_REGISTRATIONS.values());
-    const mapped: AdminIdCardSummary[] = regs.map((r) => ({
-      id: `card-${r.id}`,
-      athleteId: r.athlete_id,
-      cardNumber: r.athlete_id,
-      registrationId: r.id,
-      championshipId: r.championship_id,
-      championshipName: r.championship_name,
-      athleteName: r.athlete_name,
-      academyName: r.academy_name,
-      categoryName: r.category_name,
-      version: 1,
-      status: r.id_card_status,
-      qrToken: `token-${r.id}`,
-      verificationUrl: `/verify/athlete/token-${r.id}`,
-      generatedAt: r.registered_at,
-    }));
+    // Live synchronized ID cards store
+    const mapped = LiveSyncService.listIdCards({
+      status: params.status,
+      q: params.q,
+    });
 
     return {
       items: mapped.slice((page - 1) * pageSize, page * pageSize),

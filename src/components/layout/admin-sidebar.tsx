@@ -23,6 +23,7 @@ import {
   FileText,
   ShieldAlert,
   Settings,
+  Building2,
   X,
 } from "lucide-react";
 
@@ -37,6 +38,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
   FileText,
   ShieldAlert,
   Settings,
+  Building2,
 };
 
 export function AdminSidebar() {

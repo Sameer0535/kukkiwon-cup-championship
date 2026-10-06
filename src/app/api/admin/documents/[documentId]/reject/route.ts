@@ -1,11 +1,11 @@
 // ==============================================================================
-// ADMIN DOCUMENT REJECTION API (Phase 4 & 11 Hardened)
+// ADMIN PAYMENT / DOCUMENT REJECTION API
 // POST /api/admin/documents/[documentId]/reject
-// Requirement 16: Admin document rejection with mandatory reason
 // ==============================================================================
 
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, AuthError } from "@/lib/server-auth";
+import { LiveSyncService } from "@/server/services/live-sync.service";
 import { DocumentManagementService } from "@/server/services/document-management.service";
 
 interface RouteContext {
@@ -19,6 +19,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       "EVENT_ADMIN",
       "DOCUMENT_ADMIN",
       "REGISTRATION_ADMIN",
+      "FINANCE_ADMIN",
       "REGISTRAR",
     ]);
 
@@ -35,17 +36,27 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     const verifierName = body.verifierName || admin.full_name || "Official Admin";
 
-    const rejectedDoc = await DocumentManagementService.rejectDocument(
-      documentId,
-      admin.user_id,
-      rejectionReason,
-      verifierName
-    );
+    // 1. Try LiveSyncService rejection
+    try {
+      const syncResult = LiveSyncService.rejectPayment(documentId, rejectionReason, verifierName);
+      return NextResponse.json({
+        message: "Payment rejected.",
+        ...syncResult,
+      });
+    } catch {
+      // 2. Fallback to DocumentManagementService
+      const rejectedDoc = await DocumentManagementService.rejectDocument(
+        documentId,
+        admin.user_id,
+        rejectionReason,
+        verifierName
+      );
 
-    return NextResponse.json({
-      success: true,
-      document: rejectedDoc,
-    });
+      return NextResponse.json({
+        success: true,
+        document: rejectedDoc,
+      });
+    }
   } catch (error: any) {
     if (error instanceof AuthError || error.name === "AuthError") {
       return NextResponse.json(
@@ -54,7 +65,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
     return NextResponse.json(
-      { error: error.message || "Failed to reject document." },
+      { error: error.message || "Failed to reject payment." },
       { status: 500 }
     );
   }

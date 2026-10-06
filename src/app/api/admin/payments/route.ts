@@ -6,12 +6,11 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, AuthError } from "@/lib/server-auth";
-import prisma from "@/lib/db";
-import { formatPaiseToInr } from "@/server/services/fee.service";
+import { AdminService } from "@/server/services/admin.service";
 
 export async function GET(request: NextRequest) {
   try {
-    await requireAdmin(request, [
+    const admin = await requireAdmin(request, [
       "SUPER_ADMIN",
       "EVENT_ADMIN",
       "FINANCE_ADMIN",
@@ -21,54 +20,28 @@ export async function GET(request: NextRequest) {
 
     const url = new URL(request.url);
     const status = url.searchParams.get("status") || undefined;
-    const registrationId = url.searchParams.get("registrationId") || undefined;
+    const q = url.searchParams.get("q") || undefined;
+    const page = parseInt(url.searchParams.get("page") || "1", 10);
+    const pageSize = parseInt(url.searchParams.get("pageSize") || "25", 10);
 
-    let orders: any[] = [];
-    try {
-      orders = await prisma.paymentOrder.findMany({
-        where: {
-          status: status as any,
-          registration_id: registrationId,
-        },
-        orderBy: { created_at: "desc" },
-        take: 100,
-        include: {
-          registration: {
-            include: {
-              participant: true,
-              category: true,
-            },
-          },
-          transactions: true,
-          refunds: true,
-        },
-      });
-    } catch {
-      // Fallback
-    }
-
-    const formatted = orders.map((o) => ({
-      id: o.id,
-      orderNumber: o.order_number,
-      registrationId: o.registration_id,
-      registrationNumber: o.registration?.registration_number,
-      participantName: o.registration?.participant?.full_name,
-      categoryName: o.registration?.category?.name,
-      amountPaise: o.amount_paise,
-      amountFormatted: formatPaiseToInr(o.amount_paise, o.currency),
-      currency: o.currency,
-      status: o.status,
-      provider: o.provider,
-      providerOrderId: o.provider_order_id,
-      createdAt: o.created_at,
-      paidAt: o.paid_at,
-      transactionsCount: o.transactions?.length || 0,
-      refundsCount: o.refunds?.length || 0,
-    }));
+    const result = await AdminService.getPayments(
+      {
+        status,
+        q,
+        page,
+        pageSize,
+      },
+      admin
+    );
 
     return NextResponse.json({
       success: true,
-      orders: formatted,
+      items: result.items,
+      orders: result.items,
+      total: result.total,
+      page: result.page,
+      pageSize: result.pageSize,
+      totalPages: result.totalPages,
     });
   } catch (error: any) {
     if (error instanceof AuthError || error.name === "AuthError") {

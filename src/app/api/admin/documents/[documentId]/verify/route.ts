@@ -1,11 +1,11 @@
 // ==============================================================================
-// ADMIN DOCUMENT VERIFICATION API (Phase 4 & 11 Hardened)
+// ADMIN PAYMENT / DOCUMENT VERIFICATION APPROVAL API
 // POST /api/admin/documents/[documentId]/verify
-// Requirement 16: Admin verification foundation
 // ==============================================================================
 
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, AuthError } from "@/lib/server-auth";
+import { LiveSyncService } from "@/server/services/live-sync.service";
 import { DocumentManagementService } from "@/server/services/document-management.service";
 
 interface RouteContext {
@@ -19,6 +19,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       "EVENT_ADMIN",
       "DOCUMENT_ADMIN",
       "REGISTRATION_ADMIN",
+      "FINANCE_ADMIN",
       "REGISTRAR",
     ]);
 
@@ -26,16 +27,26 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const body = await request.json().catch(() => ({}));
     const verifierName = body.verifierName || admin.full_name || "Official Admin";
 
-    const verifiedDoc = await DocumentManagementService.verifyDocument(
-      documentId,
-      admin.user_id,
-      verifierName
-    );
+    // 1. Try LiveSyncService payment approval
+    try {
+      const syncResult = LiveSyncService.approvePayment(documentId, verifierName);
+      return NextResponse.json({
+        message: "Payment verified and registration approved successfully.",
+        ...syncResult,
+      });
+    } catch {
+      // 2. Fallback to DocumentManagementService if it was a file document ID
+      const verifiedDoc = await DocumentManagementService.verifyDocument(
+        documentId,
+        admin.user_id,
+        verifierName
+      );
 
-    return NextResponse.json({
-      success: true,
-      document: verifiedDoc,
-    });
+      return NextResponse.json({
+        success: true,
+        document: verifiedDoc,
+      });
+    }
   } catch (error: any) {
     if (error instanceof AuthError || error.name === "AuthError") {
       return NextResponse.json(
@@ -44,7 +55,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
     return NextResponse.json(
-      { error: error.message || "Failed to verify document." },
+      { error: error.message || "Failed to verify payment." },
       { status: 500 }
     );
   }

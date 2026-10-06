@@ -22,6 +22,7 @@ import { CategoryService } from "./category.service";
 import { AcademyService } from "./academy.service";
 import { CmsService } from "./cms.service";
 import { PersistenceGuard } from "./persistence-guard";
+import { LiveSyncService } from "./live-sync.service";
 
 // In-memory fallback registry for dev mode
 interface FallbackRegistration {
@@ -672,6 +673,31 @@ export class RegistrationFlowService {
         currentRegId = newReg.id;
       }
 
+      // Live synchronize with Admin Portal
+      LiveSyncService.recordSubmission({
+        registrationId: currentRegId,
+        registrationNumber: regNumber,
+        userId,
+        participantType: participantType as any,
+        athleteName: participantName,
+        email: (draftData as any).email || (draftData as any).representative_email || "",
+        phone: (draftData as any).phone || (draftData as any).representative_phone || "",
+        gender: (draftData as any).gender,
+        dob: (draftData as any).date_of_birth,
+        country: (draftData as any).country || "India",
+        nationality: (draftData as any).nationality || "IND",
+        academyName: (draftData as any).academy_name || (draftData as any).new_academy_data?.name || (draftData as any).name,
+        kukkiwonId: (draftData as any).kukkiwon_dan_number || (draftData as any).kukkiwon_id,
+        photoUrl: (draftData as any).photo_url,
+        categoryName: categoryName || (draftData as any).weight_category_name,
+        discipline,
+        coachRole: (draftData as any).coach_role,
+        qualification: (draftData as any).qualification,
+        utrNumber: (draftData as any).offline_utr,
+        paymentMethod: (draftData as any).payment_method,
+        feeAmountInr: (draftData as any).fee_amount || 2500,
+      });
+
       return {
         success: true,
         registrationNumber: regNumber,
@@ -734,6 +760,31 @@ export class RegistrationFlowService {
         kukkiwon_id: (draftData as any).kukkiwon_dan_number || (draftData as any).kukkiwon_id,
         photo_url: (draftData as any).photo_url,
         nationality: (draftData as any).nationality || "IND",
+      });
+
+      // Live synchronize with Admin Portal in fallback mode
+      LiveSyncService.recordSubmission({
+        registrationId: fbId,
+        registrationNumber: regNumber,
+        userId,
+        participantType: participantType as any,
+        athleteName: participantName,
+        email: (draftData as any).email || (draftData as any).representative_email || "",
+        phone: (draftData as any).phone || (draftData as any).representative_phone || "",
+        gender: (draftData as any).gender,
+        dob: (draftData as any).date_of_birth,
+        country: (draftData as any).country || "India",
+        nationality: (draftData as any).nationality || "IND",
+        academyName: (draftData as any).academy_name || (draftData as any).new_academy_data?.name || (draftData as any).name,
+        kukkiwonId: (draftData as any).kukkiwon_dan_number || (draftData as any).kukkiwon_id,
+        photoUrl: (draftData as any).photo_url,
+        categoryName: categoryName || (draftData as any).weight_category_name,
+        discipline,
+        coachRole: (draftData as any).coach_role,
+        qualification: (draftData as any).qualification,
+        utrNumber: (draftData as any).offline_utr,
+        paymentMethod: (draftData as any).payment_method,
+        feeAmountInr: (draftData as any).fee_amount || 2500,
       });
 
       return {

@@ -62,11 +62,18 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     description: "Payment verification, transaction logs, and receipts",
   },
   {
-    title: "Document Verification",
+    title: "Payment Verification",
     href: "/admin/documents",
     icon: "FileCheck",
-    requiredRole: ["SUPER_ADMIN", "DOCUMENT_ADMIN", "REGISTRATION_ADMIN"],
-    description: "Review private identity and Kukkiwon Dan certificates",
+    requiredRole: ["SUPER_ADMIN", "DOCUMENT_ADMIN", "REGISTRATION_ADMIN", "FINANCE_ADMIN"],
+    description: "Verify submitted UPI / UTR fee payments and approve tournament entries",
+  },
+  {
+    title: "Academies",
+    href: "/admin/academies",
+    icon: "Building2",
+    requiredRole: ["SUPER_ADMIN", "EVENT_ADMIN", "REGISTRATION_ADMIN"],
+    description: "Registered academies, dojang affiliations, and club delegations",
   },
   {
     title: "ID Cards & Badges",
