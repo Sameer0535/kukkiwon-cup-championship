@@ -1735,15 +1735,15 @@ function AthleteRegistrationContent() {
                         </label>
                         <input
                           type="text"
-                          maxLength={12}
-                          placeholder="e.g. 402918274619"
+                          maxLength={25}
+                          placeholder="e.g. 402918274619 or UPI Ref ID"
                           value={offlineUtr}
-                          onChange={(e) => setOfflineUtr(e.target.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 12))}
+                          onChange={(e) => setOfflineUtr(e.target.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 25))}
                           className="flex h-10 w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-mono tracking-widest text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 transition-colors shadow-2xs"
                           required
                         />
                         <p className="text-[11px] text-slate-500 font-mono">
-                          Must be exactly 12 alphanumeric characters ({offlineUtr.length}/12 entered)
+                          Enter 12-character UPI Reference / UTR Number or bank transaction ID ({offlineUtr.length} chars entered)
                         </p>
                       </div>
                     </div>
@@ -1752,8 +1752,12 @@ function AthleteRegistrationContent() {
 
                 {/* Step 2 Error Notice */}
                 {errorNotice && (
-                  <div className="pt-2">
-                    <Alert variant="danger" title="Submission Notice">
+                  <div className="pt-3">
+                    <Alert
+                      variant="danger"
+                      title="Submission Notice"
+                      className="border-2 border-red-400 bg-red-50 text-red-950"
+                    >
                       {errorNotice}
                     </Alert>
                   </div>
