@@ -1056,14 +1056,61 @@ export class IdCardService {
     throw new Error("ID Card not found for reissuance.");
   }
 
+  private static getCountryFlagEmoji(nationality?: string | null): string {
+    if (!nationality) return "🇮🇳";
+    const normalized = nationality.trim().toUpperCase();
+    const map: Record<string, string> = {
+      IND: "🇮🇳",
+      INDIA: "🇮🇳",
+      KOR: "🇰🇷",
+      KOREA: "🇰🇷",
+      USA: "🇺🇸",
+      "UNITED STATES": "🇺🇸",
+      GBR: "🇬🇧",
+      UK: "🇬🇧",
+      JPN: "🇯🇵",
+      JAPAN: "🇯🇵",
+      NEP: "🇳🇵",
+      NEPAL: "🇳🇵",
+      BAN: "🇧🇩",
+      BANGLADESH: "🇧🇩",
+      SRI: "🇱🇰",
+      "SRI LANKA": "🇱🇰",
+      BHU: "🇧🇹",
+      BHUTAN: "🇧🇹",
+      AUS: "🇦🇺",
+      AUSTRALIA: "🇦🇺",
+      CAN: "🇨🇦",
+      CANADA: "🇨🇦",
+      GER: "🇩🇪",
+      GERMANY: "🇩🇪",
+      FRA: "🇫🇷",
+      FRANCE: "🇫🇷",
+      THA: "🇹🇭",
+      THAILAND: "🇹🇭",
+      VIE: "🇻🇳",
+      VIETNAM: "🇻🇳",
+      SGP: "🇸🇬",
+      SINGAPORE: "🇸🇬",
+      MAS: "🇲🇾",
+      MALAYSIA: "🇲🇾",
+      UAE: "🇦🇪",
+    };
+    if (map[normalized]) return map[normalized];
+    if (normalized.length === 2) {
+      const codePoints = [...normalized].map((c) => 127397 + c.charCodeAt(0));
+      return String.fromCodePoint(...codePoints);
+    }
+    return "🇮🇳";
+  }
   /**
-  /**
-   * Generates markup for an athlete ID badge containing strictly:
+   * Generates markup for an athlete ID badge containing:
    * 1. Athlete Photo
    * 2. Name
    * 3. Academy
    * 4. Generated Athlete ID Number
    * 5. Submitted Kukkiwon ID
+   * 6. Nationality Flag
    * With support for custom uploaded background template
    */
   static generateCardMarkup(card: AthleteIdCardDetails, templateBgUrl?: string | null): string {
@@ -1071,6 +1118,9 @@ export class IdCardService {
     const bgStyle = hasTemplate
       ? `background-image: url('${templateBgUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat;`
       : `background: #ffffff; border: 2px solid #0A192F;`;
+
+    const flagEmoji = this.getCountryFlagEmoji(card.nationality);
+    const countryLabel = card.nationality || "India";
 
     return `
     <div class="badge-card" style="${bgStyle}">
@@ -1096,19 +1146,28 @@ export class IdCardService {
           <div class="field-value athlete-name">${card.athleteName.toUpperCase()}</div>
         </div>
 
-        <!-- 3. Academy -->
+        <!-- 3. Nationality Flag -->
+        <div class="field-item">
+          <div class="field-label">NATIONALITY</div>
+          <div class="field-value nationality-badge">
+            <span class="flag-icon">${flagEmoji}</span>
+            <span class="country-text">${countryLabel}</span>
+          </div>
+        </div>
+
+        <!-- 4. Academy -->
         <div class="field-item">
           <div class="field-label">ACADEMY / CLUB</div>
           <div class="field-value">${card.academyName || "Independent"}</div>
         </div>
 
-        <!-- 4. Generated Athlete ID Number -->
+        <!-- 5. Generated Athlete ID Number -->
         <div class="field-item">
           <div class="field-label">ATHLETE ID NUMBER</div>
           <div class="field-value font-mono athlete-id">${card.athleteId}</div>
         </div>
 
-        <!-- 5. Submitted Kukkiwon ID -->
+        <!-- 6. Submitted Kukkiwon ID -->
         <div class="field-item">
           <div class="field-label">KUKKIWON ID</div>
           <div class="field-value font-mono">${card.kukkiwonId || "N/A"}</div>
@@ -1274,6 +1333,17 @@ export class IdCardService {
     }
     .font-mono {
       font-family: "Courier New", Courier, monospace;
+    }
+    .nationality-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .flag-icon {
+      font-size: 18px;
+      line-height: 1;
+      display: inline-block;
     }
     @media print {
       body {

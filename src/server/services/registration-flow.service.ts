@@ -49,6 +49,9 @@ interface FallbackRegistration {
   participant_name: string;
   category_name?: string;
   academy_name?: string;
+  kukkiwon_id?: string;
+  photo_url?: string | null;
+  nationality?: string;
 }
 
 const FALLBACK_REGISTRATIONS_STORE: Map<string, FallbackRegistration> = new Map();
@@ -542,37 +545,43 @@ export class RegistrationFlowService {
           where: { id: currentRegId },
         });
 
-        if (!existing || existing.user_id !== userId) {
+        const isGuest = existing?.user_id?.startsWith("guest-") || userId.startsWith("guest-");
+        if (existing && !isGuest && existing.user_id !== userId) {
           throw new Error("Unauthorized access to submit this registration.");
         }
 
-        if (existing.status !== "DRAFT") {
-          throw new Error("Cannot modify registration: record has already been submitted, approved, or paid.");
+        if (existing && existing.status !== "DRAFT" && existing.status !== "SUBMITTED" && existing.status !== "UNDER_REVIEW") {
+          throw new Error("Cannot modify registration: record has already been approved or confirmed.");
         }
 
-        regNumber = existing.registration_number;
+        if (existing) {
+          regNumber = existing.registration_number;
 
-        // Update participant details
-        await prisma.participant.update({
-          where: { id: existing.participant_id },
-          data: {
-            full_name: participantName,
-            academy_id: academyId || null,
-          },
-        });
+          // Update participant details with academy name, kukkiwon id, photo
+          await prisma.participant.update({
+            where: { id: existing.participant_id },
+            data: {
+              full_name: participantName,
+              academy_id: academyId || null,
+              academy_name: (draftData as any).academy_name || (draftData as any).new_academy_data?.name || null,
+              kukkiwon_id: (draftData as any).kukkiwon_dan_number || (draftData as any).kukkiwon_id || null,
+              photo_url: (draftData as any).photo_url || null,
+            },
+          });
 
-        await prisma.registration.update({
-          where: { id: currentRegId },
-          data: {
-            status: "SUBMITTED",
-            submitted_at: now,
-            discipline: discipline || null,
-            category_id: categoryId || null,
-            academy_id: academyId || null,
-            draft_data: JSON.stringify(draftData),
-            updated_at: now,
-          },
-        });
+          await prisma.registration.update({
+            where: { id: currentRegId },
+            data: {
+              status: "SUBMITTED",
+              submitted_at: now,
+              discipline: discipline || null,
+              category_id: categoryId || null,
+              academy_id: academyId || null,
+              draft_data: JSON.stringify(draftData),
+              updated_at: now,
+            },
+          });
+        }
       } else {
         // Direct submission without prior draft
         const publicId = generatePublicParticipantId("2026");
@@ -581,11 +590,14 @@ export class RegistrationFlowService {
             user_id: userId,
             public_id: publicId,
             full_name: participantName,
-            date_of_birth: new Date("2000-01-01"),
-            gender: "MALE",
-            nationality: "IND",
+            date_of_birth: (draftData as any).date_of_birth ? new Date((draftData as any).date_of_birth) : new Date("2000-01-01"),
+            gender: ((draftData as any).gender as any) || "MALE",
+            nationality: (draftData as any).nationality || "IND",
             designation: participantType,
             academy_id: academyId || null,
+            academy_name: (draftData as any).academy_name || (draftData as any).new_academy_data?.name || null,
+            kukkiwon_id: (draftData as any).kukkiwon_dan_number || (draftData as any).kukkiwon_id || null,
+            photo_url: (draftData as any).photo_url || null,
           },
         });
 
@@ -638,11 +650,9 @@ export class RegistrationFlowService {
 
       if (registrationId && FALLBACK_REGISTRATIONS_STORE.has(registrationId)) {
         const existing = FALLBACK_REGISTRATIONS_STORE.get(registrationId)!;
-        if (existing.user_id !== userId) {
+        const isGuest = existing.user_id?.startsWith("guest-") || userId.startsWith("guest-");
+        if (!isGuest && existing.user_id !== userId) {
           throw new Error("Unauthorized access to submit this registration.");
-        }
-        if (existing.status !== "DRAFT") {
-          throw new Error("Cannot modify registration: record has already been submitted, approved, or paid.");
         }
         regNumber = existing.registration_number;
       }
@@ -667,6 +677,10 @@ export class RegistrationFlowService {
         updated_at: now,
         participant_name: participantName,
         category_name: categoryName,
+        academy_name: (draftData as any).academy_name || (draftData as any).new_academy_data?.name,
+        kukkiwon_id: (draftData as any).kukkiwon_dan_number || (draftData as any).kukkiwon_id,
+        photo_url: (draftData as any).photo_url,
+        nationality: (draftData as any).nationality || "IND",
       });
 
       return {

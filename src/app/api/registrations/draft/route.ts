@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
           userId = created.id;
         }
       } catch {
-        userId = `guest-${Date.now()}`;
+        userId = `guest-${Buffer.from(email).toString("hex").slice(0, 16) || "anon"}`;
       }
     }
 

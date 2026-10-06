@@ -14,7 +14,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { PublicHeader } from "@/components/layout/public-header";
 import { PublicFooter } from "@/components/layout/public-footer";
 import { Stepper, StepItem } from "@/components/registration/stepper";
-import { AcademySelector } from "@/components/registration/academy-selector";
 import { AuthModal } from "@/components/registration/auth-modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -510,14 +509,15 @@ function AthleteRegistrationContent() {
       window.scrollTo({ top: 300, behavior: "smooth" });
       return false;
     }
-    if (!formData.academy_id && !formData.is_new_academy) {
-      setErrorNotice("Please select your affiliated academy/dojang or enter a new club profile.");
+    if (!formData.academy_name?.trim()) {
+      setErrorNotice("Please enter your Academy or Dojang name.");
       window.scrollTo({ top: 600, behavior: "smooth" });
       return false;
     }
-    if (formData.is_new_academy && !formData.new_academy_data?.name?.trim()) {
-      setErrorNotice("Please provide the new academy name.");
-      window.scrollTo({ top: 600, behavior: "smooth" });
+    const kkidRegex = /^KKID-\d{6}-\d{4}-\d{4}$/i;
+    if (!formData.kukkiwon_dan_number || !kkidRegex.test(formData.kukkiwon_dan_number.trim())) {
+      setErrorNotice("Kukkiwon ID is mandatory and must match the strict format KKID-123456-1234-1234.");
+      window.scrollTo({ top: 750, behavior: "smooth" });
       return false;
     }
     if (!formData.category_id) {
@@ -616,94 +616,66 @@ function AthleteRegistrationContent() {
     setErrorNotice(null);
 
     try {
-      // 1. Ensure registration draft exists
-      let activeRegId = registrationId;
-      if (!activeRegId) {
-        const draftRes = await fetch("/api/registrations/draft", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            participantType: "ATHLETE",
-            draftData: formData,
-          }),
-        });
-        const draftData = await draftRes.json();
-        activeRegId = draftData.registrationId;
-        setRegistrationId(activeRegId);
-        setRegistrationNumber(draftData.registrationNumber);
-      }
-
-      if (paymentMethod === "DEMO" || paymentMethod === "RAZORPAY") {
-        // Instant simulated/live payment flow
-        // Submit registration
-        const submitRes = await fetch("/api/registrations/submit", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            registrationId: activeRegId,
-            participantType: "ATHLETE",
-            draftData: {
-              ...formData,
-              payment_status: "PAID",
-              payment_method: paymentMethod,
-              fee_amount: 2500,
-            },
-          }),
-        });
-
-        const submitResult = await submitRes.json();
-        if (!submitRes.ok) throw new Error(submitResult.error || "Submission failed.");
-
-        setSubmittedData({
-          ...submitResult,
-          registrationNumber: submitResult.registrationNumber || registrationNumber || `KKC26-ATH-${Math.floor(100000 + Math.random() * 900000)}`,
-          paymentStatus: "PAID",
-          amount: 2500,
-          paymentDate: new Date().toLocaleDateString("en-IN", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          }),
-        });
-      } else if (paymentMethod === "OFFLINE") {
-        if (offlineUtr.trim().length !== 12) {
-          throw new Error("Please enter a valid strict 12-digit Bank / UPI Transaction Reference (UTR) Number.");
+      if (paymentMethod === "OFFLINE") {
+        const cleanUtr = offlineUtr.trim().toUpperCase();
+        if (cleanUtr.length !== 12) {
+          throw new Error("Please enter a valid 12-character Bank / UPI Transaction Reference (UTR) Number.");
         }
+      }
 
-        const submitRes = await fetch("/api/registrations/submit", {
+      const payloadDraftData = {
+        ...formData,
+        payment_status: paymentMethod === "OFFLINE" ? "UNDER_REVIEW" : "PAID",
+        payment_method: paymentMethod === "OFFLINE" ? "OFFLINE_UPI" : paymentMethod,
+        offline_utr: offlineUtr.trim().toUpperCase(),
+        fee_amount: 2500,
+      };
+
+      // 1. Submit directly to API
+      let submitRes = await fetch("/api/registrations/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          registrationId: registrationId || undefined,
+          participantType: "ATHLETE",
+          draftData: payloadDraftData,
+        }),
+      });
+
+      let submitResult = await submitRes.json();
+
+      // If submission failed on an existing draft ID (e.g. guest session mismatch), auto-retry fresh
+      if (!submitRes.ok && registrationId) {
+        submitRes = await fetch("/api/registrations/submit", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            registrationId: activeRegId,
             participantType: "ATHLETE",
-            draftData: {
-              ...formData,
-              payment_status: "UNDER_REVIEW",
-              payment_method: "OFFLINE_UPI",
-              offline_utr: offlineUtr,
-              fee_amount: 2500,
-            },
+            draftData: payloadDraftData,
           }),
         });
-
-        const submitResult = await submitRes.json();
-        if (!submitRes.ok) throw new Error(submitResult.error || "Submission failed.");
-
-        setSubmittedData({
-          ...submitResult,
-          registrationNumber: submitResult.registrationNumber || registrationNumber || `KKC26-ATH-${Math.floor(100000 + Math.random() * 900000)}`,
-          paymentStatus: "OFFLINE_VERIFICATION_PENDING",
-          amount: 2500,
-          utrNumber: offlineUtr,
-          paymentDate: new Date().toLocaleDateString("en-IN", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          }),
-        });
+        submitResult = await submitRes.json();
       }
+
+      if (!submitRes.ok) {
+        throw new Error(submitResult.error || "Submission failed. Please verify your details and try again.");
+      }
+
+      setSubmittedData({
+        ...submitResult,
+        registrationNumber: submitResult.registrationNumber || registrationNumber || `KKC26-ATH-${Math.floor(100000 + Math.random() * 900000)}`,
+        paymentStatus: paymentMethod === "OFFLINE" ? "OFFLINE_VERIFICATION_PENDING" : "PAID",
+        amount: 2500,
+        utrNumber: paymentMethod === "OFFLINE" ? offlineUtr.trim().toUpperCase() : undefined,
+        paymentDate: new Date().toLocaleDateString("en-IN", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        }),
+      });
     } catch (err: any) {
       setErrorNotice(err.message || "Failed to process payment. Please try again.");
+      window.scrollTo({ top: 500, behavior: "smooth" });
     } finally {
       setIsProcessingPayment(false);
     }
@@ -1147,23 +1119,36 @@ function AthleteRegistrationContent() {
                     </div>
                   </div>
 
-                  <AcademySelector
-                    selectedAcademyId={formData.academy_id}
-                    selectedAcademyName={formData.academy_name}
-                    selectedAcademyCode={formData.academy_code}
-                    isNewAcademy={formData.is_new_academy}
-                    newAcademyData={formData.new_academy_data}
-                    onChange={(res) => {
-                      setFormData((prev) => ({
-                        ...prev,
-                        academy_id: res.academy_id,
-                        academy_name: res.academy_name,
-                        academy_code: res.academy_code,
-                        is_new_academy: res.is_new_academy ?? false,
-                        new_academy_data: res.new_academy_data,
-                      }));
-                    }}
-                  />
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                      Academy / Dojang Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter your academy or dojang name (e.g. Delhi Taekwondo Academy)"
+                      value={formData.academy_name || ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setFormData((prev) => ({
+                          ...prev,
+                          academy_name: val,
+                          is_new_academy: true,
+                          new_academy_data: {
+                            name: val,
+                            country: prev.country || "India",
+                            state: prev.state || "Delhi",
+                            city: prev.city || "New Delhi",
+                            head_coach: "Head Coach",
+                          },
+                        }));
+                      }}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 transition-all shadow-2xs"
+                      required
+                    />
+                    <p className="text-[11px] text-slate-500">
+                      Type the official name of your training academy or dojang.
+                    </p>
+                  </div>
                 </div>
 
                 {/* 1.4 WT DIVISION & WEIGHT CATEGORIES (DIRECTLY BELOW ACADEMY) */}
@@ -1257,42 +1242,45 @@ function AthleteRegistrationContent() {
                     </div>
                   </div>
 
-                  {/* Belt / Dan Rank */}
-                  <div className="w-full">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
-                      Belt / Dan Rank *
-                    </label>
-                    <select
-                      value={formData.belt_rank}
-                      onChange={(e) => updateField("belt_rank", e.target.value)}
-                      className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
-                    >
-                      <option value="1ST_DAN_BLACK">1st Dan Black Belt</option>
-                      <option value="2ND_DAN_BLACK">2nd Dan Black Belt</option>
-                      <option value="3RD_DAN_PLUS">3rd Dan & Above</option>
-                      <option value="1ST_POOM">1st Poom (Junior Black Belt)</option>
-                      <option value="2ND_POOM">2nd Poom</option>
-                      <option value="COLOR_BELT_RED">Red / Black Stripe (Geup 1-2)</option>
-                      <option value="COLOR_BELT_BLUE">Blue Belt (Geup 3-4)</option>
-                      <option value="COLOR_BELT_GREEN">Green Belt (Geup 5-6)</option>
-                      <option value="COLOR_BELT_YELLOW">Yellow Belt (Geup 7-8)</option>
-                    </select>
-                  </div>
-
-                  {/* Kukkiwon ID */}
+                  {/* Kukkiwon ID (Strict Mandatory) */}
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                      Kukkiwon ID <span className="text-red-500">*</span>
-                    </label>
+                    <div className="flex items-center justify-between">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                        Kukkiwon ID <span className="text-red-500">*</span>
+                      </label>
+                      <span className="text-[11px] font-mono text-blue-600 font-semibold">
+                        Format: KKID-123456-1234-1234
+                      </span>
+                    </div>
                     <input
                       type="text"
-                      placeholder="Enter KKWID-260901-1430-7788..."
+                      maxLength={21}
+                      placeholder="KKID-123456-1234-1234"
                       value={formData.kukkiwon_dan_number}
-                      onChange={(e) => updateField("kukkiwon_dan_number", e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 transition-all shadow-2xs"
+                      onChange={(e) => {
+                        const val = e.target.value.toUpperCase();
+                        let clean = val.replace(/[^A-Z0-9]/g, "");
+                        if (clean.startsWith("KKID")) {
+                          clean = clean.slice(4);
+                        }
+                        const digits = clean.replace(/\D/g, "").slice(0, 14);
+                        let formatted = "KKID";
+                        if (digits.length > 0) {
+                          formatted += "-" + digits.slice(0, 6);
+                        }
+                        if (digits.length > 6) {
+                          formatted += "-" + digits.slice(6, 10);
+                        }
+                        if (digits.length > 10) {
+                          formatted += "-" + digits.slice(10, 14);
+                        }
+                        updateField("kukkiwon_dan_number", digits.length === 0 && !val.startsWith("K") ? "" : formatted);
+                      }}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-sm font-mono tracking-wider text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 transition-all shadow-2xs"
+                      required
                     />
                     <p className="text-xs text-slate-600 leading-normal">
-                      Do not have a Kukkiwon ID?{" "}
+                      Mandatory official Kukkiwon Dan/Poom ID. Strict format: <strong>KKID-123456-1234-1234</strong>. Do not have a Kukkiwon ID?{" "}
                       <a
                         href="https://kukkiwon-india.org/services/register-individual?next=register-dojang"
                         target="_blank"
@@ -1301,7 +1289,7 @@ function AthleteRegistrationContent() {
                       >
                         Register for individual membership first
                       </a>
-                      . What you have entered here is kept for your return — you will need to verify your e-mail address again afterwards.
+                      .
                     </p>
                   </div>
 
@@ -1707,6 +1695,15 @@ function AthleteRegistrationContent() {
                     </div>
                   )}
                 </div>
+
+                {/* Step 2 Error Notice */}
+                {errorNotice && (
+                  <div className="pt-2">
+                    <Alert variant="danger" title="Submission Notice">
+                      {errorNotice}
+                    </Alert>
+                  </div>
+                )}
 
                 {/* BOTTOM ACTION BAR FOR STEP 2 */}
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200 pt-6">
