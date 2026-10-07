@@ -44,6 +44,8 @@ import {
   Clock,
   Printer,
   Mail,
+  Building,
+  Copy,
 } from "lucide-react";
 
 // ------------------------------------------------------------------------------
@@ -369,8 +371,19 @@ function AthleteRegistrationContent() {
   const [saveSuccessNotice, setSaveSuccessNotice] = React.useState<string | null>(null);
   const [submittedData, setSubmittedData] = React.useState<any | null>(null);
 
-  // Payment states in Step 2
-  const [paymentMethod, setPaymentMethod] = React.useState<"RAZORPAY" | "DEMO" | "OFFLINE">("RAZORPAY");
+  // Payment states in Step 2 (Admin-managed QR, UPI & Bank details)
+  const [paymentDetails, setPaymentDetails] = React.useState({
+    upiId: "kukkiwoncup@upi",
+    accountHolderName: "Kukkiwon Cup India North Branch Secretariat",
+    accountNumber: "987654321098",
+    bankName: "State Bank of India",
+    ifscCode: "SBIN0012345",
+    branchName: "Indira Gandhi Stadium Complex, New Delhi",
+    qrImageUrl: null as string | null,
+    feeAmountInr: 2500,
+    instructions: "Scan the official QR code or transfer directly to the UPI ID / Bank account. Enter the exact 12-digit UTR transaction reference below to complete registration.",
+  });
+  const [copiedUpi, setCopiedUpi] = React.useState(false);
   const [offlineUtr, setOfflineUtr] = React.useState("");
   const [offlineSlip, setOfflineSlip] = React.useState<UploadedFileRecord | null>(null);
   const [isProcessingPayment, setIsProcessingPayment] = React.useState(false);
@@ -379,6 +392,21 @@ function AthleteRegistrationContent() {
   const photoInputRef = React.useRef<HTMLInputElement>(null);
   const govIdInputRef = React.useRef<HTMLInputElement>(null);
   const slipInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Fetch admin-configured public payment details
+  React.useEffect(() => {
+    fetch("/api/public/payment-details")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.settings) {
+          setPaymentDetails((prev) => ({
+            ...prev,
+            ...data.settings,
+          }));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Check user session
   React.useEffect(() => {
@@ -666,28 +694,37 @@ function AthleteRegistrationContent() {
   };
 
   // ----------------------------------------------------------------------------
-  // PAYMENT COMPLETION (Online / Demo / Offline)
+  // STRICT UTR VALIDATION RULE (UPI 12-Digits or 12-22 char Bank Ref)
+  // ----------------------------------------------------------------------------
+  const cleanUtr = offlineUtr.trim();
+  const is12DigitUpiUtr = /^\d{12}$/.test(cleanUtr);
+  const isBankAlphaUtr = /^[A-Z0-9]{12,22}$/i.test(cleanUtr);
+  const isStrictUtrValid = is12DigitUpiUtr || isBankAlphaUtr;
+
+  // ----------------------------------------------------------------------------
+  // PAYMENT COMPLETION (Official Admin QR / UPI / Bank UTR Submission)
   // ----------------------------------------------------------------------------
   const handleProcessPayment = async () => {
+    if (!isStrictUtrValid) {
+      setErrorNotice(
+        "Strict UTR Requirement: Please enter a valid 12-digit UPI UTR number (or 12–22 character alphanumeric bank reference) before submitting."
+      );
+      return;
+    }
+
     setIsProcessingPayment(true);
     setErrorNotice(null);
 
     try {
-      if (paymentMethod === "OFFLINE") {
-        const cleanUtr = offlineUtr.trim().toUpperCase();
-        if (cleanUtr.length < 8 || cleanUtr.length > 25) {
-          throw new Error("Please enter a valid Bank / UPI Transaction Reference (UTR) Number (minimum 8 characters).");
-        }
-      }
-
       const { weight_kg: _unusedWeight, ...cleanFormData } = formData;
+      const feeAmount = paymentDetails.feeAmountInr || 2500;
       const payloadDraftData = {
         ...cleanFormData,
         photo_url: photoPreview || formData.photo_url,
-        payment_status: paymentMethod === "OFFLINE" ? "UNDER_REVIEW" : "PAID",
-        payment_method: paymentMethod === "OFFLINE" ? "OFFLINE_UPI" : paymentMethod,
-        offline_utr: offlineUtr.trim().toUpperCase(),
-        fee_amount: 2500,
+        payment_status: "UNDER_REVIEW",
+        payment_method: "OFFLINE_UPI",
+        offline_utr: cleanUtr.toUpperCase(),
+        fee_amount: feeAmount,
       };
 
       // 1. Submit directly to API
@@ -723,9 +760,9 @@ function AthleteRegistrationContent() {
       setSubmittedData({
         ...submitResult,
         registrationNumber: submitResult.registrationNumber || registrationNumber || `KKC26-ATH-${Math.floor(100000 + Math.random() * 900000)}`,
-        paymentStatus: paymentMethod === "OFFLINE" ? "OFFLINE_VERIFICATION_PENDING" : "PAID",
-        amount: 2500,
-        utrNumber: paymentMethod === "OFFLINE" ? offlineUtr.trim().toUpperCase() : undefined,
+        paymentStatus: "UNDER_REVIEW",
+        amount: feeAmount,
+        utrNumber: cleanUtr.toUpperCase(),
         paymentDate: new Date().toLocaleDateString("en-IN", {
           day: "numeric",
           month: "short",
@@ -776,6 +813,24 @@ function AthleteRegistrationContent() {
                 <p className="text-sm text-slate-700 font-medium max-w-md mx-auto leading-relaxed">
                   Thank you for submitting your payment and tournament registration! The tournament organizing committee has received your details.
                 </p>
+              </div>
+
+              {/* Transaction Summary */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-left text-xs space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 font-medium">Registration Reference:</span>
+                  <span className="font-mono font-bold text-slate-900">{submittedData.registrationNumber}</span>
+                </div>
+                {submittedData.utrNumber && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-500 font-medium">Submitted UTR Number:</span>
+                    <span className="font-mono font-bold text-blue-700">{submittedData.utrNumber}</span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 font-medium">Verification Status:</span>
+                  <Badge variant="warning">UNDER VERIFICATION</Badge>
+                </div>
               </div>
 
               {/* Official ID Card Delivery Notice via Email */}
@@ -1610,120 +1665,168 @@ function AthleteRegistrationContent() {
                   </div>
                 </div>
 
-                {/* Payment Channel Selection */}
-                <div className="space-y-4">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-800">
-                    Choose Payment Method *
-                  </label>
+                {/* Official Tournament Fee Payment Details (Direct QR / UPI / Bank) */}
+                <div className="space-y-6">
+                  <div>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                      <QrCode className="h-4 w-4 text-blue-600" />
+                      <span>Official Tournament Fee Payment Credentials</span>
+                    </h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Pay using any UPI App (Google Pay, PhonePe, Paytm, BHIM) by scanning the QR code, or transfer directly via NEFT/RTGS/IMPS.
+                    </p>
+                  </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {/* Method 1: Razorpay */}
-                    <div
-                      onClick={() => setPaymentMethod("RAZORPAY")}
-                      className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                        paymentMethod === "RAZORPAY"
-                          ? "border-blue-600 bg-blue-50/70 shadow-xs ring-1 ring-blue-600"
-                          : "border-slate-200 bg-white hover:border-slate-300"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-bold uppercase text-slate-900">
-                          Online Checkout
-                        </span>
-                        <div
-                          className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
-                            paymentMethod === "RAZORPAY" ? "bg-blue-600 border-blue-600 text-white" : "border-slate-300"
-                          }`}
-                        >
-                          {paymentMethod === "RAZORPAY" && <Check className="h-2.5 w-2.5 stroke-[3]" />}
-                        </div>
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-5 p-5 rounded-2xl border border-blue-200 bg-white shadow-xs">
+                    {/* Left: QR Code & UPI ID */}
+                    <div className="md:col-span-5 flex flex-col items-center justify-center p-4 rounded-xl bg-slate-50 border border-slate-200 text-center">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2.5">
+                        Official Payment QR Code
+                      </span>
+                      <div className="p-3 bg-white rounded-xl shadow-md border border-slate-200">
+                        {paymentDetails.qrImageUrl ? (
+                          <img
+                            src={paymentDetails.qrImageUrl}
+                            alt="Tournament Payment QR"
+                            className="w-40 h-40 object-contain"
+                          />
+                        ) : (
+                          <div className="w-40 h-40 bg-slate-100 flex flex-col items-center justify-center text-slate-400 p-2 text-center rounded-lg">
+                            <QrCode className="h-12 w-12 text-slate-400 mb-2" />
+                            <span className="text-[11px] font-semibold text-slate-600">Scan & Pay ₹{paymentDetails.feeAmountInr || 2500}</span>
+                            <span className="text-[10px] text-slate-400">Via UPI ID or Bank Details</span>
+                          </div>
+                        )}
                       </div>
-                      <p className="text-[11px] text-slate-500">Razorpay (Cards, UPI, NetBanking)</p>
+                      <span className="text-[10px] text-slate-500 mt-2 font-medium">
+                        Scan with GPay, PhonePe, Paytm, or BHIM
+                      </span>
+
+                      {/* UPI ID Box with Copy */}
+                      <div className="mt-3.5 w-full bg-white border border-slate-200 p-2.5 rounded-lg flex items-center justify-between shadow-2xs">
+                        <div className="text-left overflow-hidden mr-2">
+                          <div className="text-[9px] uppercase text-slate-400 font-bold">Official UPI ID</div>
+                          <div className="text-xs font-mono font-bold text-blue-700 truncate">
+                            {paymentDetails.upiId}
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (paymentDetails.upiId) {
+                              navigator.clipboard.writeText(paymentDetails.upiId);
+                              setCopiedUpi(true);
+                              setTimeout(() => setCopiedUpi(false), 2000);
+                            }
+                          }}
+                          className="px-2.5 py-1 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold flex items-center gap-1 transition shrink-0"
+                        >
+                          {copiedUpi ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+                          <span>{copiedUpi ? "Copied" : "Copy"}</span>
+                        </button>
+                      </div>
                     </div>
 
-                    {/* Method 2: Instant Demo Pay */}
-                    <div
-                      onClick={() => setPaymentMethod("DEMO")}
-                      className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                        paymentMethod === "DEMO"
-                          ? "border-blue-600 bg-blue-50/70 shadow-xs ring-1 ring-blue-600"
-                          : "border-slate-200 bg-white hover:border-slate-300"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-bold uppercase text-slate-900 flex items-center gap-1.5">
-                          <Sparkles className="h-3.5 w-3.5 text-blue-600" />
-                          <span>1-Click Test Pay</span>
-                        </span>
-                        <div
-                          className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
-                            paymentMethod === "DEMO" ? "bg-blue-600 border-blue-600 text-white" : "border-slate-300"
-                          }`}
-                        >
-                          {paymentMethod === "DEMO" && <Check className="h-2.5 w-2.5 stroke-[3]" />}
+                    {/* Right: Bank Transfer Details & Instructions */}
+                    <div className="md:col-span-7 flex flex-col justify-between space-y-4">
+                      <div>
+                        <div className="text-xs uppercase font-bold text-slate-800 flex items-center gap-1.5 pb-2 border-b border-slate-200">
+                          <Building className="h-4 w-4 text-blue-600" />
+                          <span>Direct Bank Account Details (NEFT / IMPS / RTGS)</span>
                         </div>
-                      </div>
-                      <p className="text-[11px] text-slate-500">Simulate instant test payment</p>
-                    </div>
 
-                    {/* Method 3: Offline UPI */}
-                    <div
-                      onClick={() => setPaymentMethod("OFFLINE")}
-                      className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                        paymentMethod === "OFFLINE"
-                          ? "border-blue-600 bg-blue-50/70 shadow-xs ring-1 ring-blue-600"
-                          : "border-slate-200 bg-white hover:border-slate-300"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-bold uppercase text-slate-900 flex items-center gap-1.5">
-                          <QrCode className="h-3.5 w-3.5 text-blue-600" />
-                          <span>Offline UPI / Transfer</span>
-                        </span>
-                        <div
-                          className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
-                            paymentMethod === "OFFLINE" ? "bg-blue-600 border-blue-600 text-white" : "border-slate-300"
-                          }`}
-                        >
-                          {paymentMethod === "OFFLINE" && <Check className="h-2.5 w-2.5 stroke-[3]" />}
+                        <div className="mt-3 space-y-2 text-xs">
+                          <div className="flex justify-between py-1 border-b border-slate-100">
+                            <span className="text-slate-500 font-medium">Account Name:</span>
+                            <span className="font-bold text-slate-900 text-right">{paymentDetails.accountHolderName}</span>
+                          </div>
+                          <div className="flex justify-between py-1 border-b border-slate-100">
+                            <span className="text-slate-500 font-medium">Bank:</span>
+                            <span className="font-bold text-slate-900 text-right">{paymentDetails.bankName}</span>
+                          </div>
+                          <div className="flex justify-between py-1 border-b border-slate-100">
+                            <span className="text-slate-500 font-medium">Account Number:</span>
+                            <span className="font-mono font-bold text-blue-700 text-right">{paymentDetails.accountNumber}</span>
+                          </div>
+                          <div className="flex justify-between py-1 border-b border-slate-100">
+                            <span className="text-slate-500 font-medium">IFSC Code:</span>
+                            <span className="font-mono font-bold text-blue-700 text-right">{paymentDetails.ifscCode}</span>
+                          </div>
+                          {paymentDetails.branchName && (
+                            <div className="flex justify-between py-1">
+                              <span className="text-slate-500 font-medium">Branch:</span>
+                              <span className="font-semibold text-slate-700 text-right">{paymentDetails.branchName}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
-                      <p className="text-[11px] text-slate-500">Submit UPI UTR transaction reference</p>
+
+                      {paymentDetails.instructions && (
+                        <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                          <strong>Note:</strong> {paymentDetails.instructions}
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  {/* Offline Details Box */}
-                  {paymentMethod === "OFFLINE" && (
-                    <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-3">
-                      <div className="text-xs text-slate-700 space-y-1">
-                        <span className="font-bold block text-slate-900">Official Tournament UPI Account:</span>
-                        <p className="font-mono text-blue-700 bg-white px-3 py-1.5 rounded-lg border border-slate-200 inline-block font-bold">
-                          kukkiwon.cup2026@upi
-                        </p>
-                        <p className="text-[11px] text-slate-500">
-                          Transfer ₹2,500 using Google Pay, PhonePe, or Paytm, and enter your 12-digit UTR reference below.
-                        </p>
-                      </div>
-
-                      <div className="space-y-1.5 max-w-md">
-                        <label className="block text-xs font-bold tracking-wide uppercase text-slate-700">
-                          Bank / UPI UTR Reference Number (Strict 12 Digits) <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          maxLength={25}
-                          placeholder="e.g. 402918274619 or UPI Ref ID"
-                          value={offlineUtr}
-                          onChange={(e) => setOfflineUtr(e.target.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 25))}
-                          className="flex h-10 w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-mono tracking-widest text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 transition-colors shadow-2xs"
-                          required
-                        />
-                        <p className="text-[11px] text-slate-500 font-mono">
-                          Enter 12-character UPI Reference / UTR Number or bank transaction ID ({offlineUtr.length} chars entered)
-                        </p>
-                      </div>
+                  {/* Strict UTR Input Section */}
+                  <div className="p-5 rounded-2xl border-2 border-blue-200 bg-blue-50/40 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                      <label className="block text-xs font-black uppercase tracking-wider text-slate-900">
+                        Enter Bank / UPI UTR Transaction Reference Number <span className="text-red-500">*</span>
+                      </label>
+                      <span className="text-[11px] font-mono font-bold text-blue-700">
+                        {cleanUtr.length} / 12 characters entered
+                      </span>
                     </div>
-                  )}
+
+                    <div className="relative">
+                      <input
+                        type="text"
+                        maxLength={22}
+                        placeholder="e.g. 402918274619 (Exact 12-digit UPI UTR)"
+                        value={offlineUtr}
+                        onChange={(e) => setOfflineUtr(e.target.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 22))}
+                        className={`flex h-12 w-full rounded-xl border-2 px-4 py-2.5 text-base font-mono tracking-widest bg-white transition-all shadow-xs ${
+                          !cleanUtr
+                            ? "border-slate-300 text-slate-900 focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                            : isStrictUtrValid
+                            ? "border-emerald-500 text-emerald-950 bg-emerald-50/30 focus:border-emerald-600"
+                            : "border-rose-400 text-rose-950 bg-rose-50/30 focus:border-rose-500"
+                        }`}
+                        required
+                      />
+                      {isStrictUtrValid && (
+                        <div className="absolute right-3.5 top-3.5 text-emerald-600 flex items-center gap-1 text-xs font-bold">
+                          <CheckCircle2 className="h-5 w-5" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Strict Validation Rule Status Message */}
+                    {!cleanUtr ? (
+                      <p className="text-[11px] text-slate-600 flex items-center gap-1.5 pt-0.5">
+                        <span className="font-bold text-blue-700">ℹ Mandatory:</span>
+                        <span>
+                          Submit the ₹{paymentDetails.feeAmountInr || 2500} payment first, then find the 12-digit UTR in your payment app receipt and type it above.
+                        </span>
+                      </p>
+                    ) : !isStrictUtrValid ? (
+                      <p className="text-[11px] text-rose-600 font-bold flex items-center gap-1.5 pt-0.5 animate-in fade-in">
+                        <AlertCircle className="h-4 w-4 shrink-0" />
+                        <span>
+                          Strict UTR Rule: Must be exactly 12 numeric digits (e.g. 402918274619) or a 12–22 alphanumeric bank reference. ({cleanUtr.length} chars entered)
+                        </span>
+                      </p>
+                    ) : (
+                      <p className="text-[11px] text-emerald-700 font-bold flex items-center gap-1.5 pt-0.5 animate-in fade-in">
+                        <CheckCircle2 className="h-4 w-4 shrink-0" />
+                        <span>
+                          ✓ Valid 12-digit UTR reference format verified ({cleanUtr.length} digits). Submit button is unlocked!
+                        </span>
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Step 2 Error Notice */}
@@ -1752,23 +1855,29 @@ function AthleteRegistrationContent() {
                     <span>Back to Competitor Details</span>
                   </Button>
 
-                  <Button
-                    type="button"
-                    variant="primary"
-                    size="lg"
-                    onClick={handleProcessPayment}
-                    isLoading={isProcessingPayment}
-                    className="w-full sm:w-auto text-xs uppercase font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
-                  >
-                    <span>
-                      {paymentMethod === "DEMO"
-                        ? "Confirm with 1-Click Test Pay"
-                        : paymentMethod === "OFFLINE"
-                        ? "Submit Registration & UTR"
-                        : "Pay ₹2,500 & Complete Registration"}
-                    </span>
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
+                  <div className="w-full sm:w-auto flex flex-col items-end gap-1">
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="lg"
+                      onClick={handleProcessPayment}
+                      disabled={!isStrictUtrValid || isProcessingPayment}
+                      isLoading={isProcessingPayment}
+                      className={`w-full sm:w-auto text-xs uppercase font-bold text-white shadow-sm transition-all ${
+                        !isStrictUtrValid
+                          ? "bg-slate-300 text-slate-500 cursor-not-allowed border-slate-300 hover:bg-slate-300 shadow-none opacity-60"
+                          : "bg-blue-600 hover:bg-blue-700 shadow-md"
+                      }`}
+                    >
+                      <span>Submit Registration & Verified UTR</span>
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                    {!isStrictUtrValid && (
+                      <span className="text-[10px] text-rose-500 font-semibold self-center sm:self-end">
+                        * Enter valid 12-digit UTR above to enable submit
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             )}

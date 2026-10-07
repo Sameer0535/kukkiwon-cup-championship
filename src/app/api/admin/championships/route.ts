@@ -1,46 +1,16 @@
 // ==============================================================================
-// ADMIN CHAMPIONSHIPS LIST API (GET /api/admin/championships)
-// Requirement 25: Championship Selector support
+// ADMIN CHAMPIONSHIPS MANAGEMENT API (GET, POST, PUT)
+// Multi-edition tournament creation, live editing, and disk persistence
 // ==============================================================================
 
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/server-auth";
-import prisma from "@/lib/db";
+import { CmsService } from "@/server/services/cms.service";
 
 export async function GET(req: NextRequest) {
   try {
     const admin = await requireAdmin(req);
-
-    let championships = [];
-    try {
-      championships = await prisma.championship.findMany({
-        select: {
-          id: true,
-          slug: true,
-          name: true,
-          short_name: true,
-          status: true,
-          start_date: true,
-          end_date: true,
-          city: true,
-        },
-        orderBy: { start_date: "asc" },
-      });
-    } catch {
-      // Fallback
-      championships = [
-        {
-          id: "champ-kukkiwon-2026",
-          slug: "kukkiwon-cup-2026",
-          name: "Kukkiwon Cup Championship 2026",
-          short_name: "Kukkiwon Cup 2026",
-          status: "REGISTRATION_OPEN",
-          start_date: "2026-11-20T09:00:00.000Z",
-          end_date: "2026-11-23T18:00:00.000Z",
-          city: "New Delhi",
-        },
-      ];
-    }
+    let championships = await CmsService.listChampionships(true);
 
     // Filter by admin assignment if scoped
     if (admin.assigned_championship_id) {
@@ -55,6 +25,57 @@ export async function GET(req: NextRequest) {
     const status = err.statusCode || 500;
     return NextResponse.json(
       { error: err.message || "Failed to list championships." },
+      { status }
+    );
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const admin = await requireAdmin(req, ["SUPER_ADMIN", "EVENT_ADMIN"]);
+    const body = await req.json();
+
+    if (!body.name || !body.name.trim()) {
+      return NextResponse.json(
+        { error: "Championship Name is required." },
+        { status: 400 }
+      );
+    }
+
+    const created = await CmsService.createChampionship(body, admin);
+
+    return NextResponse.json({
+      success: true,
+      message: `Championship "${created.name}" created successfully.`,
+      data: created,
+    });
+  } catch (err: any) {
+    const status = err.statusCode || 500;
+    return NextResponse.json(
+      { error: err.message || "Failed to create championship." },
+      { status }
+    );
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  try {
+    const admin = await requireAdmin(req, ["SUPER_ADMIN", "EVENT_ADMIN"]);
+    const body = await req.json();
+    const { championshipId, ...input } = body;
+
+    const targetId = championshipId || admin.assigned_championship_id || "champ-kukkiwon-2026";
+    const updated = await CmsService.updateChampionship(targetId, input, admin);
+
+    return NextResponse.json({
+      success: true,
+      message: `Championship "${updated.name}" updated successfully.`,
+      data: updated,
+    });
+  } catch (err: any) {
+    const status = err.statusCode || 500;
+    return NextResponse.json(
+      { error: err.message || "Failed to update championship." },
       { status }
     );
   }

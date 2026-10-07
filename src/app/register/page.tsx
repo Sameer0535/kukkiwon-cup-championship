@@ -45,20 +45,19 @@ export default function RegisterEntryPage() {
       id: "coach",
       title: "COACH",
       category: "Accredited Corner Coach",
-      badge: "Free (₹0 Fee)",
-      badgeVariant: "success" as const,
+      badge: "Official Accreditation",
+      badgeVariant: "info" as const,
       icon: ShieldCheck,
       description:
-        "For officially registered coaches accompanying participating athletes and dojang delegations. 100% Free registration.",
-      buttonText: "REGISTER AS COACH (FREE)",
+        "For officially registered coaches accompanying participating athletes and dojang delegations.",
+      buttonText: "REGISTER AS COACH",
       href: "/register/coach",
-      accentBorder: "hover:border-emerald-500 hover:shadow-md",
-      accentText: "text-emerald-600",
+      accentBorder: "hover:border-blue-500 hover:shadow-md",
+      accentText: "text-blue-600",
       specs: [
         "Official corner coach accreditation",
-        "100% Free - No registration fee required",
         "Academy & team delegation linkage",
-        "Ring access credentials",
+        "Ring access credentials & ID pass",
       ],
     },
   ];
@@ -104,7 +103,7 @@ export default function RegisterEntryPage() {
             </h1>
             
             <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-              Register athletes, coaches, and academies for the Kukkiwon Cup Championship.
+              Register individual athletes and accredited coaches for the Kukkiwon Cup Championship.
             </p>
 
             {/* Quick Resume Link for Existing Registrants */}

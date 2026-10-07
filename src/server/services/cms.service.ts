@@ -828,6 +828,85 @@ export class CmsService {
   }
 
   /**
+   * Lists all available championships
+   */
+  static async listChampionships(includeDrafts = true): Promise<PublicChampionship[]> {
+    loadCmsDataFromFile();
+    const result: PublicChampionship[] = [];
+    for (const [id] of FALLBACK_CHAMPIONSHIPS) {
+      const champ = await this.getChampionship(id, includeDrafts);
+      if (champ) result.push(champ);
+    }
+    return result;
+  }
+
+  /**
+   * Creates a new championship edition with audit logging and file persistence
+   */
+  static async createChampionship(
+    input: any,
+    adminSession?: AdminSession
+  ): Promise<PublicChampionship> {
+    loadCmsDataFromFile();
+    const cleanName = input.name ? String(input.name).trim() : "New Championship";
+    const slug = input.slug
+      ? String(input.slug).trim().toLowerCase()
+      : cleanName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    const id = input.id || `champ-${slug}-${Date.now().toString().slice(-4)}`;
+
+    const newChamp: FallbackChampionshipData = {
+      id,
+      slug,
+      name: cleanName,
+      short_name: input.shortName ? String(input.shortName).trim() : cleanName,
+      edition: input.edition ? String(input.edition).trim() : "2026",
+      subtitle: input.subtitle ? String(input.subtitle).trim() : "",
+      description: input.description ? String(input.description).trim() : "",
+      status: input.status || "REGISTRATION_OPEN",
+      start_date: input.startDate || "2026-11-20T09:00:00Z",
+      end_date: input.endDate || "2026-11-23T18:00:00Z",
+      registration_open: input.registrationOpen || "2026-09-01T00:00:00Z",
+      registration_close: input.registrationClose || "2026-11-10T23:59:59Z",
+      late_registration_deadline: input.lateRegistrationDeadline || null,
+      venue: input.venue ? String(input.venue).trim() : "Championship Stadium",
+      city: input.city ? String(input.city).trim() : "New Delhi",
+      state: input.state ? String(input.state).trim() : "Delhi",
+      country: input.country ? String(input.country).trim() : "India",
+      currency: "INR",
+      entry_fee_athlete: Number(input.entryFeeAthlete) || 2500,
+      entry_fee_coach: 0,
+      entry_fee_official: 0,
+      banner_url: input.bannerUrl || null,
+      poster_url: input.posterUrl || null,
+      rules_document_url: input.rulesDocumentUrl || null,
+      hero_headline: input.heroHeadline || cleanName,
+      hero_description: input.heroDescription || "",
+      contact_email: input.contactEmail || "secretariat@kukkiwoncup.org",
+      contact_phone: input.contactPhone || "+91 98765 43210",
+      contact_whatsapp: null,
+      contact_address: input.contactAddress || "Kukkiwon India North Branch Secretariat, New Delhi, India",
+      social_links: {},
+      is_published: input.status !== "DRAFT",
+      updated_at: new Date().toISOString(),
+    };
+
+    FALLBACK_CHAMPIONSHIPS.set(id, newChamp);
+    persistCmsDataToFile();
+
+    if (adminSession?.user_id) {
+      AuditService.logAction({
+        adminUserId: adminSession.user_id,
+        action: "CHAMPIONSHIP_CREATED",
+        entityType: "Championship",
+        entityId: id,
+        newValue: { name: newChamp.name, slug: newChamp.slug },
+      }).catch(() => {});
+    }
+
+    return (await this.getChampionship(id, true))!;
+  }
+
+  /**
    * Updates championship information with strict RBAC, championship scoping, and audit logging
    */
   static async updateChampionship(

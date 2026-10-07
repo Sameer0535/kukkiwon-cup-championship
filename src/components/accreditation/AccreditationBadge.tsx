@@ -186,7 +186,7 @@ export function AccreditationBadge({
                 <ShieldCheck className="h-3 w-3" />
                 <span>Verified Official</span>
               </div>
-              <span className="font-mono text-[#D4AF37]">KYORIX • KKC26</span>
+              <span className="font-mono text-[#D4AF37]">KUKKIWON • KKC26</span>
             </div>
           </div>
 

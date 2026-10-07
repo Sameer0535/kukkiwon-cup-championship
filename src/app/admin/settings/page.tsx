@@ -58,7 +58,7 @@ export default function AdminSettingsPage() {
           <div className="p-3 rounded-lg bg-slate-950 border border-slate-800">
             <div className="text-slate-400 text-[11px]">Architecture Isolation</div>
             <div className="font-semibold text-emerald-400 mt-1">100% Decoupled Standalone</div>
-            <div className="text-slate-400 text-[10px] mt-0.5">Zero reliance on legacy Kyorix portal</div>
+            <div className="text-slate-400 text-[10px] mt-0.5">Independent standalone tournament architecture</div>
           </div>
         </div>
       </Card>

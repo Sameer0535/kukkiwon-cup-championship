@@ -74,6 +74,7 @@ export default function AdminChampionshipsPage() {
 
   const [loading, setLoading] = React.useState(true);
   const [editingItem, setEditingItem] = React.useState<ChampionshipItem | null>(null);
+  const [isCreating, setIsCreating] = React.useState(false);
   const [editModalOpen, setEditModalOpen] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
   const [successBanner, setSuccessBanner] = React.useState<string | null>(null);
@@ -112,12 +113,44 @@ export default function AdminChampionshipsPage() {
   const loadChampionships = React.useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/cms/championship", {
+      const res = await fetch("/api/admin/championships", {
         headers: getAdminHeaders(),
         credentials: "include",
       });
       if (res.ok) {
         const json = await res.json();
+        if (Array.isArray(json.data) && json.data.length > 0) {
+          const items: ChampionshipItem[] = json.data.map((d: any) => ({
+            id: d.id,
+            slug: d.slug,
+            name: d.name,
+            short_name: d.shortName || d.name,
+            edition: d.edition || "2026",
+            subtitle: d.subtitle || "",
+            status: d.status || "REGISTRATION_OPEN",
+            start_date: d.startDate ? d.startDate.split("T")[0] : "",
+            end_date: d.endDate ? d.endDate.split("T")[0] : "",
+            registration_open: d.registrationOpen ? d.registrationOpen.split("T")[0] : "",
+            registration_close: d.registrationClose ? d.registrationClose.split("T")[0] : "",
+            venue: d.venue || "",
+            city: d.city || "",
+            state: d.state || "",
+            country: d.country || "India",
+            entry_fee_athlete: d.entryFeeAthlete ?? 2500,
+            entry_fee_coach: 0,
+          }));
+          setChampionships(items);
+          return;
+        }
+      }
+
+      // Fallback if needed
+      const fallbackRes = await fetch("/api/admin/cms/championship", {
+        headers: getAdminHeaders(),
+        credentials: "include",
+      });
+      if (fallbackRes.ok) {
+        const json = await fallbackRes.json();
         if (json.data) {
           const item: ChampionshipItem = {
             id: json.data.id || "champ-kukkiwon-2026",
@@ -152,8 +185,33 @@ export default function AdminChampionshipsPage() {
     loadChampionships();
   }, [loadChampionships]);
 
+  const handleOpenCreate = () => {
+    setEditingItem(null);
+    setIsCreating(true);
+    setFormData({
+      name: "",
+      short_name: "",
+      edition: new Date().getFullYear().toString(),
+      subtitle: "",
+      venue: "",
+      city: "New Delhi",
+      state: "Delhi",
+      country: "India",
+      start_date: "",
+      end_date: "",
+      registration_open: "",
+      registration_close: "",
+      status: "REGISTRATION_OPEN",
+      entry_fee_athlete: 2500,
+      entry_fee_coach: 0,
+    });
+    setErrorBanner(null);
+    setEditModalOpen(true);
+  };
+
   const handleOpenEdit = (c: ChampionshipItem) => {
     setEditingItem(c);
+    setIsCreating(false);
     setFormData({
       name: c.name,
       short_name: c.short_name || c.name,
@@ -177,42 +235,53 @@ export default function AdminChampionshipsPage() {
 
   const handleSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingItem) return;
+    if (!isCreating && !editingItem) return;
 
     setIsSaving(true);
     setErrorBanner(null);
 
     try {
-      const res = await fetch("/api/admin/cms/championship", {
-        method: "PUT",
+      const endpoint = "/api/admin/championships";
+      const method = isCreating ? "POST" : "PUT";
+      const payload: any = {
+        name: formData.name,
+        shortName: formData.short_name,
+        edition: formData.edition,
+        subtitle: formData.subtitle,
+        venue: formData.venue,
+        city: formData.city,
+        state: formData.state,
+        country: formData.country,
+        startDate: formData.start_date,
+        endDate: formData.end_date,
+        registrationOpen: formData.registration_open,
+        registrationClose: formData.registration_close,
+        status: formData.status as any,
+        entryFeeAthlete: Number(formData.entry_fee_athlete) || 2500,
+        entryFeeCoach: 0,
+      };
+
+      if (!isCreating && editingItem) {
+        payload.championshipId = editingItem.id;
+      }
+
+      const res = await fetch(endpoint, {
+        method,
         headers: getAdminHeaders(),
         credentials: "include",
-        body: JSON.stringify({
-          championshipId: editingItem.id,
-          name: formData.name,
-          shortName: formData.short_name,
-          edition: formData.edition,
-          subtitle: formData.subtitle,
-          venue: formData.venue,
-          city: formData.city,
-          state: formData.state,
-          country: formData.country,
-          startDate: formData.start_date,
-          endDate: formData.end_date,
-          registrationOpen: formData.registration_open,
-          registrationClose: formData.registration_close,
-          status: formData.status as any,
-          entryFeeAthlete: Number(formData.entry_fee_athlete) || 2500,
-          entryFeeCoach: 0,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const json = await res.json();
       if (!res.ok) {
-        throw new Error(json.error || "Failed to update championship.");
+        throw new Error(json.error || `Failed to ${isCreating ? "create" : "update"} championship.`);
       }
 
-      setSuccessBanner(`✓ Championship "${formData.name}" updated successfully.`);
+      setSuccessBanner(
+        isCreating
+          ? `✓ Championship "${formData.name}" created successfully and live now.`
+          : `✓ Championship "${formData.name}" updated successfully.`
+      );
       setEditModalOpen(false);
       loadChampionships();
     } catch (err: any) {
@@ -251,12 +320,11 @@ export default function AdminChampionshipsPage() {
           <Button
             variant="gold"
             size="sm"
-            onClick={() => {
-              if (championships[0]) handleOpenEdit(championships[0]);
-            }}
+            onClick={handleOpenCreate}
+            className="text-xs font-bold"
           >
-            <Edit className="h-4 w-4 mr-1.5" />
-            <span>Edit Active Championship</span>
+            <Plus className="h-4 w-4 mr-1.5" />
+            <span>New Championship</span>
           </Button>
         </div>
       </div>
@@ -319,7 +387,7 @@ export default function AdminChampionshipsPage() {
                   </div>
                   <div className="text-[10px] text-sky-400 font-bold flex items-center gap-1 mt-0.5">
                     <ShieldCheck className="h-3 w-3" />
-                    <span>Coach: ₹0 (Free)</span>
+                    <span>Coach: Official Accreditation</span>
                   </div>
                 </TableCell>
                 <TableCell>
@@ -363,12 +431,16 @@ export default function AdminChampionshipsPage() {
         </Table>
       </Card>
 
-      {/* Edit Championship Modal */}
+      {/* Edit / Create Championship Modal */}
       <Modal
         isOpen={editModalOpen}
         onClose={() => setEditModalOpen(false)}
-        title="Edit Championship Details"
-        description="Update official tournament identity, schedules, venue details, and rules."
+        title={isCreating ? "Create New Championship Edition" : "Edit Championship Details"}
+        description={
+          isCreating
+            ? "Configure a new tournament edition, schedule, venue location, and entry fees."
+            : "Update official tournament identity, schedules, venue details, and rules."
+        }
         maxWidth="xl"
       >
         <form onSubmit={handleSaveEdit} className="space-y-4 text-xs">
@@ -584,7 +656,7 @@ export default function AdminChampionshipsPage() {
                 />
               </div>
               <p className="text-[10px] text-sky-400 mt-1">
-                ✓ Coach registration is 100% Free (₹0) across all editions.
+                ✓ Coach accreditation requires no participant fee.
               </p>
             </div>
           </div>
@@ -610,12 +682,12 @@ export default function AdminChampionshipsPage() {
               {isSaving ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
-                  <span>Saving...</span>
+                  <span>{isCreating ? "Creating..." : "Saving..."}</span>
                 </>
               ) : (
                 <>
                   <Save className="h-4 w-4 mr-1.5" />
-                  <span>Save Changes</span>
+                  <span>{isCreating ? "Create Championship" : "Save Changes"}</span>
                 </>
               )}
             </Button>

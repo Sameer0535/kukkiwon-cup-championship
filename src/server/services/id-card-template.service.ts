@@ -32,20 +32,7 @@ export class IdCardTemplateService {
       return global.__kukkiwonTemplateStore;
     }
 
-    // 2. Check static file in public/branding/
-    try {
-      const publicFiles = ["id-card-template.png", "id-card-template.jpg", "id-card-template.webp"];
-      for (const f of publicFiles) {
-        const fullPath = path.join(PUBLIC_BRANDING_DIR, f);
-        if (fs.existsSync(fullPath)) {
-          const url = `/branding/${f}?v=${fs.statSync(fullPath).mtimeMs}`;
-          global.__kukkiwonTemplateStore = url;
-          return url;
-        }
-      }
-    } catch {}
-
-    // 3. Check .data storage
+    // 2. Check persistent .data storage first (guaranteed data URI or saved URL)
     try {
       if (fs.existsSync(DATA_TEMPLATE_PATH)) {
         const raw = fs.readFileSync(DATA_TEMPLATE_PATH, "utf-8");
@@ -57,7 +44,7 @@ export class IdCardTemplateService {
       }
     } catch {}
 
-    // 4. Check temp storage
+    // 3. Check temp storage
     try {
       if (fs.existsSync(TMP_TEMPLATE_PATH)) {
         const raw = fs.readFileSync(TMP_TEMPLATE_PATH, "utf-8");
@@ -69,7 +56,7 @@ export class IdCardTemplateService {
       }
     } catch {}
 
-    // 5. Check storage/ fallback
+    // 4. Check storage/ fallback
     try {
       if (fs.existsSync(STORAGE_TEMPLATE_PATH)) {
         const raw = fs.readFileSync(STORAGE_TEMPLATE_PATH, "utf-8");
@@ -77,6 +64,19 @@ export class IdCardTemplateService {
         if (parsed.templateUrl) {
           global.__kukkiwonTemplateStore = parsed.templateUrl;
           return parsed.templateUrl;
+        }
+      }
+    } catch {}
+
+    // 5. Check static file in public/branding/
+    try {
+      const publicFiles = ["id-card-template.png", "id-card-template.jpg", "id-card-template.webp"];
+      for (const f of publicFiles) {
+        const fullPath = path.join(PUBLIC_BRANDING_DIR, f);
+        if (fs.existsSync(fullPath)) {
+          const url = `/branding/${f}?v=${fs.statSync(fullPath).mtimeMs}`;
+          global.__kukkiwonTemplateStore = url;
+          return url;
         }
       }
     } catch {}
@@ -93,6 +93,16 @@ export class IdCardTemplateService {
       return global.__kukkiwonTemplateStore;
     }
     try {
+      if (fs.existsSync(DATA_TEMPLATE_PATH)) {
+        const raw = fs.readFileSync(DATA_TEMPLATE_PATH, "utf-8");
+        const parsed: TemplateRecord = JSON.parse(raw);
+        if (parsed.templateUrl) {
+          global.__kukkiwonTemplateStore = parsed.templateUrl;
+          return parsed.templateUrl;
+        }
+      }
+    } catch {}
+    try {
       const publicFiles = ["id-card-template.png", "id-card-template.jpg", "id-card-template.webp"];
       for (const f of publicFiles) {
         const fullPath = path.join(PUBLIC_BRANDING_DIR, f);
@@ -100,16 +110,6 @@ export class IdCardTemplateService {
           const url = `/branding/${f}`;
           global.__kukkiwonTemplateStore = url;
           return url;
-        }
-      }
-    } catch {}
-    try {
-      if (fs.existsSync(DATA_TEMPLATE_PATH)) {
-        const raw = fs.readFileSync(DATA_TEMPLATE_PATH, "utf-8");
-        const parsed: TemplateRecord = JSON.parse(raw);
-        if (parsed.templateUrl) {
-          global.__kukkiwonTemplateStore = parsed.templateUrl;
-          return parsed.templateUrl;
         }
       }
     } catch {}
@@ -150,26 +150,25 @@ export class IdCardTemplateService {
   }
 
   /**
-   * Saves binary file buffer directly to public/branding/id-card-template.*
+   * Saves binary file buffer directly to base64 Data URI and public fallback
    */
   static async saveTemplateFile(buffer: Buffer, mimeType: string): Promise<string> {
     const ext = mimeType.includes("png") ? "png" : mimeType.includes("webp") ? "webp" : "jpg";
     const filename = `id-card-template.${ext}`;
+    const base64 = `data:${mimeType};base64,${buffer.toString("base64")}`;
 
+    // Write file to public/branding as backup
     try {
       if (!fs.existsSync(PUBLIC_BRANDING_DIR)) {
         fs.mkdirSync(PUBLIC_BRANDING_DIR, { recursive: true });
       }
       const destPath = path.join(PUBLIC_BRANDING_DIR, filename);
       fs.writeFileSync(destPath, buffer);
-      const publicUrl = `/branding/${filename}?v=${Date.now()}`;
-      await this.saveTemplate(publicUrl);
-      return publicUrl;
-    } catch (e) {
-      // Fallback to base64 if filesystem is read-only
-      const base64 = `data:${mimeType};base64,${buffer.toString("base64")}`;
-      return await this.saveTemplate(base64);
-    }
+    } catch {}
+
+    // Persist base64 data URI to .data/id-card-template.json so it never 404s or disappears on reload
+    await this.saveTemplate(base64);
+    return base64;
   }
 
   /**

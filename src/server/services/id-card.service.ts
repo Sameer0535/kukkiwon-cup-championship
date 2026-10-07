@@ -1148,6 +1148,10 @@ export class IdCardService {
           </div>
           <div class="athlete-name">${card.athleteName.toUpperCase()}</div>
           <div class="athlete-id font-mono">${card.athleteId}</div>
+          ${(card as any).athleteEmail ? `
+          <div class="athlete-email">
+            <span>✉</span> <span class="truncate">${(card as any).athleteEmail}</span>
+          </div>` : ''}
         </div>
 
         <!-- 3. Details Table -->
@@ -1178,7 +1182,7 @@ export class IdCardService {
             </div>
             <div class="qr-text">
               <div class="verified-text">✓ Verified Official</div>
-              <div class="kyorix-code">KYORIX • KKC26</div>
+              <div class="kukkiwon-code">KUKKIWON • KKC26</div>
             </div>
           </div>
           <div class="security-meta font-mono">
@@ -1426,9 +1430,24 @@ export class IdCardService {
       color: #34D399;
       font-weight: 800;
     }
-    .kyorix-code {
+    .kukkiwon-code {
       color: #D4AF37;
       font-family: monospace;
+      font-weight: 700;
+    }
+    .athlete-email {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 9px;
+      color: #FCD34D;
+      background: rgba(10, 25, 47, 0.85);
+      border: 1px solid rgba(251, 191, 36, 0.35);
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-top: 4px;
+      font-family: monospace;
+      max-width: 90%;
     }
     .security-meta {
       text-align: right;
@@ -1706,9 +1725,24 @@ export class IdCardService {
       color: #34D399;
       font-weight: 800;
     }
-    .kyorix-code {
+    .kukkiwon-code {
       color: #D4AF37;
       font-family: monospace;
+      font-weight: 700;
+    }
+    .athlete-email {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 9px;
+      color: #FCD34D;
+      background: rgba(10, 25, 47, 0.85);
+      border: 1px solid rgba(251, 191, 36, 0.35);
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-top: 4px;
+      font-family: monospace;
+      max-width: 90%;
     }
     .security-meta {
       text-align: right;

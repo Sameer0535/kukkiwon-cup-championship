@@ -1015,7 +1015,7 @@ export default function AdminCmsPage() {
                 1. Partnership & Organization Section
               </CardTitle>
               <CardDescription className="text-slate-400">
-                Institutional presentation for Kukkiwon India North Branch and Kyorix Sports Technology.
+                Institutional presentation for Kukkiwon India North Branch World Taekwondo Headquarters.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -1111,54 +1111,6 @@ export default function AdminCmsPage() {
                 </div>
               </div>
 
-              {/* Kyorix Card Config */}
-              <div className="p-5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-cyan-400">
-                    Kyorix Card Configuration
-                  </h4>
-                  <Badge variant="outline">Technology Partner</Badge>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                  <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">Company Name</label>
-                    <Input
-                      value={content.kyorixTitle || "Kyorix Sports Technology"}
-                      onChange={(e) => setContent({ ...content, kyorixTitle: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">Subtitle</label>
-                    <Input
-                      value={content.kyorixSubtitle || "Electronic Scoring & Accreditation"}
-                      onChange={(e) => setContent({ ...content, kyorixSubtitle: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">Role / Function</label>
-                    <Input
-                      value={content.kyorixRole || "Sports Hardware & Accreditation Partner"}
-                      onChange={(e) => setContent({ ...content, kyorixRole: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">Badge Text</label>
-                    <Input
-                      value={content.kyorixBadge || "Electronic Scoring Partner"}
-                      onChange={(e) => setContent({ ...content, kyorixBadge: e.target.value })}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Kyorix Detailed Description</label>
-                  <Textarea
-                    rows={3}
-                    value={content.kyorixDescription || ""}
-                    onChange={(e) => setContent({ ...content, kyorixDescription: e.target.value })}
-                    placeholder="Competition electronics and accreditation details..."
-                  />
-                </div>
-              </div>
             </CardContent>
             <CardFooter className="flex justify-end border-t border-slate-800 pt-4">
               <Button onClick={() => handleSaveInfo()} disabled={saving} className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold flex items-center gap-2">

@@ -45,7 +45,7 @@ export default function AcademyRegistrationPage() {
               <div className="flex items-start gap-2.5">
                 <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
                 <span>
-                  <strong>Registering a Corner Coach?</strong> Coach registration is <strong>100% Free (₹0)</strong> with official accreditation pass.
+                  <strong>Registering a Corner Coach?</strong> Coach intake is available for accredited team officials with direct pass generation.
                 </span>
               </div>
             </div>
@@ -66,10 +66,10 @@ export default function AcademyRegistrationPage() {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="w-full text-xs font-bold uppercase border-emerald-500/60 text-emerald-700 hover:bg-emerald-50"
+                  className="w-full text-xs font-bold uppercase border-blue-500/60 text-blue-700 hover:bg-blue-50"
                 >
-                  <ShieldCheck className="h-4 w-4 mr-2 text-emerald-600" />
-                  <span>Register Coach (Free)</span>
+                  <ShieldCheck className="h-4 w-4 mr-2 text-blue-600" />
+                  <span>Register Coach</span>
                 </Button>
               </Link>
             </div>
