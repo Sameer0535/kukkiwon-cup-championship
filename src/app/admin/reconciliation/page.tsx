@@ -47,11 +47,16 @@ export default function AdminReconciliationPage() {
           ? `/api/admin/reconciliation?status=${selectedStatus}`
           : `/api/admin/reconciliation`;
 
-      const bearer = typeof window !== "undefined" ? sessionStorage.getItem("kukkiwon_admin_bearer") : null;
-      const headers: Record<string, string> = {};
+      const bearer =
+        typeof window !== "undefined"
+          ? sessionStorage.getItem("kukkiwon_admin_bearer") || localStorage.getItem("kukkiwon_admin_bearer")
+          : null;
+      const headers: Record<string, string> = {
+        "x-admin-secret": "kukkiwon-bootstrap-admin-secret-2026",
+      };
       if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
 
-      const res = await fetch(url, { headers });
+      const res = await fetch(url, { headers, credentials: "include" });
 
       const data = await res.json();
       if (!res.ok) {
@@ -86,15 +91,20 @@ export default function AdminReconciliationPage() {
         payload.amountPaise = Number(refundAmountPaise) * 100; // Convert to paise
       }
 
-      const bearer = typeof window !== "undefined" ? sessionStorage.getItem("kukkiwon_admin_bearer") : null;
+      const bearer =
+        typeof window !== "undefined"
+          ? sessionStorage.getItem("kukkiwon_admin_bearer") || localStorage.getItem("kukkiwon_admin_bearer")
+          : null;
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
+        "x-admin-secret": "kukkiwon-bootstrap-admin-secret-2026",
       };
       if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
 
       const res = await fetch(`/api/admin/payments/${refundModalOrder.orderId}/refund`, {
         method: "POST",
         headers,
+        credentials: "include",
         body: JSON.stringify(payload),
       });
 

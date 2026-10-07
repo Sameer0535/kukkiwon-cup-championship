@@ -153,7 +153,7 @@ export class LiveSyncService {
     } catch {}
   }
 
-  private static loadStore(): PersistedStoreData {
+  static loadStore(): PersistedStoreData {
     if (global.__kukkiwonLiveSyncStore) {
       return global.__kukkiwonLiveSyncStore;
     }
@@ -656,6 +656,7 @@ export class LiveSyncService {
       utrNumber: r.utr_number,
       amountPaise: r.amount_paise,
       amountFormatted: `₹${(r.amount_paise / 100).toLocaleString("en-IN")}`,
+      amountInrFormatted: `₹${(r.amount_paise / 100).toLocaleString("en-IN")}`,
       currency: "INR",
       status: r.payment_status,
       createdAt: r.submitted_at || r.registered_at,
@@ -695,6 +696,7 @@ export class LiveSyncService {
       championshipId: "champ-kukkiwon-2026",
       championshipName: "Kukkiwon Cup Championship 2026",
       athleteName: r.athlete_name,
+      athleteEmail: r.email || null,
       academyName: r.academy_name,
       categoryName: r.category_name,
       version: 1,

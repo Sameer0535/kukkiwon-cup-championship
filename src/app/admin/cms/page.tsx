@@ -34,6 +34,9 @@ import {
   Layers,
   Building,
   Target,
+  Upload,
+  Image as ImageIcon,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -125,6 +128,69 @@ export default function AdminCmsPage() {
   const [annModalOpen, setAnnModalOpen] = useState(false);
   const [editingAnn, setEditingAnn] = useState<PublicAnnouncement | null>(null);
   const [annForm, setAnnForm] = useState({ title: "", shortDescription: "", content: "", expiryDate: "", status: "PUBLISHED" as const });
+
+  // Banner direct upload state
+  const [bannerUploading, setBannerUploading] = useState(false);
+  const bannerInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload a valid image file (PNG, JPG, or WEBP).");
+      return;
+    }
+
+    setBannerUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const bearer =
+        typeof window !== "undefined"
+          ? sessionStorage.getItem("kukkiwon_admin_bearer") || localStorage.getItem("kukkiwon_admin_bearer")
+          : null;
+      const headers: Record<string, string> = {
+        "x-admin-secret": "kukkiwon-bootstrap-admin-secret-2026",
+      };
+      if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
+
+      const res = await fetch("/api/admin/cms/banner-upload", {
+        method: "POST",
+        headers,
+        credentials: "include",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (res.ok && data.url) {
+        setChampionship((prev) => (prev ? { ...prev, bannerUrl: data.url } : null));
+        triggerNotification("Championship banner uploaded successfully! Remember to save.");
+      } else {
+        // Fallback to base64 preview
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64 = reader.result as string;
+          setChampionship((prev) => (prev ? { ...prev, bannerUrl: base64 } : null));
+          triggerNotification("Championship banner loaded as preview! Click 'Save Hero Settings' to persist.");
+        };
+        reader.readAsDataURL(file);
+      }
+    } catch {
+      // Local preview fallback
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = reader.result as string;
+        setChampionship((prev) => (prev ? { ...prev, bannerUrl: base64 } : null));
+        triggerNotification("Banner image preview loaded!");
+      };
+      reader.readAsDataURL(file);
+    } finally {
+      setBannerUploading(false);
+      if (e.target) e.target.value = "";
+    }
+  };
 
   // Safe header constructor for authenticated admin calls
   const getAdminHeaders = (): Record<string, string> => {
@@ -790,38 +856,130 @@ export default function AdminCmsPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">
-                  Hero Background Image URL (Banner Backdrop)
-                </label>
-                <Input
-                  value={championship.bannerUrl || ""}
-                  onChange={(e) => setChampionship((prev) => prev ? { ...prev, bannerUrl: e.target.value } : null)}
-                  placeholder="/branding/hero-banner.jpg or https://images.unsplash.com/..."
-                />
-                <span className="text-[11px] text-slate-400 mt-1 block">
-                  Backdrop photo displayed behind the hero logos and championship title on the public homepage.
-                </span>
-                <div className="flex gap-2 mt-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="text-xs border-slate-700 bg-slate-800 text-slate-200"
-                    onClick={() => setChampionship((prev) => prev ? { ...prev, bannerUrl: "/branding/hero-banner.jpg" } : null)}
-                  >
-                    🏟️ Arena Preset
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="text-xs border-slate-700 bg-slate-800 text-slate-200"
-                    onClick={() => setChampionship((prev) => prev ? { ...prev, bannerUrl: "" } : null)}
-                  >
-                    ⚪ Clean (No Image)
-                  </Button>
+              {/* Championship Banner Upload & Preview */}
+              <div className="p-5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-wider text-amber-400 block">
+                      Hero Championship Banner
+                    </label>
+                    <p className="text-[11px] text-slate-400 mt-0.5">
+                      Upload an official graphic banner displayed behind the hero section on the championship homepage.
+                    </p>
+                  </div>
+                  {championship.bannerUrl && (
+                    <Badge variant="outline" className="text-[10px] text-emerald-400 border-emerald-500/30 self-start sm:self-auto">
+                      ✓ Banner Active
+                    </Badge>
+                  )}
                 </div>
+
+                {/* Hidden file input */}
+                <input
+                  type="file"
+                  ref={bannerInputRef}
+                  onChange={handleBannerUpload}
+                  accept="image/png, image/jpeg, image/jpg, image/webp"
+                  className="hidden"
+                />
+
+                {/* Live Banner Preview Box */}
+                {championship.bannerUrl ? (
+                  <div className="relative rounded-xl overflow-hidden border border-slate-700/80 bg-slate-900 group">
+                    <div className="relative w-full h-48 sm:h-64 bg-slate-950">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={championship.bannerUrl}
+                        alt="Championship Banner Preview"
+                        className="w-full h-full object-cover object-center"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent flex items-end p-4">
+                        <div className="text-xs text-white font-mono truncate max-w-md">
+                          {championship.bannerUrl.startsWith("data:") ? "Uploaded Local Image (Data URL)" : championship.bannerUrl}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-3 bg-slate-900/95 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          disabled={bannerUploading}
+                          onClick={() => bannerInputRef.current?.click()}
+                          className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs flex items-center gap-1.5"
+                        >
+                          {bannerUploading ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Upload className="w-3.5 h-3.5" />
+                          )}
+                          <span>Upload Different Image</span>
+                        </Button>
+
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setChampionship((prev) => prev ? { ...prev, bannerUrl: "/branding/hero-banner.jpg" } : null)}
+                          className="text-xs border-slate-700 bg-slate-800 text-slate-300 hover:text-white"
+                        >
+                          Arena Preset
+                        </Button>
+                      </div>
+
+                      <Button
+                        type="button"
+                        variant="danger"
+                        size="sm"
+                        onClick={() => setChampionship((prev) => prev ? { ...prev, bannerUrl: "" } : null)}
+                        className="text-xs flex items-center gap-1"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Remove Banner</span>
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  /* Upload Dropzone when no banner is selected */
+                  <div
+                    onClick={() => bannerInputRef.current?.click()}
+                    className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all ${
+                      bannerUploading
+                        ? "border-amber-400/50 bg-amber-400/5"
+                        : "border-slate-700 hover:border-amber-400/80 bg-slate-900/50 hover:bg-slate-900/80"
+                    }`}
+                  >
+                    <div className="flex flex-col items-center justify-center space-y-3">
+                      <div className="p-3 rounded-full bg-amber-400/10 text-amber-400 border border-amber-400/20">
+                        {bannerUploading ? (
+                          <Loader2 className="w-6 h-6 animate-spin" />
+                        ) : (
+                          <Upload className="w-6 h-6" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-white">
+                          {bannerUploading ? "Uploading Banner Image..." : "Click to Upload Banner Image"}
+                        </p>
+                        <p className="text-xs text-slate-400 mt-1">
+                          PNG, JPG, or WEBP up to 10MB • Recommended 1920x800 resolution
+                        </p>
+                      </div>
+                      <div className="pt-2 flex gap-2" onClick={(e) => e.stopPropagation()}>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setChampionship((prev) => prev ? { ...prev, bannerUrl: "/branding/hero-banner.jpg" } : null)}
+                          className="text-xs border-slate-700 bg-slate-800 text-slate-300 hover:text-white"
+                        >
+                          Use Arena Preset
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>

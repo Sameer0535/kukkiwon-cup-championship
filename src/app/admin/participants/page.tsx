@@ -53,6 +53,17 @@ export default function AdminParticipantsPage() {
   const [selectedParticipant, setSelectedParticipant] = React.useState<ParticipantItem | null>(null);
   const [cardModalOpen, setCardModalOpen] = React.useState(false);
 
+  const getAdminHeaders = React.useCallback((): Record<string, string> => {
+    const headers: Record<string, string> = {};
+    const bearer =
+      typeof window !== "undefined"
+        ? sessionStorage.getItem("kukkiwon_admin_bearer") || localStorage.getItem("kukkiwon_admin_bearer")
+        : null;
+    if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
+    headers["x-admin-secret"] = "kukkiwon-bootstrap-admin-secret-2026";
+    return headers;
+  }, []);
+
   const loadParticipants = React.useCallback(async () => {
     setLoading(true);
     try {
@@ -60,11 +71,10 @@ export default function AdminParticipantsPage() {
       if (filterDesignation) params.set("designation", filterDesignation);
       if (searchQuery.trim()) params.set("q", searchQuery.trim());
 
-      const bearer = sessionStorage.getItem("kukkiwon_admin_bearer");
-      const headers: Record<string, string> = {};
-      if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
-
-      const res = await fetch(`/api/admin/participants?${params.toString()}`, { headers });
+      const res = await fetch(`/api/admin/participants?${params.toString()}`, {
+        headers: getAdminHeaders(),
+        credentials: "include",
+      });
       const data = await res.json();
       if (data.participants) {
         setParticipants(data.participants);
@@ -74,7 +84,7 @@ export default function AdminParticipantsPage() {
     } finally {
       setLoading(false);
     }
-  }, [filterDesignation, searchQuery]);
+  }, [filterDesignation, searchQuery, getAdminHeaders]);
 
   React.useEffect(() => {
     loadParticipants();

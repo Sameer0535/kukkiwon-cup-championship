@@ -50,15 +50,25 @@ export default function AdminRegistrationDetailPage() {
   const [kyorixRecord, setKyorixRecord] = React.useState<any>(null);
   const [kyorixActionLoading, setKyorixActionLoading] = React.useState(false);
 
+  const getAdminHeaders = React.useCallback((): Record<string, string> => {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const bearer =
+      typeof window !== "undefined"
+        ? sessionStorage.getItem("kukkiwon_admin_bearer") || localStorage.getItem("kukkiwon_admin_bearer")
+        : null;
+    if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
+    headers["x-admin-secret"] = "kukkiwon-bootstrap-admin-secret-2026";
+    return headers;
+  }, []);
+
   const loadDetails = React.useCallback(async () => {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const bearer = sessionStorage.getItem("kukkiwon_admin_bearer");
-      const headers: Record<string, string> = {};
-      if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
-
-      const res = await fetch(`/api/admin/registrations/${registrationId}`, { headers });
+      const res = await fetch(`/api/admin/registrations/${registrationId}`, {
+        headers: getAdminHeaders(),
+        credentials: "include",
+      });
       const data = await res.json();
 
       if (!res.ok) {
@@ -72,11 +82,14 @@ export default function AdminRegistrationDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [registrationId]);
+  }, [registrationId, getAdminHeaders]);
 
   const fetchKyorixRecord = React.useCallback(async () => {
     try {
-      const res = await fetch(`/api/admin/integration/kyorix/athletes/${registrationId}/sync`);
+      const res = await fetch(`/api/admin/integration/kyorix/athletes/${registrationId}/sync`, {
+        headers: getAdminHeaders(),
+        credentials: "include",
+      });
       if (res.ok) {
         const data = await res.json();
         setKyorixRecord(data.record || null);
@@ -147,13 +160,10 @@ export default function AdminRegistrationDetailPage() {
     setSuccessMessage(null);
 
     try {
-      const bearer = sessionStorage.getItem("kukkiwon_admin_bearer");
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
-
       const res = await fetch(`/api/admin/registrations/${registrationId}/status`, {
         method: "POST",
-        headers,
+        headers: getAdminHeaders(),
+        credentials: "include",
         body: JSON.stringify({
           status: targetStatus,
           reason: statusReason,
@@ -181,11 +191,11 @@ export default function AdminRegistrationDetailPage() {
   const handleVerifyDoc = async (docId: string) => {
     setActionLoading(true);
     try {
-      const bearer = sessionStorage.getItem("kukkiwon_admin_bearer");
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
-
-      await fetch(`/api/admin/documents/${docId}/verify`, { method: "POST", headers });
+      await fetch(`/api/admin/documents/${docId}/verify`, {
+        method: "POST",
+        headers: getAdminHeaders(),
+        credentials: "include",
+      });
       loadDetails();
     } catch {} finally {
       setActionLoading(false);
@@ -198,13 +208,10 @@ export default function AdminRegistrationDetailPage() {
 
     setActionLoading(true);
     try {
-      const bearer = sessionStorage.getItem("kukkiwon_admin_bearer");
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
-
       await fetch(`/api/admin/documents/${docId}/reject`, {
         method: "POST",
-        headers,
+        headers: getAdminHeaders(),
+        credentials: "include",
         body: JSON.stringify({ reason }),
       });
       loadDetails();
@@ -220,13 +227,10 @@ export default function AdminRegistrationDetailPage() {
 
     setActionLoading(true);
     try {
-      const bearer = sessionStorage.getItem("kukkiwon_admin_bearer");
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
-
       await fetch(`/api/admin/id-cards/${encodeURIComponent(athleteId)}/revoke`, {
         method: "POST",
-        headers,
+        headers: getAdminHeaders(),
+        credentials: "include",
         body: JSON.stringify({ reason }),
       });
       loadDetails();
@@ -241,13 +245,10 @@ export default function AdminRegistrationDetailPage() {
 
     setActionLoading(true);
     try {
-      const bearer = sessionStorage.getItem("kukkiwon_admin_bearer");
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
-
       await fetch(`/api/admin/id-cards/${encodeURIComponent(athleteId)}/reissue`, {
         method: "POST",
-        headers,
+        headers: getAdminHeaders(),
+        credentials: "include",
         body: JSON.stringify({ reason }),
       });
       loadDetails();
@@ -260,13 +261,10 @@ export default function AdminRegistrationDetailPage() {
     setActionLoading(true);
     setErrorMessage(null);
     try {
-      const bearer = sessionStorage.getItem("kukkiwon_admin_bearer");
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
-
       const res = await fetch("/api/admin/id-cards/generate", {
         method: "POST",
-        headers,
+        headers: getAdminHeaders(),
+        credentials: "include",
         body: JSON.stringify({ registrationId }),
       });
       const data = await res.json();

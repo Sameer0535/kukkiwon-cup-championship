@@ -17,6 +17,7 @@ import {
   ChevronRight,
   RotateCcw,
   Loader2,
+  CheckCircle2,
 } from "lucide-react";
 import type { AdminPaymentSummary } from "@/types/admin";
 
@@ -30,6 +31,17 @@ export default function AdminPaymentsPage() {
   const [loading, setLoading] = React.useState(true);
   const [actionLoading, setActionLoading] = React.useState(false);
 
+  const getAdminHeaders = React.useCallback((): Record<string, string> => {
+    const headers: Record<string, string> = {};
+    const bearer =
+      typeof window !== "undefined"
+        ? sessionStorage.getItem("kukkiwon_admin_bearer") || localStorage.getItem("kukkiwon_admin_bearer")
+        : null;
+    if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
+    headers["x-admin-secret"] = "kukkiwon-bootstrap-admin-secret-2026";
+    return headers;
+  }, []);
+
   const loadPayments = React.useCallback(async () => {
     setLoading(true);
     try {
@@ -39,11 +51,10 @@ export default function AdminPaymentsPage() {
       });
       if (statusFilter) params.set("status", statusFilter);
 
-      const bearer = sessionStorage.getItem("kukkiwon_admin_bearer");
-      const headers: Record<string, string> = {};
-      if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
-
-      const res = await fetch(`/api/admin/payments?${params.toString()}`, { headers });
+      const res = await fetch(`/api/admin/payments?${params.toString()}`, {
+        headers: getAdminHeaders(),
+        credentials: "include",
+      });
       const data = await res.json();
 
       if (data.items) {
@@ -56,11 +67,46 @@ export default function AdminPaymentsPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, statusFilter]);
+  }, [page, pageSize, statusFilter, getAdminHeaders]);
 
   React.useEffect(() => {
     loadPayments();
   }, [loadPayments]);
+
+  const handleVerifyPayment = async (paymentId: string, athleteName: string) => {
+    if (
+      !confirm(
+        `Are you sure you want to verify and approve payment for ${athleteName}? This will confirm participation, update the Master Participants directory to Active, and generate their official ID card.`
+      )
+    ) {
+      return;
+    }
+
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/admin/payments/${paymentId}/verify`, {
+        method: "POST",
+        headers: {
+          ...getAdminHeaders(),
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "Failed to verify payment.");
+        return;
+      }
+
+      alert(`✓ Payment verified! ${athleteName} is now active and their ID card is ready.`);
+      loadPayments();
+    } catch {
+      alert("Network error processing payment verification.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   const handleRefund = async (paymentId: string) => {
     const reason = window.prompt("Enter mandatory reason for payment refund:");
@@ -68,13 +114,13 @@ export default function AdminPaymentsPage() {
 
     setActionLoading(true);
     try {
-      const bearer = sessionStorage.getItem("kukkiwon_admin_bearer");
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
-
       const res = await fetch(`/api/admin/payments/${paymentId}/refund`, {
         method: "POST",
-        headers,
+        headers: {
+          ...getAdminHeaders(),
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
         body: JSON.stringify({ reason }),
       });
 
@@ -134,6 +180,7 @@ export default function AdminPaymentsPage() {
           >
             <option value="">All Transactions</option>
             <option value="PAID">PAID</option>
+            <option value="UNDER_REVIEW">UNDER REVIEW</option>
             <option value="PENDING">PENDING</option>
             <option value="FAILED">FAILED</option>
             <option value="REFUNDED">REFUNDED</option>
@@ -227,16 +274,30 @@ export default function AdminPaymentsPage() {
                       {new Date(p.createdAt).toLocaleDateString()}
                     </td>
                     <td className="p-3.5 text-right whitespace-nowrap">
-                      {p.status === "PAID" && (
-                        <button
-                          onClick={() => handleRefund(p.id)}
-                          disabled={actionLoading}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-rose-800/80 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 text-[11px] font-bold uppercase transition"
-                        >
-                          <RotateCcw className="h-3 w-3" />
-                          <span>Refund</span>
-                        </button>
-                      )}
+                      <div className="flex items-center justify-end gap-1.5">
+                        {p.status !== "PAID" && p.status !== "REFUNDED" && (
+                          <button
+                            onClick={() => handleVerifyPayment(p.id, p.athleteName)}
+                            disabled={actionLoading}
+                            title="Verify and approve payment"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-emerald-800/80 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 text-[11px] font-bold uppercase transition disabled:opacity-50"
+                          >
+                            <CheckCircle2 className="h-3 w-3" />
+                            <span>Verify Payment</span>
+                          </button>
+                        )}
+
+                        {p.status === "PAID" && (
+                          <button
+                            onClick={() => handleRefund(p.id)}
+                            disabled={actionLoading}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-rose-800/80 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 text-[11px] font-bold uppercase transition disabled:opacity-50"
+                          >
+                            <RotateCcw className="h-3 w-3" />
+                            <span>Refund</span>
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))

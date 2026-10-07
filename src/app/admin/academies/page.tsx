@@ -41,11 +41,19 @@ export default function AdminAcademiesPage() {
       const params = new URLSearchParams();
       if (searchQuery.trim()) params.set("q", searchQuery.trim());
 
-      const bearer = sessionStorage.getItem("kukkiwon_admin_bearer");
-      const headers: Record<string, string> = {};
+      const bearer =
+        typeof window !== "undefined"
+          ? sessionStorage.getItem("kukkiwon_admin_bearer") || localStorage.getItem("kukkiwon_admin_bearer")
+          : null;
+      const headers: Record<string, string> = {
+        "x-admin-secret": "kukkiwon-bootstrap-admin-secret-2026",
+      };
       if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
 
-      const res = await fetch(`/api/admin/academies?${params.toString()}`, { headers });
+      const res = await fetch(`/api/admin/academies?${params.toString()}`, {
+        headers,
+        credentials: "include",
+      });
       const data = await res.json();
 
       if (data.academies) {

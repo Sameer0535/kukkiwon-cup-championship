@@ -223,12 +223,15 @@ export interface AdminIdCardSummary {
   championshipId: string;
   championshipName: string;
   athleteName: string;
+  athleteEmail?: string | null;
   academyName: string;
   categoryName: string;
   version: number;
   status: string;
   qrToken: string;
   verificationUrl: string;
+  photoUrl?: string | null;
+  kukkiwonId?: string | null;
   generatedAt: string;
   revokedAt?: string | null;
   revocationReason?: string | null;

@@ -31,11 +31,58 @@ export async function GET(request: NextRequest, context: RouteContext) {
       );
     }
 
-    // Retrieve or generate card
-    let card = await IdCardService.getCardByRegistrationId(registrationId, adminSession.user_id);
+    // Retrieve or generate card (pass null for registrant userId check since caller is verified admin)
+    let card = await IdCardService.getCardByRegistrationId(registrationId, null);
     if (!card) {
       // Attempt generation if eligible
-      card = await IdCardService.generateCard(registrationId, adminSession.user_id);
+      try {
+        card = await IdCardService.generateCard(registrationId, adminSession.user_id);
+      } catch (genErr) {
+        console.warn("[ID Card Download] Generate card notice:", genErr);
+      }
+    }
+
+    // Fallback store check from LiveSyncService
+    if (!card) {
+      const { LiveSyncService } = await import("@/server/services/live-sync.service");
+      const store = LiveSyncService.loadStore();
+      const reg = store.registrations.find(
+        (r) => r.id === registrationId || r.athlete_id === registrationId || r.registration_number === registrationId
+      );
+      if (reg) {
+        card = {
+          id: `card-${reg.id}`,
+          registrationId: reg.id,
+          participantId: `part-${reg.id}`,
+          athleteId: reg.athlete_id,
+          cardNumber: reg.athlete_id,
+          qrToken: `token-${reg.id}`,
+          version: 1,
+          cardStatus: "GENERATED",
+          generatedAt: reg.approved_at || reg.submitted_at || new Date().toISOString(),
+          revokedAt: null,
+          revocationReason: null,
+          qrCodeDataUrl: undefined,
+          verificationUrl: `/verify/athlete/token-${reg.id}`,
+          athleteName: reg.athlete_name,
+          academyName: reg.academy_name,
+          categoryName: reg.category_name,
+          discipline: reg.discipline || "KYORUGI",
+          gender: reg.gender,
+          nationality: reg.nationality || "IND",
+          championshipName: "Kukkiwon Cup Championship 2026",
+          photoUrl: reg.photo_url || null,
+          registrationNumber: reg.registration_number,
+          kukkiwonId: reg.kukkiwon_id || null,
+        };
+      }
+    }
+
+    if (!card) {
+      return NextResponse.json(
+        { error: "Athlete ID card not found or athlete registration payment is pending administrative verification." },
+        { status: 404 }
+      );
     }
 
     if (card.cardStatus === "REVOKED") {

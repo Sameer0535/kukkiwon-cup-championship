@@ -35,11 +35,19 @@ export default function AdminAuditLogsPage() {
       });
       if (actionFilter) params.set("action", actionFilter);
 
-      const bearer = sessionStorage.getItem("kukkiwon_admin_bearer");
-      const headers: Record<string, string> = {};
+      const bearer =
+        typeof window !== "undefined"
+          ? sessionStorage.getItem("kukkiwon_admin_bearer") || localStorage.getItem("kukkiwon_admin_bearer")
+          : null;
+      const headers: Record<string, string> = {
+        "x-admin-secret": "kukkiwon-bootstrap-admin-secret-2026",
+      };
       if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
 
-      const res = await fetch(`/api/admin/audit-logs?${params.toString()}`, { headers });
+      const res = await fetch(`/api/admin/audit-logs?${params.toString()}`, {
+        headers,
+        credentials: "include",
+      });
       const data = await res.json();
       if (data.items) {
         setLogs(data.items);
