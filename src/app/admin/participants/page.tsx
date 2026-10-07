@@ -20,10 +20,12 @@ import {
   CheckCircle2,
   Loader2,
   Camera,
+  Mail,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { AccreditationBadgeModal } from "@/components/accreditation/AccreditationBadgeModal";
 
 interface ParticipantItem {
   publicId: string;
@@ -52,6 +54,7 @@ export default function AdminParticipantsPage() {
   // ID Card Generation / Preview Modal State
   const [selectedParticipant, setSelectedParticipant] = React.useState<ParticipantItem | null>(null);
   const [cardModalOpen, setCardModalOpen] = React.useState(false);
+  const [templateUrl, setTemplateUrl] = React.useState<string | null>(null);
 
   const getAdminHeaders = React.useCallback((): Record<string, string> => {
     const headers: Record<string, string> = {};
@@ -63,6 +66,25 @@ export default function AdminParticipantsPage() {
     headers["x-admin-secret"] = "kukkiwon-bootstrap-admin-secret-2026";
     return headers;
   }, []);
+
+  const loadTemplate = React.useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/id-cards/template", {
+        headers: getAdminHeaders(),
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (data.success && data.templateUrl) {
+        setTemplateUrl(data.templateUrl);
+      } else {
+        const local = localStorage.getItem("kukkiwon_custom_id_template");
+        if (local) setTemplateUrl(local);
+      }
+    } catch {
+      const local = localStorage.getItem("kukkiwon_custom_id_template");
+      if (local) setTemplateUrl(local);
+    }
+  }, [getAdminHeaders]);
 
   const loadParticipants = React.useCallback(async () => {
     setLoading(true);
@@ -88,7 +110,8 @@ export default function AdminParticipantsPage() {
 
   React.useEffect(() => {
     loadParticipants();
-  }, [loadParticipants]);
+    loadTemplate();
+  }, [loadParticipants, loadTemplate]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -253,7 +276,13 @@ export default function AdminParticipantsPage() {
                             <div className="font-bold text-white uppercase text-xs">
                               {p.fullName}
                             </div>
-                            <div className="text-[10px] text-slate-400">
+                            {p.email && (
+                              <div className="text-[10px] text-amber-400 font-mono flex items-center gap-1 mt-0.5 lowercase">
+                                <Mail className="h-2.5 w-2.5 text-slate-400 shrink-0" />
+                                <span className="truncate max-w-[190px]">{p.email}</span>
+                              </div>
+                            )}
+                            <div className="text-[10px] text-slate-400 mt-0.5">
                               {isCoach ? (p.coachRole || "Accredited Coach") : (p.categoryName || "Competitor")}
                             </div>
                           </div>
@@ -324,141 +353,31 @@ export default function AdminParticipantsPage() {
         </div>
       </div>
 
-      {/* ID CARD MODAL / PREVIEW FOR ATHLETES AND COACHES */}
-      {cardModalOpen && selectedParticipant && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-md bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-800 bg-slate-950 shrink-0">
-              <div className="flex items-center gap-2">
-                <IdCard className="h-5 w-5 text-[#D4AF37]" />
-                <h3 className="text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
-                  Official Accreditation ID Card
-                </h3>
-              </div>
-              <button
-                onClick={() => setCardModalOpen(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            {/* Modal Body / Official Badge Frame */}
-            <div className="p-6 overflow-y-auto space-y-4 flex flex-col items-center justify-center bg-slate-950/60 print:m-0 print:p-0">
-              <div
-                id="accreditation-card-print"
-                className="w-full max-w-[340px] rounded-2xl border-2 border-[#D4AF37] bg-gradient-to-b from-[#0A192F] via-[#051329] to-[#0A192F] p-5 text-white shadow-2xl relative overflow-hidden"
-              >
-                {/* Gold Trim Header */}
-                <div className="text-center border-b border-[#D4AF37]/40 pb-3 space-y-1">
-                  <div className="text-[10px] tracking-widest font-black uppercase text-[#D4AF37]">
-                    KUKKIWON CUP INDIA 2026
-                  </div>
-                  <div className="text-[9px] font-bold tracking-wider text-slate-300 uppercase">
-                    OFFICIAL ACCREDITATION PASS
-                  </div>
-                  <span
-                    className={`inline-block px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                      selectedParticipant.designation === "Coach"
-                        ? "bg-blue-600 text-white"
-                        : "bg-emerald-600 text-white"
-                    }`}
-                  >
-                    {selectedParticipant.designation === "Coach" ? "OFFICIAL COACH" : "ATHLETE"}
-                  </span>
-                </div>
-
-                {/* Photo & Identity Section */}
-                <div className="flex flex-col items-center text-center my-4 space-y-3">
-                  <div className="relative w-28 h-36 rounded-xl border-2 border-[#D4AF37] overflow-hidden bg-slate-900 shadow-lg">
-                    {selectedParticipant.photoUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={selectedParticipant.photoUrl}
-                        alt={selectedParticipant.fullName}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-500">
-                        <Users className="h-10 w-10 stroke-1" />
-                        <span className="text-[9px] font-mono mt-1">Official Portrait</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="space-y-0.5">
-                    <h2 className="text-base font-black uppercase tracking-tight text-white">
-                      {selectedParticipant.fullName}
-                    </h2>
-                    <div className="text-[11px] font-mono text-[#D4AF37] font-bold">
-                      {selectedParticipant.publicId}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Details Table */}
-                <div className="space-y-1.5 text-xs border-t border-[#D4AF37]/30 pt-3 font-mono">
-                  <div className="flex justify-between items-center text-[11px]">
-                    <span className="text-slate-400">Kukkiwon Dan:</span>
-                    <span className="font-bold text-emerald-400">{selectedParticipant.kukkiwonId}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-[11px]">
-                    <span className="text-slate-400">Academy / Club:</span>
-                    <span className="font-bold text-white text-right truncate max-w-[170px]">
-                      {selectedParticipant.academy}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center text-[11px]">
-                    <span className="text-slate-400">
-                      {selectedParticipant.designation === "Coach" ? "Coach Role:" : "WT Category:"}
-                    </span>
-                    <span className="font-bold text-sky-400 text-right truncate max-w-[170px]">
-                      {selectedParticipant.designation === "Coach"
-                        ? (selectedParticipant.coachRole || "Coach")
-                        : (selectedParticipant.categoryName || "Senior")}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center text-[11px]">
-                    <span className="text-slate-400">Country:</span>
-                    <span className="font-bold text-white">
-                      {selectedParticipant.flag} {selectedParticipant.nationality}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Footer Barcode / Verification Pass */}
-                <div className="mt-4 pt-3 border-t border-[#D4AF37]/30 flex items-center justify-between text-[9px] text-slate-400">
-                  <div className="flex items-center gap-1.5">
-                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-                    <span>Verified Official Credential</span>
-                  </div>
-                  <span className="font-mono text-[#D4AF37]">KYORIX • KKC26</span>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex items-center gap-3 w-full pt-2">
-                <Button
-                  onClick={handlePrintCard}
-                  variant="primary"
-                  className="flex-1 bg-[#D4AF37] hover:bg-[#b89528] text-slate-950 font-bold uppercase text-xs"
-                >
-                  <Printer className="h-4 w-4 mr-1.5" />
-                  <span>Print / Download Badge</span>
-                </Button>
-                <Button
-                  onClick={() => setCardModalOpen(false)}
-                  variant="outline"
-                  className="border-slate-700 text-slate-300 hover:bg-slate-800 text-xs"
-                >
-                  Close
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* UNIFIED ACCREDITATION BADGE MODAL */}
+      <AccreditationBadgeModal
+        isOpen={cardModalOpen}
+        onClose={() => setCardModalOpen(false)}
+        templateUrl={templateUrl}
+        data={
+          selectedParticipant
+            ? {
+                athleteId: selectedParticipant.publicId,
+                athleteName: selectedParticipant.fullName,
+                athleteEmail: selectedParticipant.email,
+                designation: selectedParticipant.designation,
+                academyName: selectedParticipant.academy,
+                categoryName: selectedParticipant.categoryName,
+                coachRole: selectedParticipant.coachRole,
+                kukkiwonId: selectedParticipant.kukkiwonId,
+                photoUrl: selectedParticipant.photoUrl,
+                flag: selectedParticipant.flag,
+                nationality: selectedParticipant.nationality,
+                status: selectedParticipant.status,
+                registrationId: selectedParticipant.registrationId,
+              }
+            : null
+        }
+      />
     </div>
   );
 }

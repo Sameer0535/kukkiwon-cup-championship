@@ -1116,61 +1116,75 @@ export class IdCardService {
   static generateCardMarkup(card: AthleteIdCardDetails, templateBgUrl?: string | null): string {
     const hasTemplate = Boolean(templateBgUrl);
     const bgStyle = hasTemplate
-      ? `background-image: url('${templateBgUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat;`
-      : `background: #ffffff; border: 2px solid #0A192F;`;
+      ? `background-image: url('${templateBgUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat; border: 2px solid #D4AF37;`
+      : `background: linear-gradient(180deg, #0A192F 0%, #051329 50%, #0A192F 100%); border: 3px solid #D4AF37;`;
 
     const flagEmoji = this.getCountryFlagEmoji(card.nationality);
     const countryLabel = card.nationality || "India";
+    const isCoach =
+      card.discipline === "COACHING" ||
+      (card.categoryName && card.categoryName.toLowerCase().includes("coach"));
 
     return `
     <div class="badge-card" style="${bgStyle}">
-      ${!hasTemplate ? `
-      <div class="badge-header">
-        <div class="badge-header-title">KUKKIWON CUP 2026</div>
-        <div class="badge-header-sub">OFFICIAL ATHLETE ACCREDITATION</div>
-      </div>
-      ` : ''}
-
-      <div class="badge-body ${hasTemplate ? 'has-template' : ''}">
-        <!-- 1. Athlete Photo -->
-        <div class="photo-wrapper">
-          ${card.photoUrl
-            ? `<img src="${card.photoUrl}" alt="${card.athleteName}" class="athlete-photo" />`
-            : `<div class="photo-placeholder">🥋</div>`
-          }
-        </div>
-
-        <!-- 2. Athlete Name -->
-        <div class="field-item name-item">
-          <div class="field-label">NAME</div>
-          <div class="field-value athlete-name">${card.athleteName.toUpperCase()}</div>
-        </div>
-
-        <!-- 3. Nationality Flag -->
-        <div class="field-item">
-          <div class="field-label">NATIONALITY</div>
-          <div class="field-value nationality-badge">
-            <span class="flag-icon">${flagEmoji}</span>
-            <span class="country-text">${countryLabel}</span>
+      ${hasTemplate ? '<div class="badge-backdrop"></div>' : ''}
+      <div class="badge-inner">
+        <!-- 1. Header -->
+        <div class="badge-header">
+          <div class="badge-header-title">KUKKIWON CUP INDIA 2026</div>
+          <div class="badge-header-sub">OFFICIAL ACCREDITATION PASS</div>
+          <div class="badge-role-pill ${isCoach ? 'coach' : 'athlete'}">
+            ${isCoach ? 'OFFICIAL COACH' : 'ATHLETE'}
           </div>
         </div>
 
-        <!-- 4. Academy -->
-        <div class="field-item">
-          <div class="field-label">ACADEMY / CLUB</div>
-          <div class="field-value">${card.academyName || "Independent"}</div>
+        <!-- 2. Photo & Identity -->
+        <div class="identity-section">
+          <div class="photo-wrapper">
+            ${card.photoUrl
+              ? `<img src="${card.photoUrl}" alt="${card.athleteName}" class="athlete-photo" />`
+              : `<div class="photo-placeholder">🥋</div>`
+            }
+          </div>
+          <div class="athlete-name">${card.athleteName.toUpperCase()}</div>
+          <div class="athlete-id font-mono">${card.athleteId}</div>
         </div>
 
-        <!-- 5. Generated Athlete ID Number -->
-        <div class="field-item">
-          <div class="field-label">ATHLETE ID NUMBER</div>
-          <div class="field-value font-mono athlete-id">${card.athleteId}</div>
+        <!-- 3. Details Table -->
+        <div class="details-table">
+          <div class="detail-row">
+            <span class="detail-label">KUKKIWON DAN:</span>
+            <span class="detail-value dan-val font-mono">${card.kukkiwonId || "KKID-VERIFIED"}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">ACADEMY / CLUB:</span>
+            <span class="detail-value truncate">${card.academyName || "Independent"}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">${isCoach ? 'ROLE:' : 'WT CATEGORY:'}</span>
+            <span class="detail-value cat-val truncate">${card.categoryName || "Senior Division"}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">COUNTRY:</span>
+            <span class="detail-value">${flagEmoji} ${countryLabel}</span>
+          </div>
         </div>
 
-        <!-- 6. Submitted Kukkiwon ID -->
-        <div class="field-item">
-          <div class="field-label">KUKKIWON ID</div>
-          <div class="field-value font-mono">${card.kukkiwonId || "N/A"}</div>
+        <!-- 4. QR Code & Security Footer -->
+        <div class="badge-footer">
+          <div class="qr-block">
+            <div class="qr-box">
+              <svg viewBox="0 0 24 24" width="36" height="36" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            </div>
+            <div class="qr-text">
+              <div class="verified-text">✓ Verified Official</div>
+              <div class="kyorix-code">KYORIX • KKC26</div>
+            </div>
+          </div>
+          <div class="security-meta font-mono">
+            <div>v${card.version || 1}</div>
+            <div class="status-val">${card.cardStatus || "ACTIVE"}</div>
+          </div>
         </div>
       </div>
     </div>`;
@@ -1185,7 +1199,7 @@ export class IdCardService {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Athlete ID Card - ${card.athleteId}</title>
+  <title>Accreditation Pass - ${card.athleteId}</title>
   <style>
     @page {
       size: 100mm 150mm;
@@ -1200,7 +1214,7 @@ export class IdCardService {
     }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: #F3F4F6;
+      background: #060D1A;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -1217,78 +1231,107 @@ export class IdCardService {
       z-index: 100;
     }
     .print-btn {
-      background: #0A192F;
-      color: #D4AF37;
+      background: #D4AF37;
+      color: #0A192F;
       border: 1px solid #D4AF37;
       padding: 10px 20px;
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 800;
       border-radius: 8px;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      text-transform: uppercase;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
     .print-btn:hover {
-      background: #1E293B;
+      background: #E5C158;
     }
     .badge-card {
       width: 100mm;
       height: 150mm;
-      border-radius: 12px;
+      border-radius: 14px;
       overflow: hidden;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      box-shadow: 0 16px 36px rgba(0,0,0,0.5);
       position: relative;
       display: flex;
       flex-direction: column;
       page-break-after: always;
       break-after: page;
+      color: #FFFFFF;
+    }
+    .badge-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(6, 13, 26, 0.55);
+      backdrop-filter: blur(2px);
+      z-index: 1;
+    }
+    .badge-inner {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      padding: 18px 20px;
     }
     .badge-header {
-      background: #0A192F;
-      color: #FFFFFF;
-      padding: 14px 10px;
       text-align: center;
-      border-bottom: 3px solid #D4AF37;
+      border-bottom: 1px solid rgba(212,175,55,0.4);
+      padding-bottom: 10px;
     }
     .badge-header-title {
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 900;
-      letter-spacing: 1.5px;
+      letter-spacing: 2px;
       color: #D4AF37;
+      text-transform: uppercase;
     }
     .badge-header-sub {
       font-size: 9px;
-      font-weight: 600;
-      letter-spacing: 1px;
-      color: #E2E8F0;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: #CBD5E1;
       margin-top: 2px;
+      text-transform: uppercase;
     }
-    .badge-body {
-      flex: 1;
-      padding: 16px;
+    .badge-role-pill {
+      display: inline-block;
+      padding: 2px 12px;
+      border-radius: 999px;
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-top: 5px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .badge-role-pill.athlete {
+      background: #059669;
+      color: #FFFFFF;
+    }
+    .badge-role-pill.coach {
+      background: #2563EB;
+      color: #FFFFFF;
+    }
+    .identity-section {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: space-around;
-      background: rgba(255,255,255,0.92);
-    }
-    .badge-body.has-template {
-      background: rgba(255,255,255,0.85);
-      backdrop-filter: blur(2px);
-      margin: 15mm 8mm 12mm 8mm;
-      border-radius: 10px;
-      border: 1px solid rgba(212,175,55,0.4);
+      text-align: center;
+      margin: 8px 0;
     }
     .photo-wrapper {
-      width: 90px;
-      height: 90px;
-      border-radius: 10px;
-      border: 3px solid #D4AF37;
-      background: #F8FAFC;
+      width: 100px;
+      height: 125px;
+      border-radius: 12px;
+      border: 2px solid #D4AF37;
+      background: #0F172A;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.3);
+      margin-bottom: 8px;
     }
     .athlete-photo {
       width: 100%;
@@ -1296,54 +1339,106 @@ export class IdCardService {
       object-fit: cover;
     }
     .photo-placeholder {
-      font-size: 36px;
-      color: #94A3B8;
-    }
-    .field-item {
-      width: 100%;
-      text-align: center;
-      margin-top: 4px;
-    }
-    .field-label {
-      font-size: 8px;
-      font-weight: 800;
-      color: #64748B;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-    .field-value {
-      font-size: 13px;
-      font-weight: 700;
-      color: #0A192F;
-      margin-top: 2px;
+      font-size: 40px;
     }
     .athlete-name {
       font-size: 16px;
       font-weight: 900;
-      color: #0A192F;
+      color: #FFFFFF;
       letter-spacing: 0.5px;
+      text-transform: uppercase;
+      line-height: 1.2;
     }
     .athlete-id {
-      color: #B45309;
-      background: #FEF3C7;
-      padding: 3px 10px;
-      border-radius: 6px;
-      display: inline-block;
-      border: 1px solid #FDE68A;
+      font-size: 11px;
+      font-weight: 800;
+      color: #D4AF37;
+      letter-spacing: 1px;
+      margin-top: 3px;
     }
-    .font-mono {
-      font-family: "Courier New", Courier, monospace;
-    }
-    .nationality-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+    .details-table {
+      background: rgba(6, 13, 26, 0.7);
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
       gap: 6px;
     }
-    .flag-icon {
-      font-size: 18px;
-      line-height: 1;
-      display: inline-block;
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+    }
+    .detail-label {
+      color: #94A3B8;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .detail-value {
+      font-weight: 800;
+      color: #FFFFFF;
+      text-align: right;
+    }
+    .detail-value.dan-val {
+      color: #34D399;
+    }
+    .detail-value.cat-val {
+      color: #38BDF8;
+    }
+    .truncate {
+      max-width: 160px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .font-mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+    .badge-footer {
+      border-top: 1px solid rgba(212,175,55,0.3);
+      padding-top: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .qr-block {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .qr-box {
+      background: #FFFFFF;
+      color: #0A192F;
+      padding: 3px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .qr-text {
+      text-align: left;
+      font-size: 8px;
+      line-height: 1.2;
+    }
+    .verified-text {
+      color: #34D399;
+      font-weight: 800;
+    }
+    .kyorix-code {
+      color: #D4AF37;
+      font-family: monospace;
+    }
+    .security-meta {
+      text-align: right;
+      font-size: 8px;
+      color: #94A3B8;
+      line-height: 1.3;
+    }
+    .status-val {
+      color: #34D399;
+      font-weight: 800;
     }
     @media print {
       body {
@@ -1399,7 +1494,7 @@ export class IdCardService {
     }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: #F3F4F6;
+      background: #060D1A;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -1415,76 +1510,108 @@ export class IdCardService {
       z-index: 100;
     }
     .print-btn {
-      background: #0A192F;
-      color: #D4AF37;
+      background: #D4AF37;
+      color: #0A192F;
       border: 1px solid #D4AF37;
       padding: 10px 20px;
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 800;
       border-radius: 8px;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      text-transform: uppercase;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .print-btn:hover {
+      background: #E5C158;
     }
     .badge-card {
       width: 100mm;
       height: 150mm;
-      border-radius: 12px;
+      border-radius: 14px;
       overflow: hidden;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      box-shadow: 0 16px 36px rgba(0,0,0,0.5);
       position: relative;
       display: flex;
       flex-direction: column;
       page-break-after: always;
       break-after: page;
       margin-bottom: 20px;
+      color: #FFFFFF;
+    }
+    .badge-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(6, 13, 26, 0.55);
+      backdrop-filter: blur(2px);
+      z-index: 1;
+    }
+    .badge-inner {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      padding: 18px 20px;
     }
     .badge-header {
-      background: #0A192F;
-      color: #FFFFFF;
-      padding: 14px 10px;
       text-align: center;
-      border-bottom: 3px solid #D4AF37;
+      border-bottom: 1px solid rgba(212,175,55,0.4);
+      padding-bottom: 10px;
     }
     .badge-header-title {
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 900;
-      letter-spacing: 1.5px;
+      letter-spacing: 2px;
       color: #D4AF37;
+      text-transform: uppercase;
     }
     .badge-header-sub {
       font-size: 9px;
-      font-weight: 600;
-      letter-spacing: 1px;
-      color: #E2E8F0;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: #CBD5E1;
       margin-top: 2px;
+      text-transform: uppercase;
     }
-    .badge-body {
-      flex: 1;
-      padding: 16px;
+    .badge-role-pill {
+      display: inline-block;
+      padding: 2px 12px;
+      border-radius: 999px;
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-top: 5px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .badge-role-pill.athlete {
+      background: #059669;
+      color: #FFFFFF;
+    }
+    .badge-role-pill.coach {
+      background: #2563EB;
+      color: #FFFFFF;
+    }
+    .identity-section {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: space-around;
-      background: rgba(255,255,255,0.92);
-    }
-    .badge-body.has-template {
-      background: rgba(255,255,255,0.85);
-      backdrop-filter: blur(2px);
-      margin: 15mm 8mm 12mm 8mm;
-      border-radius: 10px;
-      border: 1px solid rgba(212,175,55,0.4);
+      text-align: center;
+      margin: 8px 0;
     }
     .photo-wrapper {
-      width: 90px;
-      height: 90px;
-      border-radius: 10px;
-      border: 3px solid #D4AF37;
-      background: #F8FAFC;
+      width: 100px;
+      height: 125px;
+      border-radius: 12px;
+      border: 2px solid #D4AF37;
+      background: #0F172A;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.3);
+      margin-bottom: 8px;
     }
     .athlete-photo {
       width: 100%;
@@ -1492,43 +1619,106 @@ export class IdCardService {
       object-fit: cover;
     }
     .photo-placeholder {
-      font-size: 36px;
-      color: #94A3B8;
-    }
-    .field-item {
-      width: 100%;
-      text-align: center;
-      margin-top: 4px;
-    }
-    .field-label {
-      font-size: 8px;
-      font-weight: 800;
-      color: #64748B;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-    .field-value {
-      font-size: 13px;
-      font-weight: 700;
-      color: #0A192F;
-      margin-top: 2px;
+      font-size: 40px;
     }
     .athlete-name {
       font-size: 16px;
       font-weight: 900;
-      color: #0A192F;
+      color: #FFFFFF;
       letter-spacing: 0.5px;
+      text-transform: uppercase;
+      line-height: 1.2;
     }
     .athlete-id {
-      color: #B45309;
-      background: #FEF3C7;
-      padding: 3px 10px;
-      border-radius: 6px;
-      display: inline-block;
-      border: 1px solid #FDE68A;
+      font-size: 11px;
+      font-weight: 800;
+      color: #D4AF37;
+      letter-spacing: 1px;
+      margin-top: 3px;
+    }
+    .details-table {
+      background: rgba(6, 13, 26, 0.7);
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+    }
+    .detail-label {
+      color: #94A3B8;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .detail-value {
+      font-weight: 800;
+      color: #FFFFFF;
+      text-align: right;
+    }
+    .detail-value.dan-val {
+      color: #34D399;
+    }
+    .detail-value.cat-val {
+      color: #38BDF8;
+    }
+    .truncate {
+      max-width: 160px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .font-mono {
-      font-family: "Courier New", Courier, monospace;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+    .badge-footer {
+      border-top: 1px solid rgba(212,175,55,0.3);
+      padding-top: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .qr-block {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .qr-box {
+      background: #FFFFFF;
+      color: #0A192F;
+      padding: 3px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .qr-text {
+      text-align: left;
+      font-size: 8px;
+      line-height: 1.2;
+    }
+    .verified-text {
+      color: #34D399;
+      font-weight: 800;
+    }
+    .kyorix-code {
+      color: #D4AF37;
+      font-family: monospace;
+    }
+    .security-meta {
+      text-align: right;
+      font-size: 8px;
+      color: #94A3B8;
+      line-height: 1.3;
+    }
+    .status-val {
+      color: #34D399;
+      font-weight: 800;
     }
     @media print {
       body {

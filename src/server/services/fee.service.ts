@@ -10,7 +10,7 @@ import { ParticipantType } from "@/types/registration";
 // Default championship fee parameters (in paise: 1 INR = 100 paise)
 export const DEFAULT_FEE_CONFIG = {
   ATHLETE_BASE_FEE_PAISE: 150000, // ₹1,500
-  COACH_BASE_FEE_PAISE: 100000,   // ₹1,000
+  COACH_BASE_FEE_PAISE: 0,        // ₹0 (Free Official Accreditation)
   ACADEMY_TEAM_BASE_FEE_PAISE: 250000, // ₹2,500
   LATE_FEE_SURCHARGE_PAISE: 50000, // ₹500
   TAX_RATE_PERCENT: 0,            // 0% default (configurable tax)
@@ -102,7 +102,7 @@ export class FeeService {
             }
           } else {
             if (participantType === "COACH") {
-              baseFeePaise = Math.round(Number(reg.championship.entry_fee_coach) * 100) || DEFAULT_FEE_CONFIG.COACH_BASE_FEE_PAISE;
+              baseFeePaise = 0;
             } else {
               baseFeePaise = Math.round(Number(reg.championship.entry_fee_athlete) * 100) || DEFAULT_FEE_CONFIG.ATHLETE_BASE_FEE_PAISE;
             }

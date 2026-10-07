@@ -148,7 +148,8 @@ export interface UpdateChampionshipCmsInput {
   contactPhone?: string;
   contactWhatsapp?: string | null;
   contactAddress?: string;
-  socialLinks?: Record<string, string>;
+  entryFeeAthlete?: number;
+  entryFeeCoach?: number;
   isPublished?: boolean;
 }
 

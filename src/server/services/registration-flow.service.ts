@@ -616,6 +616,9 @@ export class RegistrationFlowService {
         } catch {}
       }
 
+      const isCoach = participantType === "COACH";
+      const finalStatus = isCoach ? "APPROVED" : "SUBMITTED";
+
       let updatedExisting = false;
       if (currentRegId && isUuid(currentRegId)) {
         // IDOR Check
@@ -651,7 +654,7 @@ export class RegistrationFlowService {
           await prisma.registration.update({
             where: { id: currentRegId },
             data: {
-              status: "SUBMITTED",
+              status: finalStatus,
               submitted_at: now,
               discipline: discipline || null,
               category_id: validCategoryUuid || null,
@@ -689,7 +692,7 @@ export class RegistrationFlowService {
             championship_id: targetChampId,
             participant_id: participant.id,
             participant_type: participantType,
-            status: "SUBMITTED",
+            status: finalStatus,
             discipline: discipline || null,
             category_id: validCategoryUuid || null,
             academy_id: safeAcademyId,
@@ -703,14 +706,15 @@ export class RegistrationFlowService {
       // Record payment order in Prisma for Admin visibility
       if (currentRegId) {
         try {
-          const feeAmount = (draftData as any).fee_amount || 2500;
-          const cleanUtr = (draftData as any).offline_utr?.trim() || null;
-          const paymentMethod = (draftData as any).payment_method || "OFFLINE_UPI";
+          const feeAmount = isCoach ? 0 : ((draftData as any).fee_amount || 2500);
+          const cleanUtr = isCoach ? "FREE_COACH" : ((draftData as any).offline_utr?.trim() || null);
+          const paymentMethod = isCoach ? "FREE_ACCREDITATION" : ((draftData as any).payment_method || "OFFLINE_UPI");
+          const poStatus = isCoach ? "PAID" : "PENDING";
 
           await prisma.paymentOrder.upsert({
             where: { order_number: `ORD-${regNumber}` },
             update: {
-              status: "PENDING",
+              status: poStatus,
               provider_order_id: cleanUtr || `utr_${Date.now()}`,
               amount_paise: feeAmount * 100,
               amount: feeAmount,
@@ -718,13 +722,13 @@ export class RegistrationFlowService {
             create: {
               registration_id: currentRegId,
               order_number: `ORD-${regNumber}`,
-              provider: paymentMethod === "OFFLINE" || paymentMethod === "OFFLINE_UPI" ? "OFFLINE_UPI" : "MOCK",
+              provider: isCoach ? "MOCK" : paymentMethod === "OFFLINE" || paymentMethod === "OFFLINE_UPI" ? "OFFLINE_UPI" : "MOCK",
               provider_order_id: cleanUtr || `utr_${Date.now()}`,
               amount_paise: feeAmount * 100,
               amount: feeAmount,
               fee_snapshot: JSON.stringify({ feeAmount, cleanUtr, paymentMethod }),
               currency: "INR",
-              status: "PENDING",
+              status: poStatus,
             },
           });
         } catch (poErr) {
@@ -744,6 +748,8 @@ export class RegistrationFlowService {
         gender: (draftData as any).gender,
         dob: (draftData as any).date_of_birth,
         country: (draftData as any).country || "India",
+        state: (draftData as any).state,
+        city: (draftData as any).city,
         nationality: (draftData as any).nationality || "IND",
         academyName: (draftData as any).academy_name || (draftData as any).new_academy_data?.name || (draftData as any).name,
         kukkiwonId: (draftData as any).kukkiwon_dan_number || (draftData as any).kukkiwon_id,
@@ -752,9 +758,15 @@ export class RegistrationFlowService {
         discipline,
         coachRole: (draftData as any).coach_role,
         qualification: (draftData as any).qualification,
-        utrNumber: (draftData as any).offline_utr,
-        paymentMethod: (draftData as any).payment_method,
-        feeAmountInr: (draftData as any).fee_amount || 2500,
+        beltRank: (draftData as any).belt_rank,
+        division: (draftData as any).division,
+        weightKg: (draftData as any).weight_kg,
+        utrNumber: isCoach ? "FREE_COACH" : (draftData as any).offline_utr,
+        paymentMethod: isCoach ? "FREE_ACCREDITATION" : (draftData as any).payment_method,
+        feeAmountInr: isCoach ? 0 : ((draftData as any).fee_amount || 2500),
+        documentsUploaded: (draftData as any).documents_uploaded || {},
+        offlineSlip: (draftData as any).offline_slip || null,
+        rawDraftData: draftData,
       });
 
       return {
@@ -764,7 +776,7 @@ export class RegistrationFlowService {
         championshipName: "Kukkiwon Cup Championship 2026",
         discipline,
         categoryName,
-        status: "SUBMITTED",
+        status: finalStatus,
         submittedAt: now.toISOString(),
       };
     } catch (e: any) {
@@ -794,6 +806,8 @@ export class RegistrationFlowService {
         }
         regNumber = existing.registration_number;
       }
+
+      const isCoach = participantType === "COACH";
       PersistenceGuard.assertWritePersistence(false, "Registration.submit");
       FALLBACK_REGISTRATIONS_STORE.set(fbId, {
         id: fbId,
@@ -802,7 +816,7 @@ export class RegistrationFlowService {
         championship_id: "c1111111-1111-1111-1111-111111111111",
         participant_id: `part-${fbId}`,
         participant_type: participantType,
-        status: "SUBMITTED",
+        status: isCoach ? "APPROVED" : "SUBMITTED",
         discipline,
         category_id: categoryId,
         academy_id: academyId,
@@ -833,6 +847,8 @@ export class RegistrationFlowService {
         gender: (draftData as any).gender,
         dob: (draftData as any).date_of_birth,
         country: (draftData as any).country || "India",
+        state: (draftData as any).state,
+        city: (draftData as any).city,
         nationality: (draftData as any).nationality || "IND",
         academyName: (draftData as any).academy_name || (draftData as any).new_academy_data?.name || (draftData as any).name,
         kukkiwonId: (draftData as any).kukkiwon_dan_number || (draftData as any).kukkiwon_id,
@@ -841,9 +857,15 @@ export class RegistrationFlowService {
         discipline,
         coachRole: (draftData as any).coach_role,
         qualification: (draftData as any).qualification,
-        utrNumber: (draftData as any).offline_utr,
-        paymentMethod: (draftData as any).payment_method,
-        feeAmountInr: (draftData as any).fee_amount || 2500,
+        beltRank: (draftData as any).belt_rank,
+        division: (draftData as any).division,
+        weightKg: (draftData as any).weight_kg,
+        utrNumber: isCoach ? "FREE_COACH" : (draftData as any).offline_utr,
+        paymentMethod: isCoach ? "FREE_ACCREDITATION" : (draftData as any).payment_method,
+        feeAmountInr: isCoach ? 0 : ((draftData as any).fee_amount || 2500),
+        documentsUploaded: (draftData as any).documents_uploaded || {},
+        offlineSlip: (draftData as any).offline_slip || null,
+        rawDraftData: draftData,
       });
 
       return {
@@ -853,7 +875,7 @@ export class RegistrationFlowService {
         championshipName: "Kukkiwon Cup Championship 2026",
         discipline,
         categoryName,
-        status: "SUBMITTED",
+        status: isCoach ? "APPROVED" : "SUBMITTED",
         submittedAt: now.toISOString(),
       };
     }

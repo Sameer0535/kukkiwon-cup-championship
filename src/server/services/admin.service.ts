@@ -731,7 +731,101 @@ export class AdminService {
             }).catch(() => {});
           }
 
-          const docStatus = (r as any).document_verification_status || (r.documents?.some((d: any) => d.verification_status === "REJECTED") ? "REJECTED" : r.documents?.every((d: any) => d.verification_status === "APPROVED") && r.documents.length > 0 ? "APPROVED" : "PENDING");
+          let parsedDraft: any = null;
+          try {
+            if (r.draft_data) parsedDraft = JSON.parse(r.draft_data);
+          } catch {}
+
+          const docsList: any[] = r.documents.map((d: any) => ({
+            id: d.id,
+            requirementId: d.requirement_id,
+            documentType: d.document_type,
+            title: d.title || d.document_type,
+            status: d.status,
+            version: d.version,
+            fileUrl: `/api/storage/stream?key=${encodeURIComponent(d.storage_key || "")}`,
+            previewUrl: `/api/storage/stream?key=${encodeURIComponent(d.storage_key || "")}`,
+            fileName: d.original_name,
+            rejectionReason: d.rejection_reason,
+            uploadedAt: d.created_at.toISOString(),
+            verifiedAt: d.verified_at?.toISOString() || null,
+          }));
+
+          // Unpack documents from draft_data
+          if (parsedDraft?.documents_uploaded) {
+            const up = parsedDraft.documents_uploaded;
+            if (up.gov_id?.dataUrl) {
+              docsList.push({
+                id: `doc-gov-${r.id}`,
+                requirementId: "gov-id",
+                documentType: "GOVERNMENT_ID",
+                title: "Government Identity Proof (Aadhaar / Passport / Birth Certificate)",
+                status: "VERIFIED",
+                version: 1,
+                fileUrl: up.gov_id.dataUrl,
+                previewUrl: up.gov_id.dataUrl,
+                fileName: up.gov_id.name || "government_id_proof.jpg",
+                fileSize: up.gov_id.size,
+                mimeType: up.gov_id.type,
+                uploadedAt: r.created_at.toISOString(),
+                verifiedAt: r.created_at.toISOString(),
+              });
+            }
+            if (up.kukkiwon_cert?.dataUrl) {
+              docsList.push({
+                id: `doc-dan-${r.id}`,
+                requirementId: "kukkiwon-cert",
+                documentType: "KUKKIWON_CERTIFICATE",
+                title: "Kukkiwon Dan / Poom Certificate or Color Belt Proof",
+                status: "VERIFIED",
+                version: 1,
+                fileUrl: up.kukkiwon_cert.dataUrl,
+                previewUrl: up.kukkiwon_cert.dataUrl,
+                fileName: up.kukkiwon_cert.name || "kukkiwon_certificate.jpg",
+                fileSize: up.kukkiwon_cert.size,
+                mimeType: up.kukkiwon_cert.type,
+                uploadedAt: r.created_at.toISOString(),
+                verifiedAt: r.created_at.toISOString(),
+              });
+            }
+            if (up.medical_cert?.dataUrl) {
+              docsList.push({
+                id: `doc-med-${r.id}`,
+                requirementId: "medical-cert",
+                documentType: "MEDICAL_CERTIFICATE",
+                title: "Medical Fitness Certificate",
+                status: "VERIFIED",
+                version: 1,
+                fileUrl: up.medical_cert.dataUrl,
+                previewUrl: up.medical_cert.dataUrl,
+                fileName: up.medical_cert.name || "medical_certificate.pdf",
+                fileSize: up.medical_cert.size,
+                mimeType: up.medical_cert.type,
+                uploadedAt: r.created_at.toISOString(),
+                verifiedAt: r.created_at.toISOString(),
+              });
+            }
+          }
+
+          if (parsedDraft?.offline_slip?.dataUrl) {
+            docsList.push({
+              id: `doc-slip-${r.id}`,
+              requirementId: "payment-slip",
+              documentType: "PAYMENT_RECEIPT",
+              title: "Official UPI / Bank Payment Slip (UTR Proof)",
+              status: "VERIFIED",
+              version: 1,
+              fileUrl: parsedDraft.offline_slip.dataUrl,
+              previewUrl: parsedDraft.offline_slip.dataUrl,
+              fileName: parsedDraft.offline_slip.name || "payment_slip.jpg",
+              fileSize: parsedDraft.offline_slip.size,
+              mimeType: parsedDraft.offline_slip.type,
+              uploadedAt: r.created_at.toISOString(),
+              verifiedAt: r.created_at.toISOString(),
+            });
+          }
+
+          const docStatus = (r as any).document_verification_status || (docsList.some((d: any) => d.status === "REJECTED") ? "REJECTED" : docsList.length > 0 ? "APPROVED" : "PENDING");
 
           return {
             id: r.id,
@@ -740,34 +834,41 @@ export class AdminService {
             championshipName: r.championship.name,
             athleteId: card?.athlete_id || r.athlete_id || `ATH-${r.participant_id.slice(0, 8).toUpperCase()}`,
             athleteName: r.participant.full_name,
-            academyName: r.academy?.name || r.participant.academy_name || "Independent",
-            country: r.participant.nationality || "India",
-            categoryName: r.category?.name || "Official Entry",
-            discipline: r.discipline || "KYORUGI",
-            gender: r.participant.gender,
+            academyName: r.academy?.name || r.participant.academy_name || parsedDraft?.academy_name || "Independent",
+            country: r.participant.nationality || parsedDraft?.country || "India",
+            categoryName: r.category?.name || parsedDraft?.weight_category_name || "Official Entry",
+            discipline: r.discipline || parsedDraft?.discipline || "KYORUGI",
+            gender: r.participant.gender || parsedDraft?.gender || "MALE",
             registrationStatus: r.status,
             paymentStatus: r.status === "PAID" || r.status === "CONFIRMED" || r.status === "APPROVED" ? "PAID" : "PENDING",
             documentStatus: docStatus,
             idCardStatus: card?.card_status || "NOT_GENERATED",
-            amountPaise: 150000,
-            amountInrFormatted: "₹1,500",
+            amountPaise: parsedDraft?.fee_amount ? parsedDraft.fee_amount * 100 : 250000,
+            amountInrFormatted: parsedDraft?.fee_amount ? `₹${parsedDraft.fee_amount.toLocaleString("en-IN")}` : "₹2,500",
             registeredAt: r.created_at.toISOString(),
             participant: {
               id: r.participant.id,
               fullName: r.participant.full_name,
-              gender: r.participant.gender,
-              dob: r.participant.date_of_birth ? r.participant.date_of_birth.toISOString().split("T")[0] : null,
-              nationality: r.participant.nationality,
-              kukkiwonDanNumber: r.participant.kukkiwon_id || (r.participant as any).kukkiwon_dan_number || null,
-              beltRank: (r as any).belt_rank || (r.participant as any).belt_rank || null,
-              photoUrl: r.participant.photo_url,
+              gender: r.participant.gender || parsedDraft?.gender || "MALE",
+              dob: r.participant.date_of_birth ? r.participant.date_of_birth.toISOString().split("T")[0] : parsedDraft?.date_of_birth || null,
+              nationality: r.participant.nationality || parsedDraft?.nationality || "IND",
+              country: parsedDraft?.country || "India",
+              state: parsedDraft?.state || null,
+              city: parsedDraft?.city || null,
+              division: parsedDraft?.division || null,
+              weightKg: parsedDraft?.weight_kg || null,
+              email: parsedDraft?.email || null,
+              phone: parsedDraft?.phone || null,
+              kukkiwonDanNumber: r.participant.kukkiwon_id || (r.participant as any).kukkiwon_dan_number || parsedDraft?.kukkiwon_dan_number || null,
+              beltRank: (r as any).belt_rank || (r.participant as any).belt_rank || parsedDraft?.belt_rank || null,
+              photoUrl: r.participant.photo_url || parsedDraft?.photo_url || null,
               emergencyContactName: (r.participant as any).emergency_contact_name || null,
               emergencyContactPhone: (r.participant as any).emergency_contact_phone || null,
             },
             payment: {
               status: r.status === "PAID" || r.status === "CONFIRMED" || r.status === "APPROVED" ? "PAID" : "PENDING",
-              amountPaise: 150000,
-              amountInrFormatted: "₹1,500",
+              amountPaise: parsedDraft?.fee_amount ? parsedDraft.fee_amount * 100 : 250000,
+              amountInrFormatted: parsedDraft?.fee_amount ? `₹${parsedDraft.fee_amount.toLocaleString("en-IN")}` : "₹2,500",
               currency: "INR",
               paidAt: r.invoices[0]?.payment_date?.toISOString() || (r.invoices[0] as any)?.created_at?.toISOString() || null,
               orders: r.payment_orders.map((po: any) => ({
@@ -797,19 +898,8 @@ export class AdminService {
                 }))
               ),
             },
-            documents: r.documents.map((d: any) => ({
-              id: d.id,
-              requirementId: d.requirement_id,
-              documentType: d.document_type,
-              title: d.title || d.document_type,
-              status: d.status,
-              version: d.version,
-              fileUrl: `/api/storage/stream?key=${encodeURIComponent(d.storage_key || "")}`,
-              fileName: d.original_name,
-              rejectionReason: d.rejection_reason,
-              uploadedAt: d.created_at.toISOString(),
-              verifiedAt: d.verified_at?.toISOString() || null,
-            })),
+            documents: docsList,
+            rawDraftData: parsedDraft,
             idCard: card
               ? {
                   id: card.id,
@@ -843,6 +933,164 @@ export class AdminService {
         if (err instanceof AuthError) throw err;
         console.error("[AdminService.getRegistrationDetails] DB error:", err);
       }
+    }
+
+    // Check LiveSyncService store first
+    const syncStore = LiveSyncService.loadStore();
+    const syncReg = syncStore.registrations.find(
+      (s) => s.id === registrationId || s.registration_number === registrationId || s.athlete_id === registrationId
+    );
+
+    if (syncReg) {
+      const syncDocs: any[] = [];
+      const up = syncReg.documents_uploaded || (syncReg.raw_draft_data as any)?.documents_uploaded;
+      if (up?.gov_id?.dataUrl) {
+        syncDocs.push({
+          id: `doc-gov-${syncReg.id}`,
+          requirementId: "gov-id",
+          documentType: "GOVERNMENT_ID",
+          title: "Government Identity Proof (Aadhaar / Passport / Birth Certificate)",
+          status: "VERIFIED",
+          version: 1,
+          fileUrl: up.gov_id.dataUrl,
+          previewUrl: up.gov_id.dataUrl,
+          fileName: up.gov_id.name || "government_id_proof.jpg",
+          fileSize: up.gov_id.size,
+          mimeType: up.gov_id.type,
+          uploadedAt: syncReg.submitted_at || syncReg.registered_at,
+          verifiedAt: syncReg.approved_at || syncReg.submitted_at,
+        });
+      }
+      if (up?.kukkiwon_cert?.dataUrl) {
+        syncDocs.push({
+          id: `doc-dan-${syncReg.id}`,
+          requirementId: "kukkiwon-cert",
+          documentType: "KUKKIWON_CERTIFICATE",
+          title: "Kukkiwon Dan / Poom Certificate or Color Belt Proof",
+          status: "VERIFIED",
+          version: 1,
+          fileUrl: up.kukkiwon_cert.dataUrl,
+          previewUrl: up.kukkiwon_cert.dataUrl,
+          fileName: up.kukkiwon_cert.name || "kukkiwon_certificate.jpg",
+          fileSize: up.kukkiwon_cert.size,
+          mimeType: up.kukkiwon_cert.type,
+          uploadedAt: syncReg.submitted_at || syncReg.registered_at,
+          verifiedAt: syncReg.approved_at || syncReg.submitted_at,
+        });
+      }
+      if (up?.medical_cert?.dataUrl) {
+        syncDocs.push({
+          id: `doc-med-${syncReg.id}`,
+          requirementId: "medical-cert",
+          documentType: "MEDICAL_CERTIFICATE",
+          title: "Medical Fitness Certificate",
+          status: "VERIFIED",
+          version: 1,
+          fileUrl: up.medical_cert.dataUrl,
+          previewUrl: up.medical_cert.dataUrl,
+          fileName: up.medical_cert.name || "medical_fitness.pdf",
+          fileSize: up.medical_cert.size,
+          mimeType: up.medical_cert.type,
+          uploadedAt: syncReg.submitted_at || syncReg.registered_at,
+          verifiedAt: syncReg.approved_at || syncReg.submitted_at,
+        });
+      }
+
+      const slip = syncReg.offline_slip || (syncReg.raw_draft_data as any)?.offline_slip;
+      if (slip?.dataUrl) {
+        syncDocs.push({
+          id: `doc-slip-${syncReg.id}`,
+          requirementId: "payment-slip",
+          documentType: "PAYMENT_RECEIPT",
+          title: "Official UPI / Bank Payment Slip (UTR Proof)",
+          status: "VERIFIED",
+          version: 1,
+          fileUrl: slip.dataUrl,
+          previewUrl: slip.dataUrl,
+          fileName: slip.name || "payment_slip.jpg",
+          fileSize: slip.size,
+          mimeType: slip.type,
+          uploadedAt: syncReg.submitted_at || syncReg.registered_at,
+          verifiedAt: syncReg.approved_at || syncReg.submitted_at,
+        });
+      }
+
+      return {
+        id: syncReg.id,
+        registrationNumber: syncReg.registration_number,
+        championshipId: "champ-kukkiwon-2026",
+        championshipName: "Kukkiwon Cup Championship 2026",
+        athleteId: syncReg.athlete_id,
+        athleteName: syncReg.athlete_name,
+        academyName: syncReg.academy_name,
+        country: syncReg.country,
+        categoryName: syncReg.category_name,
+        discipline: syncReg.discipline,
+        gender: syncReg.gender,
+        registrationStatus: syncReg.status,
+        paymentStatus: syncReg.payment_status,
+        documentStatus: syncDocs.length > 0 ? "VERIFIED" : syncReg.document_status,
+        idCardStatus: syncReg.id_card_status,
+        amountPaise: syncReg.amount_paise,
+        amountInrFormatted: formatPaiseToInr(syncReg.amount_paise),
+        registeredAt: syncReg.registered_at,
+        participant: {
+          id: syncReg.user_id,
+          fullName: syncReg.athlete_name,
+          gender: syncReg.gender,
+          dob: syncReg.dob || "2000-01-01",
+          nationality: syncReg.nationality,
+          country: syncReg.country,
+          state: syncReg.state || null,
+          city: syncReg.city || null,
+          division: syncReg.division || null,
+          weightKg: syncReg.weight_kg || null,
+          email: syncReg.email,
+          phone: syncReg.phone,
+          kukkiwonDanNumber: syncReg.kukkiwon_id,
+          beltRank: syncReg.belt_rank || "1ST_DAN_BLACK",
+          photoUrl: syncReg.photo_url || null,
+          emergencyContactName: null,
+          emergencyContactPhone: null,
+        },
+        payment: {
+          status: syncReg.payment_status,
+          amountPaise: syncReg.amount_paise,
+          amountInrFormatted: formatPaiseToInr(syncReg.amount_paise),
+          currency: "INR",
+          paidAt: syncReg.approved_at || syncReg.submitted_at,
+          orders: [
+            {
+              id: `ord-${syncReg.id}`,
+              orderNumber: `ORD-${syncReg.registration_number}`,
+              providerOrderId: syncReg.utr_number || "OFFLINE-MANUAL",
+              amountPaise: syncReg.amount_paise,
+              amountInrFormatted: formatPaiseToInr(syncReg.amount_paise),
+              status: syncReg.payment_status,
+              createdAt: syncReg.submitted_at || syncReg.registered_at,
+            },
+          ],
+          invoice: {
+            invoiceNumber: `INV-${syncReg.registration_number}`,
+            issuedAt: syncReg.submitted_at || syncReg.registered_at,
+            pdfUrl: `/api/registrations/${syncReg.id}/invoice`,
+          },
+          refunds: [],
+        },
+        documents: syncDocs,
+        rawDraftData: syncReg.raw_draft_data || null,
+        idCard: {
+          id: `card-${syncReg.id}`,
+          athleteId: syncReg.athlete_id,
+          cardNumber: syncReg.athlete_id,
+          version: 1,
+          status: syncReg.id_card_status === "PENDING" ? "NOT_GENERATED" : (syncReg.id_card_status as any),
+          qrToken: `token-${syncReg.id}`,
+          verificationUrl: `/verify/athlete/token-${syncReg.id}`,
+          generatedAt: syncReg.approved_at || syncReg.submitted_at,
+        },
+        auditTrail: FALLBACK_AUDIT_LOGS,
+      };
     }
 
     // Fallback store lookup

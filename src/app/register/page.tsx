@@ -45,38 +45,20 @@ export default function RegisterEntryPage() {
       id: "coach",
       title: "COACH",
       category: "Accredited Corner Coach",
-      badge: "Official Accreditation",
-      badgeVariant: "cyan" as const,
+      badge: "Free (₹0 Fee)",
+      badgeVariant: "success" as const,
       icon: ShieldCheck,
       description:
-        "For officially registered coaches accompanying participating athletes and dojang delegations.",
-      buttonText: "REGISTER AS COACH",
+        "For officially registered coaches accompanying participating athletes and dojang delegations. 100% Free registration.",
+      buttonText: "REGISTER AS COACH (FREE)",
       href: "/register/coach",
-      accentBorder: "hover:border-blue-500 hover:shadow-md",
-      accentText: "text-blue-600",
+      accentBorder: "hover:border-emerald-500 hover:shadow-md",
+      accentText: "text-emerald-600",
       specs: [
         "Official corner coach accreditation",
+        "100% Free - No registration fee required",
         "Academy & team delegation linkage",
         "Ring access credentials",
-      ],
-    },
-    {
-      id: "academy",
-      title: "ACADEMY / TEAM",
-      category: "Club & Dojang Directory",
-      badge: "Team Management",
-      badgeVariant: "info" as const,
-      icon: Building2,
-      description:
-        "For academies or teams registering participants and managing collective tournament entries.",
-      buttonText: "REGISTER ACADEMY / TEAM",
-      href: "/register/academy",
-      accentBorder: "hover:border-blue-500 hover:shadow-md",
-      accentText: "text-blue-600",
-      specs: [
-        "Unique institutional code (e.g. KKC26-ACA-XXXXXX)",
-        "Accredited delegation management",
-        "Duplicate team protection",
       ],
     },
   ];
@@ -85,7 +67,7 @@ export default function RegisterEntryPage() {
     {
       num: "01",
       title: "Select Participant Profile",
-      desc: "Choose whether you are registering an individual athlete, an accredited coach, or a dojang academy team.",
+      desc: "Choose whether you are registering an individual athlete or an accredited coach.",
     },
     {
       num: "02",
@@ -154,7 +136,7 @@ export default function RegisterEntryPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto gap-8 pt-4">
               {selectionCards.map((card) => {
                 const Icon = card.icon;
                 return (
@@ -210,6 +192,11 @@ export default function RegisterEntryPage() {
                   </div>
                 );
               })}
+            </div>
+
+            <div className="p-4 rounded-xl border border-blue-200 bg-blue-50/60 text-center max-w-2xl mx-auto text-xs text-slate-700">
+              <span className="font-bold text-blue-700 block mb-0.5">Note for Academies & Clubs:</span>
+              Academies and club delegations are selected or entered directly during individual <strong>Athlete</strong> and <strong>Coach</strong> registration.
             </div>
           </div>
         </section>

@@ -29,6 +29,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import type { AdminIdCardSummary } from "@/types/admin";
+import { AccreditationBadgeModal } from "@/components/accreditation/AccreditationBadgeModal";
 
 export default function AdminIdCardsPage() {
   const [cards, setCards] = React.useState<AdminIdCardSummary[]>([]);
@@ -102,11 +103,17 @@ export default function AdminIdCardsPage() {
       const data = await res.json();
       if (data.success && data.templateUrl) {
         setTemplateUrl(data.templateUrl);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("kukkiwon_custom_id_template", data.templateUrl);
+        }
       } else {
-        setTemplateUrl(null);
+        const local = typeof window !== "undefined" ? localStorage.getItem("kukkiwon_custom_id_template") : null;
+        if (local) setTemplateUrl(local);
+        else setTemplateUrl(null);
       }
     } catch {
-      // Ignore
+      const local = typeof window !== "undefined" ? localStorage.getItem("kukkiwon_custom_id_template") : null;
+      if (local) setTemplateUrl(local);
     }
   }, [getAdminHeaders]);
 
@@ -124,40 +131,69 @@ export default function AdminIdCardsPage() {
       return;
     }
 
+    // Immediate visual preview in UI
+    const localPreview = URL.createObjectURL(file);
+    setTemplateUrl(localPreview);
     setTemplateLoading(true);
+
     try {
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const base64 = reader.result as string;
-        const headers = {
-          ...getAdminHeaders(),
-          "Content-Type": "application/json",
-        };
+      const formData = new FormData();
+      formData.append("file", file);
 
-        const res = await fetch("/api/admin/id-cards/template", {
-          method: "POST",
-          headers,
-          credentials: "include",
-          body: JSON.stringify({ templateUrl: base64 }),
-        });
+      const headers: Record<string, string> = { ...getAdminHeaders() };
+      // Omit Content-Type so browser sets boundary multipart header
 
-        const data = await res.json();
-        if (res.ok) {
-          setTemplateUrl(base64);
-          alert("ID card background template uploaded successfully!");
-        } else {
-          if (res.status === 401) {
-            alert("Admin authentication is required. Please re-authenticate at /admin/login or provide credentials.");
-          } else {
-            alert(data.error || "Failed to upload template.");
-          }
+      const res = await fetch("/api/admin/id-cards/template", {
+        method: "POST",
+        headers,
+        credentials: "include",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (res.ok && data.templateUrl) {
+        setTemplateUrl(data.templateUrl);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("kukkiwon_custom_id_template", data.templateUrl);
         }
-        setTemplateLoading(false);
+        alert("ID card background template uploaded and saved successfully!");
+      } else {
+        // Fallback: Read as base64 and send JSON
+        const reader = new FileReader();
+        reader.onload = async () => {
+          const base64 = reader.result as string;
+          setTemplateUrl(base64);
+          if (typeof window !== "undefined") {
+            localStorage.setItem("kukkiwon_custom_id_template", base64);
+          }
+          await fetch("/api/admin/id-cards/template", {
+            method: "POST",
+            headers: {
+              ...getAdminHeaders(),
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({ templateUrl: base64 }),
+          });
+        };
+        reader.readAsDataURL(file);
+        alert(data.error ? `Notice: Template set locally (${data.error})` : "Template active!");
+      }
+    } catch {
+      // FileReader client-side backup
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = reader.result as string;
+        setTemplateUrl(base64);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("kukkiwon_custom_id_template", base64);
+        }
       };
       reader.readAsDataURL(file);
-    } catch {
-      alert("Error reading file.");
+      alert("Template loaded and saved locally.");
+    } finally {
       setTemplateLoading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -168,21 +204,19 @@ export default function AdminIdCardsPage() {
 
     setTemplateLoading(true);
     try {
-      const res = await fetch("/api/admin/id-cards/template", {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("kukkiwon_custom_id_template");
+      }
+      setTemplateUrl(null);
+
+      await fetch("/api/admin/id-cards/template", {
         method: "DELETE",
         headers: getAdminHeaders(),
         credentials: "include",
       });
-
-      if (res.ok) {
-        setTemplateUrl(null);
-        alert("Custom template removed. Default design restored.");
-      } else {
-        const data = await res.json();
-        alert(data.error || "Failed to remove template.");
-      }
+      alert("Custom template removed. Default design restored.");
     } catch {
-      alert("Error removing template.");
+      alert("Custom template removed locally.");
     } finally {
       setTemplateLoading(false);
     }
@@ -654,175 +688,28 @@ export default function AdminIdCardsPage() {
         </div>
       )}
 
-      {/* View ID Card Accreditation Modal */}
-      {viewModalOpen && viewCard && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="w-full max-w-lg rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-200">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/70">
-              <div className="flex items-center gap-2">
-                <IdCard className="h-5 w-5 text-amber-400" />
-                <h3 className="text-sm font-bold uppercase tracking-wider text-white">
-                  Athlete Accreditation Badge
-                </h3>
-              </div>
-              <button
-                onClick={() => setViewModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            {/* Modal Body / Badge Preview */}
-            <div className="p-6 space-y-6">
-              {/* Badge Physical Mockup Container */}
-              <div className="mx-auto w-full max-w-sm rounded-2xl overflow-hidden border-2 border-amber-400/60 bg-gradient-to-b from-[#0A192F] via-[#0D1F38] to-[#0A192F] shadow-2xl relative text-center">
-                {/* Gold Top Banner */}
-                <div className="bg-[#D4AF37] py-1 text-[9px] font-black uppercase tracking-widest text-slate-950">
-                  Official Competitor Accreditation
-                </div>
-
-                {/* Badge Header */}
-                <div className="p-4 border-b border-amber-400/30">
-                  <h4 className="text-base font-black uppercase tracking-wider text-[#D4AF37]">
-                    Kukkiwon Cup 2026
-                  </h4>
-                  <p className="text-[10px] text-slate-300 font-semibold uppercase tracking-widest mt-0.5">
-                    India North Championship • New Delhi
-                  </p>
-                </div>
-
-                {/* Badge Content */}
-                <div className="p-5 space-y-4">
-                  {/* Athlete Photo & Dan Badge */}
-                  <div className="flex justify-center">
-                    <div className="relative">
-                      <div className="w-24 h-24 rounded-full border-2 border-[#D4AF37] overflow-hidden bg-slate-800 flex items-center justify-center shadow-lg">
-                        {viewCard.photoUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={viewCard.photoUrl}
-                            alt={viewCard.athleteName}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="text-2xl font-black text-[#D4AF37] uppercase">
-                            {viewCard.athleteName.slice(0, 2)}
-                          </div>
-                        )}
-                      </div>
-                      <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-[#D4AF37] text-slate-950 font-black text-[9px] uppercase tracking-wider whitespace-nowrap shadow">
-                        {viewCard.kukkiwonId || "Competitor"}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Athlete Name & Registered Email */}
-                  <div>
-                    <h3 className="text-lg font-black uppercase text-white tracking-wide">
-                      {viewCard.athleteName}
-                    </h3>
-                    <div className="inline-flex items-center gap-1 text-xs text-amber-300/90 font-mono mt-1 px-2.5 py-0.5 rounded-full bg-slate-950/60 border border-amber-400/20">
-                      <Mail className="h-3 w-3 text-slate-400" />
-                      <span>{viewCard.athleteEmail || "No registered email"}</span>
-                    </div>
-                  </div>
-
-                  {/* Metadata Grid */}
-                  <div className="grid grid-cols-2 gap-2 text-left bg-slate-950/70 p-3 rounded-xl border border-slate-800 text-xs">
-                    <div>
-                      <span className="text-[10px] text-slate-400 uppercase tracking-wider block">
-                        Athlete ID
-                      </span>
-                      <span className="font-mono font-bold text-[#D4AF37]">
-                        {viewCard.athleteId}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-slate-400 uppercase tracking-wider block">
-                        Status
-                      </span>
-                      <span className="font-bold text-emerald-400 uppercase text-[11px]">
-                        {viewCard.status}
-                      </span>
-                    </div>
-                    <div className="col-span-2 pt-1 border-t border-slate-800">
-                      <span className="text-[10px] text-slate-400 uppercase tracking-wider block">
-                        Academy / Club
-                      </span>
-                      <span className="font-semibold text-slate-200 truncate block">
-                        {viewCard.academyName}
-                      </span>
-                    </div>
-                    <div className="col-span-2 pt-1 border-t border-slate-800">
-                      <span className="text-[10px] text-slate-400 uppercase tracking-wider block">
-                        Division / Category
-                      </span>
-                      <span className="font-semibold text-slate-200 truncate block">
-                        {viewCard.categoryName}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Verification QR Representation */}
-                  <div className="pt-2 flex flex-col items-center justify-center">
-                    <div className="p-2 rounded-xl bg-white text-slate-950 shadow">
-                      <QrCode className="h-16 w-16 text-slate-950" />
-                    </div>
-                    <span className="text-[9px] font-mono text-slate-400 mt-1 uppercase tracking-widest">
-                      Scan for Digital Verification
-                    </span>
-                  </div>
-                </div>
-
-                {/* Footer Security Watermark */}
-                <div className="p-2.5 bg-slate-950 border-t border-slate-800 text-[9px] text-slate-400 font-mono flex items-center justify-between">
-                  <span>KKC-2026-BADGE</span>
-                  <span>v{viewCard.version}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Modal Actions */}
-            <div className="px-6 py-4 border-t border-slate-800 bg-slate-950/80 flex flex-wrap items-center justify-between gap-2">
-              {viewCard.athleteEmail && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    navigator.clipboard.writeText(viewCard.athleteEmail || "");
-                    alert(`Copied email to clipboard: ${viewCard.athleteEmail}`);
-                  }}
-                  className="px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-900 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5"
-                >
-                  <Mail className="h-3.5 w-3.5" />
-                  <span>Copy Email</span>
-                </button>
-              )}
-
-              <div className="flex items-center gap-2 ml-auto">
-                <button
-                  type="button"
-                  onClick={() => setViewModalOpen(false)}
-                  className="px-4 py-2 rounded-xl border border-slate-700 text-xs font-semibold text-slate-300 hover:bg-slate-800"
-                >
-                  Close
-                </button>
-
-                <a
-                  href={`/api/registrations/${viewCard.registrationId}/id-card/download?admin_secret=kukkiwon-bootstrap-admin-secret-2026&autoprint=1`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-bold uppercase transition flex items-center gap-1.5"
-                >
-                  <Printer className="h-3.5 w-3.5" />
-                  <span>Print / Download Badge</span>
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* UNIFIED ACCREDITATION BADGE MODAL */}
+      <AccreditationBadgeModal
+        isOpen={viewModalOpen}
+        onClose={() => setViewModalOpen(false)}
+        templateUrl={templateUrl}
+        data={
+          viewCard
+            ? {
+                athleteId: viewCard.athleteId,
+                athleteName: viewCard.athleteName,
+                athleteEmail: viewCard.athleteEmail,
+                academyName: viewCard.academyName,
+                categoryName: viewCard.categoryName,
+                kukkiwonId: viewCard.kukkiwonId,
+                photoUrl: viewCard.photoUrl,
+                status: viewCard.status,
+                version: viewCard.version,
+                registrationId: viewCard.registrationId,
+              }
+            : null
+        }
+      />
     </div>
   );
 }

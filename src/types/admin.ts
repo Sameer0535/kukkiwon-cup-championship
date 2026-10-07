@@ -130,6 +130,13 @@ export interface AdminRegistrationDetails extends AdminRegistrationSummary {
     gender: string;
     dob?: string | null;
     nationality: string;
+    country?: string | null;
+    state?: string | null;
+    city?: string | null;
+    division?: string | null;
+    weightKg?: string | null;
+    email?: string | null;
+    phone?: string | null;
     kukkiwonDanNumber?: string | null;
     beltRank?: string | null;
     photoUrl?: string | null;
@@ -173,11 +180,15 @@ export interface AdminRegistrationDetails extends AdminRegistrationSummary {
     status: string;
     version: number;
     fileUrl?: string | null;
+    previewUrl?: string | null;
     fileName?: string | null;
+    fileSize?: number | null;
+    mimeType?: string | null;
     rejectionReason?: string | null;
     uploadedAt: string;
     verifiedAt?: string | null;
   }>;
+  rawDraftData?: Record<string, any> | null;
   idCard?: {
     id: string;
     athleteId: string;

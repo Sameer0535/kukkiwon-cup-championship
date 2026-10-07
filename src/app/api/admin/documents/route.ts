@@ -83,6 +83,24 @@ export async function GET(req: NextRequest) {
           r.participant?.full_name ||
           (draftData.first_name ? `${draftData.first_name || ""} ${draftData.last_name || ""}`.trim() : "Official Competitor");
 
+        const docsUploaded = draftData.documents_uploaded || {};
+        if (r.documents && r.documents.length > 0) {
+          for (const d of r.documents) {
+            if (!docsUploaded[d.document_type]) {
+              const fileUrl = (d as any).file_url || (d as any).file_path || "";
+              docsUploaded[d.document_type] = {
+                file_name: d.file_name,
+                preview_url: fileUrl,
+                file_url: fileUrl,
+                file_size: d.file_size,
+                mime_type: d.mime_type,
+              };
+            }
+          }
+        }
+
+        const participantAny = r.participant as any;
+
         mappedItems.push({
           id: r.id,
           registrationId: r.id,
@@ -101,6 +119,15 @@ export async function GET(req: NextRequest) {
           phone: r.participant?.phone || draftData.phone || "",
           gender: r.participant?.gender || draftData.gender || "MALE",
           nationality: r.participant?.nationality || draftData.nationality || "IND",
+          state: participantAny?.state || draftData.state || "",
+          city: participantAny?.city || draftData.city || "",
+          dob: participantAny?.dob || draftData.dob || "",
+          beltRank: participantAny?.belt_rank || draftData.belt_rank || "",
+          division: participantAny?.division || draftData.division || "",
+          weightKg: participantAny?.weight_kg ? String(participantAny.weight_kg) : (draftData.weight_kg ? String(draftData.weight_kg) : ""),
+          documentsUploaded: docsUploaded,
+          offlineSlip: draftData.offline_slip || null,
+          rawDraftData: draftData,
           status: itemStatus,
           title: r.participant_type === "COACH" ? "Coach Accreditation Fee" : `Athlete Championship Fee (₹${amount.toLocaleString("en-IN")})`,
           documentType: "PAYMENT_RECEIPT",
@@ -143,6 +170,13 @@ export async function GET(req: NextRequest) {
             phone: v.phone,
             gender: v.gender,
             nationality: v.nationality,
+            state: v.state || "",
+            city: v.city || "",
+            beltRank: v.beltRank || "",
+            division: v.division || "",
+            documentsUploaded: v.documentsUploaded || {},
+            offlineSlip: v.offlineSlip || null,
+            rawDraftData: v.rawDraftData || {},
             status: v.status,
             title: v.participantType === "COACH" ? "Coach Accreditation Fee" : `Athlete Championship Fee (₹${v.amountInr.toLocaleString("en-IN")})`,
             documentType: "PAYMENT_RECEIPT",
@@ -192,6 +226,15 @@ export async function GET(req: NextRequest) {
               phone: draft.phone || "",
               gender: draft.gender || "MALE",
               nationality: r.nationality || draft.nationality || "IND",
+              state: draft.state || "",
+              city: draft.city || "",
+              dob: draft.dob || "",
+              beltRank: draft.belt_rank || "",
+              division: draft.division || "",
+              weightKg: draft.weight_kg ? String(draft.weight_kg) : "",
+              documentsUploaded: draft.documents_uploaded || {},
+              offlineSlip: draft.offline_slip || null,
+              rawDraftData: draft,
               status: itemStatus,
               title: r.participant_type === "COACH" ? "Coach Accreditation Fee" : "Athlete Championship Fee (₹2,500)",
               documentType: "PAYMENT_RECEIPT",

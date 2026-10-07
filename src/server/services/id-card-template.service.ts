@@ -1,9 +1,10 @@
 // ==============================================================================
 // ID CARD TEMPLATE STORAGE SERVICE
-// Stores and retrieves custom ID card background template (image/data URL)
+// Authoritative persistence and retrieval for custom accreditation badge background templates
+// Supports static public assets, .data store, filesystem, and global dev cache
 // ==============================================================================
 
-import fs from "fs/promises";
+import fs from "fs";
 import path from "path";
 import os from "os";
 
@@ -12,75 +13,187 @@ interface TemplateRecord {
   updatedAt: string;
 }
 
-let inMemoryTemplate: string | null = null;
+declare global {
+  var __kukkiwonTemplateStore: string | null | undefined;
+}
+
 const TMP_TEMPLATE_PATH = path.join(os.tmpdir(), "kukkiwon_championship_data", "id-card-template.json");
-const LOCAL_TEMPLATE_PATH = path.join(process.cwd(), "storage", "id-card-template.json");
+const DATA_TEMPLATE_PATH = path.join(process.cwd(), ".data", "id-card-template.json");
+const STORAGE_TEMPLATE_PATH = path.join(process.cwd(), "storage", "id-card-template.json");
+const PUBLIC_BRANDING_DIR = path.join(process.cwd(), "public", "branding");
 
 export class IdCardTemplateService {
   /**
    * Retrieves the current custom ID card template URL or data URI
    */
   static async getTemplate(): Promise<string | null> {
-    if (inMemoryTemplate) return inMemoryTemplate;
+    // 1. Check global cache first
+    if (global.__kukkiwonTemplateStore !== undefined && global.__kukkiwonTemplateStore !== null) {
+      return global.__kukkiwonTemplateStore;
+    }
 
-    // Check temp storage first (serverless safe)
+    // 2. Check static file in public/branding/
     try {
-      const tmpData = await fs.readFile(TMP_TEMPLATE_PATH, "utf-8");
-      const parsed: TemplateRecord = JSON.parse(tmpData);
-      if (parsed.templateUrl) {
-        inMemoryTemplate = parsed.templateUrl;
-        return inMemoryTemplate;
+      const publicFiles = ["id-card-template.png", "id-card-template.jpg", "id-card-template.webp"];
+      for (const f of publicFiles) {
+        const fullPath = path.join(PUBLIC_BRANDING_DIR, f);
+        if (fs.existsSync(fullPath)) {
+          const url = `/branding/${f}?v=${fs.statSync(fullPath).mtimeMs}`;
+          global.__kukkiwonTemplateStore = url;
+          return url;
+        }
       }
     } catch {}
 
-    // Check local storage fallback
+    // 3. Check .data storage
     try {
-      const fileData = await fs.readFile(LOCAL_TEMPLATE_PATH, "utf-8");
-      const parsed: TemplateRecord = JSON.parse(fileData);
-      inMemoryTemplate = parsed.templateUrl || null;
-      return inMemoryTemplate;
-    } catch {
-      return inMemoryTemplate;
-    }
+      if (fs.existsSync(DATA_TEMPLATE_PATH)) {
+        const raw = fs.readFileSync(DATA_TEMPLATE_PATH, "utf-8");
+        const parsed: TemplateRecord = JSON.parse(raw);
+        if (parsed.templateUrl) {
+          global.__kukkiwonTemplateStore = parsed.templateUrl;
+          return parsed.templateUrl;
+        }
+      }
+    } catch {}
+
+    // 4. Check temp storage
+    try {
+      if (fs.existsSync(TMP_TEMPLATE_PATH)) {
+        const raw = fs.readFileSync(TMP_TEMPLATE_PATH, "utf-8");
+        const parsed: TemplateRecord = JSON.parse(raw);
+        if (parsed.templateUrl) {
+          global.__kukkiwonTemplateStore = parsed.templateUrl;
+          return parsed.templateUrl;
+        }
+      }
+    } catch {}
+
+    // 5. Check storage/ fallback
+    try {
+      if (fs.existsSync(STORAGE_TEMPLATE_PATH)) {
+        const raw = fs.readFileSync(STORAGE_TEMPLATE_PATH, "utf-8");
+        const parsed: TemplateRecord = JSON.parse(raw);
+        if (parsed.templateUrl) {
+          global.__kukkiwonTemplateStore = parsed.templateUrl;
+          return parsed.templateUrl;
+        }
+      }
+    } catch {}
+
+    global.__kukkiwonTemplateStore = null;
+    return null;
   }
 
   /**
-   * Saves a new custom ID card template
+   * Synchronous getter for use in server templates
+   */
+  static getTemplateSync(): string | null {
+    if (global.__kukkiwonTemplateStore !== undefined && global.__kukkiwonTemplateStore !== null) {
+      return global.__kukkiwonTemplateStore;
+    }
+    try {
+      const publicFiles = ["id-card-template.png", "id-card-template.jpg", "id-card-template.webp"];
+      for (const f of publicFiles) {
+        const fullPath = path.join(PUBLIC_BRANDING_DIR, f);
+        if (fs.existsSync(fullPath)) {
+          const url = `/branding/${f}`;
+          global.__kukkiwonTemplateStore = url;
+          return url;
+        }
+      }
+    } catch {}
+    try {
+      if (fs.existsSync(DATA_TEMPLATE_PATH)) {
+        const raw = fs.readFileSync(DATA_TEMPLATE_PATH, "utf-8");
+        const parsed: TemplateRecord = JSON.parse(raw);
+        if (parsed.templateUrl) {
+          global.__kukkiwonTemplateStore = parsed.templateUrl;
+          return parsed.templateUrl;
+        }
+      }
+    } catch {}
+    return null;
+  }
+
+  /**
+   * Saves a new custom ID card template (image buffer or URL/data URI)
    */
   static async saveTemplate(templateUrl: string): Promise<string> {
-    inMemoryTemplate = templateUrl;
+    global.__kukkiwonTemplateStore = templateUrl;
     const record: TemplateRecord = {
       templateUrl,
       updatedAt: new Date().toISOString(),
     };
     const content = JSON.stringify(record, null, 2);
 
-    // Save to temp directory first
+    // Ensure directories exist
     try {
-      await fs.mkdir(path.dirname(TMP_TEMPLATE_PATH), { recursive: true });
-      await fs.writeFile(TMP_TEMPLATE_PATH, content, "utf-8");
+      const dataDir = path.dirname(DATA_TEMPLATE_PATH);
+      if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+      fs.writeFileSync(DATA_TEMPLATE_PATH, content, "utf-8");
     } catch {}
 
-    // Save to local storage if filesystem permits
     try {
-      await fs.mkdir(path.dirname(LOCAL_TEMPLATE_PATH), { recursive: true });
-      await fs.writeFile(LOCAL_TEMPLATE_PATH, content, "utf-8");
-    } catch (err) {
-      console.warn("[IdCardTemplateService.saveTemplate] Local storage note (handled in memory/temp):", err);
-    }
+      const tmpDir = path.dirname(TMP_TEMPLATE_PATH);
+      if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+      fs.writeFileSync(TMP_TEMPLATE_PATH, content, "utf-8");
+    } catch {}
+
+    try {
+      const storageDir = path.dirname(STORAGE_TEMPLATE_PATH);
+      if (!fs.existsSync(storageDir)) fs.mkdirSync(storageDir, { recursive: true });
+      fs.writeFileSync(STORAGE_TEMPLATE_PATH, content, "utf-8");
+    } catch {}
+
     return templateUrl;
+  }
+
+  /**
+   * Saves binary file buffer directly to public/branding/id-card-template.*
+   */
+  static async saveTemplateFile(buffer: Buffer, mimeType: string): Promise<string> {
+    const ext = mimeType.includes("png") ? "png" : mimeType.includes("webp") ? "webp" : "jpg";
+    const filename = `id-card-template.${ext}`;
+
+    try {
+      if (!fs.existsSync(PUBLIC_BRANDING_DIR)) {
+        fs.mkdirSync(PUBLIC_BRANDING_DIR, { recursive: true });
+      }
+      const destPath = path.join(PUBLIC_BRANDING_DIR, filename);
+      fs.writeFileSync(destPath, buffer);
+      const publicUrl = `/branding/${filename}?v=${Date.now()}`;
+      await this.saveTemplate(publicUrl);
+      return publicUrl;
+    } catch (e) {
+      // Fallback to base64 if filesystem is read-only
+      const base64 = `data:${mimeType};base64,${buffer.toString("base64")}`;
+      return await this.saveTemplate(base64);
+    }
   }
 
   /**
    * Deletes the custom template, reverting to the standard badge design
    */
   static async deleteTemplate(): Promise<void> {
-    inMemoryTemplate = null;
+    global.__kukkiwonTemplateStore = null;
+
     try {
-      await fs.unlink(TMP_TEMPLATE_PATH);
+      const publicFiles = ["id-card-template.png", "id-card-template.jpg", "id-card-template.webp"];
+      for (const f of publicFiles) {
+        const fullPath = path.join(PUBLIC_BRANDING_DIR, f);
+        if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
+      }
+    } catch {}
+
+    try {
+      if (fs.existsSync(DATA_TEMPLATE_PATH)) fs.unlinkSync(DATA_TEMPLATE_PATH);
     } catch {}
     try {
-      await fs.unlink(LOCAL_TEMPLATE_PATH);
+      if (fs.existsSync(TMP_TEMPLATE_PATH)) fs.unlinkSync(TMP_TEMPLATE_PATH);
+    } catch {}
+    try {
+      if (fs.existsSync(STORAGE_TEMPLATE_PATH)) fs.unlinkSync(STORAGE_TEMPLATE_PATH);
     } catch {}
   }
 }

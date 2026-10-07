@@ -112,7 +112,9 @@ export async function GET(request: NextRequest, context: RouteContext) {
       });
     }
 
-    const html = IdCardService.generatePrintableHtml(card);
+    const { IdCardTemplateService } = await import("@/server/services/id-card-template.service");
+    const templateBgUrl = await IdCardTemplateService.getTemplate();
+    const html = IdCardService.generatePrintableHtml(card, templateBgUrl);
 
     return new NextResponse(html, {
       status: 200,

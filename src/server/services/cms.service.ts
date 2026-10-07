@@ -873,6 +873,8 @@ export class CmsService {
             banner_url: input.bannerUrl !== undefined ? input.bannerUrl : undefined,
             poster_url: input.posterUrl !== undefined ? input.posterUrl : undefined,
             rules_document_url: input.rulesDocumentUrl !== undefined ? input.rulesDocumentUrl : undefined,
+            entry_fee_athlete: input.entryFeeAthlete !== undefined ? input.entryFeeAthlete : undefined,
+            entry_fee_coach: input.entryFeeCoach !== undefined ? input.entryFeeCoach : undefined,
           },
         });
 
@@ -966,6 +968,8 @@ export class CmsService {
     if (input.contactPhone) existingFallback.contact_phone = input.contactPhone;
     if (input.contactWhatsapp !== undefined) existingFallback.contact_whatsapp = input.contactWhatsapp;
     if (input.contactAddress) existingFallback.contact_address = input.contactAddress;
+    if (input.entryFeeAthlete !== undefined) existingFallback.entry_fee_athlete = input.entryFeeAthlete;
+    if (input.entryFeeCoach !== undefined) existingFallback.entry_fee_coach = input.entryFeeCoach;
     existingFallback.updated_at = new Date().toISOString();
 
     FALLBACK_CHAMPIONSHIPS.set(championshipId, existingFallback);

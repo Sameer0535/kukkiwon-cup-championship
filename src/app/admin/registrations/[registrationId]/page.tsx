@@ -27,6 +27,13 @@ import {
   RotateCw,
   Network,
   RotateCcw,
+  Eye,
+  Download,
+  Mail,
+  Phone,
+  MapPin,
+  FileText,
+  X,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { AdminRegistrationDetails } from "@/types/admin";
@@ -41,6 +48,8 @@ export default function AdminRegistrationDetailPage() {
   const [actionLoading, setActionLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
+  const [previewDoc, setPreviewDoc] = React.useState<any | null>(null);
+  const [previewPhoto, setPreviewPhoto] = React.useState<string | null>(null);
 
   // Status transition state
   const [targetStatus, setTargetStatus] = React.useState("");
@@ -354,14 +363,26 @@ export default function AdminRegistrationDetailPage() {
           {/* Athlete Profile Card */}
           <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 space-y-5">
             <div className="flex items-center gap-4">
-              <div className="relative h-24 w-20 rounded-xl border-2 border-[#D4AF37] bg-slate-950 flex items-center justify-center overflow-hidden shrink-0">
+              <div
+                onClick={() => {
+                  if (details.participant.photoUrl) setPreviewPhoto(details.participant.photoUrl);
+                }}
+                className={`relative h-24 w-20 rounded-xl border-2 border-[#D4AF37] bg-slate-950 flex items-center justify-center overflow-hidden shrink-0 ${
+                  details.participant.photoUrl ? "cursor-pointer group" : ""
+                }`}
+              >
                 {details.participant.photoUrl ? (
-                  <Image
-                    src={details.participant.photoUrl}
-                    alt={details.athleteName}
-                    fill
-                    className="object-cover"
-                  />
+                  <>
+                    <Image
+                      src={details.participant.photoUrl}
+                      alt={details.athleteName}
+                      fill
+                      className="object-cover group-hover:scale-105 transition"
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
+                      <Eye className="h-4 w-4 text-white" />
+                    </div>
+                  </>
                 ) : (
                   <Award className="h-8 w-8 text-[#D4AF37]" />
                 )}
@@ -377,27 +398,56 @@ export default function AdminRegistrationDetailPage() {
                   {details.academyName}
                 </div>
                 <div className="text-[11px] text-slate-400">
-                  {details.country} • {details.participant.gender}
+                  {details.participant.nationality || details.country} • {details.participant.gender}
                 </div>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-800 text-xs">
               <div>
-                <span className="text-slate-500 block text-[10px] uppercase font-bold">Category</span>
-                <span className="font-semibold text-amber-400">{details.categoryName}</span>
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Discipline & Division</span>
+                <span className="font-semibold text-slate-200">
+                  {details.discipline} {details.participant.division ? `(${details.participant.division})` : ""}
+                </span>
               </div>
               <div>
-                <span className="text-slate-500 block text-[10px] uppercase font-bold">Discipline</span>
-                <span className="font-semibold text-slate-200">{details.discipline}</span>
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Category</span>
+                <span className="font-semibold text-amber-400">{details.categoryName}</span>
               </div>
               <div>
                 <span className="text-slate-500 block text-[10px] uppercase font-bold">Date of Birth</span>
                 <span className="font-mono text-slate-300">{details.participant.dob || "—"}</span>
               </div>
               <div>
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Weight Class</span>
+                <span className="font-medium text-slate-300">
+                  {details.participant.weightKg ? `${details.participant.weightKg} kg` : "WT Division"}
+                </span>
+              </div>
+              <div>
                 <span className="text-slate-500 block text-[10px] uppercase font-bold">Dan / Belt Rank</span>
                 <span className="font-medium text-slate-300">{details.participant.beltRank || "—"}</span>
+              </div>
+              <div>
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Kukkiwon Dan ID</span>
+                <span className="font-mono text-[#D4AF37] font-bold">{details.participant.kukkiwonDanNumber || "—"}</span>
+              </div>
+              <div className="col-span-2 pt-2 border-t border-slate-800/80 space-y-1">
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Contact & Location</span>
+                <div className="text-slate-300 flex items-center gap-1.5 text-[11px]">
+                  <Mail className="h-3 w-3 text-sky-400 shrink-0" />
+                  <span className="truncate">{details.participant.email || "—"}</span>
+                </div>
+                <div className="text-slate-300 flex items-center gap-1.5 text-[11px]">
+                  <Phone className="h-3 w-3 text-emerald-400 shrink-0" />
+                  <span>{details.participant.phone || "—"}</span>
+                </div>
+                <div className="text-slate-400 flex items-center gap-1.5 text-[11px]">
+                  <MapPin className="h-3 w-3 text-amber-400 shrink-0" />
+                  <span>
+                    {[details.participant.city, details.participant.state, details.participant.country || details.country].filter(Boolean).join(", ")}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -697,10 +747,15 @@ export default function AdminRegistrationDetailPage() {
 
           {/* Uploaded Documents Management */}
           <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
-              <FileCheck className="h-4 w-4 text-sky-400" />
-              <span>Participant Document Queue</span>
-            </h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
+                <FileCheck className="h-4 w-4 text-sky-400" />
+                <span>Participant Document Dossier</span>
+              </h3>
+              <span className="text-[10px] text-slate-400 font-mono">
+                {details.documents.length} File{details.documents.length === 1 ? "" : "s"} Uploaded
+              </span>
+            </div>
 
             {details.documents.length === 0 ? (
               <p className="text-xs text-slate-500 p-4 rounded-xl border border-slate-800 bg-slate-950/40 text-center">
@@ -708,61 +763,125 @@ export default function AdminRegistrationDetailPage() {
               </p>
             ) : (
               <div className="space-y-3">
-                {details.documents.map((doc) => (
-                  <div
-                    key={doc.id}
-                    className="p-4 rounded-xl border border-slate-800 bg-slate-950/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
-                  >
-                    <div className="space-y-1">
-                      <div className="font-bold text-white flex items-center gap-2">
-                        <span>{doc.title}</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">
-                          v{doc.version}
-                        </span>
-                      </div>
-                      <div className="text-[11px] text-slate-400">
-                        {doc.fileName || "document.pdf"} • Uploaded {new Date(doc.uploadedAt).toLocaleDateString()}
-                      </div>
-                      {doc.rejectionReason && (
-                        <div className="text-[11px] text-rose-400 font-medium">
-                          Rejection Reason: {doc.rejectionReason}
+                {details.documents.map((doc) => {
+                  const isImage =
+                    doc.previewUrl?.startsWith("data:image/") ||
+                    doc.fileUrl?.endsWith(".jpg") ||
+                    doc.fileUrl?.endsWith(".png") ||
+                    doc.fileUrl?.endsWith(".jpeg") ||
+                    doc.fileName?.match(/\.(jpg|jpeg|png|webp)$/i);
+
+                  return (
+                    <div
+                      key={doc.id}
+                      className="p-4 rounded-xl border border-slate-800 bg-slate-950/60 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs"
+                    >
+                      <div className="flex items-start gap-3 min-w-0">
+                        {/* Thumbnail / Document Icon */}
+                        {doc.previewUrl && isImage ? (
+                          <div
+                            onClick={() => setPreviewDoc(doc)}
+                            className="relative w-14 h-14 rounded-lg overflow-hidden border border-slate-700 bg-slate-900 cursor-pointer shrink-0 hover:border-amber-400 transition group"
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={doc.previewUrl}
+                              alt={doc.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition"
+                            />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
+                              <Eye className="h-3.5 w-3.5 text-white" />
+                            </div>
+                          </div>
+                        ) : (
+                          <div
+                            onClick={() => {
+                              if (doc.previewUrl || doc.fileUrl) setPreviewDoc(doc);
+                            }}
+                            className="w-14 h-14 rounded-lg border border-slate-800 bg-slate-900 flex items-center justify-center text-sky-400 shrink-0 cursor-pointer hover:border-sky-500 transition"
+                          >
+                            <FileText className="h-6 w-6" />
+                          </div>
+                        )}
+
+                        <div className="space-y-1 min-w-0">
+                          <div className="font-bold text-white flex items-center gap-2">
+                            <span className="truncate">{doc.title}</span>
+                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 shrink-0">
+                              v{doc.version || 1}
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-slate-400 flex items-center gap-2 flex-wrap">
+                            <span className="truncate">{doc.fileName || "document"}</span>
+                            {doc.fileSize && <span>({(doc.fileSize / 1024).toFixed(1)} KB)</span>}
+                            <span>• Uploaded {new Date(doc.uploadedAt).toLocaleDateString()}</span>
+                          </div>
+                          {doc.rejectionReason && (
+                            <div className="text-[11px] text-rose-400 font-medium">
+                              Rejection Reason: {doc.rejectionReason}
+                            </div>
+                          )}
+                          <div className="flex items-center gap-3 pt-1">
+                            {(doc.previewUrl || doc.fileUrl) && (
+                              <button
+                                type="button"
+                                onClick={() => setPreviewDoc(doc)}
+                                className="inline-flex items-center gap-1 text-[11px] font-bold text-sky-400 hover:text-sky-300 hover:underline cursor-pointer"
+                              >
+                                <Eye className="h-3 w-3" />
+                                <span>Preview Document</span>
+                              </button>
+                            )}
+                            {(doc.previewUrl || doc.fileUrl) && (
+                              <a
+                                href={(doc.previewUrl || doc.fileUrl) ?? undefined}
+                                download={doc.fileName || "document"}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-400 hover:text-amber-300 hover:underline"
+                              >
+                                <Download className="h-3 w-3" />
+                                <span>Download</span>
+                              </a>
+                            )}
+                          </div>
                         </div>
-                      )}
+                      </div>
+
+                      <div className="flex items-center gap-2 self-end md:self-center shrink-0">
+                        <span className={`px-2.5 py-1 rounded text-[10px] font-bold ${
+                          doc.status === "VERIFIED"
+                            ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                            : doc.status === "REJECTED"
+                            ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                            : "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                        }`}>
+                          {doc.status}
+                        </span>
+
+                        {doc.status !== "VERIFIED" && (
+                          <button
+                            onClick={() => handleVerifyDoc(doc.id)}
+                            disabled={actionLoading}
+                            className="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold uppercase transition"
+                          >
+                            Approve
+                          </button>
+                        )}
+
+                        {doc.status !== "REJECTED" && (
+                          <button
+                            onClick={() => handleRejectDoc(doc.id)}
+                            disabled={actionLoading}
+                            className="px-2.5 py-1 rounded border border-rose-800/80 bg-rose-950/40 hover:bg-rose-900 text-rose-300 text-[11px] font-bold uppercase transition"
+                          >
+                            Reject
+                          </button>
+                        )}
+                      </div>
                     </div>
-
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2.5 py-1 rounded text-[10px] font-bold ${
-                        doc.status === "VERIFIED"
-                          ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                          : doc.status === "REJECTED"
-                          ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
-                          : "bg-amber-500/20 text-amber-300 border border-amber-500/30"
-                      }`}>
-                        {doc.status}
-                      </span>
-
-                      {doc.status !== "VERIFIED" && (
-                        <button
-                          onClick={() => handleVerifyDoc(doc.id)}
-                          disabled={actionLoading}
-                          className="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold uppercase transition"
-                        >
-                          Approve
-                        </button>
-                      )}
-
-                      {doc.status !== "REJECTED" && (
-                        <button
-                          onClick={() => handleRejectDoc(doc.id)}
-                          disabled={actionLoading}
-                          className="px-2.5 py-1 rounded border border-rose-800/80 bg-rose-950/40 hover:bg-rose-900 text-rose-300 text-[11px] font-bold uppercase transition"
-                        >
-                          Reject
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -806,6 +925,99 @@ export default function AdminRegistrationDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Document Preview Lightbox Modal */}
+      {previewDoc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in">
+          <div className="relative w-full max-w-3xl rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800 shrink-0">
+              <div>
+                <h3 className="text-base font-bold text-white">{previewDoc.title}</h3>
+                <p className="text-xs text-slate-400 mt-0.5">{previewDoc.fileName}</p>
+              </div>
+              <button
+                onClick={() => setPreviewDoc(null)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="py-4 overflow-auto flex-1 flex items-center justify-center bg-slate-950/60 rounded-xl my-3">
+              {previewDoc.previewUrl?.startsWith("data:image/") || previewDoc.fileUrl?.endsWith(".jpg") || previewDoc.fileUrl?.endsWith(".png") || previewDoc.fileName?.match(/\.(jpg|jpeg|png|webp)$/i) ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={previewDoc.previewUrl || previewDoc.fileUrl}
+                  alt={previewDoc.title}
+                  className="max-h-[60vh] max-w-full object-contain rounded-lg shadow-lg"
+                />
+              ) : (
+                <div className="text-center p-8 space-y-3">
+                  <FileText className="h-12 w-12 text-sky-400 mx-auto" />
+                  <p className="text-sm font-semibold text-white">{previewDoc.fileName}</p>
+                  <a
+                    href={(previewDoc.previewUrl || previewDoc.fileUrl) ?? undefined}
+                    download={previewDoc.fileName}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold uppercase transition"
+                  >
+                    <Download className="h-4 w-4" />
+                    <span>Download / Open Document File</span>
+                  </a>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between pt-3 border-t border-slate-800 shrink-0">
+              <span className="text-[11px] text-slate-400">
+                Uploaded: {new Date(previewDoc.uploadedAt).toLocaleString()}
+              </span>
+              <div className="flex items-center gap-2">
+                <a
+                  href={(previewDoc.previewUrl || previewDoc.fileUrl) ?? undefined}
+                  download={previewDoc.fileName}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white transition inline-flex items-center gap-1"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  <span>Download</span>
+                </a>
+                <button
+                  onClick={() => setPreviewDoc(null)}
+                  className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white transition cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Photo Lightbox Modal */}
+      {previewPhoto && (
+        <div
+          onClick={() => setPreviewPhoto(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in cursor-pointer"
+        >
+          <div className="relative max-w-lg p-2 bg-slate-900 border border-[#D4AF37] rounded-2xl shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={previewPhoto}
+              alt="Athlete Photo Full Size"
+              className="max-h-[80vh] max-w-full rounded-xl object-contain"
+            />
+            <button
+              onClick={() => setPreviewPhoto(null)}
+              className="absolute top-4 right-4 p-1.5 rounded-full bg-slate-950/80 text-white hover:bg-black cursor-pointer"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

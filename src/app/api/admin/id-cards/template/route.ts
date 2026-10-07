@@ -1,10 +1,11 @@
 // ==============================================================================
 // ADMIN ID CARD TEMPLATE API (GET/POST/DELETE)
 // Manage custom tournament accreditation badge background template
+// Supports multipart/form-data image upload (up to 10MB) & JSON base64/URL
 // ==============================================================================
 
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/server-auth";
+import { requireAdmin, AuthError } from "@/lib/server-auth";
 import { IdCardTemplateService } from "@/server/services/id-card-template.service";
 
 export async function GET(req: NextRequest) {
@@ -44,6 +45,46 @@ export async function POST(req: NextRequest) {
       "FINANCE_ADMIN",
       "REGISTRAR",
     ]);
+
+    const contentType = req.headers.get("content-type") || "";
+
+    // 1. Multipart Form Data Upload (File Upload)
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await req.formData();
+      const file = formData.get("file") as File | null;
+
+      if (!file) {
+        return NextResponse.json(
+          { error: "No image file provided in template upload." },
+          { status: 400 }
+        );
+      }
+
+      if (!file.type.startsWith("image/")) {
+        return NextResponse.json(
+          { error: "Invalid file type. Only PNG, JPG, or WEBP images are supported." },
+          { status: 400 }
+        );
+      }
+
+      if (file.size > 15 * 1024 * 1024) {
+        return NextResponse.json(
+          { error: "Template image file is too large. Maximum size is 15MB." },
+          { status: 400 }
+        );
+      }
+
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const savedUrl = await IdCardTemplateService.saveTemplateFile(buffer, file.type);
+
+      return NextResponse.json({
+        success: true,
+        message: "ID card template uploaded and saved successfully.",
+        templateUrl: savedUrl,
+      });
+    }
+
+    // 2. JSON Payload ({ templateUrl })
     const body = await req.json();
     const { templateUrl } = body;
 
@@ -62,9 +103,15 @@ export async function POST(req: NextRequest) {
       templateUrl: saved,
     });
   } catch (err: any) {
+    if (err instanceof AuthError || err.name === "AuthError") {
+      return NextResponse.json(
+        { error: err.message },
+        { status: err.statusCode || 403 }
+      );
+    }
     return NextResponse.json(
       { error: err.message || "Failed to save template." },
-      { status: err.statusCode || 500 }
+      { status: 500 }
     );
   }
 }

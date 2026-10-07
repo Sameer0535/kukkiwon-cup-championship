@@ -42,6 +42,14 @@ export interface SyncRegistration {
   id_card_status: "NOT_GENERATED" | "PENDING" | "READY" | "GENERATED" | "REVOKED";
   utr_number?: string | null;
   payment_method?: string;
+  state?: string;
+  city?: string;
+  belt_rank?: string;
+  division?: string;
+  weight_kg?: string;
+  documents_uploaded?: Record<string, any>;
+  offline_slip?: Record<string, any> | null;
+  raw_draft_data?: Record<string, any>;
   submitted_at: string;
   registered_at: string;
   approved_at?: string | null;
@@ -65,6 +73,13 @@ export interface PaymentVerificationItem {
   phone: string;
   gender: string;
   nationality: string;
+  state?: string;
+  city?: string;
+  division?: string;
+  beltRank?: string;
+  documentsUploaded?: Record<string, any>;
+  offlineSlip?: Record<string, any> | null;
+  rawDraftData?: Record<string, any>;
   status: "UNDER_REVIEW" | "VERIFIED" | "REJECTED";
   submittedAt: string;
   verifiedAt?: string | null;
@@ -136,6 +151,7 @@ function getCountryFlag(nationality: string): string {
 // Global in-memory cache to survive module reload during dev runtime
 declare global {
   var __kukkiwonLiveSyncStore: PersistedStoreData | undefined;
+  var __kukkiwonLiveSyncMtime: number | undefined;
 }
 
 export class LiveSyncService {
@@ -154,23 +170,43 @@ export class LiveSyncService {
   }
 
   static loadStore(): PersistedStoreData {
-    if (global.__kukkiwonLiveSyncStore) {
+    this.ensureStorageDir();
+
+    let diskMtime = 0;
+    let chosenPath: string | null = null;
+    try {
+      if (fs.existsSync(LOCAL_STORE_FILE)) {
+        const stat = fs.statSync(LOCAL_STORE_FILE);
+        diskMtime = stat.mtimeMs;
+        chosenPath = LOCAL_STORE_FILE;
+      }
+      if (fs.existsSync(TMP_STORE_FILE)) {
+        const stat = fs.statSync(TMP_STORE_FILE);
+        if (stat.mtimeMs > diskMtime) {
+          diskMtime = stat.mtimeMs;
+          chosenPath = TMP_STORE_FILE;
+        }
+      }
+    } catch {}
+
+    // If memory cache exists and disk hasn't changed, return memory cache
+    if (
+      global.__kukkiwonLiveSyncStore &&
+      global.__kukkiwonLiveSyncMtime &&
+      diskMtime <= global.__kukkiwonLiveSyncMtime
+    ) {
       return global.__kukkiwonLiveSyncStore;
     }
 
-    this.ensureStorageDir();
-
     let loadedData: PersistedStoreData | null = null;
-    try {
-      if (fs.existsSync(TMP_STORE_FILE)) {
-        const raw = fs.readFileSync(TMP_STORE_FILE, "utf-8");
+    if (chosenPath) {
+      try {
+        const raw = fs.readFileSync(chosenPath, "utf-8");
         loadedData = JSON.parse(raw);
-      } else if (fs.existsSync(LOCAL_STORE_FILE)) {
-        const raw = fs.readFileSync(LOCAL_STORE_FILE, "utf-8");
-        loadedData = JSON.parse(raw);
+        global.__kukkiwonLiveSyncMtime = diskMtime;
+      } catch {
+        loadedData = null;
       }
-    } catch {
-      loadedData = null;
     }
 
     if (!loadedData || !Array.isArray(loadedData.registrations)) {
@@ -296,15 +332,23 @@ export class LiveSyncService {
   private static persistStore(data: PersistedStoreData): void {
     global.__kukkiwonLiveSyncStore = data;
     this.ensureStorageDir();
+    const now = Date.now();
+    try {
+      fs.writeFileSync(LOCAL_STORE_FILE, JSON.stringify(data, null, 2), "utf-8");
+      try {
+        const stat = fs.statSync(LOCAL_STORE_FILE);
+        global.__kukkiwonLiveSyncMtime = stat.mtimeMs;
+      } catch {
+        global.__kukkiwonLiveSyncMtime = now;
+      }
+    } catch {
+      // In-memory / serverless fallback
+      global.__kukkiwonLiveSyncMtime = now;
+    }
     try {
       fs.writeFileSync(TMP_STORE_FILE, JSON.stringify(data, null, 2), "utf-8");
     } catch {
-      // In-memory fallback
-    }
-    try {
-      fs.writeFileSync(LOCAL_STORE_FILE, JSON.stringify(data, null, 2), "utf-8");
-    } catch {
-      // Ignore if local store cannot be written in serverless
+      // Ignore if tmp store cannot be written
     }
   }
 
@@ -324,6 +368,11 @@ export class LiveSyncService {
     dob?: string;
     nationality?: string;
     country?: string;
+    state?: string;
+    city?: string;
+    beltRank?: string;
+    division?: string;
+    weightKg?: string;
     academyName?: string;
     kukkiwonId?: string;
     photoUrl?: string | null;
@@ -334,11 +383,15 @@ export class LiveSyncService {
     utrNumber?: string;
     paymentMethod?: string;
     feeAmountInr?: number;
+    documentsUploaded?: Record<string, any>;
+    offlineSlip?: Record<string, any> | null;
+    rawDraftData?: Record<string, any>;
   }): { registration: SyncRegistration; verification?: PaymentVerificationItem } {
     const store = this.loadStore();
     const now = new Date().toISOString();
     const regId = params.registrationId || `reg-sync-${Date.now()}`;
-    const amountInr = params.feeAmountInr || 2500;
+    const isCoach = params.participantType === "COACH";
+    const amountInr = isCoach ? 0 : (params.feeAmountInr ?? 2500);
     const amountPaise = amountInr * 100;
     const hasUtr = !!params.utrNumber?.trim();
 
@@ -358,22 +411,31 @@ export class LiveSyncService {
       gender: params.gender || "MALE",
       dob: params.dob || "2000-01-01",
       country: params.country || "India",
+      state: params.state,
+      city: params.city,
       nationality: params.nationality || "IND",
       academy_name: params.academyName || "Independent Dojang",
       kukkiwon_id: params.kukkiwonId || "KKID-PENDING",
       photo_url: params.photoUrl || null,
-      category_name: params.categoryName || "Official WT Category",
-      discipline: params.discipline || (params.participantType === "COACH" ? "COACHING" : "KYORUGI"),
+      category_name: params.categoryName || (isCoach ? "Accredited Corner Coach" : "Official WT Category"),
+      discipline: params.discipline || (isCoach ? "COACHING" : "KYORUGI"),
       participant_type: params.participantType,
       coach_role: params.coachRole,
       qualification: params.qualification,
+      belt_rank: params.beltRank,
+      division: params.division,
+      weight_kg: params.weightKg,
       amount_paise: amountPaise,
-      status: "SUBMITTED",
-      payment_status: "UNDER_REVIEW",
-      document_status: "UNDER_REVIEW",
-      id_card_status: "PENDING",
-      utr_number: params.utrNumber || null,
-      payment_method: params.paymentMethod || "OFFLINE_UPI",
+      status: isCoach ? "APPROVED" : "SUBMITTED",
+      payment_status: isCoach ? "PAID" : "UNDER_REVIEW",
+      document_status: isCoach ? "VERIFIED" : "UNDER_REVIEW",
+      id_card_status: isCoach ? "READY" : "PENDING",
+      approved_at: isCoach ? now : null,
+      utr_number: isCoach ? "FREE_COACH" : (params.utrNumber || null),
+      payment_method: isCoach ? "FREE_ACCREDITATION" : (params.paymentMethod || "OFFLINE_UPI"),
+      documents_uploaded: params.documentsUploaded,
+      offline_slip: params.offlineSlip,
+      raw_draft_data: params.rawDraftData,
       submitted_at: now,
       registered_at: now,
     };
@@ -384,9 +446,9 @@ export class LiveSyncService {
       store.registrations.unshift(syncReg);
     }
 
-    // 2. Add to Payment Verification Queue
+    // 2. Add to Payment Verification Queue (ONLY for ATHLETES that require fee payment)
     let verificationItem: PaymentVerificationItem | undefined;
-    if (params.participantType === "ATHLETE" || hasUtr) {
+    if (!isCoach && (params.participantType === "ATHLETE" || hasUtr)) {
       const vId = `verif-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
       verificationItem = {
         id: vId,
@@ -394,7 +456,7 @@ export class LiveSyncService {
         registrationNumber: params.registrationNumber,
         athleteId: params.registrationNumber,
         participantName: params.athleteName,
-        participantType: params.participantType === "COACH" ? "COACH" : "ATHLETE",
+        participantType: "ATHLETE",
         utrNumber: params.utrNumber || "OFFLINE-MANUAL",
         amountInr,
         categoryName: params.categoryName || "Official Entry",
@@ -405,6 +467,13 @@ export class LiveSyncService {
         phone: params.phone,
         gender: params.gender || "MALE",
         nationality: params.nationality || "IND",
+        state: params.state,
+        city: params.city,
+        division: params.division,
+        beltRank: params.beltRank,
+        documentsUploaded: params.documentsUploaded,
+        offlineSlip: params.offlineSlip,
+        rawDraftData: params.rawDraftData,
         status: "UNDER_REVIEW",
         submittedAt: now,
       };
@@ -495,6 +564,13 @@ export class LiveSyncService {
           phone: existingReg.phone,
           gender: existingReg.gender,
           nationality: existingReg.nationality,
+          state: existingReg.state,
+          city: existingReg.city,
+          division: existingReg.division,
+          beltRank: existingReg.belt_rank,
+          documentsUploaded: existingReg.documents_uploaded,
+          offlineSlip: existingReg.offline_slip,
+          rawDraftData: existingReg.raw_draft_data,
           status: "UNDER_REVIEW",
           submittedAt: existingReg.submitted_at,
         };
