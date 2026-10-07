@@ -1,7 +1,7 @@
 // ==============================================================================
 // CHAMPIONSHIP ADMIN CMS WORKSPACE (/admin/cms)
 // Complete institutional administrative control over public championship content,
-// timeline, announcements, FAQ, contact channels, and live publishing status
+// hero, sections, timeline, announcements, FAQ, contact channels, and live publishing status
 // ==============================================================================
 
 "use client";
@@ -30,6 +30,10 @@ import {
   X,
   FileText,
   Layout,
+  Code,
+  Layers,
+  Building,
+  Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -62,6 +66,30 @@ import {
 
 type TabKey = "info" | "hero" | "sections" | "dates" | "announcements" | "faqs" | "contact" | "publishing";
 
+interface DisciplineCard {
+  title: string;
+  category: string;
+  description: string;
+}
+
+const DEFAULT_DISCIPLINE_CARDS: DisciplineCard[] = [
+  {
+    title: "Kyorugi (Sparring)",
+    category: "Senior, Junior, Cadet",
+    description: "Official Olympic-style sparring conducted under World Taekwondo rules with electronic scoring systems and real-time point validation.",
+  },
+  {
+    title: "Poomsae (Forms)",
+    category: "Individual, Pair & Team",
+    description: "Recognized WTF poomsae judging evaluating technical accuracy, balance, speed, presentation, and martial art discipline.",
+  },
+  {
+    title: "Kyukpa (Breaking & Demo)",
+    category: "Speed, Power & Special Tech",
+    description: "Official demonstration and wood breaking divisions demonstrating precision impact force, jumping techniques, and technical mastery.",
+  },
+];
+
 export default function AdminCmsPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("info");
   const [loading, setLoading] = useState(true);
@@ -77,6 +105,13 @@ export default function AdminCmsPage() {
   const [dates, setDates] = useState<ChampionshipImportantDateDTO[]>([]);
   const [faqs, setFaqs] = useState<ChampionshipFAQDTO[]>([]);
   const [announcements, setAnnouncements] = useState<PublicAnnouncement[]>([]);
+
+  // Disciplines Builder state
+  const [disciplineCards, setDisciplineCards] = useState<DisciplineCard[]>(DEFAULT_DISCIPLINE_CARDS);
+  const [disciplineModalOpen, setDisciplineModalOpen] = useState(false);
+  const [editingDisciplineIndex, setEditingDisciplineIndex] = useState<number | null>(null);
+  const [disciplineForm, setDisciplineForm] = useState<DisciplineCard>({ title: "", category: "", description: "" });
+  const [showRawDisciplinesJson, setShowRawDisciplinesJson] = useState(false);
 
   // Modals for CRUD
   const [dateModalOpen, setDateModalOpen] = useState(false);
@@ -146,6 +181,18 @@ export default function AdminCmsPage() {
         setDates(json.data.dates || []);
         setFaqs(json.data.faqs || []);
         setAnnouncements(json.data.announcements || []);
+
+        // Parse disciplines JSON
+        if (json.data.content?.disciplinesJson) {
+          try {
+            const parsed = JSON.parse(json.data.content.disciplinesJson);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setDisciplineCards(parsed);
+            }
+          } catch {
+            // Keep fallback
+          }
+        }
       }
     } catch (err: any) {
       setError(err.message || "Failed to load championship CMS data.");
@@ -164,8 +211,8 @@ export default function AdminCmsPage() {
   };
 
   // Save Content / Info
-  const handleSaveInfo = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSaveInfo = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!content || !championship) return;
     setSaving(true);
     setError(null);
@@ -182,22 +229,52 @@ export default function AdminCmsPage() {
           location: content.location,
           heroTitle: content.heroTitle,
           heroSubtitle: content.heroSubtitle,
+          heroTagline: content.heroTagline,
+          heroPrimaryCtaText: content.heroPrimaryCtaText,
+          heroSecondaryCtaText: content.heroSecondaryCtaText,
           registrationInstructions: content.registrationInstructions,
           contactEmail: content.contactEmail,
           contactPhone: content.contactPhone,
+          contactPhoneHours: content.contactPhoneHours,
+          contactAddress: content.contactAddress || championship.contactAddress,
           startDate: championship.startDate,
           endDate: championship.endDate,
           registrationOpen: championship.registrationOpen,
           registrationClose: championship.registrationClose,
           lateRegistrationDeadline: championship.lateRegistrationDeadline,
           bannerUrl: championship.bannerUrl,
+          partnershipTagline: content.partnershipTagline,
           partnershipHeading: content.partnershipHeading,
           partnershipDescription: content.partnershipDescription,
+          kukkiwonTitle: content.kukkiwonTitle,
+          kukkiwonBranch: content.kukkiwonBranch,
+          kukkiwonRole: content.kukkiwonRole,
           kukkiwonDescription: content.kukkiwonDescription,
+          kukkiwonUrl: content.kukkiwonUrl,
+          kukkiwonUrlText: content.kukkiwonUrlText,
+          kukkiwonBadge: content.kukkiwonBadge,
+          kyorixTitle: content.kyorixTitle,
+          kyorixSubtitle: content.kyorixSubtitle,
+          kyorixRole: content.kyorixRole,
           kyorixDescription: content.kyorixDescription,
+          kyorixBadge: content.kyorixBadge,
+          disciplinesTagline: content.disciplinesTagline,
+          disciplinesHeading: content.disciplinesHeading,
+          disciplinesDescription: content.disciplinesDescription,
+          disciplinesJson: content.disciplinesJson,
+          datesTagline: content.datesTagline,
+          datesHeading: content.datesHeading,
+          datesDescription: content.datesDescription,
+          ctaTagline: content.ctaTagline,
           ctaTitle: content.ctaTitle,
           ctaDescription: content.ctaDescription,
-          disciplinesJson: content.disciplinesJson,
+          ctaPrimaryBtnText: content.ctaPrimaryBtnText,
+          ctaSecondaryBtnText: content.ctaSecondaryBtnText,
+          contactTagline: content.contactTagline,
+          contactHeading: content.contactHeading,
+          contactDescription: content.contactDescription,
+          aboutMissionHeading: content.aboutMissionHeading,
+          aboutMissionText: content.aboutMissionText,
         }),
       });
       const data = await res.json();
@@ -230,6 +307,37 @@ export default function AdminCmsPage() {
       setError(err.message);
     } finally {
       setPublishing(false);
+    }
+  };
+
+  // Save Discipline Modal
+  const handleSaveDisciplineModal = (e: React.FormEvent) => {
+    e.preventDefault();
+    let updated: DisciplineCard[];
+    if (editingDisciplineIndex !== null) {
+      updated = disciplineCards.map((c, i) => (i === editingDisciplineIndex ? disciplineForm : c));
+    } else {
+      updated = [...disciplineCards, disciplineForm];
+    }
+    setDisciplineCards(updated);
+    if (content) {
+      setContent({
+        ...content,
+        disciplinesJson: JSON.stringify(updated, null, 2),
+      });
+    }
+    setDisciplineModalOpen(false);
+  };
+
+  const handleDeleteDiscipline = (index: number) => {
+    if (!confirm("Are you sure you want to remove this discipline card?")) return;
+    const updated = disciplineCards.filter((_, i) => i !== index);
+    setDisciplineCards(updated);
+    if (content) {
+      setContent({
+        ...content,
+        disciplinesJson: JSON.stringify(updated, null, 2),
+      });
     }
   };
 
@@ -362,7 +470,7 @@ export default function AdminCmsPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900/60 p-6 rounded-2xl border border-slate-800 backdrop-blur-md">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <Badge variant="gold">Phase 9 Production CMS</Badge>
+            <Badge variant="gold">Production CMS Engine</Badge>
             <Badge variant={statusVariant(content?.websiteStatus || "DRAFT")}>
               {content?.websiteStatus || "DRAFT"}
             </Badge>
@@ -375,7 +483,7 @@ export default function AdminCmsPage() {
             Championship CMS & Live Publishing
           </h1>
           <p className="text-slate-400 text-sm mt-1">
-            Authoritative institutional management of public tournament information, announcements, schedule, and live status.
+            Authoritative institutional management of all public tournament sections, content, timeline, announcements, and live publishing.
           </p>
         </div>
 
@@ -456,7 +564,7 @@ export default function AdminCmsPage() {
           { key: "dates", label: "Important Dates", icon: Calendar, badge: dates.length },
           { key: "announcements", label: "Announcements", icon: Megaphone, badge: announcements.length },
           { key: "faqs", label: "FAQ Management", icon: HelpCircle, badge: faqs.length },
-          { key: "contact", label: "Contact & Social", icon: Mail },
+          { key: "contact", label: "Contact & Secretariat", icon: Mail },
           { key: "publishing", label: "Publishing Status", icon: Shield },
         ].map((tab) => {
           const Icon = tab.icon;
@@ -483,7 +591,9 @@ export default function AdminCmsPage() {
         })}
       </div>
 
-      {/* Tab 1: Championship Information */}
+      {/* =========================================================================
+          Tab 1: Championship Information
+          ========================================================================= */}
       {activeTab === "info" && championship && content && (
         <Card className="bg-slate-900/60 border-slate-800">
           <CardHeader>
@@ -608,25 +718,37 @@ export default function AdminCmsPage() {
         </Card>
       )}
 
-      {/* Tab 2: Hero Section */}
+      {/* =========================================================================
+          Tab 2: Hero & Banner Section
+          ========================================================================= */}
       {activeTab === "hero" && content && championship && (
         <Card className="bg-slate-900/60 border-slate-800">
           <CardHeader>
             <CardTitle className="text-white text-xl">Hero & Banner Configuration</CardTitle>
             <CardDescription className="text-slate-400">
-              Customize the landing page headline, sub-headline, and athlete registration instructions.
+              Customize the landing page headline, tagline badge, sub-headline, CTA buttons, and backdrop photo.
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleSaveInfo}>
             <CardContent className="space-y-6">
-              <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">Hero Main Headline</label>
-                <Input
-                  value={content.heroTitle}
-                  onChange={(e) => setContent({ ...content, heroTitle: e.target.value })}
-                  placeholder="The Pinnacle of Taekwondo Excellence"
-                  required
-                />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="md:col-span-2">
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Hero Main Headline</label>
+                  <Input
+                    value={content.heroTitle}
+                    onChange={(e) => setContent({ ...content, heroTitle: e.target.value })}
+                    placeholder="The Pinnacle of Taekwondo Excellence"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Tagline Badge (Top Pill)</label>
+                  <Input
+                    value={content.heroTagline || ""}
+                    onChange={(e) => setContent({ ...content, heroTagline: e.target.value })}
+                    placeholder="Official National Championship 2026"
+                  />
+                </div>
               </div>
 
               <div>
@@ -636,6 +758,36 @@ export default function AdminCmsPage() {
                   onChange={(e) => setContent({ ...content, heroSubtitle: e.target.value })}
                   placeholder="Sanctioned by World Taekwondo Headquarters Kukkiwon India North Branch"
                 />
+              </div>
+
+              <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-4">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-400">
+                  Hero Call-to-Action Buttons
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">Primary CTA Button Label</label>
+                    <Input
+                      value={content.heroPrimaryCtaText || "Register Now"}
+                      onChange={(e) => setContent({ ...content, heroPrimaryCtaText: e.target.value })}
+                      placeholder="Register Now"
+                    />
+                    <span className="text-[11px] text-slate-500 mt-1 block">
+                      Links to athlete & coach registration portal (/register).
+                    </span>
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">Secondary CTA Button Label</label>
+                    <Input
+                      value={content.heroSecondaryCtaText || "Contact Secretariat"}
+                      onChange={(e) => setContent({ ...content, heroSecondaryCtaText: e.target.value })}
+                      placeholder="Contact Secretariat"
+                    />
+                    <span className="text-[11px] text-slate-500 mt-1 block">
+                      Links to official contact page (/contact).
+                    </span>
+                  </div>
+                </div>
               </div>
 
               <div>
@@ -681,12 +833,6 @@ export default function AdminCmsPage() {
                   placeholder="1. Complete profile. 2. Upload verification. 3. Pay online."
                 />
               </div>
-
-              <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
-                <span className="text-xs font-mono text-slate-400">
-                  CTA Button Destination: <code className="text-amber-400 font-bold">/register</code> (Enforced server-side)
-                </span>
-              </div>
             </CardContent>
             <CardFooter className="flex justify-end border-t border-slate-800 pt-4">
               <Button type="submit" disabled={saving} className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold flex items-center gap-2">
@@ -698,205 +844,553 @@ export default function AdminCmsPage() {
         </Card>
       )}
 
-      {/* Tab: Website Sections Configuration */}
+      {/* =========================================================================
+          Tab 3: Website Sections Configuration (Partnership, Disciplines, CTA, About)
+          ========================================================================= */}
       {activeTab === "sections" && content && (
-        <Card className="bg-slate-900/60 border-slate-800">
-          <CardHeader>
-            <CardTitle className="text-white text-xl">All Website Sections Content</CardTitle>
-            <CardDescription className="text-slate-400">
-              Live authoring for Partnership, About, Registration CTA, and Disciplines sections.
-            </CardDescription>
-          </CardHeader>
-          <form onSubmit={handleSaveInfo}>
-            <CardContent className="space-y-8">
-              {/* 1. Partnership / About Section */}
-              <div className="space-y-4 p-5 rounded-xl bg-slate-950/60 border border-slate-800">
-                <h4 className="text-sm font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
-                  <span>1. Partnership & Organization Section</span>
-                </h4>
-                <div className="space-y-3">
-                  <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">Partnership Section Heading</label>
-                    <Input
-                      value={content.partnershipHeading || "Presented in Partnership"}
-                      onChange={(e) => setContent({ ...content, partnershipHeading: e.target.value })}
-                      placeholder="Presented in Partnership"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">Partnership Section Subtitle</label>
-                    <Input
-                      value={content.partnershipDescription || "A strategic sporting union combining authentic martial arts governance with modern tournament technology."}
-                      onChange={(e) => setContent({ ...content, partnershipDescription: e.target.value })}
-                      placeholder="Section introductory description..."
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">Kukkiwon India North Branch Description</label>
-                    <Textarea
-                      rows={3}
-                      value={content.kukkiwonDescription || ""}
-                      onChange={(e) => setContent({ ...content, kukkiwonDescription: e.target.value })}
-                      placeholder="Official governing authority details..."
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">Kyorix Sports Technology Description</label>
-                    <Textarea
-                      rows={3}
-                      value={content.kyorixDescription || ""}
-                      onChange={(e) => setContent({ ...content, kyorixDescription: e.target.value })}
-                      placeholder="Competition electronics and accreditation details..."
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* 2. Registration Call to Action */}
-              <div className="space-y-4 p-5 rounded-xl bg-slate-950/60 border border-slate-800">
-                <h4 className="text-sm font-bold uppercase tracking-wider text-blue-400 flex items-center gap-2">
-                  <span>2. Registration Call-to-Action (CTA) Section</span>
-                </h4>
-                <div className="space-y-3">
-                  <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">CTA Headline</label>
-                    <Input
-                      value={content.ctaTitle || "Ready to Take Part?"}
-                      onChange={(e) => setContent({ ...content, ctaTitle: e.target.value })}
-                      placeholder="Ready to Take Part?"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">CTA Description Paragraph</label>
-                    <Textarea
-                      rows={2}
-                      value={content.ctaDescription || ""}
-                      onChange={(e) => setContent({ ...content, ctaDescription: e.target.value })}
-                      placeholder="Call to action invitation text..."
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* 3. Tournament Disciplines Overview */}
-              <div className="space-y-4 p-5 rounded-xl bg-slate-950/60 border border-slate-800">
-                <h4 className="text-sm font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
-                  <span>3. Disciplines & Structure Overview</span>
-                </h4>
-                <p className="text-xs text-slate-400">
-                  Custom descriptions for Kyorugi (Sparring), Poomsae, and Demo/Breaking displayed on the homepage.
-                </p>
+        <div className="space-y-8">
+          {/* Section 1: Partnership & Organization Section */}
+          <Card className="bg-slate-900/60 border-slate-800">
+            <CardHeader>
+              <CardTitle className="text-white text-xl flex items-center gap-2">
+                <Building className="w-5 h-5 text-amber-400" />
+                1. Partnership & Organization Section
+              </CardTitle>
+              <CardDescription className="text-slate-400">
+                Institutional presentation for Kukkiwon India North Branch and Kyorix Sports Technology.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Disciplines JSON (Optional Override)</label>
-                  <Textarea
-                    rows={4}
-                    value={content.disciplinesJson || ""}
-                    onChange={(e) => setContent({ ...content, disciplinesJson: e.target.value })}
-                    placeholder='[{"title":"Kyorugi (Sparring)","category":"Senior, Junior, Cadet","description":"..."},{"title":"Poomsae","category":"Individual, Pair & Team","description":"..."}]'
-                    className="font-mono text-xs"
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Section Tagline (Small Pill)</label>
+                  <Input
+                    value={content.partnershipTagline || "Collaboration & Leadership"}
+                    onChange={(e) => setContent({ ...content, partnershipTagline: e.target.value })}
+                    placeholder="Collaboration & Leadership"
                   />
-                  <span className="text-[11px] text-slate-500 mt-1 block">
-                    Leave blank to use official championship default disciplines structure.
-                  </span>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Section Main Heading</label>
+                  <Input
+                    value={content.partnershipHeading || "Presented in Partnership"}
+                    onChange={(e) => setContent({ ...content, partnershipHeading: e.target.value })}
+                    placeholder="Presented in Partnership"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">Partnership Section Description</label>
+                <Input
+                  value={content.partnershipDescription || "A strategic sporting union combining authentic martial arts governance with modern tournament technology."}
+                  onChange={(e) => setContent({ ...content, partnershipDescription: e.target.value })}
+                  placeholder="Section introductory description..."
+                />
+              </div>
+
+              {/* Kukkiwon Card Config */}
+              <div className="p-5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-amber-400">
+                    Kukkiwon Card Configuration
+                  </h4>
+                  <Badge variant="gold">Governing Authority</Badge>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">Institution Title</label>
+                    <Input
+                      value={content.kukkiwonTitle || "World Taekwondo Headquarters Kukkiwon"}
+                      onChange={(e) => setContent({ ...content, kukkiwonTitle: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">Branch Name</label>
+                    <Input
+                      value={content.kukkiwonBranch || "India North Branch"}
+                      onChange={(e) => setContent({ ...content, kukkiwonBranch: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">Role / Function</label>
+                    <Input
+                      value={content.kukkiwonRole || "Official Governing Authority"}
+                      onChange={(e) => setContent({ ...content, kukkiwonRole: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">Badge Text</label>
+                    <Input
+                      value={content.kukkiwonBadge || "Sanctioning Body"}
+                      onChange={(e) => setContent({ ...content, kukkiwonBadge: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">Official Portal URL</label>
+                    <Input
+                      value={content.kukkiwonUrl || "https://kukkiwon-india.org/"}
+                      onChange={(e) => setContent({ ...content, kukkiwonUrl: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">Portal Link Text</label>
+                    <Input
+                      value={content.kukkiwonUrlText || "Visit Kukkiwon India"}
+                      onChange={(e) => setContent({ ...content, kukkiwonUrlText: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Kukkiwon Detailed Description</label>
+                  <Textarea
+                    rows={3}
+                    value={content.kukkiwonDescription || ""}
+                    onChange={(e) => setContent({ ...content, kukkiwonDescription: e.target.value })}
+                    placeholder="Official governing authority details..."
+                  />
+                </div>
+              </div>
+
+              {/* Kyorix Card Config */}
+              <div className="p-5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-cyan-400">
+                    Kyorix Card Configuration
+                  </h4>
+                  <Badge variant="outline">Technology Partner</Badge>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">Company Name</label>
+                    <Input
+                      value={content.kyorixTitle || "Kyorix Sports Technology"}
+                      onChange={(e) => setContent({ ...content, kyorixTitle: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">Subtitle</label>
+                    <Input
+                      value={content.kyorixSubtitle || "Electronic Scoring & Accreditation"}
+                      onChange={(e) => setContent({ ...content, kyorixSubtitle: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">Role / Function</label>
+                    <Input
+                      value={content.kyorixRole || "Sports Hardware & Accreditation Partner"}
+                      onChange={(e) => setContent({ ...content, kyorixRole: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">Badge Text</label>
+                    <Input
+                      value={content.kyorixBadge || "Electronic Scoring Partner"}
+                      onChange={(e) => setContent({ ...content, kyorixBadge: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Kyorix Detailed Description</label>
+                  <Textarea
+                    rows={3}
+                    value={content.kyorixDescription || ""}
+                    onChange={(e) => setContent({ ...content, kyorixDescription: e.target.value })}
+                    placeholder="Competition electronics and accreditation details..."
+                  />
                 </div>
               </div>
             </CardContent>
             <CardFooter className="flex justify-end border-t border-slate-800 pt-4">
-              <Button type="submit" disabled={saving} className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold flex items-center gap-2">
+              <Button onClick={() => handleSaveInfo()} disabled={saving} className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold flex items-center gap-2">
                 <Save className="w-4 h-4" />
-                {saving ? "Saving..." : "Save Website Sections"}
+                {saving ? "Saving..." : "Save Partnership Section"}
               </Button>
             </CardFooter>
-          </form>
-        </Card>
-      )}
+          </Card>
 
-      {/* Tab 3: Important Dates CRUD */}
-      {activeTab === "dates" && (
-        <Card className="bg-slate-900/60 border-slate-800">
-          <CardHeader className="flex flex-row justify-between items-center">
-            <div>
-              <CardTitle className="text-white text-xl">Tournament Schedule & Milestones</CardTitle>
+          {/* Section 2: Tournament Disciplines & Structure */}
+          <Card className="bg-slate-900/60 border-slate-800">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-white text-xl flex items-center gap-2">
+                  <Layers className="w-5 h-5 text-emerald-400" />
+                  2. Tournament Disciplines & Divisions
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Manage the official competition categories and divisions displayed on the homepage.
+                </CardDescription>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => {
+                  setEditingDisciplineIndex(null);
+                  setDisciplineForm({ title: "", category: "", description: "" });
+                  setDisciplineModalOpen(true);
+                }}
+                className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold flex items-center gap-1.5"
+              >
+                <Plus className="w-4 h-4" /> Add Discipline Card
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Section Tagline</label>
+                  <Input
+                    value={content.disciplinesTagline || "Tournament Structure"}
+                    onChange={(e) => setContent({ ...content, disciplinesTagline: e.target.value })}
+                    placeholder="Tournament Structure"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Section Heading</label>
+                  <Input
+                    value={content.disciplinesHeading || "Championship Details & Disciplines"}
+                    onChange={(e) => setContent({ ...content, disciplinesHeading: e.target.value })}
+                    placeholder="Championship Details & Disciplines"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">Section Description</label>
+                <Input
+                  value={content.disciplinesDescription || "Official competition divisions, category weight brackets, and venue regulations."}
+                  onChange={(e) => setContent({ ...content, disciplinesDescription: e.target.value })}
+                  placeholder="Official competition divisions, category weight brackets, and venue regulations."
+                />
+              </div>
+
+              {/* Visual Disciplines Cards Grid */}
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                    Configured Discipline Cards ({disciplineCards.length})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowRawDisciplinesJson(!showRawDisciplinesJson)}
+                    className="text-xs text-amber-400 hover:underline flex items-center gap-1"
+                  >
+                    <Code className="w-3.5 h-3.5" />
+                    {showRawDisciplinesJson ? "Hide Raw JSON" : "Advanced: Edit Raw JSON"}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {disciplineCards.map((card, idx) => (
+                    <div
+                      key={idx}
+                      className="p-5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2 relative group hover:border-slate-700 transition-all"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-mono text-emerald-400 font-bold uppercase">
+                          {card.category || "General"}
+                        </span>
+                        <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0 text-slate-400 hover:text-white"
+                            onClick={() => {
+                              setEditingDisciplineIndex(idx);
+                              setDisciplineForm({ ...card });
+                              setDisciplineModalOpen(true);
+                            }}
+                          >
+                            <Edit className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0 text-red-400 hover:text-red-300"
+                            onClick={() => handleDeleteDiscipline(idx)}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                      <h4 className="text-sm font-bold text-white uppercase">{card.title}</h4>
+                      <p className="text-xs text-slate-400 leading-relaxed line-clamp-3">{card.description}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {showRawDisciplinesJson && (
+                  <div className="mt-4 p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+                    <label className="text-xs font-mono text-slate-400 block">Disciplines JSON String</label>
+                    <Textarea
+                      rows={5}
+                      value={content.disciplinesJson || JSON.stringify(disciplineCards, null, 2)}
+                      onChange={(e) => {
+                        setContent({ ...content, disciplinesJson: e.target.value });
+                        try {
+                          const parsed = JSON.parse(e.target.value);
+                          if (Array.isArray(parsed)) setDisciplineCards(parsed);
+                        } catch {
+                          // Invalid JSON typing
+                        }
+                      }}
+                      className="font-mono text-xs text-emerald-400 bg-slate-900"
+                    />
+                  </div>
+                )}
+              </div>
+            </CardContent>
+            <CardFooter className="flex justify-end border-t border-slate-800 pt-4">
+              <Button onClick={() => handleSaveInfo()} disabled={saving} className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold flex items-center gap-2">
+                <Save className="w-4 h-4" />
+                {saving ? "Saving..." : "Save Disciplines Section"}
+              </Button>
+            </CardFooter>
+          </Card>
+
+          {/* Section 3: Registration CTA Section */}
+          <Card className="bg-slate-900/60 border-slate-800">
+            <CardHeader>
+              <CardTitle className="text-white text-xl flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-blue-400" />
+                3. Registration Call-to-Action (CTA) Section
+              </CardTitle>
               <CardDescription className="text-slate-400">
-                Manage chronological deadlines displayed in the Important Dates section on the public site.
+                Call to action prompt displayed above footer motivating academies and athletes to enroll.
               </CardDescription>
-            </div>
-            <Button
-              size="sm"
-              onClick={() => {
-                setEditingDate(null);
-                setDateForm({ title: "", description: "", date: new Date().toISOString(), displayOrder: dates.length + 1, isPublished: true });
-                setDateModalOpen(true);
-              }}
-              className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold flex items-center gap-1.5"
-            >
-              <Plus className="w-4 h-4" /> Add Date
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-16">Order</TableHead>
-                  <TableHead>Milestone Title</TableHead>
-                  <TableHead>Date / Timestamp</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {dates.map((d) => (
-                  <TableRow key={d.id}>
-                    <TableCell className="font-mono text-slate-400">#{d.displayOrder}</TableCell>
-                    <TableCell>
-                      <div className="font-bold text-white text-sm">{d.title}</div>
-                      {d.description && <div className="text-xs text-slate-400">{d.description}</div>}
-                    </TableCell>
-                    <TableCell className="text-xs text-amber-400 font-mono">
-                      {new Date(d.date).toLocaleDateString("en-US", {
-                        weekday: "short",
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={d.isPublished ? "success" : "default"}>
-                        {d.isPublished ? "PUBLISHED" : "HIDDEN"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setEditingDate(d);
-                          setDateForm({
-                            title: d.title,
-                            description: d.description || "",
-                            date: d.date,
-                            displayOrder: d.displayOrder,
-                            isPublished: d.isPublished,
-                          });
-                          setDateModalOpen(true);
-                        }}
-                      >
-                        <Edit className="w-3.5 h-3.5" />
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDeleteDate(d.id)} className="text-red-400 hover:text-red-300">
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">CTA Tagline (Pill)</label>
+                  <Input
+                    value={content.ctaTagline || "Accreditation & Badges"}
+                    onChange={(e) => setContent({ ...content, ctaTagline: e.target.value })}
+                    placeholder="Accreditation & Badges"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">CTA Main Headline</label>
+                  <Input
+                    value={content.ctaTitle || "Ready to Take Part?"}
+                    onChange={(e) => setContent({ ...content, ctaTitle: e.target.value })}
+                    placeholder="Ready to Take Part?"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">CTA Description Paragraph</label>
+                <Textarea
+                  rows={2}
+                  value={content.ctaDescription || ""}
+                  onChange={(e) => setContent({ ...content, ctaDescription: e.target.value })}
+                  placeholder="Register for the Kukkiwon Cup Championship. Compete under official Kukkiwon sanction..."
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Primary Button Label</label>
+                  <Input
+                    value={content.ctaPrimaryBtnText || "Register Now"}
+                    onChange={(e) => setContent({ ...content, ctaPrimaryBtnText: e.target.value })}
+                    placeholder="Register Now"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Secondary Button Label</label>
+                  <Input
+                    value={content.ctaSecondaryBtnText || "Contact Secretariat"}
+                    onChange={(e) => setContent({ ...content, ctaSecondaryBtnText: e.target.value })}
+                    placeholder="Contact Secretariat"
+                  />
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter className="flex justify-end border-t border-slate-800 pt-4">
+              <Button onClick={() => handleSaveInfo()} disabled={saving} className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold flex items-center gap-2">
+                <Save className="w-4 h-4" />
+                {saving ? "Saving..." : "Save CTA Section"}
+              </Button>
+            </CardFooter>
+          </Card>
+
+          {/* Section 4: About Page Mission & Standards */}
+          <Card className="bg-slate-900/60 border-slate-800">
+            <CardHeader>
+              <CardTitle className="text-white text-xl flex items-center gap-2">
+                <Target className="w-5 h-5 text-rose-400" />
+                4. About Page: Standards & Mission Section
+              </CardTitle>
+              <CardDescription className="text-slate-400">
+                Participation standards, ethics, and accreditation mission displayed on /about.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">Mission / Standards Heading</label>
+                <Input
+                  value={content.aboutMissionHeading || "Participation Standards & Ethics"}
+                  onChange={(e) => setContent({ ...content, aboutMissionHeading: e.target.value })}
+                  placeholder="Participation Standards & Ethics"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">Mission / Subtitle Text</label>
+                <Textarea
+                  rows={2}
+                  value={content.aboutMissionText || ""}
+                  onChange={(e) => setContent({ ...content, aboutMissionText: e.target.value })}
+                  placeholder="Upholding Olympic martial arts excellence, fair play, and athlete empowerment."
+                />
+              </div>
+            </CardContent>
+            <CardFooter className="flex justify-end border-t border-slate-800 pt-4">
+              <Button onClick={() => handleSaveInfo()} disabled={saving} className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold flex items-center gap-2">
+                <Save className="w-4 h-4" />
+                {saving ? "Saving..." : "Save About Page Mission"}
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
       )}
 
-      {/* Tab 4: Announcements CRUD */}
+      {/* =========================================================================
+          Tab 4: Important Dates Schedule & Headers
+          ========================================================================= */}
+      {activeTab === "dates" && content && (
+        <div className="space-y-8">
+          {/* Important Dates Section Headers */}
+          <Card className="bg-slate-900/60 border-slate-800">
+            <CardHeader>
+              <CardTitle className="text-white text-xl">Dates Section Presentation Headers</CardTitle>
+              <CardDescription className="text-slate-400">
+                Customize the headline and description displayed for this section on the public homepage.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Section Tagline</label>
+                  <Input
+                    value={content.datesTagline || "Key Milestones"}
+                    onChange={(e) => setContent({ ...content, datesTagline: e.target.value })}
+                    placeholder="Key Milestones"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Section Heading</label>
+                  <Input
+                    value={content.datesHeading || "Important Championship Dates"}
+                    onChange={(e) => setContent({ ...content, datesHeading: e.target.value })}
+                    placeholder="Important Championship Dates"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">Section Description</label>
+                <Input
+                  value={content.datesDescription || "Crucial deadlines for athlete submissions, late registrations, and tournament start dates."}
+                  onChange={(e) => setContent({ ...content, datesDescription: e.target.value })}
+                  placeholder="Crucial deadlines for athlete submissions, late registrations, and tournament start dates."
+                />
+              </div>
+            </CardContent>
+            <CardFooter className="flex justify-end border-t border-slate-800 pt-4">
+              <Button onClick={() => handleSaveInfo()} disabled={saving} className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold flex items-center gap-2">
+                <Save className="w-4 h-4" />
+                {saving ? "Saving..." : "Save Dates Section Headers"}
+              </Button>
+            </CardFooter>
+          </Card>
+
+          {/* Important Dates Milestones CRUD Table */}
+          <Card className="bg-slate-900/60 border-slate-800">
+            <CardHeader className="flex flex-row justify-between items-center">
+              <div>
+                <CardTitle className="text-white text-xl">Tournament Schedule & Milestones</CardTitle>
+                <CardDescription className="text-slate-400">
+                  Manage individual chronological deadlines displayed in the Important Dates section on the public site.
+                </CardDescription>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => {
+                  setEditingDate(null);
+                  setDateForm({ title: "", description: "", date: new Date().toISOString(), displayOrder: dates.length + 1, isPublished: true });
+                  setDateModalOpen(true);
+                }}
+                className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold flex items-center gap-1.5"
+              >
+                <Plus className="w-4 h-4" /> Add Date
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-16">Order</TableHead>
+                    <TableHead>Milestone Title</TableHead>
+                    <TableHead>Date / Timestamp</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {dates.map((d) => (
+                    <TableRow key={d.id}>
+                      <TableCell className="font-mono text-slate-400">#{d.displayOrder}</TableCell>
+                      <TableCell>
+                        <div className="font-bold text-white text-sm">{d.title}</div>
+                        {d.description && <div className="text-xs text-slate-400">{d.description}</div>}
+                      </TableCell>
+                      <TableCell className="text-xs text-amber-400 font-mono">
+                        {new Date(d.date).toLocaleDateString("en-US", {
+                          weekday: "short",
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={d.isPublished ? "success" : "default"}>
+                          {d.isPublished ? "PUBLISHED" : "HIDDEN"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setEditingDate(d);
+                            setDateForm({
+                              title: d.title,
+                              description: d.description || "",
+                              date: d.date,
+                              displayOrder: d.displayOrder,
+                              isPublished: d.isPublished,
+                            });
+                            setDateModalOpen(true);
+                          }}
+                        >
+                          <Edit className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleDeleteDate(d.id)} className="text-red-400 hover:text-red-300">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* =========================================================================
+          Tab 5: Announcements CRUD
+          ========================================================================= */}
       {activeTab === "announcements" && (
         <Card className="bg-slate-900/60 border-slate-800">
           <CardHeader className="flex flex-row justify-between items-center">
@@ -973,7 +1467,9 @@ export default function AdminCmsPage() {
         </Card>
       )}
 
-      {/* Tab 5: FAQ CRUD */}
+      {/* =========================================================================
+          Tab 6: FAQ CRUD
+          ========================================================================= */}
       {activeTab === "faqs" && (
         <Card className="bg-slate-900/60 border-slate-800">
           <CardHeader className="flex flex-row justify-between items-center">
@@ -1032,18 +1528,52 @@ export default function AdminCmsPage() {
         </Card>
       )}
 
-      {/* Tab 6: Contact & Social Information */}
+      {/* =========================================================================
+          Tab 7: Contact & Secretariat Information
+          ========================================================================= */}
       {activeTab === "contact" && content && championship && (
         <Card className="bg-slate-900/60 border-slate-800">
           <CardHeader>
-            <CardTitle className="text-white text-xl">Official Contact & Social Channels</CardTitle>
+            <CardTitle className="text-white text-xl">Official Secretariat & Contact Channels</CardTitle>
             <CardDescription className="text-slate-400">
-              Secretariat email, phone helpline, and verified social media links.
+              Secretariat email, phone helpline, operating hours, venue address, and verified social media links.
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleSaveInfo}>
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-4">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-400">
+                  Homepage Secretariat Section Headers
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">Section Tagline</label>
+                    <Input
+                      value={content.contactTagline || "Tournament Secretariat"}
+                      onChange={(e) => setContent({ ...content, contactTagline: e.target.value })}
+                      placeholder="Tournament Secretariat"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">Section Heading</label>
+                    <Input
+                      value={content.contactHeading || "Official Inquiries & Support"}
+                      onChange={(e) => setContent({ ...content, contactHeading: e.target.value })}
+                      placeholder="Official Inquiries & Support"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Section Subtitle / Description</label>
+                  <Input
+                    value={content.contactDescription || "Official communication channels for participating academies, coaches, and delegations."}
+                    onChange={(e) => setContent({ ...content, contactDescription: e.target.value })}
+                    placeholder="Official communication channels for participating academies, coaches, and delegations."
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label className="text-xs font-semibold text-slate-300 block mb-1">Official Email</label>
                   <Input
@@ -1061,13 +1591,24 @@ export default function AdminCmsPage() {
                     required
                   />
                 </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Support Operating Hours</label>
+                  <Input
+                    value={content.contactPhoneHours || "Monday to Saturday • 9:00 AM – 6:00 PM IST"}
+                    onChange={(e) => setContent({ ...content, contactPhoneHours: e.target.value })}
+                    placeholder="Monday to Saturday • 9:00 AM – 6:00 PM IST"
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">Secretariat Physical Address</label>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">Secretariat Physical Address / Venue</label>
                 <Input
-                  value={championship.contactAddress || ""}
-                  onChange={(e) => setChampionship({ ...championship, contactAddress: e.target.value })}
+                  value={content.contactAddress || championship.contactAddress || ""}
+                  onChange={(e) => {
+                    setContent({ ...content, contactAddress: e.target.value });
+                    setChampionship({ ...championship, contactAddress: e.target.value });
+                  }}
                   placeholder="Kyorix Sports Technology Private Limited, New Delhi, India"
                 />
               </div>
@@ -1115,7 +1656,9 @@ export default function AdminCmsPage() {
         </Card>
       )}
 
-      {/* Tab 7: Publishing State */}
+      {/* =========================================================================
+          Tab 8: Publishing State
+          ========================================================================= */}
       {activeTab === "publishing" && content && (
         <Card className="bg-slate-900/60 border-slate-800">
           <CardHeader>
@@ -1193,10 +1736,63 @@ export default function AdminCmsPage() {
         </Card>
       )}
 
+      {/* =========================================================================
+          MODALS
+          ========================================================================= */}
+
+      {/* Discipline Card Modal */}
+      {disciplineModalOpen && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <Layers className="w-5 h-5 text-emerald-400" />
+              {editingDisciplineIndex !== null ? "Edit Discipline Card" : "Add Discipline Card"}
+            </h3>
+            <form onSubmit={handleSaveDisciplineModal} className="space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">Discipline Title</label>
+                <Input
+                  value={disciplineForm.title}
+                  onChange={(e) => setDisciplineForm({ ...disciplineForm, title: e.target.value })}
+                  placeholder="e.g. Kyorugi (Sparring)"
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">Category / Divisions</label>
+                <Input
+                  value={disciplineForm.category}
+                  onChange={(e) => setDisciplineForm({ ...disciplineForm, category: e.target.value })}
+                  placeholder="e.g. Senior, Junior, Cadet"
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">Detailed Description</label>
+                <Textarea
+                  rows={4}
+                  value={disciplineForm.description}
+                  onChange={(e) => setDisciplineForm({ ...disciplineForm, description: e.target.value })}
+                  placeholder="Official Olympic-style sparring conducted under World Taekwondo rules..."
+                  required
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+                <Button variant="ghost" type="button" onClick={() => setDisciplineModalOpen(false)}>Cancel</Button>
+                <Button type="submit" className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold">
+                  {editingDisciplineIndex !== null ? "Update Card" : "Add Card"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Date Modal */}
       {dateModalOpen && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 space-y-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl">
             <h3 className="text-lg font-bold text-white">
               {editingDate ? "Edit Important Date" : "Add Important Date"}
             </h3>
@@ -1261,7 +1857,7 @@ export default function AdminCmsPage() {
       {/* FAQ Modal */}
       {faqModalOpen && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 space-y-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl">
             <h3 className="text-lg font-bold text-white">
               {editingFaq ? "Edit FAQ" : "Add FAQ"}
             </h3>
@@ -1319,7 +1915,7 @@ export default function AdminCmsPage() {
       {/* Announcement Modal */}
       {annModalOpen && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 space-y-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl">
             <h3 className="text-lg font-bold text-white">
               {editingAnn ? "Edit Announcement" : "Create Announcement"}
             </h3>

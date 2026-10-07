@@ -99,9 +99,13 @@ export default async function HomePage() {
 
             {/* Main Championship Title */}
             <div className="space-y-2">
+              {tournament.heroTagline && (
+                <div className="inline-block px-3.5 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold uppercase tracking-wider mb-1">
+                  {tournament.heroTagline}
+                </div>
+              )}
               <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-slate-950 leading-tight font-sans">
-                KUKKIWON CUP <br className="hidden sm:inline" />
-                <span className="text-blue-600">CHAMPIONSHIP 2026</span>
+                {tournament.heroHeadline || tournament.name || "KUKKIWON CUP CHAMPIONSHIP 2026"}
               </h1>
               <p className="text-sm sm:text-base text-slate-600 font-medium max-w-xl mx-auto">
                 {tournament.subtitle}
@@ -156,7 +160,7 @@ export default async function HomePage() {
                     size="lg"
                     className="w-full sm:w-auto text-xs uppercase tracking-wider font-extrabold px-8 py-3.5 shadow-lg shadow-blue-500/20"
                   >
-                    <span>Register Now</span>
+                    <span>{tournament.heroPrimaryCtaText || "Register Now"}</span>
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                 </Link>
@@ -180,7 +184,7 @@ export default async function HomePage() {
                   size="lg"
                   className="w-full sm:w-auto text-xs uppercase tracking-wider font-bold px-7 border-slate-300 bg-white hover:bg-slate-50 text-slate-700"
                 >
-                  <span>Contact Secretariat</span>
+                  <span>{tournament.heroSecondaryCtaText || "Contact Secretariat"}</span>
                 </Button>
               </Link>
             </div>
@@ -194,7 +198,7 @@ export default async function HomePage() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-12">
             <div className="text-center space-y-2 max-w-2xl mx-auto">
               <span className="text-xs font-bold uppercase tracking-widest text-blue-600">
-                Collaboration & Leadership
+                {tournament.partnershipTagline || "Collaboration & Leadership"}
               </span>
               <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-slate-950">
                 {tournament.partnershipHeading || "Presented in Partnership"}
@@ -219,13 +223,13 @@ export default async function HomePage() {
                     </div>
                     <div>
                       <h3 className="text-lg font-bold text-slate-900 uppercase tracking-wide">
-                        {BRANDING.kukkiwon.name}
+                        {tournament.kukkiwonTitle || BRANDING.kukkiwon.name}
                       </h3>
                       <p className="text-xs text-blue-600 font-bold">
-                        {BRANDING.kukkiwon.branch}
+                        {tournament.kukkiwonBranch || BRANDING.kukkiwon.branch}
                       </p>
                       <p className="text-[11px] text-slate-500">
-                        {BRANDING.kukkiwon.title}
+                        {tournament.kukkiwonRole || BRANDING.kukkiwon.title}
                       </p>
                     </div>
                   </div>
@@ -236,14 +240,14 @@ export default async function HomePage() {
                 </div>
 
                 <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
-                  <span className="text-slate-500 font-medium">Sanctioning Body</span>
+                  <span className="text-slate-500 font-medium">{tournament.kukkiwonBadge || "Sanctioning Body"}</span>
                   <a
-                    href="https://kukkiwon-india.org/"
+                    href={tournament.kukkiwonUrl || "https://kukkiwon-india.org/"}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 font-bold text-blue-600 hover:underline"
                   >
-                    <span>Visit Kukkiwon India</span>
+                    <span>{tournament.kukkiwonUrlText || "Visit Kukkiwon India"}</span>
                     <ExternalLink className="h-3 w-3" />
                   </a>
                 </div>
@@ -263,13 +267,13 @@ export default async function HomePage() {
                     </div>
                     <div>
                       <h3 className="text-lg font-bold text-slate-900 uppercase tracking-wide">
-                        {BRANDING.kyorix.name}
+                        {tournament.kyorixTitle || BRANDING.kyorix.name}
                       </h3>
                       <p className="text-xs text-cyan-600 font-bold">
-                        {BRANDING.kyorix.subtitle}
+                        {tournament.kyorixSubtitle || BRANDING.kyorix.subtitle}
                       </p>
                       <p className="text-[11px] text-slate-500">
-                        Sports Hardware & Accreditation Partner
+                        {tournament.kyorixRole || "Sports Hardware & Accreditation Partner"}
                       </p>
                     </div>
                   </div>
@@ -282,7 +286,7 @@ export default async function HomePage() {
                 <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
                   <span className="text-slate-500 font-medium">Technology & Accreditation</span>
                   <span className="text-blue-600 font-bold">
-                    Electronic Scoring Partner
+                    {tournament.kyorixBadge || "Electronic Scoring Partner"}
                   </span>
                 </div>
               </div>
@@ -297,13 +301,13 @@ export default async function HomePage() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-12">
             <div className="text-center space-y-2 max-w-2xl mx-auto">
               <span className="text-xs font-bold uppercase tracking-widest text-blue-600">
-                Tournament Structure
+                {tournament.disciplinesTagline || "Tournament Structure"}
               </span>
               <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-slate-950">
-                Championship Details & Disciplines
+                {tournament.disciplinesHeading || "Championship Details & Disciplines"}
               </h2>
               <p className="text-xs sm:text-sm text-slate-600">
-                Official competition divisions, category weight brackets, and venue regulations.
+                {tournament.disciplinesDescription || "Official competition divisions, category weight brackets, and venue regulations."}
               </p>
             </div>
 
@@ -333,13 +337,13 @@ export default async function HomePage() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-10">
             <div className="text-center space-y-2 max-w-2xl mx-auto">
               <span className="text-xs font-bold uppercase tracking-widest text-blue-600">
-                Key Milestones
+                {tournament.datesTagline || "Key Milestones"}
               </span>
               <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-slate-950">
-                Important Championship Dates
+                {tournament.datesHeading || "Important Championship Dates"}
               </h2>
               <p className="text-xs sm:text-sm text-slate-600">
-                Crucial deadlines for athlete submissions, late registrations, and tournament start dates.
+                {tournament.datesDescription || "Crucial deadlines for athlete submissions, late registrations, and tournament start dates."}
               </p>
             </div>
 
@@ -420,6 +424,11 @@ export default async function HomePage() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl text-center space-y-6">
 
             <div className="space-y-3">
+              {tournament.ctaTagline && (
+                <span className="text-xs font-bold uppercase tracking-widest text-blue-600 block">
+                  {tournament.ctaTagline}
+                </span>
+              )}
               <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-slate-950 font-sans">
                 {tournament.ctaTitle || "Ready to Take Part?"}
               </h2>
@@ -436,7 +445,7 @@ export default async function HomePage() {
                     size="lg"
                     className="w-full sm:w-auto text-xs uppercase tracking-wider font-black px-10 py-4 shadow-xl shadow-blue-500/25"
                   >
-                    <span>Register Now</span>
+                    <span>{tournament.ctaPrimaryBtnText || "Register Now"}</span>
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                 </Link>
@@ -459,7 +468,7 @@ export default async function HomePage() {
                   size="lg"
                   className="w-full sm:w-auto text-xs uppercase tracking-wider font-bold px-8 border-slate-300 bg-white hover:bg-slate-50 text-slate-700"
                 >
-                  <span>Contact Secretariat</span>
+                  <span>{tournament.ctaSecondaryBtnText || "Contact Secretariat"}</span>
                 </Button>
               </Link>
             </div>
@@ -473,13 +482,13 @@ export default async function HomePage() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-10">
             <div className="text-center space-y-2 max-w-2xl mx-auto">
               <span className="text-xs font-bold uppercase tracking-widest text-blue-600">
-                Tournament Secretariat
+                {tournament.contactTagline || "Tournament Secretariat"}
               </span>
               <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-slate-950">
-                Official Inquiries & Support
+                {tournament.contactHeading || "Official Inquiries & Support"}
               </h2>
               <p className="text-xs sm:text-sm text-slate-600">
-                Official communication channels for participating academies, coaches, and delegations.
+                {tournament.contactDescription || "Official communication channels for participating academies, coaches, and delegations."}
               </p>
             </div>
 
@@ -505,6 +514,11 @@ export default async function HomePage() {
                 <span className="text-xs font-semibold text-slate-700 block">
                   {tournament.contactPhone || SITE_CONFIG.contact.phone}
                 </span>
+                {tournament.contactPhoneHours && (
+                  <span className="text-[11px] text-slate-500 block">
+                    {tournament.contactPhoneHours}
+                  </span>
+                )}
               </div>
 
               <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-2 shadow-xs">

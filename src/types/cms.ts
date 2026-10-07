@@ -268,24 +268,60 @@ export interface ChampionshipContentDTO {
   championshipId: string;
   heroTitle: string;
   heroSubtitle: string | null;
+  heroTagline?: string | null;
+  heroPrimaryCtaText?: string | null;
+  heroSecondaryCtaText?: string | null;
   description: string | null;
   venue: string | null;
   location: string | null;
   registrationInstructions: string | null;
   contactEmail: string | null;
   contactPhone: string | null;
+  contactPhoneHours?: string | null;
+  contactAddress?: string | null;
   websiteStatus: PublicationStatus;
   createdAt: string;
   updatedAt: string;
   publishedAt: string | null;
   updatedBy: string | null;
+  // Partnership & Governance Section
+  partnershipTagline?: string | null;
   partnershipHeading?: string | null;
   partnershipDescription?: string | null;
+  kukkiwonTitle?: string | null;
+  kukkiwonBranch?: string | null;
+  kukkiwonRole?: string | null;
   kukkiwonDescription?: string | null;
+  kukkiwonUrl?: string | null;
+  kukkiwonUrlText?: string | null;
+  kukkiwonBadge?: string | null;
+  kyorixTitle?: string | null;
+  kyorixSubtitle?: string | null;
+  kyorixRole?: string | null;
   kyorixDescription?: string | null;
+  kyorixBadge?: string | null;
+  // Disciplines Section
+  disciplinesTagline?: string | null;
+  disciplinesHeading?: string | null;
+  disciplinesDescription?: string | null;
+  disciplinesJson?: string | null;
+  // Dates Section Headers
+  datesTagline?: string | null;
+  datesHeading?: string | null;
+  datesDescription?: string | null;
+  // CTA Section
+  ctaTagline?: string | null;
   ctaTitle?: string | null;
   ctaDescription?: string | null;
-  disciplinesJson?: string | null;
+  ctaPrimaryBtnText?: string | null;
+  ctaSecondaryBtnText?: string | null;
+  // Contact Section Headers
+  contactTagline?: string | null;
+  contactHeading?: string | null;
+  contactDescription?: string | null;
+  // About Page Mission
+  aboutMissionHeading?: string | null;
+  aboutMissionText?: string | null;
 }
 
 export interface ChampionshipImportantDateDTO {
@@ -369,20 +405,56 @@ export interface PublicChampionshipResponse {
 export interface CreateOrUpdateContentInput {
   heroTitle?: string;
   heroSubtitle?: string;
+  heroTagline?: string;
+  heroPrimaryCtaText?: string;
+  heroSecondaryCtaText?: string;
   description?: string;
   venue?: string;
   location?: string;
   registrationInstructions?: string;
   contactEmail?: string;
   contactPhone?: string;
+  contactPhoneHours?: string;
+  contactAddress?: string;
   websiteStatus?: PublicationStatus;
+  // Partnership & Governance Section
+  partnershipTagline?: string;
   partnershipHeading?: string;
   partnershipDescription?: string;
+  kukkiwonTitle?: string;
+  kukkiwonBranch?: string;
+  kukkiwonRole?: string;
   kukkiwonDescription?: string;
+  kukkiwonUrl?: string;
+  kukkiwonUrlText?: string;
+  kukkiwonBadge?: string;
+  kyorixTitle?: string;
+  kyorixSubtitle?: string;
+  kyorixRole?: string;
   kyorixDescription?: string;
+  kyorixBadge?: string;
+  // Disciplines Section
+  disciplinesTagline?: string;
+  disciplinesHeading?: string;
+  disciplinesDescription?: string;
+  disciplinesJson?: string;
+  // Dates Section Headers
+  datesTagline?: string;
+  datesHeading?: string;
+  datesDescription?: string;
+  // CTA Section
+  ctaTagline?: string;
   ctaTitle?: string;
   ctaDescription?: string;
-  disciplinesJson?: string;
+  ctaPrimaryBtnText?: string;
+  ctaSecondaryBtnText?: string;
+  // Contact Section Headers
+  contactTagline?: string;
+  contactHeading?: string;
+  contactDescription?: string;
+  // About Page Mission
+  aboutMissionHeading?: string;
+  aboutMissionText?: string;
 }
 
 export interface CreateDateInput {

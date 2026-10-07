@@ -4,6 +4,9 @@
 // Registration Fees, Announcements, Public Documents, and Live Publishing
 // ==============================================================================
 
+import fs from "fs";
+import path from "path";
+import os from "os";
 import prisma from "@/lib/db";
 import { formatPaiseToInr } from "@/server/services/fee.service";
 import { AuditService } from "@/server/services/audit.service";
@@ -92,18 +95,63 @@ interface FallbackChampionshipData {
   updated_at: string;
   hero_title?: string;
   hero_subtitle?: string;
+  hero_tagline?: string;
+  hero_primary_cta_text?: string;
+  hero_secondary_cta_text?: string;
   location?: string;
   registration_instructions?: string;
+  contact_phone_hours?: string;
   website_status?: PublicationStatus;
   published_at?: string | null;
   updated_by?: string | null;
+  partnership_tagline?: string;
   partnership_heading?: string;
   partnership_description?: string;
+  kukkiwon_title?: string;
+  kukkiwon_branch?: string;
+  kukkiwon_role?: string;
   kukkiwon_description?: string;
+  kukkiwon_url?: string;
+  kukkiwon_url_text?: string;
+  kukkiwon_badge?: string;
+  kyorix_title?: string;
+  kyorix_subtitle?: string;
+  kyorix_role?: string;
   kyorix_description?: string;
+  kyorix_badge?: string;
+  disciplines_tagline?: string;
+  disciplines_heading?: string;
+  disciplines_description?: string;
+  disciplines_json?: string;
+  dates_tagline?: string;
+  dates_heading?: string;
+  dates_description?: string;
+  cta_tagline?: string;
   cta_title?: string;
   cta_description?: string;
-  disciplines_json?: string;
+  cta_primary_btn_text?: string;
+  cta_secondary_btn_text?: string;
+  contact_tagline?: string;
+  contact_heading?: string;
+  contact_description?: string;
+  about_mission_heading?: string;
+  about_mission_text?: string;
+}
+
+function getCmsDataFilePath(): string {
+  const tmpDir = path.join(os.tmpdir(), "kukkiwon_championship_data");
+  try {
+    if (!fs.existsSync(tmpDir)) {
+      fs.mkdirSync(tmpDir, { recursive: true });
+    }
+    return path.join(tmpDir, "cms-data.json");
+  } catch {
+    const localDir = path.join(process.cwd(), "storage");
+    if (!fs.existsSync(localDir)) {
+      fs.mkdirSync(localDir, { recursive: true });
+    }
+    return path.join(localDir, "cms-data.json");
+  }
 }
 
 const FALLBACK_CHAMPIONSHIPS: Map<string, FallbackChampionshipData> = new Map([
@@ -578,6 +626,57 @@ const FALLBACK_FAQS: Map<string, ChampionshipFAQDTO> = new Map([
   ],
 ]);
 
+function persistCmsDataToFile() {
+  try {
+    const filePath = getCmsDataFilePath();
+    const payload = {
+      championships: Array.from(FALLBACK_CHAMPIONSHIPS.entries()),
+      dates: Array.from(FALLBACK_DATES.entries()),
+      faqs: Array.from(FALLBACK_FAQS.entries()),
+      announcements: Array.from(FALLBACK_ANNOUNCEMENTS.entries()),
+    };
+    fs.writeFileSync(filePath, JSON.stringify(payload, null, 2), "utf-8");
+  } catch (e) {
+    console.warn("[CmsService] Could not persist CMS data to disk:", e);
+  }
+}
+
+function loadCmsDataFromFile() {
+  try {
+    const filePath = getCmsDataFilePath();
+    if (fs.existsSync(filePath)) {
+      const raw = fs.readFileSync(filePath, "utf-8");
+      const parsed = JSON.parse(raw);
+      if (parsed.championships && Array.isArray(parsed.championships)) {
+        for (const [k, v] of parsed.championships) {
+          const current = FALLBACK_CHAMPIONSHIPS.get(k);
+          FALLBACK_CHAMPIONSHIPS.set(k, { ...(current || {}), ...v });
+        }
+      }
+      if (parsed.dates && Array.isArray(parsed.dates)) {
+        for (const [k, v] of parsed.dates) {
+          FALLBACK_DATES.set(k, v);
+        }
+      }
+      if (parsed.faqs && Array.isArray(parsed.faqs)) {
+        for (const [k, v] of parsed.faqs) {
+          FALLBACK_FAQS.set(k, v);
+        }
+      }
+      if (parsed.announcements && Array.isArray(parsed.announcements)) {
+        for (const [k, v] of parsed.announcements) {
+          FALLBACK_ANNOUNCEMENTS.set(k, v);
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("[CmsService] Could not load CMS data from disk:", e);
+  }
+}
+
+// Initial bootstrap load from persistent cache
+loadCmsDataFromFile();
+
 export class CmsService {
   private static checkContentPermission(adminSession?: AdminSession) {
     if (!adminSession) return;
@@ -870,6 +969,7 @@ export class CmsService {
     existingFallback.updated_at = new Date().toISOString();
 
     FALLBACK_CHAMPIONSHIPS.set(championshipId, existingFallback);
+    persistCmsDataToFile();
 
     // Audit logging
     let auditAction = "CHAMPIONSHIP_UPDATED";
@@ -1484,6 +1584,7 @@ export class CmsService {
     };
 
     FALLBACK_ANNOUNCEMENTS.set(newId, ann);
+    persistCmsDataToFile();
 
     const auditAction = ann.status === "PUBLISHED" ? "ANNOUNCEMENT_PUBLISHED" : "ANNOUNCEMENT_CREATED";
     if (adminSession?.user_id) {
@@ -1538,6 +1639,7 @@ export class CmsService {
     };
 
     FALLBACK_ANNOUNCEMENTS.set(id, updated);
+    persistCmsDataToFile();
 
     let auditAction = "ANNOUNCEMENT_UPDATED";
     if (updated.status === "PUBLISHED" && current.status !== "PUBLISHED") {
@@ -1585,6 +1687,7 @@ export class CmsService {
     }
 
     FALLBACK_ANNOUNCEMENTS.delete(id);
+    persistCmsDataToFile();
 
     if (adminSession?.user_id) {
       AuditService.logAction({
@@ -1841,24 +1944,54 @@ export class CmsService {
       championshipId: champ.id,
       heroTitle: fallback?.hero_title || champ.heroHeadline || "The Pinnacle of Taekwondo Excellence",
       heroSubtitle: fallback?.hero_subtitle || champ.subtitle || "Sanctioned by World Taekwondo Headquarters Kukkiwon India North Branch",
+      heroTagline: fallback?.hero_tagline || "Official National Championship 2026",
+      heroPrimaryCtaText: fallback?.hero_primary_cta_text || "Register Now",
+      heroSecondaryCtaText: fallback?.hero_secondary_cta_text || "Contact Secretariat",
       description: champ.description || "",
       venue: champ.venue,
       location: fallback?.location || `${champ.city}, ${champ.state}, ${champ.country}`,
       registrationInstructions: fallback?.registration_instructions || "1. Submit athlete profile and national Dan accreditation.\n2. Upload mandatory verification documents.\n3. Complete registration payment to receive your Digital ID card.",
-      contactEmail: champ.contactEmail,
-      contactPhone: champ.contactPhone,
+      contactEmail: fallback?.contact_email || champ.contactEmail,
+      contactPhone: fallback?.contact_phone || champ.contactPhone,
+      contactPhoneHours: fallback?.contact_phone_hours || "Monday to Saturday • 9:00 AM – 6:00 PM IST",
+      contactAddress: fallback?.contact_address || champ.contactAddress,
       websiteStatus: champ.status,
       createdAt: champ.updatedAt,
       updatedAt: champ.updatedAt,
       publishedAt: fallback?.published_at || (champ.status === "PUBLISHED" ? champ.updatedAt : null),
       updatedBy: fallback?.updated_by || null,
+      partnershipTagline: fallback?.partnership_tagline || "Collaboration & Leadership",
       partnershipHeading: fallback?.partnership_heading || "Presented in Partnership",
       partnershipDescription: fallback?.partnership_description || "A strategic sporting union combining authentic martial arts governance with modern tournament technology.",
+      kukkiwonTitle: fallback?.kukkiwon_title || "World Taekwondo Headquarters Kukkiwon",
+      kukkiwonBranch: fallback?.kukkiwon_branch || "India North Branch",
+      kukkiwonRole: fallback?.kukkiwon_role || "Official Governing Authority",
       kukkiwonDescription: fallback?.kukkiwon_description || "Established under the authority of World Taekwondo Headquarters Kukkiwon (Seoul, South Korea). The India North Branch is the official governing authority responsible for Dan promotions, black belt certifications, instructor seminars, and sanctioned championships across Northern India.",
+      kukkiwonUrl: fallback?.kukkiwon_url || "https://kukkiwon-india.org/",
+      kukkiwonUrlText: fallback?.kukkiwon_url_text || "Visit Kukkiwon India",
+      kukkiwonBadge: fallback?.kukkiwon_badge || "Sanctioning Body",
+      kyorixTitle: fallback?.kyorix_title || "Kyorix Sports Technology",
+      kyorixSubtitle: fallback?.kyorix_subtitle || "Advanced Electronic Scoring & Accreditation",
+      kyorixRole: fallback?.kyorix_role || "Sports Hardware & Accreditation Partner",
       kyorixDescription: fallback?.kyorix_description || "Pioneers in martial arts competition electronics, Kyorix Sports Technology engineers wireless electronic chest and head protectors, multi-mat management software, real-time judge scoring consoles, and secure cryptographic accreditation ensuring flawless event execution.",
+      kyorixBadge: fallback?.kyorix_badge || "Electronic Scoring Partner",
+      disciplinesTagline: fallback?.disciplines_tagline || "Tournament Structure",
+      disciplinesHeading: fallback?.disciplines_heading || "Championship Details & Disciplines",
+      disciplinesDescription: fallback?.disciplines_description || "Official competition divisions, category weight brackets, and venue regulations.",
+      disciplinesJson: fallback?.disciplines_json || null,
+      datesTagline: fallback?.dates_tagline || "Key Milestones",
+      datesHeading: fallback?.dates_heading || "Important Championship Dates",
+      datesDescription: fallback?.dates_description || "Crucial deadlines for athlete submissions, late registrations, and tournament start dates.",
+      ctaTagline: fallback?.cta_tagline || "Accreditation & Badges",
       ctaTitle: fallback?.cta_title || "Ready to Take Part?",
       ctaDescription: fallback?.cta_description || "Register for the Kukkiwon Cup Championship. Compete under official Kukkiwon sanction and secure your certified tournament accreditation badge.",
-      disciplinesJson: fallback?.disciplines_json || null,
+      ctaPrimaryBtnText: fallback?.cta_primary_btn_text || "Register Now",
+      ctaSecondaryBtnText: fallback?.cta_secondary_btn_text || "Contact Secretariat",
+      contactTagline: fallback?.contact_tagline || "Tournament Secretariat",
+      contactHeading: fallback?.contact_heading || "Official Inquiries & Support",
+      contactDescription: fallback?.contact_description || "Official communication channels for participating academies, coaches, and delegations.",
+      aboutMissionHeading: fallback?.about_mission_heading || "Tournament Mission & Standards",
+      aboutMissionText: fallback?.about_mission_text || "Upholding Olympic martial arts excellence, fair play, and athlete empowerment.",
     };
   }
 
@@ -1891,25 +2024,58 @@ export class CmsService {
         existingFallback.hero_subtitle = input.heroSubtitle;
         existingFallback.subtitle = input.heroSubtitle;
       }
+      if (input.heroTagline !== undefined) existingFallback.hero_tagline = input.heroTagline;
+      if (input.heroPrimaryCtaText !== undefined) existingFallback.hero_primary_cta_text = input.heroPrimaryCtaText;
+      if (input.heroSecondaryCtaText !== undefined) existingFallback.hero_secondary_cta_text = input.heroSecondaryCtaText;
       if (input.description) existingFallback.description = input.description;
       if (input.venue) existingFallback.venue = input.venue;
       if (input.location) existingFallback.location = input.location;
       if (input.registrationInstructions) existingFallback.registration_instructions = input.registrationInstructions;
       if (input.contactEmail) existingFallback.contact_email = input.contactEmail;
       if (input.contactPhone) existingFallback.contact_phone = input.contactPhone;
+      if (input.contactPhoneHours !== undefined) existingFallback.contact_phone_hours = input.contactPhoneHours;
+      if (input.contactAddress !== undefined) existingFallback.contact_address = input.contactAddress;
       if (input.websiteStatus) {
         existingFallback.status = input.websiteStatus;
         existingFallback.is_published = input.websiteStatus === "PUBLISHED";
       }
+      if (input.partnershipTagline !== undefined) existingFallback.partnership_tagline = input.partnershipTagline;
       if (input.partnershipHeading !== undefined) existingFallback.partnership_heading = input.partnershipHeading;
       if (input.partnershipDescription !== undefined) existingFallback.partnership_description = input.partnershipDescription;
+      if (input.kukkiwonTitle !== undefined) existingFallback.kukkiwon_title = input.kukkiwonTitle;
+      if (input.kukkiwonBranch !== undefined) existingFallback.kukkiwon_branch = input.kukkiwonBranch;
+      if (input.kukkiwonRole !== undefined) existingFallback.kukkiwon_role = input.kukkiwonRole;
       if (input.kukkiwonDescription !== undefined) existingFallback.kukkiwon_description = input.kukkiwonDescription;
+      if (input.kukkiwonUrl !== undefined) existingFallback.kukkiwon_url = input.kukkiwonUrl;
+      if (input.kukkiwonUrlText !== undefined) existingFallback.kukkiwon_url_text = input.kukkiwonUrlText;
+      if (input.kukkiwonBadge !== undefined) existingFallback.kukkiwon_badge = input.kukkiwonBadge;
+      if (input.kyorixTitle !== undefined) existingFallback.kyorix_title = input.kyorixTitle;
+      if (input.kyorixSubtitle !== undefined) existingFallback.kyorix_subtitle = input.kyorixSubtitle;
+      if (input.kyorixRole !== undefined) existingFallback.kyorix_role = input.kyorixRole;
       if (input.kyorixDescription !== undefined) existingFallback.kyorix_description = input.kyorixDescription;
+      if (input.kyorixBadge !== undefined) existingFallback.kyorix_badge = input.kyorixBadge;
+      if (input.disciplinesTagline !== undefined) existingFallback.disciplines_tagline = input.disciplinesTagline;
+      if (input.disciplinesHeading !== undefined) existingFallback.disciplines_heading = input.disciplinesHeading;
+      if (input.disciplinesDescription !== undefined) existingFallback.disciplines_description = input.disciplinesDescription;
+      if (input.disciplinesJson !== undefined) existingFallback.disciplines_json = input.disciplinesJson;
+      if (input.datesTagline !== undefined) existingFallback.dates_tagline = input.datesTagline;
+      if (input.datesHeading !== undefined) existingFallback.dates_heading = input.datesHeading;
+      if (input.datesDescription !== undefined) existingFallback.dates_description = input.datesDescription;
+      if (input.ctaTagline !== undefined) existingFallback.cta_tagline = input.ctaTagline;
       if (input.ctaTitle !== undefined) existingFallback.cta_title = input.ctaTitle;
       if (input.ctaDescription !== undefined) existingFallback.cta_description = input.ctaDescription;
-      if (input.disciplinesJson !== undefined) existingFallback.disciplines_json = input.disciplinesJson;
+      if (input.ctaPrimaryBtnText !== undefined) existingFallback.cta_primary_btn_text = input.ctaPrimaryBtnText;
+      if (input.ctaSecondaryBtnText !== undefined) existingFallback.cta_secondary_btn_text = input.ctaSecondaryBtnText;
+      if (input.contactTagline !== undefined) existingFallback.contact_tagline = input.contactTagline;
+      if (input.contactHeading !== undefined) existingFallback.contact_heading = input.contactHeading;
+      if (input.contactDescription !== undefined) existingFallback.contact_description = input.contactDescription;
+      if (input.aboutMissionHeading !== undefined) existingFallback.about_mission_heading = input.aboutMissionHeading;
+      if (input.aboutMissionText !== undefined) existingFallback.about_mission_text = input.aboutMissionText;
+
       existingFallback.updated_at = new Date().toISOString();
       if (adminSession?.email) existingFallback.updated_by = adminSession.email;
+
+      persistCmsDataToFile();
     }
 
     if (adminSession?.user_id) {
@@ -1949,6 +2115,7 @@ export class CmsService {
     existingFallback.published_at = nowIso;
     existingFallback.updated_at = nowIso;
     if (adminSession?.email) existingFallback.updated_by = adminSession.email;
+    persistCmsDataToFile();
 
     if (adminSession?.user_id) {
       AuditService.logAction({
@@ -1989,6 +2156,7 @@ export class CmsService {
     existingFallback.is_published = false;
     existingFallback.updated_at = new Date().toISOString();
     if (adminSession?.email) existingFallback.updated_by = adminSession.email;
+    persistCmsDataToFile();
 
     if (adminSession?.user_id) {
       AuditService.logAction({
@@ -2061,6 +2229,7 @@ export class CmsService {
     };
 
     FALLBACK_DATES.set(newId, item);
+    persistCmsDataToFile();
 
     if (adminSession?.user_id) {
       AuditService.logAction({
@@ -2105,6 +2274,7 @@ export class CmsService {
     };
 
     FALLBACK_DATES.set(id, updated);
+    persistCmsDataToFile();
 
     if (adminSession?.user_id) {
       AuditService.logAction({
@@ -2139,6 +2309,7 @@ export class CmsService {
     }
 
     FALLBACK_DATES.delete(id);
+    persistCmsDataToFile();
 
     if (adminSession?.user_id) {
       AuditService.logAction({
@@ -2207,6 +2378,7 @@ export class CmsService {
     };
 
     FALLBACK_FAQS.set(newId, item);
+    persistCmsDataToFile();
 
     if (adminSession?.user_id) {
       AuditService.logAction({
@@ -2250,6 +2422,7 @@ export class CmsService {
     };
 
     FALLBACK_FAQS.set(id, updated);
+    persistCmsDataToFile();
 
     if (adminSession?.user_id) {
       AuditService.logAction({
@@ -2284,6 +2457,7 @@ export class CmsService {
     }
 
     FALLBACK_FAQS.delete(id);
+    persistCmsDataToFile();
 
     if (adminSession?.user_id) {
       AuditService.logAction({

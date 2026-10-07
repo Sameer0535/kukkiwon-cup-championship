@@ -10,7 +10,7 @@ import { PublicFooter } from "@/components/layout/public-footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BRANDING } from "@/config/branding";
-import { SITE_CONFIG } from "@/config/site";
+import { getPublicChampionshipData } from "@/lib/cms";
 import {
   Shield,
   Award,
@@ -23,7 +23,9 @@ import {
   Target,
 } from "lucide-react";
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const tournament = await getPublicChampionshipData();
+
   return (
     <div className="flex min-h-screen flex-col bg-white text-slate-900 selection:bg-blue-600 selection:text-white font-sans">
       <PublicHeader />
@@ -33,14 +35,14 @@ export default function AboutPage() {
         <section className="relative overflow-hidden border-b border-slate-200 bg-gradient-to-b from-blue-50/70 via-white to-white py-16 sm:py-20">
           <div className="container relative mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl text-center space-y-4">
             <span className="text-xs font-bold uppercase tracking-widest text-blue-600">
-              Institutional Governance & Partnership
+              {tournament.partnershipTagline || "Institutional Governance & Partnership"}
             </span>
             <h1 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-slate-950">
               About The Championship
             </h1>
             <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed">
-              An official tournament platform established under the direct authority of
-              Kukkiwon India North Branch, powered by Kyorix Sports Technology.
+              {tournament.partnershipDescription ||
+                "An official tournament platform established under the direct authority of Kukkiwon India North Branch, powered by Kyorix Sports Technology."}
             </p>
           </div>
         </section>
@@ -53,7 +55,7 @@ export default function AboutPage() {
                 <div className="relative h-36 w-44 rounded-2xl bg-white p-3 border border-slate-200 shadow-md flex items-center justify-center">
                   <Image
                     src={BRANDING.kukkiwon.logoPath}
-                    alt={BRANDING.kukkiwon.name}
+                    alt={tournament.kukkiwonTitle || BRANDING.kukkiwon.name}
                     fill
                     className="object-contain"
                   />
@@ -63,37 +65,30 @@ export default function AboutPage() {
               <div className="lg:col-span-8 space-y-4">
                 <div className="space-y-1">
                   <span className="text-xs font-bold uppercase tracking-widest text-blue-600">
-                    Governing Authority
+                    {tournament.kukkiwonRole || "Governing Authority"}
                   </span>
                   <h2 className="text-2xl sm:text-3xl font-black uppercase text-slate-950">
-                    {BRANDING.kukkiwon.name} ({BRANDING.kukkiwon.branch})
+                    {tournament.kukkiwonTitle || BRANDING.kukkiwon.name}{" "}
+                    {tournament.kukkiwonBranch ? `(${tournament.kukkiwonBranch})` : `(${BRANDING.kukkiwon.branch})`}
                   </h2>
                   <p className="text-xs font-bold text-slate-500">
-                    {BRANDING.kukkiwon.title}
+                    {tournament.kukkiwonBadge || "Official Sanctioning Body"}
                   </p>
                 </div>
 
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                  Kukkiwon, located in Gangnam-gu, Seoul, Republic of Korea, was founded in 1972 as the World
-                  Taekwondo Headquarters. It serves as the definitive authority for standardizing Taekwondo technique,
-                  administering international Dan/Poom promotions, training master instructors, and upholding the martial
-                  art's Olympic legacy.
-                </p>
-
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                  The Kukkiwon India North Branch is the officially designated jurisdictional authority governing
-                  Dan promotions, examiner certifications, black belt verification, and sanctioned championships across
-                  the northern states of India.
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-line">
+                  {tournament.kukkiwonDescription ||
+                    "Kukkiwon, located in Gangnam-gu, Seoul, Republic of Korea, was founded in 1972 as the World Taekwondo Headquarters. It serves as the definitive authority for standardizing Taekwondo technique, administering international Dan/Poom promotions, training master instructors, and upholding the martial art's Olympic legacy.\n\nThe Kukkiwon India North Branch is the officially designated jurisdictional authority governing Dan promotions, examiner certifications, black belt verification, and sanctioned championships across the northern states of India."}
                 </p>
 
                 <div className="pt-2">
                   <a
-                    href="https://kukkiwon-india.org/"
+                    href={tournament.kukkiwonUrl || "https://kukkiwon-india.org/"}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:underline"
                   >
-                    <span>Visit Kukkiwon India North Branch Official Portal</span>
+                    <span>{tournament.kukkiwonUrlText || "Visit Kukkiwon India North Branch Official Portal"}</span>
                     <ExternalLink className="h-3.5 w-3.5" />
                   </a>
                 </div>
@@ -109,26 +104,20 @@ export default function AboutPage() {
               <div className="lg:col-span-8 space-y-4 order-2 lg:order-1">
                 <div className="space-y-1">
                   <span className="text-xs font-bold uppercase tracking-widest text-cyan-600">
-                    Technology & Accreditation Partner
+                    {tournament.kyorixRole || "Technology & Accreditation Partner"}
                   </span>
                   <h2 className="text-2xl sm:text-3xl font-black uppercase text-slate-950">
-                    {BRANDING.kyorix.name} {BRANDING.kyorix.subtitle}
+                    {tournament.kyorixTitle || BRANDING.kyorix.name}{" "}
+                    {tournament.kyorixSubtitle || BRANDING.kyorix.subtitle}
                   </h2>
                   <p className="text-xs font-bold text-slate-500">
-                    Electronic Scoring & Tournament Infrastructure
+                    {tournament.kyorixBadge || "Electronic Scoring & Tournament Infrastructure"}
                   </p>
                 </div>
 
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                  Kyorix Sports Technology provides tournament electronic management solutions for combat sports.
-                  Through wireless sensor transmitters, electronic body protectors (PSS), synchronized video replay,
-                  and digital referee scoring pads, Kyorix ensures instant, tamper-proof point calculation.
-                </p>
-
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                  For the Kukkiwon Cup Championship, Kyorix architects the standalone registration platform,
-                  cryptographic QR badge verification, electronic mat management, and participant credential verification,
-                  elevating the tournament to international technological benchmarks.
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-line">
+                  {tournament.kyorixDescription ||
+                    "Kyorix Sports Technology provides tournament electronic management solutions for combat sports. Through wireless sensor transmitters, electronic body protectors (PSS), synchronized video replay, and digital referee scoring pads, Kyorix ensures instant, tamper-proof point calculation.\n\nFor the Kukkiwon Cup Championship, Kyorix architects the standalone registration platform, cryptographic QR badge verification, electronic mat management, and participant credential verification, elevating the tournament to international technological benchmarks."}
                 </p>
               </div>
 
@@ -136,7 +125,7 @@ export default function AboutPage() {
                 <div className="relative h-36 w-36 rounded-2xl bg-white p-3 border border-slate-200 shadow-md flex items-center justify-center">
                   <Image
                     src={BRANDING.kyorix.logoPath}
-                    alt={BRANDING.kyorix.name}
+                    alt={tournament.kyorixTitle || BRANDING.kyorix.name}
                     fill
                     className="object-contain"
                   />
@@ -154,8 +143,13 @@ export default function AboutPage() {
                 Official Standards
               </span>
               <h2 className="text-2xl sm:text-3xl font-black uppercase text-slate-950">
-                Participation Standards & Ethics
+                {tournament.aboutMissionHeading || "Participation Standards & Ethics"}
               </h2>
+              {tournament.aboutMissionText && (
+                <p className="text-xs sm:text-sm text-slate-600 max-w-xl mx-auto">
+                  {tournament.aboutMissionText}
+                </p>
+              )}
             </div>
 
             <div className="space-y-4 text-xs sm:text-sm text-slate-600 leading-relaxed">

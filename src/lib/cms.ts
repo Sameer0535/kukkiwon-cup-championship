@@ -31,16 +31,45 @@ export interface PublicChampionshipContent {
   rulesDocumentUrl: string | null;
   heroHeadline: string;
   heroDescription: string;
+  heroTagline?: string;
+  heroPrimaryCtaText?: string;
+  heroSecondaryCtaText?: string;
   contactEmail: string;
   contactPhone: string;
+  contactPhoneHours?: string;
   contactAddress: string;
   disciplines: { title: string; category: string; description: string }[];
+  disciplinesTagline?: string;
+  disciplinesHeading?: string;
+  disciplinesDescription?: string;
+  partnershipTagline?: string;
   partnershipHeading?: string;
   partnershipDescription?: string;
+  kukkiwonTitle?: string;
+  kukkiwonBranch?: string;
+  kukkiwonRole?: string;
   kukkiwonDescription?: string;
+  kukkiwonUrl?: string;
+  kukkiwonUrlText?: string;
+  kukkiwonBadge?: string;
+  kyorixTitle?: string;
+  kyorixSubtitle?: string;
+  kyorixRole?: string;
   kyorixDescription?: string;
+  kyorixBadge?: string;
+  datesTagline?: string;
+  datesHeading?: string;
+  datesDescription?: string;
+  ctaTagline?: string;
   ctaTitle?: string;
   ctaDescription?: string;
+  ctaPrimaryBtnText?: string;
+  ctaSecondaryBtnText?: string;
+  contactTagline?: string;
+  contactHeading?: string;
+  contactDescription?: string;
+  aboutMissionHeading?: string;
+  aboutMissionText?: string;
 }
 
 const DEFAULT_CHAMPIONSHIP_DATA: PublicChampionshipContent = {
@@ -69,15 +98,44 @@ const DEFAULT_CHAMPIONSHIP_DATA: PublicChampionshipContent = {
   heroHeadline: "The Pinnacle of Taekwondo Excellence",
   heroDescription:
     "Experience world-class competition, official Kukkiwon Dan accreditation, and electronic scoring precision powered by Kyorix Sports Technology.",
+  heroTagline: "Official National Championship 2026",
+  heroPrimaryCtaText: "Register Now",
+  heroSecondaryCtaText: "Contact Secretariat",
   contactEmail: SITE_CONFIG.contact.email,
   contactPhone: SITE_CONFIG.contact.phone,
+  contactPhoneHours: "Monday to Saturday • 9:00 AM – 6:00 PM IST",
   contactAddress: SITE_CONFIG.contact.address,
+  partnershipTagline: "Collaboration & Leadership",
   partnershipHeading: "Presented in Partnership",
   partnershipDescription: "A strategic sporting union combining authentic martial arts governance with modern tournament technology.",
+  kukkiwonTitle: "World Taekwondo Headquarters Kukkiwon",
+  kukkiwonBranch: "India North Branch",
+  kukkiwonRole: "Official Governing Authority",
   kukkiwonDescription: "Established under the authority of World Taekwondo Headquarters Kukkiwon (Seoul, South Korea). The India North Branch is the official governing authority responsible for Dan promotions, black belt certifications, instructor seminars, and sanctioned championships across Northern India.",
+  kukkiwonUrl: "https://kukkiwon-india.org/",
+  kukkiwonUrlText: "Visit Kukkiwon India",
+  kukkiwonBadge: "Sanctioning Body",
+  kyorixTitle: "Kyorix Sports Technology",
+  kyorixSubtitle: "Electronic Scoring & Accreditation",
+  kyorixRole: "Sports Hardware & Accreditation Partner",
   kyorixDescription: "Pioneers in martial arts competition electronics, Kyorix Sports Technology engineers wireless electronic chest and head protectors, multi-mat management software, real-time judge scoring consoles, and secure cryptographic accreditation ensuring flawless event execution.",
+  kyorixBadge: "Electronic Scoring Partner",
+  disciplinesTagline: "Tournament Structure",
+  disciplinesHeading: "Championship Details & Disciplines",
+  disciplinesDescription: "Official competition divisions, category weight brackets, and venue regulations.",
+  datesTagline: "Key Milestones",
+  datesHeading: "Important Championship Dates",
+  datesDescription: "Crucial deadlines for athlete submissions, late registrations, and tournament start dates.",
+  ctaTagline: "Accreditation & Badges",
   ctaTitle: "Ready to Take Part?",
   ctaDescription: "Register for the Kukkiwon Cup Championship. Compete under official Kukkiwon sanction and secure your certified tournament accreditation badge.",
+  ctaPrimaryBtnText: "Register Now",
+  ctaSecondaryBtnText: "Contact Secretariat",
+  contactTagline: "Tournament Secretariat",
+  contactHeading: "Official Inquiries & Support",
+  contactDescription: "Official communication channels for participating academies, coaches, and delegations.",
+  aboutMissionHeading: "Tournament Mission & Standards",
+  aboutMissionText: "Upholding Olympic martial arts excellence, fair play, and athlete empowerment.",
   disciplines: [
     {
       title: "Kyorugi (Sparring)",
@@ -131,7 +189,7 @@ export async function getPublicChampionshipData(
         slug: cmsChamp.slug,
         name: cmsChamp.name,
         shortName: cmsChamp.shortName,
-        subtitle: cmsChamp.subtitle,
+        subtitle: content?.heroSubtitle || cmsChamp.subtitle,
         description: cmsChamp.description,
         status: cmsChamp.registrationAvailability === "OPEN" ? "REGISTRATION_OPEN" : cmsChamp.status,
         startDate: cmsChamp.startDate,
@@ -151,15 +209,44 @@ export async function getPublicChampionshipData(
         rulesDocumentUrl: cmsChamp.rulesDocumentUrl,
         heroHeadline: content?.heroTitle || cmsChamp.heroHeadline,
         heroDescription: content?.heroSubtitle || cmsChamp.heroDescription,
+        heroTagline: content?.heroTagline || DEFAULT_CHAMPIONSHIP_DATA.heroTagline,
+        heroPrimaryCtaText: content?.heroPrimaryCtaText || DEFAULT_CHAMPIONSHIP_DATA.heroPrimaryCtaText,
+        heroSecondaryCtaText: content?.heroSecondaryCtaText || DEFAULT_CHAMPIONSHIP_DATA.heroSecondaryCtaText,
         contactEmail: content?.contactEmail || cmsChamp.contactEmail,
         contactPhone: content?.contactPhone || cmsChamp.contactPhone,
-        contactAddress: cmsChamp.contactAddress,
+        contactPhoneHours: content?.contactPhoneHours || DEFAULT_CHAMPIONSHIP_DATA.contactPhoneHours,
+        contactAddress: content?.contactAddress || cmsChamp.contactAddress,
+        partnershipTagline: content?.partnershipTagline || DEFAULT_CHAMPIONSHIP_DATA.partnershipTagline,
         partnershipHeading: content?.partnershipHeading || DEFAULT_CHAMPIONSHIP_DATA.partnershipHeading,
         partnershipDescription: content?.partnershipDescription || DEFAULT_CHAMPIONSHIP_DATA.partnershipDescription,
+        kukkiwonTitle: content?.kukkiwonTitle || DEFAULT_CHAMPIONSHIP_DATA.kukkiwonTitle,
+        kukkiwonBranch: content?.kukkiwonBranch || DEFAULT_CHAMPIONSHIP_DATA.kukkiwonBranch,
+        kukkiwonRole: content?.kukkiwonRole || DEFAULT_CHAMPIONSHIP_DATA.kukkiwonRole,
         kukkiwonDescription: content?.kukkiwonDescription || DEFAULT_CHAMPIONSHIP_DATA.kukkiwonDescription,
+        kukkiwonUrl: content?.kukkiwonUrl || DEFAULT_CHAMPIONSHIP_DATA.kukkiwonUrl,
+        kukkiwonUrlText: content?.kukkiwonUrlText || DEFAULT_CHAMPIONSHIP_DATA.kukkiwonUrlText,
+        kukkiwonBadge: content?.kukkiwonBadge || DEFAULT_CHAMPIONSHIP_DATA.kukkiwonBadge,
+        kyorixTitle: content?.kyorixTitle || DEFAULT_CHAMPIONSHIP_DATA.kyorixTitle,
+        kyorixSubtitle: content?.kyorixSubtitle || DEFAULT_CHAMPIONSHIP_DATA.kyorixSubtitle,
+        kyorixRole: content?.kyorixRole || DEFAULT_CHAMPIONSHIP_DATA.kyorixRole,
         kyorixDescription: content?.kyorixDescription || DEFAULT_CHAMPIONSHIP_DATA.kyorixDescription,
+        kyorixBadge: content?.kyorixBadge || DEFAULT_CHAMPIONSHIP_DATA.kyorixBadge,
+        disciplinesTagline: content?.disciplinesTagline || DEFAULT_CHAMPIONSHIP_DATA.disciplinesTagline,
+        disciplinesHeading: content?.disciplinesHeading || DEFAULT_CHAMPIONSHIP_DATA.disciplinesHeading,
+        disciplinesDescription: content?.disciplinesDescription || DEFAULT_CHAMPIONSHIP_DATA.disciplinesDescription,
+        datesTagline: content?.datesTagline || DEFAULT_CHAMPIONSHIP_DATA.datesTagline,
+        datesHeading: content?.datesHeading || DEFAULT_CHAMPIONSHIP_DATA.datesHeading,
+        datesDescription: content?.datesDescription || DEFAULT_CHAMPIONSHIP_DATA.datesDescription,
+        ctaTagline: content?.ctaTagline || DEFAULT_CHAMPIONSHIP_DATA.ctaTagline,
         ctaTitle: content?.ctaTitle || DEFAULT_CHAMPIONSHIP_DATA.ctaTitle,
         ctaDescription: content?.ctaDescription || DEFAULT_CHAMPIONSHIP_DATA.ctaDescription,
+        ctaPrimaryBtnText: content?.ctaPrimaryBtnText || DEFAULT_CHAMPIONSHIP_DATA.ctaPrimaryBtnText,
+        ctaSecondaryBtnText: content?.ctaSecondaryBtnText || DEFAULT_CHAMPIONSHIP_DATA.ctaSecondaryBtnText,
+        contactTagline: content?.contactTagline || DEFAULT_CHAMPIONSHIP_DATA.contactTagline,
+        contactHeading: content?.contactHeading || DEFAULT_CHAMPIONSHIP_DATA.contactHeading,
+        contactDescription: content?.contactDescription || DEFAULT_CHAMPIONSHIP_DATA.contactDescription,
+        aboutMissionHeading: content?.aboutMissionHeading || DEFAULT_CHAMPIONSHIP_DATA.aboutMissionHeading,
+        aboutMissionText: content?.aboutMissionText || DEFAULT_CHAMPIONSHIP_DATA.aboutMissionText,
         disciplines: parsedDisciplines,
       };
     }
