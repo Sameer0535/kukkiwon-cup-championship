@@ -9,7 +9,16 @@ import { CmsService } from "@/server/services/cms.service";
 
 export async function GET(req: NextRequest) {
   try {
-    const admin = await requireAdmin(req, ["SUPER_ADMIN", "EVENT_ADMIN", "REGISTRAR", "VIEWER"]);
+    const admin = await requireAdmin(req, [
+      "SUPER_ADMIN",
+      "EVENT_ADMIN",
+      "CONTENT_ADMIN",
+      "REGISTRATION_ADMIN",
+      "DOCUMENT_ADMIN",
+      "FINANCE_ADMIN",
+      "REGISTRAR",
+      "VIEWER",
+    ]);
     const { searchParams } = new URL(req.url);
     const championshipId =
       searchParams.get("championshipId") ||
@@ -54,7 +63,12 @@ export async function GET(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
-    const admin = await requireAdmin(req, ["SUPER_ADMIN", "EVENT_ADMIN"]);
+    const admin = await requireAdmin(req, [
+      "SUPER_ADMIN",
+      "EVENT_ADMIN",
+      "CONTENT_ADMIN",
+      "REGISTRATION_ADMIN",
+    ]);
     const body = await req.json();
     const { searchParams } = new URL(req.url);
     const championshipId =

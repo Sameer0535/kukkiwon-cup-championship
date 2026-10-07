@@ -581,12 +581,7 @@ const FALLBACK_FAQS: Map<string, ChampionshipFAQDTO> = new Map([
 export class CmsService {
   private static checkContentPermission(adminSession?: AdminSession) {
     if (!adminSession) return;
-    if (
-      adminSession.role === "VIEWER" ||
-      (adminSession.role as any) === "REGISTRANT" ||
-      (adminSession.role as any) === "REGISTRAR" ||
-      adminSession.role === "FINANCE_ADMIN"
-    ) {
+    if (adminSession.role === "VIEWER" || (adminSession.role as any) === "REGISTRANT") {
       throw new AuthError("Forbidden: Insufficient privileges for championship content.", 403);
     }
   }

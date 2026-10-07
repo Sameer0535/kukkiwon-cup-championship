@@ -9,7 +9,16 @@ import { IdCardTemplateService } from "@/server/services/id-card-template.servic
 
 export async function GET(req: NextRequest) {
   try {
-    await requireAdmin(req, ["SUPER_ADMIN", "EVENT_ADMIN", "REGISTRATION_ADMIN", "VIEWER"]);
+    await requireAdmin(req, [
+      "SUPER_ADMIN",
+      "EVENT_ADMIN",
+      "REGISTRATION_ADMIN",
+      "DOCUMENT_ADMIN",
+      "CONTENT_ADMIN",
+      "FINANCE_ADMIN",
+      "REGISTRAR",
+      "VIEWER",
+    ]);
     const templateUrl = await IdCardTemplateService.getTemplate();
     return NextResponse.json({
       success: true,
@@ -26,7 +35,15 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    await requireAdmin(req, ["SUPER_ADMIN", "EVENT_ADMIN", "REGISTRATION_ADMIN"]);
+    await requireAdmin(req, [
+      "SUPER_ADMIN",
+      "EVENT_ADMIN",
+      "REGISTRATION_ADMIN",
+      "DOCUMENT_ADMIN",
+      "CONTENT_ADMIN",
+      "FINANCE_ADMIN",
+      "REGISTRAR",
+    ]);
     const body = await req.json();
     const { templateUrl } = body;
 
@@ -54,7 +71,15 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    await requireAdmin(req, ["SUPER_ADMIN", "EVENT_ADMIN", "REGISTRATION_ADMIN"]);
+    await requireAdmin(req, [
+      "SUPER_ADMIN",
+      "EVENT_ADMIN",
+      "REGISTRATION_ADMIN",
+      "DOCUMENT_ADMIN",
+      "CONTENT_ADMIN",
+      "FINANCE_ADMIN",
+      "REGISTRAR",
+    ]);
     await IdCardTemplateService.deleteTemplate();
 
     return NextResponse.json({

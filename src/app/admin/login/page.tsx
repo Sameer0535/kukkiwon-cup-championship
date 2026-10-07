@@ -41,9 +41,10 @@ export default function AdminLoginPage() {
         return;
       }
 
-      // Store bearer token for authorization header support
+      // Store bearer token for authorization header support across tabs and sessions
       if (data.token) {
         sessionStorage.setItem("kukkiwon_admin_bearer", data.token);
+        localStorage.setItem("kukkiwon_admin_bearer", data.token);
       }
 
       router.push("/admin");

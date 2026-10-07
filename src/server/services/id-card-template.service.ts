@@ -5,6 +5,7 @@
 
 import fs from "fs/promises";
 import path from "path";
+import os from "os";
 
 interface TemplateRecord {
   templateUrl: string;
@@ -12,7 +13,8 @@ interface TemplateRecord {
 }
 
 let inMemoryTemplate: string | null = null;
-const TEMPLATE_FILE_PATH = path.join(process.cwd(), "storage", "id-card-template.json");
+const TMP_TEMPLATE_PATH = path.join(os.tmpdir(), "kukkiwon_championship_data", "id-card-template.json");
+const LOCAL_TEMPLATE_PATH = path.join(process.cwd(), "storage", "id-card-template.json");
 
 export class IdCardTemplateService {
   /**
@@ -21,8 +23,19 @@ export class IdCardTemplateService {
   static async getTemplate(): Promise<string | null> {
     if (inMemoryTemplate) return inMemoryTemplate;
 
+    // Check temp storage first (serverless safe)
     try {
-      const fileData = await fs.readFile(TEMPLATE_FILE_PATH, "utf-8");
+      const tmpData = await fs.readFile(TMP_TEMPLATE_PATH, "utf-8");
+      const parsed: TemplateRecord = JSON.parse(tmpData);
+      if (parsed.templateUrl) {
+        inMemoryTemplate = parsed.templateUrl;
+        return inMemoryTemplate;
+      }
+    } catch {}
+
+    // Check local storage fallback
+    try {
+      const fileData = await fs.readFile(LOCAL_TEMPLATE_PATH, "utf-8");
       const parsed: TemplateRecord = JSON.parse(fileData);
       inMemoryTemplate = parsed.templateUrl || null;
       return inMemoryTemplate;
@@ -36,16 +49,24 @@ export class IdCardTemplateService {
    */
   static async saveTemplate(templateUrl: string): Promise<string> {
     inMemoryTemplate = templateUrl;
+    const record: TemplateRecord = {
+      templateUrl,
+      updatedAt: new Date().toISOString(),
+    };
+    const content = JSON.stringify(record, null, 2);
+
+    // Save to temp directory first
     try {
-      const dir = path.dirname(TEMPLATE_FILE_PATH);
-      await fs.mkdir(dir, { recursive: true });
-      const record: TemplateRecord = {
-        templateUrl,
-        updatedAt: new Date().toISOString(),
-      };
-      await fs.writeFile(TEMPLATE_FILE_PATH, JSON.stringify(record, null, 2), "utf-8");
+      await fs.mkdir(path.dirname(TMP_TEMPLATE_PATH), { recursive: true });
+      await fs.writeFile(TMP_TEMPLATE_PATH, content, "utf-8");
+    } catch {}
+
+    // Save to local storage if filesystem permits
+    try {
+      await fs.mkdir(path.dirname(LOCAL_TEMPLATE_PATH), { recursive: true });
+      await fs.writeFile(LOCAL_TEMPLATE_PATH, content, "utf-8");
     } catch (err) {
-      console.warn("[IdCardTemplateService.saveTemplate] Could not persist to disk, stored in memory:", err);
+      console.warn("[IdCardTemplateService.saveTemplate] Local storage note (handled in memory/temp):", err);
     }
     return templateUrl;
   }
@@ -56,9 +77,10 @@ export class IdCardTemplateService {
   static async deleteTemplate(): Promise<void> {
     inMemoryTemplate = null;
     try {
-      await fs.unlink(TEMPLATE_FILE_PATH);
-    } catch {
-      // Ignore if file doesn't exist
-    }
+      await fs.unlink(TMP_TEMPLATE_PATH);
+    } catch {}
+    try {
+      await fs.unlink(LOCAL_TEMPLATE_PATH);
+    } catch {}
   }
 }

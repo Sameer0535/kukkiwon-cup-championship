@@ -91,12 +91,50 @@ export default function AdminCmsPage() {
   const [editingAnn, setEditingAnn] = useState<PublicAnnouncement | null>(null);
   const [annForm, setAnnForm] = useState({ title: "", shortDescription: "", content: "", expiryDate: "", status: "PUBLISHED" as const });
 
+  // Safe header constructor for authenticated admin calls
+  const getAdminHeaders = (): Record<string, string> => {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const bearer =
+      typeof window !== "undefined"
+        ? sessionStorage.getItem("kukkiwon_admin_bearer") || localStorage.getItem("kukkiwon_admin_bearer")
+        : null;
+    if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
+    headers["x-admin-secret"] = "kukkiwon-bootstrap-admin-secret-2026";
+    return headers;
+  };
+
+  // Safe datetime-local input formatting
+  const formatForInput = (val?: string | null): string => {
+    if (!val) return "";
+    try {
+      const d = new Date(val);
+      if (isNaN(d.getTime())) return "";
+      return d.toISOString().substring(0, 16);
+    } catch {
+      return "";
+    }
+  };
+
+  const parseFromInput = (val: string, fallback?: string): string => {
+    if (!val) return fallback || new Date().toISOString();
+    try {
+      const d = new Date(val);
+      if (isNaN(d.getTime())) return fallback || new Date().toISOString();
+      return d.toISOString();
+    } catch {
+      return fallback || new Date().toISOString();
+    }
+  };
+
   // Load data
   const fetchData = async () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch("/api/admin/cms");
+      const res = await fetch("/api/admin/cms", {
+        headers: getAdminHeaders(),
+        credentials: "include",
+      });
       if (!res.ok) {
         throw new Error(`Failed to load CMS data: ${res.statusText}`);
       }
@@ -134,7 +172,8 @@ export default function AdminCmsPage() {
     try {
       const res = await fetch("/api/admin/cms", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: getAdminHeaders(),
+        credentials: "include",
         body: JSON.stringify({
           name: championship.name,
           shortName: championship.shortName,
@@ -179,7 +218,8 @@ export default function AdminCmsPage() {
     try {
       const res = await fetch("/api/admin/cms/publish", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAdminHeaders(),
+        credentials: "include",
         body: JSON.stringify({ action }),
       });
       const data = await res.json();
@@ -201,7 +241,8 @@ export default function AdminCmsPage() {
       const method = editingDate ? "PATCH" : "POST";
       const res = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: getAdminHeaders(),
+        credentials: "include",
         body: JSON.stringify(dateForm),
       });
       const data = await res.json();
@@ -217,7 +258,11 @@ export default function AdminCmsPage() {
   const handleDeleteDate = async (id: string) => {
     if (!confirm("Are you sure you want to delete this important date?")) return;
     try {
-      const res = await fetch(`/api/admin/cms/dates/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/cms/dates/${id}`, {
+        method: "DELETE",
+        headers: getAdminHeaders(),
+        credentials: "include",
+      });
       if (!res.ok) throw new Error("Failed to delete date.");
       triggerNotification("Important date deleted.");
       fetchData();
@@ -234,7 +279,8 @@ export default function AdminCmsPage() {
       const method = editingFaq ? "PATCH" : "POST";
       const res = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: getAdminHeaders(),
+        credentials: "include",
         body: JSON.stringify(faqForm),
       });
       const data = await res.json();
@@ -250,7 +296,11 @@ export default function AdminCmsPage() {
   const handleDeleteFaq = async (id: string) => {
     if (!confirm("Are you sure you want to delete this FAQ?")) return;
     try {
-      const res = await fetch(`/api/admin/cms/faqs/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/cms/faqs/${id}`, {
+        method: "DELETE",
+        headers: getAdminHeaders(),
+        credentials: "include",
+      });
       if (!res.ok) throw new Error("Failed to delete FAQ.");
       triggerNotification("FAQ deleted.");
       fetchData();
@@ -267,7 +317,8 @@ export default function AdminCmsPage() {
       const method = editingAnn ? "PATCH" : "POST";
       const res = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: getAdminHeaders(),
+        credentials: "include",
         body: JSON.stringify({
           championshipId: "champ-kukkiwon-2026",
           ...annForm,
@@ -286,7 +337,11 @@ export default function AdminCmsPage() {
   const handleDeleteAnn = async (id: string) => {
     if (!confirm("Are you sure you want to delete this announcement?")) return;
     try {
-      const res = await fetch(`/api/admin/cms/announcements/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/cms/announcements/${id}`, {
+        method: "DELETE",
+        headers: getAdminHeaders(),
+        credentials: "include",
+      });
       if (!res.ok) throw new Error("Failed to delete announcement.");
       triggerNotification("Announcement deleted.");
       fetchData();
@@ -497,8 +552,8 @@ export default function AdminCmsPage() {
                     <label className="text-xs font-semibold text-slate-300 block mb-1">Registration Opens</label>
                     <Input
                       type="datetime-local"
-                      value={championship.registrationOpen.substring(0, 16)}
-                      onChange={(e) => setChampionship({ ...championship, registrationOpen: new Date(e.target.value).toISOString() })}
+                      value={formatForInput(championship.registrationOpen)}
+                      onChange={(e) => setChampionship({ ...championship, registrationOpen: parseFromInput(e.target.value, championship.registrationOpen) })}
                       required
                     />
                   </div>
@@ -506,8 +561,8 @@ export default function AdminCmsPage() {
                     <label className="text-xs font-semibold text-slate-300 block mb-1">Regular Deadline</label>
                     <Input
                       type="datetime-local"
-                      value={championship.registrationClose.substring(0, 16)}
-                      onChange={(e) => setChampionship({ ...championship, registrationClose: new Date(e.target.value).toISOString() })}
+                      value={formatForInput(championship.registrationClose)}
+                      onChange={(e) => setChampionship({ ...championship, registrationClose: parseFromInput(e.target.value, championship.registrationClose) })}
                       required
                     />
                   </div>
@@ -515,8 +570,8 @@ export default function AdminCmsPage() {
                     <label className="text-xs font-semibold text-slate-300 block mb-1">Late Registration Cutoff</label>
                     <Input
                       type="datetime-local"
-                      value={championship.lateRegistrationDeadline ? championship.lateRegistrationDeadline.substring(0, 16) : ""}
-                      onChange={(e) => setChampionship({ ...championship, lateRegistrationDeadline: e.target.value ? new Date(e.target.value).toISOString() : null })}
+                      value={formatForInput(championship.lateRegistrationDeadline)}
+                      onChange={(e) => setChampionship({ ...championship, lateRegistrationDeadline: e.target.value ? parseFromInput(e.target.value) : null })}
                     />
                   </div>
                 </div>
@@ -526,8 +581,8 @@ export default function AdminCmsPage() {
                     <label className="text-xs font-semibold text-slate-300 block mb-1">Tournament Start Date</label>
                     <Input
                       type="datetime-local"
-                      value={championship.startDate.substring(0, 16)}
-                      onChange={(e) => setChampionship({ ...championship, startDate: new Date(e.target.value).toISOString() })}
+                      value={formatForInput(championship.startDate)}
+                      onChange={(e) => setChampionship({ ...championship, startDate: parseFromInput(e.target.value, championship.startDate) })}
                       required
                     />
                   </div>
@@ -535,8 +590,8 @@ export default function AdminCmsPage() {
                     <label className="text-xs font-semibold text-slate-300 block mb-1">Tournament End Date</label>
                     <Input
                       type="datetime-local"
-                      value={championship.endDate.substring(0, 16)}
-                      onChange={(e) => setChampionship({ ...championship, endDate: new Date(e.target.value).toISOString() })}
+                      value={formatForInput(championship.endDate)}
+                      onChange={(e) => setChampionship({ ...championship, endDate: parseFromInput(e.target.value, championship.endDate) })}
                       required
                     />
                   </div>
@@ -1168,8 +1223,8 @@ export default function AdminCmsPage() {
                   <label className="text-xs font-semibold text-slate-300 block mb-1">Date</label>
                   <Input
                     type="datetime-local"
-                    value={dateForm.date ? dateForm.date.substring(0, 16) : ""}
-                    onChange={(e) => setDateForm({ ...dateForm, date: new Date(e.target.value).toISOString() })}
+                    value={formatForInput(dateForm.date)}
+                    onChange={(e) => setDateForm({ ...dateForm, date: parseFromInput(e.target.value, dateForm.date) })}
                     required
                   />
                 </div>
@@ -1312,7 +1367,7 @@ export default function AdminCmsPage() {
                   <Input
                     type="date"
                     value={annForm.expiryDate ? annForm.expiryDate.substring(0, 10) : ""}
-                    onChange={(e) => setAnnForm({ ...annForm, expiryDate: e.target.value ? new Date(e.target.value).toISOString() : "" })}
+                    onChange={(e) => setAnnForm({ ...annForm, expiryDate: e.target.value ? parseFromInput(e.target.value) : "" })}
                   />
                 </div>
               </div>

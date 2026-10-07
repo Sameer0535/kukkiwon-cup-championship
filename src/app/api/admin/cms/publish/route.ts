@@ -9,7 +9,12 @@ import { CmsService } from "@/server/services/cms.service";
 
 export async function POST(req: NextRequest) {
   try {
-    const admin = await requireAdmin(req, ["SUPER_ADMIN", "EVENT_ADMIN"]);
+    const admin = await requireAdmin(req, [
+      "SUPER_ADMIN",
+      "EVENT_ADMIN",
+      "CONTENT_ADMIN",
+      "REGISTRATION_ADMIN",
+    ]);
     let body: any = {};
     try {
       body = await req.json();

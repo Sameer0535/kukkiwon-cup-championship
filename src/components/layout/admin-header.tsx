@@ -16,9 +16,18 @@ export function AdminHeader({ title = "Tournament Management" }: { title?: strin
   const { toggleSidebar } = useAdminNav();
   const [championships, setChampionships] = React.useState<any[]>([]);
   const [selectedChamp, setSelectedChamp] = React.useState<string>("champ-kukkiwon-2026");
+  const [dbStatus, setDbStatus] = React.useState<{ dbOnline: boolean; mode: string } | null>(null);
 
   React.useEffect(() => {
-    fetch("/api/admin/championships")
+    if (typeof window !== "undefined") {
+      const stored = sessionStorage.getItem("kukkiwon_admin_bearer") || localStorage.getItem("kukkiwon_admin_bearer");
+      if (stored) {
+        sessionStorage.setItem("kukkiwon_admin_bearer", stored);
+        localStorage.setItem("kukkiwon_admin_bearer", stored);
+      }
+    }
+
+    fetch("/api/admin/championships", { credentials: "include" })
       .then((res) => res.json())
       .then((data) => {
         if (data.data && data.data.length > 0) {
@@ -27,12 +36,25 @@ export function AdminHeader({ title = "Tournament Management" }: { title?: strin
         }
       })
       .catch(() => {});
+
+    fetch("/api/admin/system/status")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setDbStatus({ dbOnline: data.dbOnline, mode: data.mode });
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/admin/auth/logout", { method: "POST" });
+      await fetch("/api/admin/auth/logout", { method: "POST", credentials: "include" });
     } catch {}
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("kukkiwon_admin_bearer");
+      localStorage.removeItem("kukkiwon_admin_bearer");
+    }
     router.push("/admin/login");
   };
 
@@ -79,6 +101,30 @@ export function AdminHeader({ title = "Tournament Management" }: { title?: strin
       </div>
 
       <div className="flex items-center gap-2 sm:gap-3">
+        {dbStatus && (
+          <span
+            title={
+              dbStatus.dbOnline
+                ? "PostgreSQL / Supabase Database Connected. Real-time cross-device persistence active."
+                : "Serverless Local Memory. Cross-device sync requires cloud Supabase DATABASE_URL in Vercel Settings."
+            }
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-bold border transition-colors ${
+              dbStatus.dbOnline
+                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                : "bg-amber-500/10 text-amber-300 border-amber-500/30"
+            }`}
+          >
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${
+                dbStatus.dbOnline ? "bg-emerald-400 animate-pulse" : "bg-amber-400"
+              }`}
+            />
+            <span className="hidden sm:inline">
+              {dbStatus.dbOnline ? "Database Online" : "Memory Fallback"}
+            </span>
+          </span>
+        )}
+
         <span className="hidden lg:inline-flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
           <Shield className="h-3 w-3" />
           Accredited Admin

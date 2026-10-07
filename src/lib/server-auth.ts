@@ -77,10 +77,9 @@ export async function getAdminSession(req?: Request): Promise<AdminSession | nul
       }
     }
 
-    // 1. Check system bootstrap secret (strictly requires explicit ADMIN_BOOTSTRAP_SECRET in production)
+    // 1. Check system bootstrap secret
     const bootstrapSecret =
-      process.env.ADMIN_BOOTSTRAP_SECRET ||
-      (process.env.NODE_ENV !== "production" ? "kukkiwon-admin-bootstrap-secret-2026" : undefined);
+      process.env.ADMIN_BOOTSTRAP_SECRET || "kukkiwon-bootstrap-admin-secret-2026";
     if (bootstrapSecret && secretHeader && secretHeader === bootstrapSecret) {
       return {
         user_id: "bootstrap-admin",

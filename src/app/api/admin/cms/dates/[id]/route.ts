@@ -12,7 +12,12 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const admin = await requireAdmin(req, ["SUPER_ADMIN", "EVENT_ADMIN"]);
+    const admin = await requireAdmin(req, [
+      "SUPER_ADMIN",
+      "EVENT_ADMIN",
+      "CONTENT_ADMIN",
+      "REGISTRATION_ADMIN",
+    ]);
     const { id } = await params;
     const body = await req.json();
 
@@ -37,7 +42,12 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const admin = await requireAdmin(req, ["SUPER_ADMIN", "EVENT_ADMIN"]);
+    const admin = await requireAdmin(req, [
+      "SUPER_ADMIN",
+      "EVENT_ADMIN",
+      "CONTENT_ADMIN",
+      "REGISTRATION_ADMIN",
+    ]);
     const { id } = await params;
 
     const result = await CmsService.deleteDate(id, admin);

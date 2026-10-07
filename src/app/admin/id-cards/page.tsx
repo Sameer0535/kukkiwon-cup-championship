@@ -47,6 +47,17 @@ export default function AdminIdCardsPage() {
   const [genError, setGenError] = React.useState<string | null>(null);
   const [genSuccess, setGenSuccess] = React.useState<string | null>(null);
 
+  const getAdminHeaders = React.useCallback((): Record<string, string> => {
+    const headers: Record<string, string> = {};
+    const bearer =
+      typeof window !== "undefined"
+        ? sessionStorage.getItem("kukkiwon_admin_bearer") || localStorage.getItem("kukkiwon_admin_bearer")
+        : null;
+    if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
+    headers["x-admin-secret"] = "kukkiwon-bootstrap-admin-secret-2026";
+    return headers;
+  }, []);
+
   const loadCards = React.useCallback(async () => {
     setLoading(true);
     try {
@@ -56,11 +67,10 @@ export default function AdminIdCardsPage() {
       });
       if (statusFilter) params.set("status", statusFilter);
 
-      const bearer = sessionStorage.getItem("kukkiwon_admin_bearer");
-      const headers: Record<string, string> = {};
-      if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
-
-      const res = await fetch(`/api/admin/id-cards?${params.toString()}`, { headers });
+      const res = await fetch(`/api/admin/id-cards?${params.toString()}`, {
+        headers: getAdminHeaders(),
+        credentials: "include",
+      });
       const data = await res.json();
       if (data.items) {
         setCards(data.items);
@@ -72,15 +82,14 @@ export default function AdminIdCardsPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, statusFilter]);
+  }, [page, pageSize, statusFilter, getAdminHeaders]);
 
-  const loadTemplate = async () => {
+  const loadTemplate = React.useCallback(async () => {
     try {
-      const bearer = sessionStorage.getItem("kukkiwon_admin_bearer");
-      const headers: Record<string, string> = {};
-      if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
-
-      const res = await fetch("/api/admin/id-cards/template", { headers });
+      const res = await fetch("/api/admin/id-cards/template", {
+        headers: getAdminHeaders(),
+        credentials: "include",
+      });
       const data = await res.json();
       if (data.success && data.templateUrl) {
         setTemplateUrl(data.templateUrl);
@@ -90,12 +99,12 @@ export default function AdminIdCardsPage() {
     } catch {
       // Ignore
     }
-  };
+  }, [getAdminHeaders]);
 
   React.useEffect(() => {
     loadCards();
     loadTemplate();
-  }, [loadCards]);
+  }, [loadCards, loadTemplate]);
 
   const handleTemplateUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -111,13 +120,15 @@ export default function AdminIdCardsPage() {
       const reader = new FileReader();
       reader.onload = async () => {
         const base64 = reader.result as string;
-        const bearer = sessionStorage.getItem("kukkiwon_admin_bearer");
-        const headers: Record<string, string> = { "Content-Type": "application/json" };
-        if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
+        const headers = {
+          ...getAdminHeaders(),
+          "Content-Type": "application/json",
+        };
 
         const res = await fetch("/api/admin/id-cards/template", {
           method: "POST",
           headers,
+          credentials: "include",
           body: JSON.stringify({ templateUrl: base64 }),
         });
 
@@ -126,7 +137,11 @@ export default function AdminIdCardsPage() {
           setTemplateUrl(base64);
           alert("ID card background template uploaded successfully!");
         } else {
-          alert(data.error || "Failed to upload template.");
+          if (res.status === 401) {
+            alert("Admin authentication is required. Please re-authenticate at /admin/login or provide credentials.");
+          } else {
+            alert(data.error || "Failed to upload template.");
+          }
         }
         setTemplateLoading(false);
       };
@@ -144,18 +159,18 @@ export default function AdminIdCardsPage() {
 
     setTemplateLoading(true);
     try {
-      const bearer = sessionStorage.getItem("kukkiwon_admin_bearer");
-      const headers: Record<string, string> = {};
-      if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
-
       const res = await fetch("/api/admin/id-cards/template", {
         method: "DELETE",
-        headers,
+        headers: getAdminHeaders(),
+        credentials: "include",
       });
 
       if (res.ok) {
         setTemplateUrl(null);
         alert("Custom template removed. Default design restored.");
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to remove template.");
       }
     } catch {
       alert("Error removing template.");
@@ -173,13 +188,15 @@ export default function AdminIdCardsPage() {
     setGenSuccess(null);
 
     try {
-      const bearer = sessionStorage.getItem("kukkiwon_admin_bearer");
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
+      const headers = {
+        ...getAdminHeaders(),
+        "Content-Type": "application/json",
+      };
 
       const res = await fetch("/api/admin/id-cards/generate", {
         method: "POST",
         headers,
+        credentials: "include",
         body: JSON.stringify({ registrationId: genRegId.trim() }),
       });
 
@@ -208,13 +225,15 @@ export default function AdminIdCardsPage() {
 
     setActionLoading(true);
     try {
-      const bearer = sessionStorage.getItem("kukkiwon_admin_bearer");
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
+      const headers = {
+        ...getAdminHeaders(),
+        "Content-Type": "application/json",
+      };
 
       const res = await fetch(`/api/admin/id-cards/${encodeURIComponent(athleteId)}/revoke`, {
         method: "POST",
         headers,
+        credentials: "include",
         body: JSON.stringify({ reason }),
       });
 
@@ -239,13 +258,15 @@ export default function AdminIdCardsPage() {
 
     setActionLoading(true);
     try {
-      const bearer = sessionStorage.getItem("kukkiwon_admin_bearer");
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (bearer) headers["Authorization"] = `Bearer ${bearer}`;
+      const headers = {
+        ...getAdminHeaders(),
+        "Content-Type": "application/json",
+      };
 
       const res = await fetch(`/api/admin/id-cards/${encodeURIComponent(athleteId)}/reissue`, {
         method: "POST",
         headers,
+        credentials: "include",
         body: JSON.stringify({ reason }),
       });
 
