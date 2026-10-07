@@ -545,7 +545,34 @@ export class RegistrationFlowService {
         !!val && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
 
       const safeUserId = isUuid(userId) ? userId : null;
-      const safeAcademyId = isUuid(academyId) ? academyId : null;
+      let safeAcademyId = isUuid(academyId) ? academyId : null;
+      const inputAcadName = (draftData as any).academy_name || (draftData as any).new_academy_data?.name;
+      if (!safeAcademyId && inputAcadName && typeof inputAcadName === "string" && inputAcadName.trim().length > 1) {
+        try {
+          const cleanAcad = inputAcadName.trim();
+          const found = await prisma.academy.findFirst({
+            where: { name: { equals: cleanAcad, mode: "insensitive" } },
+          });
+          if (found) {
+            safeAcademyId = found.id;
+          } else {
+            const count = await prisma.academy.count().catch(() => 0);
+            const created = await prisma.academy.create({
+              data: {
+                name: cleanAcad,
+                code: `KKC-ACAD-${String(count + 1).padStart(3, "0")}`,
+                city: (draftData as any).city || "New Delhi",
+                state: (draftData as any).state || "Delhi",
+                country: (draftData as any).country || "India",
+                email: (draftData as any).email || (draftData as any).representative_email || null,
+                phone: (draftData as any).phone || (draftData as any).representative_phone || null,
+                status: "APPROVED",
+              },
+            });
+            safeAcademyId = created.id;
+          }
+        } catch {}
+      }
 
       let targetChampId = "c1111111-1111-1111-1111-111111111111";
       try {
@@ -673,6 +700,38 @@ export class RegistrationFlowService {
         currentRegId = newReg.id;
       }
 
+      // Record payment order in Prisma for Admin visibility
+      if (currentRegId) {
+        try {
+          const feeAmount = (draftData as any).fee_amount || 2500;
+          const cleanUtr = (draftData as any).offline_utr?.trim() || null;
+          const paymentMethod = (draftData as any).payment_method || "OFFLINE_UPI";
+
+          await prisma.paymentOrder.upsert({
+            where: { order_number: `ORD-${regNumber}` },
+            update: {
+              status: "PENDING",
+              provider_order_id: cleanUtr || `utr_${Date.now()}`,
+              amount_paise: feeAmount * 100,
+              amount: feeAmount,
+            },
+            create: {
+              registration_id: currentRegId,
+              order_number: `ORD-${regNumber}`,
+              provider: paymentMethod === "OFFLINE" || paymentMethod === "OFFLINE_UPI" ? "OFFLINE_UPI" : "MOCK",
+              provider_order_id: cleanUtr || `utr_${Date.now()}`,
+              amount_paise: feeAmount * 100,
+              amount: feeAmount,
+              fee_snapshot: JSON.stringify({ feeAmount, cleanUtr, paymentMethod }),
+              currency: "INR",
+              status: "PENDING",
+            },
+          });
+        } catch (poErr) {
+          console.warn("[RegistrationFlowService.submitRegistration] paymentOrder upsert notice:", poErr);
+        }
+      }
+
       // Live synchronize with Admin Portal
       LiveSyncService.recordSubmission({
         registrationId: currentRegId,
@@ -798,5 +857,9 @@ export class RegistrationFlowService {
         submittedAt: now.toISOString(),
       };
     }
+  }
+
+  static getFallbackStore(): Map<string, FallbackRegistration> {
+    return FALLBACK_REGISTRATIONS_STORE;
   }
 }

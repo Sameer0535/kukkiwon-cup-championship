@@ -584,12 +584,43 @@ export class AdminService {
           registeredAt: r.created_at.toISOString(),
         }));
 
+        const seenRegIds = new Set(items.map((r: any) => r.id));
+        const liveRegs = LiveSyncService.listRegistrations({
+          status: params.status,
+          paymentStatus: params.paymentStatus,
+          q: params.q,
+        });
+        for (const lr of liveRegs) {
+          if (!seenRegIds.has(lr.id)) {
+            mapped.push({
+              id: lr.id,
+              registrationNumber: lr.registration_number,
+              championshipId: "champ-kukkiwon-2026",
+              championshipName: "Kukkiwon Cup Championship 2026",
+              athleteId: lr.athlete_id,
+              athleteName: lr.athlete_name,
+              academyName: lr.academy_name,
+              country: lr.country,
+              categoryName: lr.category_name,
+              discipline: lr.discipline,
+              gender: lr.gender,
+              registrationStatus: lr.status,
+              paymentStatus: lr.payment_status,
+              documentStatus: lr.document_status,
+              idCardStatus: lr.id_card_status,
+              amountPaise: lr.amount_paise,
+              amountInrFormatted: formatPaiseToInr(lr.amount_paise),
+              registeredAt: lr.registered_at,
+            });
+          }
+        }
+
         return {
-          items: mapped,
-          total,
+          items: mapped.slice((page - 1) * pageSize, page * pageSize),
+          total: mapped.length,
           page,
           pageSize,
-          totalPages: Math.ceil(total / pageSize) || 1,
+          totalPages: Math.ceil(mapped.length / pageSize) || 1,
         };
       } catch (err) {
         console.error("[AdminService.getRegistrations] DB error:", err);
@@ -1042,12 +1073,65 @@ export class AdminService {
           refundedAmountPaise: o.refunds.reduce((acc: number, r: any) => acc + (r.amount_paise || 0), 0),
         }));
 
+        // Also include any registrations not yet mapped to a paymentOrder
+        const seenRegIds = new Set(orders.map((o: any) => o.registration_id));
+        const regWhere: any = {};
+        if (effectiveChampId) regWhere.championship_id = effectiveChampId;
+        const allRegs = await prisma.registration.findMany({
+          where: regWhere,
+          include: {
+            championship: true,
+            participant: true,
+            id_card: true,
+          },
+          take: 50,
+          orderBy: { created_at: "desc" },
+        }).catch(() => []);
+
+        for (const r of allRegs) {
+          if (!seenRegIds.has(r.id)) {
+            let draft: any = {};
+            try { if (r.draft_data) draft = JSON.parse(r.draft_data); } catch {}
+            const amount = draft.fee_amount || 2500;
+            const utr = draft.offline_utr || "OFFLINE-MANUAL";
+            mapped.push({
+              id: `po-${r.id}`,
+              orderNumber: `ORD-${r.registration_number || r.id.slice(0, 8)}`,
+              registrationId: r.id,
+              championshipId: r.championship_id,
+              championshipName: r.championship.name,
+              athleteId: r.id_card?.athlete_id || r.athlete_id || r.registration_number || `ATH-${r.participant_id.slice(0, 8)}`,
+              athleteName: r.participant?.full_name || "Official Competitor",
+              provider: "OFFLINE_UPI",
+              providerOrderId: utr,
+              amountPaise: amount * 100,
+              amountInrFormatted: `₹${amount.toLocaleString("en-IN")}`,
+              currency: "INR",
+              status: r.status === "APPROVED" || r.status === "CONFIRMED" ? "PAID" : "UNDER_REVIEW",
+              createdAt: r.created_at.toISOString(),
+              paidAt: r.status === "APPROVED" ? r.updated_at.toISOString() : null,
+              invoiceNumber: null,
+              refundStatus: null,
+              refundedAmountPaise: 0,
+            });
+          }
+        }
+
+        // Also merge with LiveSyncService payments
+        const livePayments = LiveSyncService.listPayments({ status: params.status, q: params.q });
+        const seenOrderIds = new Set(mapped.map((m) => m.id));
+        for (const lp of livePayments) {
+          if (!seenOrderIds.has(lp.id) && !seenRegIds.has(lp.registrationId)) {
+            mapped.push(lp);
+          }
+        }
+
         return {
-          items: mapped,
-          total,
+          items: mapped.slice((page - 1) * pageSize, page * pageSize),
+          total: mapped.length,
           page,
           pageSize,
-          totalPages: Math.ceil(total / pageSize) || 1,
+          totalPages: Math.ceil(mapped.length / pageSize) || 1,
         };
       } catch (err) {
         console.error("[AdminService.getPayments] DB error:", err);

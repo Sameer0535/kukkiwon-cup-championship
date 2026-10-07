@@ -762,7 +762,7 @@ function AthleteRegistrationContent() {
       <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900 font-sans">
         <PublicHeader />
         <main className="flex-1 py-14 sm:py-20">
-          <div className="container mx-auto px-4 max-w-2xl">
+          <div className="container mx-auto px-4 max-w-xl">
             <div className="rounded-2xl border border-blue-200 bg-white p-8 sm:p-12 text-center space-y-6 shadow-sm">
               <div className="w-16 h-16 rounded-full bg-emerald-50 border-2 border-emerald-500 flex items-center justify-center mx-auto text-emerald-600">
                 <CheckCircle2 className="h-8 w-8 stroke-[2.5]" />
@@ -773,61 +773,45 @@ function AthleteRegistrationContent() {
                 <h1 className="text-2xl sm:text-3xl font-black uppercase text-slate-950 tracking-tight">
                   THANK YOU FOR YOUR PAYMENT
                 </h1>
-                <p className="text-sm text-slate-700 font-medium max-w-lg mx-auto leading-relaxed">
-                  Thank you for submitting your payment and tournament registration! The tournament organizing committee will verify your payment and send your official Athlete ID Card / Accreditation Pass directly to your registered email address (<strong className="text-blue-700">{formData.email}</strong>) once verified.
+                <p className="text-sm text-slate-700 font-medium max-w-md mx-auto leading-relaxed">
+                  Thank you for submitting your payment and tournament registration! The tournament organizing committee has received your details.
                 </p>
               </div>
 
-              {/* Official Receipt Card */}
-              <div className="p-6 rounded-xl bg-slate-50 border border-slate-200 text-left space-y-3 font-mono text-xs">
-                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                  <span className="text-slate-500">Official Reference Code:</span>
-                  <span className="text-blue-600 font-bold text-sm tracking-wide">
-                    {submittedData.registrationNumber}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                  <span className="text-slate-500">Athlete Name:</span>
-                  <span className="text-slate-900 font-bold uppercase">
-                    {formData.first_name} {formData.middle_name} {formData.last_name}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                  <span className="text-slate-500">Kukkiwon ID:</span>
-                  <span className="text-slate-900 font-bold">
-                    {formData.kukkiwon_dan_number || "Submitted"}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                  <span className="text-slate-500">Academy / Dojang:</span>
-                  <span className="text-slate-900">
-                    {formData.academy_name || formData.new_academy_data?.name || "Official Dojang"}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                  <span className="text-slate-500">WT Division & Weight:</span>
-                  <span className="text-blue-700 font-semibold">{formData.weight_category_name}</span>
-                </div>
-                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                  <span className="text-slate-500">Registration Fee:</span>
-                  <span className="text-slate-900 font-bold">₹2,500</span>
-                </div>
-                {submittedData.utrNumber && (
-                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                    <span className="text-slate-500">Submitted UTR Reference:</span>
-                    <span className="text-slate-900 font-bold tracking-wider">{submittedData.utrNumber}</span>
+              {/* Official ID Card Delivery Notice via Email */}
+              <div className="p-6 rounded-2xl bg-blue-50/80 border border-blue-200 text-left space-y-3">
+                <div className="flex items-center gap-3 text-blue-900 font-bold text-base">
+                  <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <Mail className="h-5 w-5" />
                   </div>
-                )}
-                <div className="flex items-center justify-between pt-1">
-                  <span className="text-slate-500">Accreditation Status:</span>
-                  <Badge variant="warning">
-                    PENDING PAYMENT VERIFICATION
-                  </Badge>
+                  <div>
+                    <h3 className="font-bold text-sm text-blue-950 uppercase tracking-wide">
+                      Official ID Card Delivery Notice
+                    </h3>
+                    <p className="text-xs text-blue-700 font-normal">
+                      Accreditation pass delivered to your inbox
+                    </p>
+                  </div>
                 </div>
+
+                <p className="text-sm text-slate-700 leading-relaxed pt-1">
+                  Once your payment verification is reviewed and approved by the tournament organizing committee, your official <strong className="text-slate-950">Athlete Accreditation ID Card</strong> will be sent directly to your registered email address:
+                </p>
+
+                <div className="p-3 bg-white border border-blue-200 rounded-xl flex items-center justify-between">
+                  <span className="text-xs text-slate-500 font-medium">Delivery Destination:</span>
+                  <span className="text-sm font-mono font-bold text-blue-700 break-all">
+                    {formData.email}
+                  </span>
+                </div>
+
+                <p className="text-xs text-slate-500 leading-normal">
+                  Please monitor your email inbox and spam folder. Your ID Card contains your competition barcode and verified division entry.
+                </p>
               </div>
 
-              {/* Action Buttons (Strictly NO ID Card buttons on website) */}
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
                 <Link href="/" className="w-full sm:w-auto">
                   <Button variant="outline" size="lg" className="w-full text-xs font-bold uppercase border-slate-300 text-slate-700 hover:bg-slate-100">
                     <span>Return to Home</span>

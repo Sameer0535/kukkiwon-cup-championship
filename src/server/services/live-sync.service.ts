@@ -12,6 +12,7 @@
 
 import fs from "fs";
 import path from "path";
+import os from "os";
 import { INITIAL_ACADEMIES } from "@/config/academies";
 
 export interface SyncRegistration {
@@ -106,10 +107,11 @@ export interface AcademyRecord {
 }
 
 // ------------------------------------------------------------------------------
-// PERSISTENT FILE STORAGE PATH
+// PERSISTENT FILE STORAGE PATH (Serverless Safe + Local Dev Support)
 // ------------------------------------------------------------------------------
-const DATA_DIR = path.join(process.cwd(), ".data");
-const STORE_FILE = path.join(DATA_DIR, "live_championship_store.json");
+const TMP_DATA_DIR = path.join(os.tmpdir(), "kukkiwon_championship_data");
+const TMP_STORE_FILE = path.join(TMP_DATA_DIR, "live_championship_store.json");
+const LOCAL_STORE_FILE = path.join(process.cwd(), ".data", "live_championship_store.json");
 
 interface PersistedStoreData {
   registrations: SyncRegistration[];
@@ -139,12 +141,16 @@ declare global {
 export class LiveSyncService {
   private static ensureStorageDir(): void {
     try {
-      if (!fs.existsSync(DATA_DIR)) {
-        fs.mkdirSync(DATA_DIR, { recursive: true });
+      if (!fs.existsSync(TMP_DATA_DIR)) {
+        fs.mkdirSync(TMP_DATA_DIR, { recursive: true });
       }
-    } catch {
-      // Ignore if cannot create directory
-    }
+    } catch {}
+    try {
+      const localDir = path.dirname(LOCAL_STORE_FILE);
+      if (!fs.existsSync(localDir)) {
+        fs.mkdirSync(localDir, { recursive: true });
+      }
+    } catch {}
   }
 
   private static loadStore(): PersistedStoreData {
@@ -156,8 +162,11 @@ export class LiveSyncService {
 
     let loadedData: PersistedStoreData | null = null;
     try {
-      if (fs.existsSync(STORE_FILE)) {
-        const raw = fs.readFileSync(STORE_FILE, "utf-8");
+      if (fs.existsSync(TMP_STORE_FILE)) {
+        const raw = fs.readFileSync(TMP_STORE_FILE, "utf-8");
+        loadedData = JSON.parse(raw);
+      } else if (fs.existsSync(LOCAL_STORE_FILE)) {
+        const raw = fs.readFileSync(LOCAL_STORE_FILE, "utf-8");
         loadedData = JSON.parse(raw);
       }
     } catch {
@@ -286,11 +295,16 @@ export class LiveSyncService {
 
   private static persistStore(data: PersistedStoreData): void {
     global.__kukkiwonLiveSyncStore = data;
+    this.ensureStorageDir();
     try {
-      this.ensureStorageDir();
-      fs.writeFileSync(STORE_FILE, JSON.stringify(data, null, 2), "utf-8");
+      fs.writeFileSync(TMP_STORE_FILE, JSON.stringify(data, null, 2), "utf-8");
     } catch {
       // In-memory fallback
+    }
+    try {
+      fs.writeFileSync(LOCAL_STORE_FILE, JSON.stringify(data, null, 2), "utf-8");
+    } catch {
+      // Ignore if local store cannot be written in serverless
     }
   }
 
@@ -452,19 +466,53 @@ export class LiveSyncService {
     registration: SyncRegistration;
   } {
     const store = this.loadStore();
-    const verif = store.verifications.find((v) => v.id === verificationId);
+    let verif = store.verifications.find(
+      (v) => v.id === verificationId || v.registrationId === verificationId || v.registrationNumber === verificationId
+    );
+
+    const now = new Date().toISOString();
+
+    // If verification not in store but registration exists, synthesize verification
+    if (!verif) {
+      const existingReg = store.registrations.find(
+        (r) => r.id === verificationId || r.registration_number === verificationId
+      );
+      if (existingReg) {
+        verif = {
+          id: `verif-${Date.now()}`,
+          registrationId: existingReg.id,
+          registrationNumber: existingReg.registration_number,
+          athleteId: existingReg.athlete_id,
+          participantName: existingReg.athlete_name,
+          participantType: existingReg.participant_type === "COACH" ? "COACH" : "ATHLETE",
+          utrNumber: existingReg.utr_number || "OFFLINE-MANUAL",
+          amountInr: existingReg.amount_paise / 100 || 2500,
+          categoryName: existingReg.category_name,
+          academyName: existingReg.academy_name,
+          kukkiwonId: existingReg.kukkiwon_id,
+          photoUrl: existingReg.photo_url,
+          email: existingReg.email,
+          phone: existingReg.phone,
+          gender: existingReg.gender,
+          nationality: existingReg.nationality,
+          status: "UNDER_REVIEW",
+          submittedAt: existingReg.submitted_at,
+        };
+        store.verifications.unshift(verif);
+      }
+    }
+
     if (!verif) {
       throw new Error("Payment verification record not found.");
     }
 
-    const now = new Date().toISOString();
     verif.status = "VERIFIED";
     verif.verifiedAt = now;
     verif.verifiedBy = verifiedBy;
 
     // Update associated registration
     let reg = store.registrations.find(
-      (r) => r.id === verif.registrationId || r.registration_number === verif.registrationNumber
+      (r) => r.id === verif!.registrationId || r.registration_number === verif!.registrationNumber
     );
 
     if (reg) {
@@ -519,7 +567,9 @@ export class LiveSyncService {
     verifiedBy = "Official Admin"
   ): { success: boolean; verification: PaymentVerificationItem } {
     const store = this.loadStore();
-    const verif = store.verifications.find((v) => v.id === verificationId);
+    const verif = store.verifications.find(
+      (v) => v.id === verificationId || v.registrationId === verificationId || v.registrationNumber === verificationId
+    );
     if (!verif) {
       throw new Error("Payment verification record not found.");
     }
