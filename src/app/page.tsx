@@ -18,6 +18,7 @@ import {
   getPublicImportantDates,
 } from "@/lib/cms";
 import { CmsService } from "@/server/services/cms.service";
+import { LiveSyncService } from "@/server/services/live-sync.service";
 import { formatDate } from "@/lib/utils";
 import {
   Calendar,
@@ -33,7 +34,11 @@ import {
   Mail,
   Phone,
   AlertCircle,
+  Users,
 } from "lucide-react";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function HomePage() {
   const pkg = await getPublicChampionshipPackage("kukkiwon-cup-2026");
@@ -43,6 +48,7 @@ export default async function HomePage() {
   );
   const champId = pkg?.championship.id || "champ-kukkiwon-2026";
   const dynamicDates = await getPublicImportantDates(champId);
+  const liveMetrics = LiveSyncService.getMetrics();
 
   return (
     <div className="flex min-h-screen flex-col bg-white text-slate-900 selection:bg-blue-600 selection:text-white font-sans">
@@ -149,6 +155,18 @@ export default async function HomePage() {
                   </span>
                 </div>
               </div>
+            </div>
+
+            {/* Live Synchronized Participation Statistics Pill */}
+            <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-slate-500 pt-1">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50/80 border border-blue-200/60 font-semibold text-blue-700">
+                <Users className="h-3.5 w-3.5 text-blue-600" />
+                <span>{liveMetrics.totalRegistrations} Verified Competitors & Coaches Registered</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 font-semibold text-slate-700">
+                <Shield className="h-3.5 w-3.5 text-emerald-600" />
+                <span>{liveMetrics.totalAcademies} Accredited Academies</span>
+              </span>
             </div>
 
             {/* Primary & Secondary Action Buttons */}

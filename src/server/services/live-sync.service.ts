@@ -14,6 +14,7 @@ import fs from "fs";
 import path from "path";
 import os from "os";
 import { INITIAL_ACADEMIES } from "@/config/academies";
+import { toWorldTaekwondoCountryCode } from "@/lib/utils";
 
 export interface SyncRegistration {
   id: string;
@@ -135,17 +136,7 @@ interface PersistedStoreData {
 }
 
 function getCountryFlag(nationality: string): string {
-  const code = (nationality || "").toUpperCase();
-  if (code.includes("IND") || code.includes("INDIA")) return "🇮🇳";
-  if (code.includes("KOR") || code.includes("KOREA")) return "🇰🇷";
-  if (code.includes("USA") || code.includes("AMERICA")) return "🇺🇸";
-  if (code.includes("GBR") || code.includes("BRITISH") || code.includes("UK")) return "🇬🇧";
-  if (code.includes("NEP") || code.includes("NEPAL")) return "🇳🇵";
-  if (code.includes("BHU") || code.includes("BHUTAN")) return "🇧🇹";
-  if (code.includes("BGD") || code.includes("BANGLADESH")) return "🇧🇩";
-  if (code.includes("LKA") || code.includes("SRI LANKA")) return "🇱🇰";
-  if (code.includes("UAE") || code.includes("EMIRATES")) return "🇦🇪";
-  return "🌐";
+  return toWorldTaekwondoCountryCode(nationality).flag;
 }
 
 // Global in-memory cache to survive module reload during dev runtime
@@ -812,12 +803,13 @@ export class LiveSyncService {
     // Map all registrations into master participants
     const participants: MasterParticipant[] = store.registrations.map((r) => {
       const isCoach = r.participant_type === "COACH";
+      const wtCountry = toWorldTaekwondoCountryCode(r.nationality || r.country || "IND");
       return {
         publicId: `KUKKI-2026-${r.registration_number.slice(-5).toUpperCase()}`,
         fullName: r.athlete_name,
         gender: r.gender,
-        nationality: r.country || "India",
-        flag: getCountryFlag(r.nationality || r.country),
+        nationality: wtCountry.code,
+        flag: wtCountry.flag,
         designation: isCoach ? "Coach" : "Athlete",
         academy: r.academy_name,
         kukkiwonId: r.kukkiwon_id,

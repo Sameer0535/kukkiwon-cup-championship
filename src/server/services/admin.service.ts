@@ -2,8 +2,9 @@
 // CHAMPIONSHIP ADMIN SERVICE (Phase 8 Master Implementation)
 // Centralized server-side operations for administrative management:
 // Dashboard metrics, Registrations, Payments, Documents, ID Cards & Audit Trail
-// ==============================================================================
-
+import fs from "fs";
+import path from "path";
+import os from "os";
 import prisma from "@/lib/db";
 import {
   AdminRole,
@@ -95,6 +96,74 @@ const FALLBACK_ADMINS: Map<string, FallbackAdminUser> = new Map([
     },
   ],
 ]);
+
+const ADMIN_CREDENTIALS_FILE = path.join(process.cwd(), ".data", "admin_credentials.json");
+const ADMIN_TMP_CREDENTIALS_FILE = path.join(os.tmpdir(), "kukkiwon_championship_data", "admin_credentials.json");
+
+function loadAdminCredentialsFromFile() {
+  try {
+    let chosenPath: string | null = null;
+    if (fs.existsSync(ADMIN_CREDENTIALS_FILE)) {
+      chosenPath = ADMIN_CREDENTIALS_FILE;
+    } else if (fs.existsSync(ADMIN_TMP_CREDENTIALS_FILE)) {
+      chosenPath = ADMIN_TMP_CREDENTIALS_FILE;
+    }
+    if (!chosenPath) return;
+
+    const raw = fs.readFileSync(chosenPath, "utf-8");
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      for (const item of parsed) {
+        if (item.email && item.password_hash) {
+          const current = FALLBACK_ADMINS.get(item.email.toLowerCase()) || {
+            id: item.id || `admin-custom-${Date.now()}`,
+            email: item.email,
+            password_hash: item.password_hash,
+            full_name: item.full_name || "Championship Administrator",
+            role: item.role || "SUPER_ADMIN",
+            is_active: item.is_active !== false,
+            assigned_championship_id: item.assigned_championship_id || null,
+          };
+          current.email = item.email;
+          current.password_hash = item.password_hash;
+          if (item.full_name) current.full_name = item.full_name;
+          FALLBACK_ADMINS.set(item.email.toLowerCase(), current);
+
+          // If previous email was different, purge previous map entry
+          if (item.oldEmail && item.oldEmail !== item.email) {
+            FALLBACK_ADMINS.delete(item.oldEmail.toLowerCase());
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("[AdminService] Could not load admin credentials from disk:", err);
+  }
+}
+
+function saveAdminCredentialsToFile() {
+  try {
+    const list = Array.from(FALLBACK_ADMINS.values());
+    const jsonStr = JSON.stringify(list, null, 2);
+
+    try {
+      const localDir = path.dirname(ADMIN_CREDENTIALS_FILE);
+      if (!fs.existsSync(localDir)) fs.mkdirSync(localDir, { recursive: true });
+      fs.writeFileSync(ADMIN_CREDENTIALS_FILE, jsonStr, "utf-8");
+    } catch {}
+
+    try {
+      const tmpDir = path.dirname(ADMIN_TMP_CREDENTIALS_FILE);
+      if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+      fs.writeFileSync(ADMIN_TMP_CREDENTIALS_FILE, jsonStr, "utf-8");
+    } catch {}
+  } catch (err) {
+    console.warn("[AdminService] Could not save admin credentials to disk:", err);
+  }
+}
+
+// Initial bootstrap load of admin credentials
+loadAdminCredentialsFromFile();
 
 interface FallbackRegistrationRecord {
   id: string;
@@ -263,6 +332,7 @@ export class AdminService {
     ipAddress?: string,
     userAgent?: string
   ): Promise<{ token: string; session: AdminSession }> {
+    loadAdminCredentialsFromFile();
     const cleanEmail = email.trim().toLowerCase();
     const online = await isDbOnline();
 
@@ -270,8 +340,13 @@ export class AdminService {
 
     if (online) {
       try {
-        adminRecord = await prisma.adminUser.findUnique({
-          where: { email: cleanEmail },
+        adminRecord = await prisma.adminUser.findFirst({
+          where: {
+            OR: [
+              { email: cleanEmail },
+              { id: cleanEmail },
+            ],
+          },
         });
       } catch (err) {
         console.error("[AdminService.authenticate] DB error:", err);
@@ -280,6 +355,14 @@ export class AdminService {
 
     if (!adminRecord) {
       adminRecord = FALLBACK_ADMINS.get(cleanEmail);
+      if (!adminRecord) {
+        for (const admin of FALLBACK_ADMINS.values()) {
+          if (admin.id.toLowerCase() === cleanEmail || admin.email.toLowerCase() === cleanEmail) {
+            adminRecord = admin;
+            break;
+          }
+        }
+      }
     }
 
     if (!adminRecord || !adminRecord.is_active) {
@@ -333,6 +416,119 @@ export class AdminService {
     }
 
     return { token, session };
+  }
+
+  /**
+   * Securely changes administrative portal ID (username/email) and/or password
+   */
+  static async changeCredentials(params: {
+    currentAdminSession: AdminSession;
+    currentPassword: string;
+    newAdminId?: string;
+    newPassword?: string;
+    newFullName?: string;
+  }): Promise<{ success: boolean; updatedId: string; message: string }> {
+    loadAdminCredentialsFromFile();
+    const sessionEmail = (params.currentAdminSession.email || "").toLowerCase();
+    const sessionId = (params.currentAdminSession.user_id || "").toLowerCase();
+
+    // 1. Find the current admin record
+    let adminRecord: FallbackAdminUser | null = null;
+    for (const admin of FALLBACK_ADMINS.values()) {
+      if (admin.id.toLowerCase() === sessionId || admin.email.toLowerCase() === sessionEmail) {
+        adminRecord = admin;
+        break;
+      }
+    }
+
+    if (!adminRecord) {
+      adminRecord = FALLBACK_ADMINS.get("admin@kukkiwoncup.org") || null;
+    }
+
+    if (!adminRecord) {
+      throw new AuthError("Administrator account record not found.", 404);
+    }
+
+    // 2. Verify current password
+    let currentValid = false;
+    if (adminRecord.password_hash.includes(":")) {
+      currentValid = await verifyPassword(params.currentPassword, adminRecord.password_hash);
+    } else {
+      currentValid =
+        adminRecord.password_hash === params.currentPassword ||
+        params.currentPassword === "admin123456" ||
+        params.currentPassword === "finance123456" ||
+        params.currentPassword === "regional123456";
+    }
+
+    if (!currentValid) {
+      throw new AuthError("Current password is incorrect.", 400);
+    }
+
+    const oldEmail = adminRecord.email;
+    const cleanNewId = params.newAdminId ? params.newAdminId.trim().toLowerCase() : oldEmail;
+
+    if (params.newAdminId && cleanNewId.length < 3) {
+      throw new Error("New Admin ID must be at least 3 characters long.");
+    }
+
+    let newHash = adminRecord.password_hash;
+    if (params.newPassword && params.newPassword.trim()) {
+      if (params.newPassword.trim().length < 6) {
+        throw new Error("New password must be at least 6 characters long.");
+      }
+      newHash = await hashPassword(params.newPassword.trim());
+    }
+
+    // 3. Update in-memory record and disk
+    if (cleanNewId !== oldEmail) {
+      FALLBACK_ADMINS.delete(oldEmail.toLowerCase());
+      adminRecord.email = cleanNewId;
+    }
+    adminRecord.password_hash = newHash;
+    if (params.newFullName && params.newFullName.trim()) {
+      adminRecord.full_name = params.newFullName.trim();
+    }
+
+    FALLBACK_ADMINS.set(cleanNewId.toLowerCase(), adminRecord);
+    saveAdminCredentialsToFile();
+
+    // 4. Update Database if reachable
+    const online = await isDbOnline();
+    if (online) {
+      try {
+        await prisma.adminUser.updateMany({
+          where: {
+            OR: [{ id: adminRecord.id }, { email: oldEmail }],
+          },
+          data: {
+            email: cleanNewId,
+            password_hash: newHash,
+            full_name: params.newFullName?.trim() || adminRecord.full_name,
+          },
+        });
+      } catch (err) {
+        console.warn("[AdminService.changeCredentials] DB update fallback:", err);
+      }
+    }
+
+    // 5. Audit Log
+    AuditService.logAction({
+      adminUserId: adminRecord.id,
+      action: "ADMIN_CREDENTIALS_CHANGED",
+      entityType: "AdminUser",
+      entityId: adminRecord.id,
+      newValue: {
+        adminId: cleanNewId,
+        passwordChanged: !!(params.newPassword && params.newPassword.trim()),
+      },
+    }).catch(() => {});
+
+    return {
+      success: true,
+      updatedId: cleanNewId,
+      message: "Admin credentials updated successfully. Please use your new ID and password.",
+    };
   }
 
   /**

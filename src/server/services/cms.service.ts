@@ -138,19 +138,22 @@ interface FallbackChampionshipData {
   about_mission_text?: string;
 }
 
+const CMS_LOCAL_STORE_FILE = path.join(process.cwd(), ".data", "cms_data.json");
+const CMS_TMP_DATA_DIR = path.join(os.tmpdir(), "kukkiwon_championship_data");
+const CMS_TMP_STORE_FILE = path.join(CMS_TMP_DATA_DIR, "cms-data.json");
+
 function getCmsDataFilePath(): string {
-  const tmpDir = path.join(os.tmpdir(), "kukkiwon_championship_data");
   try {
-    if (!fs.existsSync(tmpDir)) {
-      fs.mkdirSync(tmpDir, { recursive: true });
-    }
-    return path.join(tmpDir, "cms-data.json");
-  } catch {
-    const localDir = path.join(process.cwd(), "storage");
+    const localDir = path.dirname(CMS_LOCAL_STORE_FILE);
     if (!fs.existsSync(localDir)) {
       fs.mkdirSync(localDir, { recursive: true });
     }
-    return path.join(localDir, "cms-data.json");
+    return CMS_LOCAL_STORE_FILE;
+  } catch {
+    if (!fs.existsSync(CMS_TMP_DATA_DIR)) {
+      fs.mkdirSync(CMS_TMP_DATA_DIR, { recursive: true });
+    }
+    return CMS_TMP_STORE_FILE;
   }
 }
 
@@ -626,47 +629,105 @@ const FALLBACK_FAQS: Map<string, ChampionshipFAQDTO> = new Map([
   ],
 ]);
 
+let lastCmsDiskMtime = 0;
+
 function persistCmsDataToFile() {
   try {
-    const filePath = getCmsDataFilePath();
     const payload = {
       championships: Array.from(FALLBACK_CHAMPIONSHIPS.entries()),
       dates: Array.from(FALLBACK_DATES.entries()),
       faqs: Array.from(FALLBACK_FAQS.entries()),
       announcements: Array.from(FALLBACK_ANNOUNCEMENTS.entries()),
+      categories: Array.from(FALLBACK_CATEGORIES.entries()),
+      fees: Array.from(FALLBACK_FEES.entries()),
+      documents: Array.from(FALLBACK_PUBLIC_DOCUMENTS.entries()),
+      timestamp: Date.now(),
     };
-    fs.writeFileSync(filePath, JSON.stringify(payload, null, 2), "utf-8");
+    const jsonStr = JSON.stringify(payload, null, 2);
+
+    // 1. Write to project root .data/
+    try {
+      const localDir = path.dirname(CMS_LOCAL_STORE_FILE);
+      if (!fs.existsSync(localDir)) fs.mkdirSync(localDir, { recursive: true });
+      fs.writeFileSync(CMS_LOCAL_STORE_FILE, jsonStr, "utf-8");
+      const stat = fs.statSync(CMS_LOCAL_STORE_FILE);
+      lastCmsDiskMtime = stat.mtimeMs;
+    } catch (e) {
+      console.warn("[CmsService] Could not write to .data/cms_data.json:", e);
+    }
+
+    // 2. Also write to os.tmpdir()
+    try {
+      if (!fs.existsSync(CMS_TMP_DATA_DIR)) fs.mkdirSync(CMS_TMP_DATA_DIR, { recursive: true });
+      fs.writeFileSync(CMS_TMP_STORE_FILE, jsonStr, "utf-8");
+    } catch {}
   } catch (e) {
     console.warn("[CmsService] Could not persist CMS data to disk:", e);
   }
 }
 
-function loadCmsDataFromFile() {
+function loadCmsDataFromFile(force = false) {
   try {
-    const filePath = getCmsDataFilePath();
-    if (fs.existsSync(filePath)) {
-      const raw = fs.readFileSync(filePath, "utf-8");
-      const parsed = JSON.parse(raw);
-      if (parsed.championships && Array.isArray(parsed.championships)) {
-        for (const [k, v] of parsed.championships) {
-          const current = FALLBACK_CHAMPIONSHIPS.get(k);
-          FALLBACK_CHAMPIONSHIPS.set(k, { ...(current || {}), ...v });
-        }
+    let chosenPath: string | null = null;
+    let diskMtime = 0;
+
+    if (fs.existsSync(CMS_LOCAL_STORE_FILE)) {
+      const stat = fs.statSync(CMS_LOCAL_STORE_FILE);
+      diskMtime = stat.mtimeMs;
+      chosenPath = CMS_LOCAL_STORE_FILE;
+    }
+    if (fs.existsSync(CMS_TMP_STORE_FILE)) {
+      const stat = fs.statSync(CMS_TMP_STORE_FILE);
+      if (stat.mtimeMs > diskMtime) {
+        diskMtime = stat.mtimeMs;
+        chosenPath = CMS_TMP_STORE_FILE;
       }
-      if (parsed.dates && Array.isArray(parsed.dates)) {
-        for (const [k, v] of parsed.dates) {
-          FALLBACK_DATES.set(k, v);
-        }
+    }
+
+    if (!chosenPath) return;
+
+    if (!force && lastCmsDiskMtime && diskMtime <= lastCmsDiskMtime) {
+      return; // In-memory cache is up-to-date with disk
+    }
+
+    const raw = fs.readFileSync(chosenPath, "utf-8");
+    const parsed = JSON.parse(raw);
+    lastCmsDiskMtime = diskMtime;
+
+    if (parsed.championships && Array.isArray(parsed.championships)) {
+      for (const [k, v] of parsed.championships) {
+        const current = FALLBACK_CHAMPIONSHIPS.get(k);
+        FALLBACK_CHAMPIONSHIPS.set(k, { ...(current || {}), ...v });
       }
-      if (parsed.faqs && Array.isArray(parsed.faqs)) {
-        for (const [k, v] of parsed.faqs) {
-          FALLBACK_FAQS.set(k, v);
-        }
+    }
+    if (parsed.dates && Array.isArray(parsed.dates)) {
+      for (const [k, v] of parsed.dates) {
+        FALLBACK_DATES.set(k, v);
       }
-      if (parsed.announcements && Array.isArray(parsed.announcements)) {
-        for (const [k, v] of parsed.announcements) {
-          FALLBACK_ANNOUNCEMENTS.set(k, v);
-        }
+    }
+    if (parsed.faqs && Array.isArray(parsed.faqs)) {
+      for (const [k, v] of parsed.faqs) {
+        FALLBACK_FAQS.set(k, v);
+      }
+    }
+    if (parsed.announcements && Array.isArray(parsed.announcements)) {
+      for (const [k, v] of parsed.announcements) {
+        FALLBACK_ANNOUNCEMENTS.set(k, v);
+      }
+    }
+    if (parsed.categories && Array.isArray(parsed.categories)) {
+      for (const [k, v] of parsed.categories) {
+        FALLBACK_CATEGORIES.set(k, v);
+      }
+    }
+    if (parsed.fees && Array.isArray(parsed.fees)) {
+      for (const [k, v] of parsed.fees) {
+        FALLBACK_FEES.set(k, v);
+      }
+    }
+    if (parsed.documents && Array.isArray(parsed.documents)) {
+      for (const [k, v] of parsed.documents) {
+        FALLBACK_PUBLIC_DOCUMENTS.set(k, v);
       }
     }
   } catch (e) {
@@ -675,7 +736,7 @@ function loadCmsDataFromFile() {
 }
 
 // Initial bootstrap load from persistent cache
-loadCmsDataFromFile();
+loadCmsDataFromFile(true);
 
 export class CmsService {
   private static checkContentPermission(adminSession?: AdminSession) {
@@ -703,6 +764,7 @@ export class CmsService {
     idOrSlug = "champ-kukkiwon-2026",
     includeDrafts = false
   ): Promise<PublicChampionship | null> {
+    loadCmsDataFromFile(false);
     const online = await isDbOnline();
 
     if (online) {
@@ -721,47 +783,58 @@ export class CmsService {
             return null;
           }
 
+          // Merge with any saved fallback overrides from admin portal
+          const fb = FALLBACK_CHAMPIONSHIPS.get(champ.id) || FALLBACK_CHAMPIONSHIPS.get(champ.slug);
+          const effectiveStartDate = fb?.start_date || champ.start_date.toISOString();
+          const effectiveEndDate = fb?.end_date || champ.end_date.toISOString();
+          const effectiveRegOpen = fb?.registration_open || champ.registration_open.toISOString();
+          const effectiveRegClose = fb?.registration_close || champ.registration_close.toISOString();
+          const effectiveVenue = fb?.venue || champ.venue;
+          const effectiveCity = fb?.city || champ.city;
+          const effectiveState = fb?.state || champ.state;
+          const effectiveCountry = fb?.country || champ.country;
+
           const availability = this.calculateRegistrationAvailability(
-            champ.registration_open,
-            champ.registration_close,
-            champ.status
+            effectiveRegOpen,
+            effectiveRegClose,
+            fb?.status || champ.status
           );
 
           return {
             id: champ.id,
-            slug: champ.slug,
-            name: champ.name,
-            shortName: champ.short_name || champ.name,
-            edition: (champ as any).edition || "2026",
-            subtitle: champ.subtitle || champ.site_settings?.subtitle || "",
-            description: champ.description || champ.site_settings?.about_content || "",
-            status: champ.status === "DRAFT" ? "DRAFT" : champ.status === "ARCHIVED" ? "ARCHIVED" : "PUBLISHED",
+            slug: fb?.slug || champ.slug,
+            name: fb?.name || champ.name,
+            shortName: fb?.short_name || champ.short_name || champ.name,
+            edition: fb?.edition || (champ as any).edition || "2026",
+            subtitle: fb?.subtitle || champ.subtitle || champ.site_settings?.subtitle || "",
+            description: fb?.description || champ.description || champ.site_settings?.about_content || "",
+            status: fb?.status || (champ.status === "DRAFT" ? "DRAFT" : champ.status === "ARCHIVED" ? "ARCHIVED" : "PUBLISHED"),
             registrationAvailability: availability,
-            venue: champ.venue,
-            city: champ.city,
-            state: champ.state,
-            country: champ.country,
-            startDate: champ.start_date.toISOString(),
-            endDate: champ.end_date.toISOString(),
-            registrationOpen: champ.registration_open.toISOString(),
-            registrationClose: champ.registration_close.toISOString(),
-            lateRegistrationDeadline: null,
-            currency: champ.currency,
-            entryFeeAthlete: Number(champ.entry_fee_athlete),
-            entryFeeCoach: Number(champ.entry_fee_coach),
-            entryFeeOfficial: Number(champ.entry_fee_official),
-            bannerUrl: champ.banner_url || null,
-            posterUrl: champ.poster_url || champ.site_settings?.poster_url || null,
-            rulesDocumentUrl: champ.rules_document_url || null,
-            heroHeadline: champ.site_settings?.hero_headline || "The Pinnacle of Taekwondo Excellence",
-            heroDescription: champ.site_settings?.hero_description || "",
-            contactEmail: champ.site_settings?.contact_email || "contact@kyorix.com",
-            contactPhone: champ.site_settings?.contact_phone || "+91 98765 43210",
-            contactWhatsapp: null,
-            contactAddress: champ.site_settings?.contact_address || "Kyorix Sports Technology Private Limited, New Delhi, India",
-            socialLinks: champ.site_settings?.social_links ? JSON.parse(champ.site_settings.social_links) : {},
+            venue: effectiveVenue,
+            city: effectiveCity,
+            state: effectiveState,
+            country: effectiveCountry,
+            startDate: effectiveStartDate,
+            endDate: effectiveEndDate,
+            registrationOpen: effectiveRegOpen,
+            registrationClose: effectiveRegClose,
+            lateRegistrationDeadline: fb?.late_registration_deadline || null,
+            currency: fb?.currency || champ.currency,
+            entryFeeAthlete: fb?.entry_fee_athlete !== undefined ? fb.entry_fee_athlete : Number(champ.entry_fee_athlete),
+            entryFeeCoach: fb?.entry_fee_coach !== undefined ? fb.entry_fee_coach : Number(champ.entry_fee_coach),
+            entryFeeOfficial: fb?.entry_fee_official !== undefined ? fb.entry_fee_official : Number(champ.entry_fee_official),
+            bannerUrl: fb?.banner_url !== undefined ? fb.banner_url : (champ.banner_url || null),
+            posterUrl: fb?.poster_url !== undefined ? fb.poster_url : (champ.poster_url || champ.site_settings?.poster_url || null),
+            rulesDocumentUrl: fb?.rules_document_url !== undefined ? fb.rules_document_url : (champ.rules_document_url || null),
+            heroHeadline: fb?.hero_headline || champ.site_settings?.hero_headline || "The Pinnacle of Taekwondo Excellence",
+            heroDescription: fb?.hero_description || champ.site_settings?.hero_description || "",
+            contactEmail: fb?.contact_email || champ.site_settings?.contact_email || "contact@kyorix.com",
+            contactPhone: fb?.contact_phone || champ.site_settings?.contact_phone || "+91 98765 43210",
+            contactWhatsapp: fb?.contact_whatsapp !== undefined ? fb.contact_whatsapp : null,
+            contactAddress: fb?.contact_address || champ.site_settings?.contact_address || "Kyorix Sports Technology Private Limited, New Delhi, India",
+            socialLinks: fb?.social_links || (champ.site_settings?.social_links ? JSON.parse(champ.site_settings.social_links) : {}),
             isPublished,
-            updatedAt: champ.updated_at.toISOString(),
+            updatedAt: fb?.updated_at || champ.updated_at.toISOString(),
           };
         }
       } catch (err) {
@@ -1051,6 +1124,32 @@ export class CmsService {
     if (input.entryFeeCoach !== undefined) existingFallback.entry_fee_coach = input.entryFeeCoach;
     existingFallback.updated_at = new Date().toISOString();
 
+    // Live synchronise public milestone dates if registration/start dates were changed
+    if (input.registrationOpen) {
+      for (const [dId, dItem] of FALLBACK_DATES.entries()) {
+        if (dItem.title.toLowerCase().includes("registration open") || dItem.title.toLowerCase().includes("online registration")) {
+          dItem.date = input.registrationOpen;
+          FALLBACK_DATES.set(dId, dItem);
+        }
+      }
+    }
+    if (input.registrationClose) {
+      for (const [dId, dItem] of FALLBACK_DATES.entries()) {
+        if (dItem.title.toLowerCase().includes("registration close") || dItem.title.toLowerCase().includes("standard registration")) {
+          dItem.date = input.registrationClose;
+          FALLBACK_DATES.set(dId, dItem);
+        }
+      }
+    }
+    if (input.startDate) {
+      for (const [dId, dItem] of FALLBACK_DATES.entries()) {
+        if (dItem.title.toLowerCase().includes("championship opening") || dItem.title.toLowerCase().includes("day 1") || dItem.title.toLowerCase().includes("start")) {
+          dItem.date = input.startDate;
+          FALLBACK_DATES.set(dId, dItem);
+        }
+      }
+    }
+
     FALLBACK_CHAMPIONSHIPS.set(championshipId, existingFallback);
     persistCmsDataToFile();
 
@@ -1082,6 +1181,59 @@ export class CmsService {
     }
 
     return (await this.getChampionship(championshipId, true))!;
+  }
+
+  /**
+   * Deletes a championship edition with strict RBAC, audit logging, and file persistence
+   */
+  static async deleteChampionship(
+    championshipId: string,
+    adminSession?: AdminSession
+  ): Promise<{ success: boolean; message: string }> {
+    this.checkContentPermission(adminSession);
+
+    if (
+      adminSession?.assigned_championship_id &&
+      adminSession.assigned_championship_id !== championshipId
+    ) {
+      throw new AuthError("Forbidden: You do not have permission to delete this championship.", 403);
+    }
+
+    loadCmsDataFromFile();
+    const existing = await this.getChampionship(championshipId, true);
+    if (!existing) {
+      throw new Error(`Championship '${championshipId}' not found.`);
+    }
+
+    const online = await isDbOnline();
+    if (online) {
+      try {
+        await prisma.championship.delete({
+          where: { id: championshipId },
+        });
+      } catch (err) {
+        console.warn("[CmsService.deleteChampionship] DB delete fallback:", err);
+      }
+    }
+
+    // Remove from in-memory fallback and persist
+    FALLBACK_CHAMPIONSHIPS.delete(championshipId);
+    persistCmsDataToFile();
+
+    if (adminSession?.user_id) {
+      AuditService.logAction({
+        adminUserId: adminSession.user_id,
+        action: "CHAMPIONSHIP_DELETED",
+        entityType: "Championship",
+        entityId: championshipId,
+        oldValue: { name: existing.name, slug: existing.slug },
+      }).catch(() => {});
+    }
+
+    return {
+      success: true,
+      message: `Championship "${existing.name}" was successfully deleted.`,
+    };
   }
 
   // ============================================================================
@@ -2015,6 +2167,7 @@ export class CmsService {
   // ============================================================================
 
   static async getContent(championshipId = "champ-kukkiwon-2026"): Promise<ChampionshipContentDTO> {
+    loadCmsDataFromFile(false);
     const champ = await this.getChampionship(championshipId, true);
     if (!champ) {
       throw new Error(`Championship '${championshipId}' not found.`);
@@ -2265,6 +2418,7 @@ export class CmsService {
     championshipId = "champ-kukkiwon-2026",
     includeUnpublished = false
   ): Promise<ChampionshipImportantDateDTO[]> {
+    loadCmsDataFromFile(false);
     const list: ChampionshipImportantDateDTO[] = [];
     FALLBACK_DATES.forEach((d) => {
       if (d.championshipId === championshipId) {

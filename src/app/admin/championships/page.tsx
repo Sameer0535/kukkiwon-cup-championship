@@ -27,6 +27,7 @@ import {
   RefreshCw,
   DollarSign,
   ShieldCheck,
+  Trash2,
 } from "lucide-react";
 
 interface ChampionshipItem {
@@ -74,6 +75,9 @@ export default function AdminChampionshipsPage() {
 
   const [loading, setLoading] = React.useState(true);
   const [editingItem, setEditingItem] = React.useState<ChampionshipItem | null>(null);
+  const [deletingItem, setDeletingItem] = React.useState<ChampionshipItem | null>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
   const [isCreating, setIsCreating] = React.useState(false);
   const [editModalOpen, setEditModalOpen] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
@@ -291,6 +295,40 @@ export default function AdminChampionshipsPage() {
     }
   };
 
+  const handleOpenDelete = (c: ChampionshipItem) => {
+    setDeletingItem(c);
+    setDeleteModalOpen(true);
+    setErrorBanner(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingItem) return;
+    setIsDeleting(true);
+    setErrorBanner(null);
+
+    try {
+      const res = await fetch(`/api/admin/championships?id=${encodeURIComponent(deletingItem.id)}`, {
+        method: "DELETE",
+        headers: getAdminHeaders(),
+        credentials: "include",
+      });
+
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.error || "Failed to delete championship.");
+      }
+
+      setSuccessBanner(`✓ Championship "${deletingItem.name}" deleted successfully.`);
+      setDeleteModalOpen(false);
+      setDeletingItem(null);
+      loadChampionships();
+    } catch (err: any) {
+      setErrorBanner(err.message || "Failed to delete championship.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="space-y-6 max-w-6xl pb-12">
       {/* Page Header */}
@@ -413,6 +451,16 @@ export default function AdminChampionshipsPage() {
                     >
                       <Edit className="h-3.5 w-3.5 mr-1" />
                       <span>Edit</span>
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleOpenDelete(c)}
+                      className="border-rose-500/40 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-bold"
+                    >
+                      <Trash2 className="h-3.5 w-3.5 mr-1" />
+                      <span>Delete</span>
                     </Button>
 
                     <Link
@@ -694,6 +742,69 @@ export default function AdminChampionshipsPage() {
           </div>
         </form>
       </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={deleteModalOpen}
+        onClose={() => {
+          if (!isDeleting) {
+            setDeleteModalOpen(false);
+            setDeletingItem(null);
+          }
+        }}
+        title="Confirm Championship Deletion"
+        description="This action will permanently delete the championship edition and cannot be undone."
+      >
+        <div className="space-y-4 pt-2 text-white">
+          <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 shrink-0 text-rose-400 mt-0.5" />
+            <div className="space-y-1">
+              <span className="font-bold block text-rose-200">Permanent Deletion Warning</span>
+              <span>
+                You are about to delete <strong>{deletingItem?.name}</strong> ({deletingItem?.edition}). All linked configurations for this tournament edition will be removed.
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={isDeleting}
+              onClick={() => {
+                setDeleteModalOpen(false);
+                setDeletingItem(null);
+              }}
+              className="border-slate-700 text-slate-300 hover:bg-slate-800"
+            >
+              Cancel
+            </Button>
+
+            <Button
+              type="button"
+              variant="danger"
+              size="sm"
+              disabled={isDeleting}
+              onClick={handleConfirmDelete}
+              className="bg-rose-600 hover:bg-rose-700 text-white font-bold min-w-[130px]"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                  <span>Deleting...</span>
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4 mr-1.5" />
+                  <span>Delete Championship</span>
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
+

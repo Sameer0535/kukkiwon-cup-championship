@@ -20,6 +20,7 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { toWorldTaekwondoCountryCode } from "@/lib/utils";
 
 interface ParticipantItem {
   publicId: string;
@@ -274,10 +275,15 @@ export default function AdminParticipantsPage() {
                       </td>
 
                       <td className="p-3.5 whitespace-nowrap">
-                        <div className="flex items-center gap-1.5 text-xs text-slate-200">
-                          <span>{p.flag}</span>
-                          <span>{p.nationality}</span>
-                        </div>
+                        {(() => {
+                          const wt = toWorldTaekwondoCountryCode(p.nationality);
+                          return (
+                            <div className="flex items-center gap-1.5 text-xs text-slate-200">
+                              <span>{p.flag || wt.flag}</span>
+                              <span className="font-mono font-bold tracking-wider text-sky-400">{wt.code}</span>
+                            </div>
+                          );
+                        })()}
                       </td>
 
                       <td className="p-3.5 text-right whitespace-nowrap">

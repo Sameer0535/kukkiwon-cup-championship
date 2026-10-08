@@ -19,6 +19,7 @@ import {
   Users,
   QrCode as QrCodeIcon,
 } from "lucide-react";
+import { toWorldTaekwondoCountryCode } from "@/lib/utils";
 
 export interface AccreditationBadgeData {
   athleteId: string;
@@ -58,8 +59,9 @@ export function AccreditationBadge({
   const roleLabel = isCoach ? "OFFICIAL COACH" : "ATHLETE";
   const roleBg = isCoach ? "bg-blue-600 text-white" : "bg-emerald-600 text-white";
 
-  const nationalityDisplay = data.nationality || "IND";
-  const flagDisplay = data.flag || (nationalityDisplay.includes("IND") ? "🇮🇳" : "🌐");
+  const wtCountry = toWorldTaekwondoCountryCode(data.nationality || "IND");
+  const nationalityDisplay = wtCountry.code;
+  const flagDisplay = data.flag || wtCountry.flag;
 
   return (
     <div

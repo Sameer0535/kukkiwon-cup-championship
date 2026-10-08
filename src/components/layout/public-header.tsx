@@ -56,17 +56,32 @@ export function PublicHeader() {
       {/* Main Header */}
       <header className="sticky top-0 z-40 w-full border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-xs">
         <div className="container mx-auto flex h-20 items-center justify-between px-3 sm:px-6 lg:px-8">
-          {/* LEFT & CENTER: Kukkiwon Official Logo + Championship Title */}
-          <Link href="/" className="flex items-center gap-3 sm:gap-4 group min-w-0">
-            <div className="relative h-10 w-14 sm:h-12 sm:w-18 shrink-0 transition-transform group-hover:scale-105 flex items-center justify-center">
-              <Image
-                src={BRANDING.kukkiwon.logoPath}
-                alt={BRANDING.kukkiwon.name}
-                fill
-                className="object-contain"
-                priority
-              />
+          {/* LEFT & CENTER: Dual Kukkiwon & Kyorix Official Logos + Title */}
+          <Link href="/" className="flex items-center gap-2.5 sm:gap-4 group min-w-0">
+            <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+              <div className="relative h-10 w-14 sm:h-12 sm:w-16 transition-transform group-hover:scale-105 flex items-center justify-center">
+                <Image
+                  src={BRANDING.kukkiwon.logoPath}
+                  alt={BRANDING.kukkiwon.name}
+                  fill
+                  sizes="(max-width: 640px) 56px, 64px"
+                  className="object-contain"
+                  priority
+                />
+              </div>
+              <span className="text-slate-300 font-light text-base sm:text-lg select-none">×</span>
+              <div className="relative h-9 w-12 sm:h-11 sm:w-14 transition-transform group-hover:scale-105 flex items-center justify-center">
+                <Image
+                  src={BRANDING.kyorix.logoPath}
+                  alt={BRANDING.kyorix.name}
+                  fill
+                  sizes="(max-width: 640px) 48px, 56px"
+                  className="object-contain"
+                  priority
+                />
+              </div>
             </div>
+            <div className="h-8 w-px bg-slate-200 hidden sm:block shrink-0" />
             <div className="flex flex-col min-w-0">
               <span className="text-xs sm:text-base lg:text-lg font-black tracking-wider text-slate-950 uppercase font-sans leading-tight truncate">
                 KUKKIWON CUP 2026

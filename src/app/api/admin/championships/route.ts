@@ -80,3 +80,38 @@ export async function PUT(req: NextRequest) {
     );
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const admin = await requireAdmin(req, ["SUPER_ADMIN", "EVENT_ADMIN"]);
+    let championshipId = req.nextUrl.searchParams.get("id") || req.nextUrl.searchParams.get("championshipId");
+
+    if (!championshipId) {
+      try {
+        const body = await req.json();
+        championshipId = body.id || body.championshipId;
+      } catch {}
+    }
+
+    if (!championshipId) {
+      return NextResponse.json(
+        { error: "Championship ID is required for deletion." },
+        { status: 400 }
+      );
+    }
+
+    const result = await CmsService.deleteChampionship(championshipId, admin);
+
+    return NextResponse.json({
+      success: true,
+      message: result.message,
+    });
+  } catch (err: any) {
+    const status = err.statusCode || 500;
+    return NextResponse.json(
+      { error: err.message || "Failed to delete championship." },
+      { status }
+    );
+  }
+}
+
