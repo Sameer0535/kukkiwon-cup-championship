@@ -31,8 +31,26 @@ export function AdminHeader({ title = "Tournament Management" }: { title?: strin
       .then((res) => res.json())
       .then((data) => {
         if (data.data && data.data.length > 0) {
-          setChampionships(data.data);
-          setSelectedChamp(data.data[0].id);
+          const deletedSet = new Set<string>(["champ-delhi-open-2026", "delhi-open-2026"]);
+          if (typeof window !== "undefined") {
+            try {
+              const raw = localStorage.getItem("kukkiwon_deleted_championships");
+              if (raw) {
+                const list: string[] = JSON.parse(raw);
+                list.forEach((id) => deletedSet.add(id));
+              }
+            } catch {}
+          }
+          const valid = data.data.filter(
+            (c: any) =>
+              !deletedSet.has(c.id) &&
+              !deletedSet.has(c.slug) &&
+              !c.name?.toLowerCase().includes("delhi open")
+          );
+          setChampionships(valid);
+          if (valid.length > 0) {
+            setSelectedChamp(valid[0].id);
+          }
         }
       })
       .catch(() => {});

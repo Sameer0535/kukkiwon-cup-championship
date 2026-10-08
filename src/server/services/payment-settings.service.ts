@@ -36,6 +36,7 @@ const DEFAULT_SETTINGS: TournamentPaymentSettings = {
 
 declare global {
   var __kukkiwonPaymentSettings: TournamentPaymentSettings | undefined;
+  var __kukkiwonPaymentSettingsMtime: number | undefined;
 }
 
 const TMP_PATH = path.join(os.tmpdir(), "kukkiwon_championship_data", "payment_settings.json");
@@ -43,41 +44,55 @@ const DATA_PATH = path.join(process.cwd(), ".data", "payment_settings.json");
 
 export class PaymentSettingsService {
   /**
-   * Retrieves active payment settings
+   * Retrieves active payment settings with reactive disk reload
    */
   static async getSettings(): Promise<TournamentPaymentSettings> {
-    if (global.__kukkiwonPaymentSettings) {
+    let diskMtime = 0;
+    let chosenPath: string | null = null;
+
+    try {
+      if (fs.existsSync(DATA_PATH)) {
+        const stat = fs.statSync(DATA_PATH);
+        diskMtime = stat.mtimeMs;
+        chosenPath = DATA_PATH;
+      }
+      if (fs.existsSync(TMP_PATH)) {
+        const stat = fs.statSync(TMP_PATH);
+        if (stat.mtimeMs > diskMtime) {
+          diskMtime = stat.mtimeMs;
+          chosenPath = TMP_PATH;
+        }
+      }
+    } catch {}
+
+    if (
+      global.__kukkiwonPaymentSettings &&
+      global.__kukkiwonPaymentSettingsMtime &&
+      diskMtime <= global.__kukkiwonPaymentSettingsMtime
+    ) {
       return global.__kukkiwonPaymentSettings;
     }
 
-    // Try reading from .data/payment_settings.json
-    try {
-      if (fs.existsSync(DATA_PATH)) {
-        const raw = fs.readFileSync(DATA_PATH, "utf-8");
+    if (chosenPath) {
+      try {
+        const raw = fs.readFileSync(chosenPath, "utf-8");
         const parsed = JSON.parse(raw);
-        const merged = { ...DEFAULT_SETTINGS, ...parsed };
+        const merged: TournamentPaymentSettings = { ...DEFAULT_SETTINGS, ...parsed };
         global.__kukkiwonPaymentSettings = merged;
+        global.__kukkiwonPaymentSettingsMtime = diskMtime;
         return merged;
-      }
-    } catch {}
+      } catch {}
+    }
 
-    // Try reading from tmp path
-    try {
-      if (fs.existsSync(TMP_PATH)) {
-        const raw = fs.readFileSync(TMP_PATH, "utf-8");
-        const parsed = JSON.parse(raw);
-        const merged = { ...DEFAULT_SETTINGS, ...parsed };
-        global.__kukkiwonPaymentSettings = merged;
-        return merged;
-      }
-    } catch {}
-
-    global.__kukkiwonPaymentSettings = DEFAULT_SETTINGS;
-    return DEFAULT_SETTINGS;
+    if (!global.__kukkiwonPaymentSettings) {
+      global.__kukkiwonPaymentSettings = { ...DEFAULT_SETTINGS };
+      global.__kukkiwonPaymentSettingsMtime = Date.now();
+    }
+    return global.__kukkiwonPaymentSettings;
   }
 
   /**
-   * Updates tournament payment details
+   * Updates tournament payment details and syncs to disk and CMS
    */
   static async saveSettings(
     patch: Partial<TournamentPaymentSettings>
@@ -89,13 +104,19 @@ export class PaymentSettingsService {
       updatedAt: new Date().toISOString(),
     };
 
+    const now = Date.now();
     global.__kukkiwonPaymentSettings = updated;
+    global.__kukkiwonPaymentSettingsMtime = now;
     const content = JSON.stringify(updated, null, 2);
 
     try {
       const dir = path.dirname(DATA_PATH);
       if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(DATA_PATH, content, "utf-8");
+      try {
+        const stat = fs.statSync(DATA_PATH);
+        global.__kukkiwonPaymentSettingsMtime = stat.mtimeMs;
+      } catch {}
     } catch {}
 
     try {

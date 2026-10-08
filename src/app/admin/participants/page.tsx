@@ -69,9 +69,57 @@ export default function AdminParticipantsPage() {
         credentials: "include",
       });
       const data = await res.json();
-      if (data.participants) {
-        setParticipants(data.participants);
+      let list: ParticipantItem[] = Array.isArray(data?.participants) ? data.participants : [];
+
+      // Merge local client-stored registrations so participants never disappear on serverless restarts
+      if (typeof window !== "undefined") {
+        try {
+          const raw = localStorage.getItem("kukkiwon_client_registrations");
+          if (raw) {
+            const clientList: any[] = JSON.parse(raw);
+            const seenNames = new Set(list.map((p) => p.fullName?.toLowerCase().trim()));
+            const seenIds = new Set(list.map((p) => p.publicId));
+
+            for (const c of clientList) {
+              if (!c || !c.registrationNumber) continue;
+              const name = (c.athleteName || c.participantName || "").trim();
+              if (name && !seenNames.has(name.toLowerCase()) && !seenIds.has(c.registrationNumber)) {
+                const des: "Athlete" | "Coach" = c.participantType === "COACH" ? "Coach" : "Athlete";
+                if (!filterDesignation || filterDesignation.toLowerCase() === des.toLowerCase()) {
+                  const q = searchQuery.trim().toLowerCase();
+                  if (
+                    !q ||
+                    name.toLowerCase().includes(q) ||
+                    (c.registrationNumber && c.registrationNumber.toLowerCase().includes(q)) ||
+                    (c.academyName && c.academyName.toLowerCase().includes(q)) ||
+                    (c.kukkiwonId && c.kukkiwonId.toLowerCase().includes(q))
+                  ) {
+                    list.unshift({
+                      publicId: c.registrationNumber,
+                      fullName: name,
+                      gender: c.gender || "MALE",
+                      nationality: c.nationality || "IND",
+                      flag: "🌐",
+                      designation: des,
+                      academy: c.academyName || "Official Dojang",
+                      kukkiwonId: c.kukkiwonId || "Submitted",
+                      photoUrl: c.photoUrl || null,
+                      status: c.paymentStatus === "PAID" || c.status === "APPROVED" ? "ACTIVE" : "PENDING",
+                      registrationId: c.id,
+                      categoryName: c.categoryName || "Official Entry",
+                      coachRole: c.coachRole,
+                      email: c.email || "",
+                      phone: c.phone || "",
+                    });
+                  }
+                }
+              }
+            }
+          }
+        } catch {}
       }
+
+      setParticipants(list);
     } catch {
       // Error handling
     } finally {
@@ -278,10 +326,9 @@ export default function AdminParticipantsPage() {
                         {(() => {
                           const wt = toWorldTaekwondoCountryCode(p.nationality);
                           return (
-                            <div className="flex items-center gap-1.5 text-xs text-slate-200">
-                              <span>{p.flag || wt.flag}</span>
-                              <span className="font-mono font-bold tracking-wider text-sky-400">{wt.code}</span>
-                            </div>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-black tracking-wider bg-sky-950/80 text-sky-400 border border-sky-500/30">
+                              {wt.code}
+                            </span>
                           );
                         })()}
                       </td>

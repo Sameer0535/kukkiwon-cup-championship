@@ -65,9 +65,73 @@ export default function AdminPaymentVerificationPage() {
         credentials: "include",
       });
       const data = await res.json();
-      if (data.items) {
-        setItems(data.items);
+      let queueItems: any[] = Array.isArray(data?.items) ? data.items : [];
+
+      // Merge local client-stored registrations so they never disappear on serverless restarts
+      if (typeof window !== "undefined") {
+        try {
+          const raw = localStorage.getItem("kukkiwon_client_registrations");
+          if (raw) {
+            const clientList: any[] = JSON.parse(raw);
+            const seenIds = new Set(queueItems.map((i: any) => i.registrationId || i.id));
+            const seenRegNums = new Set(queueItems.map((i: any) => i.registrationNumber));
+
+            for (const c of clientList) {
+              if (!c || !c.registrationNumber) continue;
+              if (!seenIds.has(c.id) && !seenRegNums.has(c.registrationNumber)) {
+                const cStatus =
+                  c.paymentStatus === "PAID" || c.status === "APPROVED"
+                    ? "VERIFIED"
+                    : c.status === "REJECTED" || c.paymentStatus === "REJECTED"
+                    ? "REJECTED"
+                    : "UNDER_REVIEW";
+
+                if (!statusFilter || statusFilter === cStatus) {
+                  queueItems.unshift({
+                    id: c.id,
+                    registrationId: c.id,
+                    registrationNumber: c.registrationNumber,
+                    athleteId: c.athleteId || c.registrationNumber,
+                    athleteName: c.athleteName || c.participantName || "Competitor",
+                    participantType: c.participantType || "ATHLETE",
+                    utrNumber: c.utrNumber || "OFFLINE-MANUAL",
+                    amountInr: c.amountInr || 2500,
+                    amountFormatted: c.amountFormatted || `₹${(c.amountInr || 2500).toLocaleString("en-IN")}`,
+                    categoryName: c.categoryName || "Official WT Category",
+                    academyName: c.academyName || "Official Dojang",
+                    kukkiwonId: c.kukkiwonId || "Submitted",
+                    photoUrl: c.photoUrl || null,
+                    email: c.email || "",
+                    phone: c.phone || "",
+                    gender: c.gender || "MALE",
+                    nationality: c.nationality || "IND",
+                    state: c.state || "",
+                    city: c.city || "",
+                    beltRank: c.beltRank || "",
+                    division: c.division || "",
+                    documentsUploaded: c.documentsUploaded || {},
+                    offlineSlip: c.offlineSlip || null,
+                    rawDraftData: c.rawDraftData || {},
+                    status: cStatus,
+                    title: `Athlete Championship Fee (${c.amountFormatted || "₹2,500"})`,
+                    documentType: "PAYMENT_RECEIPT",
+                    fileName: `UTR: ${c.utrNumber || "N/A"}`,
+                    version: 1,
+                    uploadedAt: c.submittedAt || new Date().toISOString(),
+                    submittedAt: c.submittedAt || new Date().toISOString(),
+                    verifiedAt: c.verifiedAt || null,
+                    verifiedBy: c.verifiedBy || null,
+                    rejectionReason: c.rejectionReason || null,
+                    championshipName: "Kukkiwon Cup Championship 2026",
+                  });
+                }
+              }
+            }
+          }
+        } catch {}
       }
+
+      setItems(queueItems);
     } catch {
       // Error handling
     } finally {
@@ -101,6 +165,36 @@ export default function AdminPaymentVerificationPage() {
         throw new Error(data.error || "Failed to verify payment.");
       }
 
+      // Update client-side persistence so approved status survives refreshes & serverless restarts
+      if (typeof window !== "undefined") {
+        try {
+          const raw = localStorage.getItem("kukkiwon_client_registrations");
+          if (raw) {
+            const list: any[] = JSON.parse(raw);
+            const updated = list.map((c: any) => {
+              if (c.id === itemId || c.registrationId === itemId || c.registrationNumber === itemId) {
+                return {
+                  ...c,
+                  paymentStatus: "PAID",
+                  status: "APPROVED",
+                  verifiedAt: new Date().toISOString(),
+                  verifiedBy: "Tournament Organizing Committee",
+                };
+              }
+              return c;
+            });
+            localStorage.setItem("kukkiwon_client_registrations", JSON.stringify(updated));
+
+            // Sync with backend in background
+            fetch("/api/registrations/sync", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ registrations: updated }),
+            }).catch(() => {});
+          }
+        } catch {}
+      }
+
       setSuccessBanner(
         `✓ Payment approved for ${participantName}! Details have been synchronized to Payments, Registrations, and ID Cards sections.`
       );
@@ -132,6 +226,34 @@ export default function AdminPaymentVerificationPage() {
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || "Failed to reject payment.");
+      }
+
+      // Update client-side persistence
+      if (typeof window !== "undefined") {
+        try {
+          const raw = localStorage.getItem("kukkiwon_client_registrations");
+          if (raw) {
+            const list: any[] = JSON.parse(raw);
+            const updated = list.map((c: any) => {
+              if (c.id === itemId || c.registrationId === itemId || c.registrationNumber === itemId) {
+                return {
+                  ...c,
+                  paymentStatus: "REJECTED",
+                  status: "REJECTED",
+                  rejectionReason: reason,
+                };
+              }
+              return c;
+            });
+            localStorage.setItem("kukkiwon_client_registrations", JSON.stringify(updated));
+
+            fetch("/api/registrations/sync", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ registrations: updated }),
+            }).catch(() => {});
+          }
+        } catch {}
       }
 
       setSuccessBanner(`Payment rejected for ${participantName}.`);

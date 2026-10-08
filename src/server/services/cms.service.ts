@@ -8,6 +8,7 @@ import fs from "fs";
 import path from "path";
 import os from "os";
 import prisma from "@/lib/db";
+import { PaymentSettingsService } from "@/server/services/payment-settings.service";
 import { formatPaiseToInr } from "@/server/services/fee.service";
 import { AuditService } from "@/server/services/audit.service";
 import { AuthError } from "@/lib/server-auth";
@@ -141,6 +142,13 @@ interface FallbackChampionshipData {
 const CMS_LOCAL_STORE_FILE = path.join(process.cwd(), ".data", "cms_data.json");
 const CMS_TMP_DATA_DIR = path.join(os.tmpdir(), "kukkiwon_championship_data");
 const CMS_TMP_STORE_FILE = path.join(CMS_TMP_DATA_DIR, "cms-data.json");
+const CMS_DELETED_STORE_FILE = path.join(process.cwd(), ".data", "deleted_championships.json");
+
+// Blacklist of permanently deleted championship IDs and slugs
+const DELETED_CHAMPIONSHIPS_SET = new Set<string>([
+  "champ-delhi-open-2026",
+  "delhi-open-2026",
+]);
 
 function getCmsDataFilePath(): string {
   try {
@@ -199,44 +207,6 @@ const FALLBACK_CHAMPIONSHIPS: Map<string, FallbackChampionshipData> = new Map([
         youtube: "https://youtube.com/@kukkiwoncup",
       } as Record<string, string>,
       is_published: true,
-      updated_at: new Date().toISOString(),
-    },
-  ],
-  [
-    "champ-delhi-open-2026",
-    {
-      id: "champ-delhi-open-2026",
-      slug: "delhi-open-2026",
-      name: "Delhi Open Taekwondo Championship 2026",
-      short_name: "Delhi Open 2026",
-      edition: "2026",
-      subtitle: "State-Level Invitational Championship",
-      description: "Delhi State Invitational Taekwondo Championship.",
-      status: "DRAFT",
-      start_date: "2026-12-05T09:00:00Z",
-      end_date: "2026-12-07T18:00:00Z",
-      registration_open: "2026-11-01T00:00:00Z",
-      registration_close: "2026-11-30T23:59:59Z",
-      late_registration_deadline: null,
-      venue: "Thyagaraj Indoor Stadium",
-      city: "New Delhi",
-      state: "Delhi",
-      country: "India",
-      currency: "INR",
-      entry_fee_athlete: 1200,
-      entry_fee_coach: 800,
-      entry_fee_official: 0,
-      banner_url: null,
-      poster_url: null,
-      rules_document_url: null,
-      hero_headline: "Delhi Open Taekwondo",
-      hero_description: "State level invitational.",
-      contact_email: "contact@kyorix.com",
-      contact_phone: "+91 98765 43210",
-      contact_whatsapp: null,
-      contact_address: "Kyorix Sports Technology Private Limited, New Delhi, India",
-      social_links: {} as Record<string, string>,
-      is_published: false,
       updated_at: new Date().toISOString(),
     },
   ],
@@ -323,26 +293,6 @@ const FALLBACK_CATEGORIES: Map<string, PublicCategory> = new Map([
       isActive: false, // Inactive by default to test requirement 7
     },
   ],
-  [
-    "cat-005",
-    {
-      id: "cat-005",
-      championshipId: "champ-delhi-open-2026",
-      code: "DELHI-JUN-M-U45",
-      name: "Delhi Junior Male Under 45kg",
-      discipline: "KYORUGI",
-      division: "JUNIOR",
-      gender: "MALE",
-      minAge: 14,
-      maxAge: 17,
-      minWeight: null,
-      maxWeight: 45,
-      beltRequirement: null,
-      registrationFee: 1200,
-      displayOrder: 1,
-      isActive: true,
-    },
-  ],
 ]);
 
 const FALLBACK_FEES: Map<string, PublicFee> = new Map([
@@ -383,26 +333,6 @@ const FALLBACK_FEES: Map<string, PublicFee> = new Map([
       lateFeeFrom: null,
       effectiveFrom: "2026-09-01T00:00:00Z",
       effectiveUntil: "2026-11-15T23:59:59Z",
-      isActive: true,
-    },
-  ],
-  [
-    "fee-delhi-001",
-    {
-      id: "fee-delhi-001",
-      championshipId: "champ-delhi-open-2026",
-      categoryId: null,
-      categoryName: null,
-      participantType: "ATHLETE",
-      name: "Delhi Open Athlete Entry Fee",
-      baseFeePaise: 120000,
-      baseFeeFormatted: "₹1,200",
-      lateFeePaise: 30000,
-      lateFeeFormatted: "₹300",
-      currency: "INR",
-      lateFeeFrom: "2026-11-20T00:00:00Z",
-      effectiveFrom: "2026-11-01T00:00:00Z",
-      effectiveUntil: "2026-11-30T23:59:59Z",
       isActive: true,
     },
   ],
@@ -641,6 +571,7 @@ function persistCmsDataToFile() {
       categories: Array.from(FALLBACK_CATEGORIES.entries()),
       fees: Array.from(FALLBACK_FEES.entries()),
       documents: Array.from(FALLBACK_PUBLIC_DOCUMENTS.entries()),
+      deletedChampionships: Array.from(DELETED_CHAMPIONSHIPS_SET),
       timestamp: Date.now(),
     };
     const jsonStr = JSON.stringify(payload, null, 2);
@@ -650,6 +581,9 @@ function persistCmsDataToFile() {
       const localDir = path.dirname(CMS_LOCAL_STORE_FILE);
       if (!fs.existsSync(localDir)) fs.mkdirSync(localDir, { recursive: true });
       fs.writeFileSync(CMS_LOCAL_STORE_FILE, jsonStr, "utf-8");
+      try {
+        fs.writeFileSync(CMS_DELETED_STORE_FILE, JSON.stringify(Array.from(DELETED_CHAMPIONSHIPS_SET), null, 2), "utf-8");
+      } catch {}
       const stat = fs.statSync(CMS_LOCAL_STORE_FILE);
       lastCmsDiskMtime = stat.mtimeMs;
     } catch (e) {
@@ -684,9 +618,27 @@ function loadCmsDataFromFile(force = false) {
       }
     }
 
-    if (!chosenPath) return;
+    // Also load external deleted file if exists
+    try {
+      if (fs.existsSync(CMS_DELETED_STORE_FILE)) {
+        const rawDel = JSON.parse(fs.readFileSync(CMS_DELETED_STORE_FILE, "utf-8"));
+        if (Array.isArray(rawDel)) {
+          for (const d of rawDel) DELETED_CHAMPIONSHIPS_SET.add(d);
+        }
+      }
+    } catch {}
+
+    if (!chosenPath) {
+      for (const delId of DELETED_CHAMPIONSHIPS_SET) {
+        FALLBACK_CHAMPIONSHIPS.delete(delId);
+      }
+      return;
+    }
 
     if (!force && lastCmsDiskMtime && diskMtime <= lastCmsDiskMtime) {
+      for (const delId of DELETED_CHAMPIONSHIPS_SET) {
+        FALLBACK_CHAMPIONSHIPS.delete(delId);
+      }
       return; // In-memory cache is up-to-date with disk
     }
 
@@ -694,11 +646,23 @@ function loadCmsDataFromFile(force = false) {
     const parsed = JSON.parse(raw);
     lastCmsDiskMtime = diskMtime;
 
+    if (parsed.deletedChampionships && Array.isArray(parsed.deletedChampionships)) {
+      for (const delId of parsed.deletedChampionships) {
+        DELETED_CHAMPIONSHIPS_SET.add(delId);
+      }
+    }
+
     if (parsed.championships && Array.isArray(parsed.championships)) {
       for (const [k, v] of parsed.championships) {
-        const current = FALLBACK_CHAMPIONSHIPS.get(k);
-        FALLBACK_CHAMPIONSHIPS.set(k, { ...(current || {}), ...v });
+        if (!DELETED_CHAMPIONSHIPS_SET.has(k) && !DELETED_CHAMPIONSHIPS_SET.has(v?.slug)) {
+          const current = FALLBACK_CHAMPIONSHIPS.get(k);
+          FALLBACK_CHAMPIONSHIPS.set(k, { ...(current || {}), ...v });
+        }
       }
+    }
+
+    for (const delId of DELETED_CHAMPIONSHIPS_SET) {
+      FALLBACK_CHAMPIONSHIPS.delete(delId);
     }
     if (parsed.dates && Array.isArray(parsed.dates)) {
       for (const [k, v] of parsed.dates) {
@@ -765,6 +729,9 @@ export class CmsService {
     includeDrafts = false
   ): Promise<PublicChampionship | null> {
     loadCmsDataFromFile(false);
+    if (DELETED_CHAMPIONSHIPS_SET.has(idOrSlug)) {
+      return null;
+    }
     const online = await isDbOnline();
 
     if (online) {
@@ -906,7 +873,10 @@ export class CmsService {
   static async listChampionships(includeDrafts = true): Promise<PublicChampionship[]> {
     loadCmsDataFromFile();
     const result: PublicChampionship[] = [];
-    for (const [id] of FALLBACK_CHAMPIONSHIPS) {
+    for (const [id, cData] of FALLBACK_CHAMPIONSHIPS) {
+      if (DELETED_CHAMPIONSHIPS_SET.has(id) || (cData?.slug && DELETED_CHAMPIONSHIPS_SET.has(cData.slug))) {
+        continue;
+      }
       const champ = await this.getChampionship(id, includeDrafts);
       if (champ) result.push(champ);
     }
@@ -1120,7 +1090,12 @@ export class CmsService {
     if (input.contactPhone) existingFallback.contact_phone = input.contactPhone;
     if (input.contactWhatsapp !== undefined) existingFallback.contact_whatsapp = input.contactWhatsapp;
     if (input.contactAddress) existingFallback.contact_address = input.contactAddress;
-    if (input.entryFeeAthlete !== undefined) existingFallback.entry_fee_athlete = input.entryFeeAthlete;
+    if (input.entryFeeAthlete !== undefined) {
+      existingFallback.entry_fee_athlete = input.entryFeeAthlete;
+      try {
+        PaymentSettingsService.saveSettings({ feeAmountInr: input.entryFeeAthlete }).catch(() => {});
+      } catch {}
+    }
     if (input.entryFeeCoach !== undefined) existingFallback.entry_fee_coach = input.entryFeeCoach;
     existingFallback.updated_at = new Date().toISOString();
 
@@ -1217,7 +1192,10 @@ export class CmsService {
     }
 
     // Remove from in-memory fallback and persist
+    DELETED_CHAMPIONSHIPS_SET.add(championshipId);
+    if (existing?.slug) DELETED_CHAMPIONSHIPS_SET.add(existing.slug);
     FALLBACK_CHAMPIONSHIPS.delete(championshipId);
+    if (existing?.slug) FALLBACK_CHAMPIONSHIPS.delete(existing.slug);
     persistCmsDataToFile();
 
     if (adminSession?.user_id) {

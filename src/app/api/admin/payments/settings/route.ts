@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/server-auth";
 import { PaymentSettingsService } from "@/server/services/payment-settings.service";
 import { AuditService } from "@/server/services/audit.service";
+import { CmsService } from "@/server/services/cms.service";
 
 export async function GET(req: NextRequest) {
   try {
@@ -66,12 +67,20 @@ export async function POST(req: NextRequest) {
 
       const updated = await PaymentSettingsService.saveSettings(patch);
 
+      if (patch.feeAmountInr && !isNaN(Number(patch.feeAmountInr))) {
+        try {
+          await CmsService.updateChampionship("champ-kukkiwon-2026", {
+            entryFeeAthlete: Number(patch.feeAmountInr),
+          });
+        } catch {}
+      }
+
       await AuditService.logAction({
         adminUserId: admin.user_id,
         action: "PAYMENT_SETTINGS_UPDATED",
         entityType: "PaymentSettings",
         entityId: "default",
-        newValue: { upiId: updated.upiId, bankName: updated.bankName, hasQr: !!updated.qrImageUrl },
+        newValue: { upiId: updated.upiId, bankName: updated.bankName, hasQr: !!updated.qrImageUrl, fee: updated.feeAmountInr },
       });
 
       return NextResponse.json({
@@ -85,12 +94,20 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const updated = await PaymentSettingsService.saveSettings(body);
 
+    if (body.feeAmountInr && !isNaN(Number(body.feeAmountInr))) {
+      try {
+        await CmsService.updateChampionship("champ-kukkiwon-2026", {
+          entryFeeAthlete: Number(body.feeAmountInr),
+        });
+      } catch {}
+    }
+
     await AuditService.logAction({
       adminUserId: admin.user_id,
       action: "PAYMENT_SETTINGS_UPDATED",
       entityType: "PaymentSettings",
       entityId: "default",
-      newValue: { upiId: updated.upiId, bankName: updated.bankName, hasQr: !!updated.qrImageUrl },
+      newValue: { upiId: updated.upiId, bankName: updated.bankName, hasQr: !!updated.qrImageUrl, fee: updated.feeAmountInr },
     });
 
     return NextResponse.json({

@@ -193,6 +193,57 @@ export async function GET(req: NextRequest) {
       }
     } catch {}
 
+    // 2b. Also include any LiveSync registrations not explicitly in verifications
+    try {
+      const liveStore = LiveSyncService.loadStore();
+      for (const reg of liveStore.registrations) {
+        if (!seenRegIds.has(reg.id) && !seenRegNumbers.has(reg.registration_number)) {
+          seenRegIds.add(reg.id);
+          seenRegNumbers.add(reg.registration_number);
+          const itemStatus = reg.status === "APPROVED" || reg.payment_status === "PAID" ? "VERIFIED" : "UNDER_REVIEW";
+          if (!status || status === "ALL" || status === itemStatus) {
+            mappedItems.push({
+              id: reg.id,
+              registrationId: reg.id,
+              registrationNumber: reg.registration_number,
+              athleteId: reg.athlete_id || reg.registration_number,
+              athleteName: reg.athlete_name,
+              participantType: reg.participant_type,
+              utrNumber: reg.utr_number || "OFFLINE-MANUAL",
+              amountInr: reg.amount_paise ? reg.amount_paise / 100 : 2500,
+              amountFormatted: `₹${(reg.amount_paise ? reg.amount_paise / 100 : 2500).toLocaleString("en-IN")}`,
+              categoryName: reg.category_name,
+              academyName: reg.academy_name,
+              kukkiwonId: reg.kukkiwon_id,
+              photoUrl: reg.photo_url,
+              email: reg.email,
+              phone: reg.phone,
+              gender: reg.gender,
+              nationality: reg.nationality || "IND",
+              state: reg.state || "",
+              city: reg.city || "",
+              beltRank: reg.belt_rank || "",
+              division: reg.division || "",
+              documentsUploaded: reg.documents_uploaded || {},
+              offlineSlip: reg.offline_slip || null,
+              rawDraftData: reg.raw_draft_data || {},
+              status: itemStatus,
+              title: reg.participant_type === "COACH" ? "Coach Accreditation Fee" : "Athlete Championship Fee",
+              documentType: "PAYMENT_RECEIPT",
+              fileName: reg.utr_number ? `UTR: ${reg.utr_number}` : "UPI Payment Proof",
+              version: 1,
+              uploadedAt: reg.submitted_at || reg.registered_at,
+              submittedAt: reg.submitted_at || reg.registered_at,
+              verifiedAt: reg.approved_at || null,
+              verifiedBy: reg.status === "APPROVED" ? "Tournament Organizing Committee" : null,
+              rejectionReason: null,
+              championshipName: "Kukkiwon Cup Championship 2026",
+            });
+          }
+        }
+      }
+    } catch {}
+
     // 3. Check fallback registrations store if running without active database
     try {
       const fallbackStore = RegistrationFlowService.getFallbackStore();

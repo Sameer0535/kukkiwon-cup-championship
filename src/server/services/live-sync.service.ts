@@ -374,6 +374,12 @@ export class LiveSyncService {
     utrNumber?: string;
     paymentMethod?: string;
     feeAmountInr?: number;
+    status?: string;
+    paymentStatus?: string;
+    documentStatus?: string;
+    idCardStatus?: string;
+    verifiedAt?: string | null;
+    verifiedBy?: string | null;
     documentsUploaded?: Record<string, any>;
     offlineSlip?: Record<string, any> | null;
     rawDraftData?: Record<string, any>;
@@ -390,6 +396,8 @@ export class LiveSyncService {
     const existingIndex = store.registrations.findIndex(
       (r) => r.id === regId || r.registration_number === params.registrationNumber
     );
+
+    const isAlreadyPaid = params.paymentStatus === "PAID" || params.status === "APPROVED";
 
     const syncReg: SyncRegistration = {
       id: regId,
@@ -417,11 +425,11 @@ export class LiveSyncService {
       division: params.division,
       weight_kg: params.weightKg,
       amount_paise: amountPaise,
-      status: isCoach ? "APPROVED" : "SUBMITTED",
-      payment_status: isCoach ? "PAID" : "UNDER_REVIEW",
-      document_status: isCoach ? "VERIFIED" : "UNDER_REVIEW",
-      id_card_status: isCoach ? "READY" : "PENDING",
-      approved_at: isCoach ? now : null,
+      status: isCoach ? "APPROVED" : (params.status as any) || (isAlreadyPaid ? "APPROVED" : "SUBMITTED"),
+      payment_status: isCoach ? "PAID" : (params.paymentStatus as any) || (isAlreadyPaid ? "PAID" : "UNDER_REVIEW"),
+      document_status: isCoach ? "VERIFIED" : (params.documentStatus as any) || (isAlreadyPaid ? "VERIFIED" : "UNDER_REVIEW"),
+      id_card_status: isCoach ? "READY" : (params.idCardStatus as any) || (isAlreadyPaid ? "READY" : "PENDING"),
+      approved_at: isCoach || isAlreadyPaid ? (params.verifiedAt || now) : null,
       utr_number: isCoach ? "FREE_COACH" : (params.utrNumber || null),
       payment_method: isCoach ? "FREE_ACCREDITATION" : (params.paymentMethod || "OFFLINE_UPI"),
       documents_uploaded: params.documentsUploaded,
@@ -441,6 +449,7 @@ export class LiveSyncService {
     let verificationItem: PaymentVerificationItem | undefined;
     if (!isCoach && (params.participantType === "ATHLETE" || hasUtr)) {
       const vId = `verif-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+      const vStatus = isAlreadyPaid ? "VERIFIED" : ((params.status as any) || "UNDER_REVIEW");
       verificationItem = {
         id: vId,
         registrationId: regId,
@@ -465,8 +474,10 @@ export class LiveSyncService {
         documentsUploaded: params.documentsUploaded,
         offlineSlip: params.offlineSlip,
         rawDraftData: params.rawDraftData,
-        status: "UNDER_REVIEW",
+        status: vStatus,
         submittedAt: now,
+        verifiedAt: vStatus === "VERIFIED" ? (params.verifiedAt || now) : null,
+        verifiedBy: vStatus === "VERIFIED" ? (params.verifiedBy || "Tournament Organizing Committee") : null,
       };
 
       // Remove existing pending verifications for this reg
@@ -526,8 +537,15 @@ export class LiveSyncService {
     registration: SyncRegistration;
   } {
     const store = this.loadStore();
+    const cleanId = verificationId.replace(/^pay-|^po-/, "");
     let verif = store.verifications.find(
-      (v) => v.id === verificationId || v.registrationId === verificationId || v.registrationNumber === verificationId
+      (v) =>
+        v.id === verificationId ||
+        v.id === cleanId ||
+        v.registrationId === verificationId ||
+        v.registrationId === cleanId ||
+        v.registrationNumber === verificationId ||
+        v.registrationNumber === cleanId
     );
 
     const now = new Date().toISOString();
@@ -535,7 +553,11 @@ export class LiveSyncService {
     // If verification not in store but registration exists, synthesize verification
     if (!verif) {
       const existingReg = store.registrations.find(
-        (r) => r.id === verificationId || r.registration_number === verificationId
+        (r) =>
+          r.id === verificationId ||
+          r.id === cleanId ||
+          r.registration_number === verificationId ||
+          r.registration_number === cleanId
       );
       if (existingReg) {
         verif = {
@@ -579,7 +601,11 @@ export class LiveSyncService {
 
     // Update associated registration
     let reg = store.registrations.find(
-      (r) => r.id === verif!.registrationId || r.registration_number === verif!.registrationNumber
+      (r) =>
+        r.id === verif!.registrationId ||
+        r.id === cleanId ||
+        r.registration_number === verif!.registrationNumber ||
+        r.registration_number === cleanId
     );
 
     if (reg) {

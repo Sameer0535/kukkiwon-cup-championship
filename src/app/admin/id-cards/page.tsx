@@ -87,11 +87,51 @@ export default function AdminIdCardsPage() {
         credentials: "include",
       });
       const data = await res.json();
-      if (data.items) {
-        setCards(data.items);
-        setTotal(data.total || 0);
-        setTotalPages(data.totalPages || 1);
+      let cardItems: any[] = Array.isArray(data?.items) ? data.items : [];
+
+      if (typeof window !== "undefined") {
+        try {
+          const raw = localStorage.getItem("kukkiwon_client_registrations");
+          if (raw) {
+            const clientList: any[] = JSON.parse(raw);
+            const seenIds = new Set(cardItems.map((c) => c.registrationId || c.id));
+            const seenNums = new Set(cardItems.map((c) => c.cardNumber || c.athleteId));
+
+            for (const c of clientList) {
+              if (!c || !c.registrationNumber) continue;
+              if (!seenIds.has(c.id) && !seenNums.has(c.registrationNumber)) {
+                const isPaid = c.paymentStatus === "PAID" || c.status === "APPROVED";
+                const cardStatus = isPaid ? "GENERATED" : "NOT_GENERATED";
+
+                if (!statusFilter || statusFilter === cardStatus) {
+                  cardItems.unshift({
+                    id: `card-${c.id}`,
+                    athleteId: c.athleteId || c.registrationNumber,
+                    cardNumber: c.registrationNumber,
+                    registrationId: c.id,
+                    championshipId: "champ-kukkiwon-2026",
+                    championshipName: "Kukkiwon Cup Championship 2026",
+                    athleteName: c.athleteName || c.participantName || "Competitor",
+                    athleteEmail: c.email || null,
+                    academyName: c.academyName || "Official Dojang",
+                    categoryName: c.categoryName || "Official WT Category",
+                    version: 1,
+                    status: cardStatus,
+                    pdfUrl: null,
+                    qrToken: `token-${c.id}`,
+                    generatedAt: isPaid ? (c.verifiedAt || c.submittedAt) : null,
+                    printCount: 0,
+                  });
+                }
+              }
+            }
+          }
+        } catch {}
       }
+
+      setCards(cardItems);
+      setTotal(cardItems.length);
+      setTotalPages(Math.ceil(cardItems.length / pageSize) || 1);
     } catch {
       // Error handling
     } finally {

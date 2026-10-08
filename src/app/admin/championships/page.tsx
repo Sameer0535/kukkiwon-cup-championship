@@ -124,25 +124,38 @@ export default function AdminChampionshipsPage() {
       if (res.ok) {
         const json = await res.json();
         if (Array.isArray(json.data) && json.data.length > 0) {
-          const items: ChampionshipItem[] = json.data.map((d: any) => ({
-            id: d.id,
-            slug: d.slug,
-            name: d.name,
-            short_name: d.shortName || d.name,
-            edition: d.edition || "2026",
-            subtitle: d.subtitle || "",
-            status: d.status || "REGISTRATION_OPEN",
-            start_date: d.startDate ? d.startDate.split("T")[0] : "",
-            end_date: d.endDate ? d.endDate.split("T")[0] : "",
-            registration_open: d.registrationOpen ? d.registrationOpen.split("T")[0] : "",
-            registration_close: d.registrationClose ? d.registrationClose.split("T")[0] : "",
-            venue: d.venue || "",
-            city: d.city || "",
-            state: d.state || "",
-            country: d.country || "India",
-            entry_fee_athlete: d.entryFeeAthlete ?? 2500,
-            entry_fee_coach: 0,
-          }));
+          const deletedSet = new Set<string>(["champ-delhi-open-2026", "delhi-open-2026"]);
+          if (typeof window !== "undefined") {
+            try {
+              const raw = localStorage.getItem("kukkiwon_deleted_championships");
+              if (raw) {
+                const list: string[] = JSON.parse(raw);
+                list.forEach((id) => deletedSet.add(id));
+              }
+            } catch {}
+          }
+
+          const items: ChampionshipItem[] = json.data
+            .filter((d: any) => !deletedSet.has(d.id) && !deletedSet.has(d.slug) && !d.name?.toLowerCase().includes("delhi open"))
+            .map((d: any) => ({
+              id: d.id,
+              slug: d.slug,
+              name: d.name,
+              short_name: d.shortName || d.name,
+              edition: d.edition || "2026",
+              subtitle: d.subtitle || "",
+              status: d.status || "REGISTRATION_OPEN",
+              start_date: d.startDate ? d.startDate.split("T")[0] : "",
+              end_date: d.endDate ? d.endDate.split("T")[0] : "",
+              registration_open: d.registrationOpen ? d.registrationOpen.split("T")[0] : "",
+              registration_close: d.registrationClose ? d.registrationClose.split("T")[0] : "",
+              venue: d.venue || "",
+              city: d.city || "",
+              state: d.state || "",
+              country: d.country || "India",
+              entry_fee_athlete: d.entryFeeAthlete ?? 2500,
+              entry_fee_coach: 0,
+            }));
           setChampionships(items);
           return;
         }
@@ -316,6 +329,16 @@ export default function AdminChampionshipsPage() {
       const json = await res.json();
       if (!res.ok) {
         throw new Error(json.error || "Failed to delete championship.");
+      }
+
+      if (typeof window !== "undefined") {
+        try {
+          const raw = localStorage.getItem("kukkiwon_deleted_championships");
+          const list: string[] = raw ? JSON.parse(raw) : [];
+          list.push(deletingItem.id);
+          if (deletingItem.slug) list.push(deletingItem.slug);
+          localStorage.setItem("kukkiwon_deleted_championships", JSON.stringify(Array.from(new Set(list))));
+        } catch {}
       }
 
       setSuccessBanner(`✓ Championship "${deletingItem.name}" deleted successfully.`);

@@ -114,11 +114,55 @@ export default function AdminPaymentsPage() {
       });
       const data = await res.json();
 
-      if (data.items) {
-        setPayments(data.items);
-        setTotal(data.total || 0);
-        setTotalPages(data.totalPages || 1);
+      let paymentsList: any[] = Array.isArray(data?.items) ? data.items : [];
+
+      // Merge local client-stored registrations so payments never disappear on serverless restarts
+      if (typeof window !== "undefined") {
+        try {
+          const raw = localStorage.getItem("kukkiwon_client_registrations");
+          if (raw) {
+            const clientList: any[] = JSON.parse(raw);
+            const seenRegIds = new Set(paymentsList.map((p: any) => p.registrationId || p.id));
+            const seenRegNums = new Set(paymentsList.map((p: any) => p.registrationNumber));
+
+            for (const c of clientList) {
+              if (!c || !c.registrationNumber) continue;
+              if (!seenRegIds.has(c.id) && !seenRegNums.has(c.registrationNumber)) {
+                const pStatus = c.paymentStatus === "PAID" || c.status === "APPROVED" ? "PAID" : "UNDER_REVIEW";
+                if (!statusFilter || statusFilter === pStatus) {
+                  paymentsList.unshift({
+                    id: `pay-${c.id}`,
+                    orderNumber: `KKC26-ORD-${c.registrationNumber.slice(-6)}`,
+                    registrationId: c.id,
+                    registrationNumber: c.registrationNumber,
+                    championshipId: "champ-kukkiwon-2026",
+                    championshipName: "Kukkiwon Cup Championship 2026",
+                    athleteId: c.athleteId || c.registrationNumber,
+                    athleteName: c.athleteName || c.participantName || "Competitor",
+                    provider: c.paymentMethod || "OFFLINE_UPI",
+                    providerOrderId: c.utrNumber || `ord_${c.id}`,
+                    utrNumber: c.utrNumber,
+                    amountPaise: (c.amountInr || 2500) * 100,
+                    amountFormatted: c.amountFormatted || `₹${(c.amountInr || 2500).toLocaleString("en-IN")}`,
+                    amountInrFormatted: c.amountFormatted || `₹${(c.amountInr || 2500).toLocaleString("en-IN")}`,
+                    currency: "INR",
+                    status: pStatus,
+                    createdAt: c.submittedAt || new Date().toISOString(),
+                    paidAt: pStatus === "PAID" ? (c.verifiedAt || c.submittedAt) : null,
+                    invoiceNumber: `INV-${c.registrationNumber.slice(-6)}`,
+                    refundStatus: null,
+                    refundedAmountPaise: 0,
+                  });
+                }
+              }
+            }
+          }
+        } catch {}
       }
+
+      setPayments(paymentsList);
+      setTotal(paymentsList.length);
+      setTotalPages(Math.ceil(paymentsList.length / pageSize) || 1);
     } catch {
       // Error handling
     } finally {
@@ -184,6 +228,7 @@ export default function AdminPaymentsPage() {
       formData.append("ifscCode", paymentSettings.ifscCode);
       formData.append("branchName", paymentSettings.branchName);
       formData.append("instructions", paymentSettings.instructions);
+      formData.append("feeAmountInr", String(paymentSettings.feeAmountInr || 2500));
 
       const headers = getAdminHeaders();
       delete headers["Content-Type"];
@@ -205,6 +250,11 @@ export default function AdminPaymentsPage() {
       if (data.settings) {
         setPaymentSettings(data.settings);
         setQrPreview(data.settings.qrImageUrl || null);
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.setItem("kukkiwon_payment_settings", JSON.stringify(data.settings));
+          } catch {}
+        }
       }
     } catch (err: any) {
       setSettingsErrorBanner(err.message || "Failed to save payment settings.");
@@ -237,6 +287,44 @@ export default function AdminPaymentsPage() {
       if (!res.ok) {
         alert(data.error || "Failed to verify payment.");
         return;
+      }
+
+      // Update client-side persistence so approved payment survives refreshes & serverless restarts
+      if (typeof window !== "undefined") {
+        try {
+          const raw = localStorage.getItem("kukkiwon_client_registrations");
+          if (raw) {
+            const list: any[] = JSON.parse(raw);
+            const cleanId = paymentId.replace(/^pay-|^po-/, "");
+            const updated = list.map((c: any) => {
+              if (
+                c.id === paymentId ||
+                c.id === cleanId ||
+                c.registrationId === paymentId ||
+                c.registrationId === cleanId ||
+                c.registrationNumber === paymentId ||
+                c.registrationNumber === cleanId
+              ) {
+                return {
+                  ...c,
+                  paymentStatus: "PAID",
+                  status: "APPROVED",
+                  verifiedAt: new Date().toISOString(),
+                  verifiedBy: "Tournament Organizing Committee",
+                };
+              }
+              return c;
+            });
+            localStorage.setItem("kukkiwon_client_registrations", JSON.stringify(updated));
+
+            // Sync with backend in background
+            fetch("/api/registrations/sync", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ registrations: updated }),
+            }).catch(() => {});
+          }
+        } catch {}
       }
 
       alert(`✓ Payment verified! ${athleteName} is now active and their ID card is ready.`);
@@ -411,7 +499,22 @@ export default function AdminPaymentsPage() {
               </div>
 
               {/* UPI ID */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[11px] uppercase font-bold text-amber-400 block">
+                    Athlete Entry Fee (₹) *
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min={1}
+                    value={paymentSettings.feeAmountInr || 2500}
+                    onChange={(e) => setPaymentSettings({ ...paymentSettings, feeAmountInr: Number(e.target.value) || 0 })}
+                    placeholder="e.g. 2500"
+                    className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-amber-500/50 text-amber-300 font-bold text-xs focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+
                 <div className="space-y-1">
                   <label className="text-[11px] uppercase font-bold text-slate-300 block">
                     Official UPI ID *

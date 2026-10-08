@@ -63,12 +63,56 @@ export default function AdminRegistrationsPage() {
         credentials: "include",
       });
       const data = await res.json();
+      let regList: AdminRegistrationSummary[] = Array.isArray(data?.items) ? data.items : [];
 
-      if (data.items) {
-        setRegistrations(data.items);
-        setTotal(data.total || 0);
-        setTotalPages(data.totalPages || 1);
+      if (typeof window !== "undefined") {
+        try {
+          const raw = localStorage.getItem("kukkiwon_client_registrations");
+          if (raw) {
+            const clientList: any[] = JSON.parse(raw);
+            const seenIds = new Set(regList.map((r) => r.id));
+            const seenRegNums = new Set(regList.map((r) => r.registrationNumber));
+
+            for (const c of clientList) {
+              if (!c || !c.registrationNumber) continue;
+              if (!seenIds.has(c.id) && !seenRegNums.has(c.registrationNumber)) {
+                const rStatus = c.status === "APPROVED" ? "APPROVED" : "SUBMITTED";
+                const pStatus = c.paymentStatus === "PAID" || c.status === "APPROVED" ? "PAID" : "UNDER_REVIEW";
+
+                if (
+                  (!statusFilter || statusFilter === rStatus) &&
+                  (!paymentFilter || paymentFilter === pStatus)
+                ) {
+                  regList.unshift({
+                    id: c.id,
+                    registrationNumber: c.registrationNumber,
+                    championshipId: "champ-kukkiwon-2026",
+                    championshipName: "Kukkiwon Cup Championship 2026",
+                    athleteId: c.athleteId || c.registrationNumber,
+                    athleteName: c.athleteName || c.participantName || "Competitor",
+                    academyName: c.academyName || "Official Dojang",
+                    country: c.nationality || "IND",
+                    categoryName: c.categoryName || "Official WT Category",
+                    discipline: c.discipline || "KYORUGI",
+                    gender: c.gender || "MALE",
+                    registrationStatus: rStatus,
+                    paymentStatus: pStatus,
+                    documentStatus: pStatus === "PAID" ? "VERIFIED" : "UNDER_REVIEW",
+                    idCardStatus: pStatus === "PAID" ? "READY" : "PENDING",
+                    amountPaise: (c.amountInr || 2500) * 100,
+                    amountInrFormatted: c.amountFormatted || `₹${(c.amountInr || 2500).toLocaleString("en-IN")}`,
+                    registeredAt: c.submittedAt || new Date().toISOString(),
+                  });
+                }
+              }
+            }
+          }
+        } catch {}
       }
+
+      setRegistrations(regList);
+      setTotal(regList.length);
+      setTotalPages(Math.ceil(regList.length / pageSize) || 1);
     } catch {
       // Error handling
     } finally {

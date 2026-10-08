@@ -393,9 +393,19 @@ function AthleteRegistrationContent() {
   const govIdInputRef = React.useRef<HTMLInputElement>(null);
   const slipInputRef = React.useRef<HTMLInputElement>(null);
 
-  // Fetch admin-configured public payment details
+  // Fetch admin-configured public payment details (with localStorage backup & no-cache fetch)
   React.useEffect(() => {
-    fetch("/api/public/payment-details")
+    if (typeof window !== "undefined") {
+      try {
+        const local = localStorage.getItem("kukkiwon_payment_settings");
+        if (local) {
+          const parsed = JSON.parse(local);
+          setPaymentDetails((prev) => ({ ...prev, ...parsed }));
+        }
+      } catch {}
+    }
+
+    fetch(`/api/public/payment-details?_t=${Date.now()}`, { cache: "no-store" })
       .then((res) => res.json())
       .then((data) => {
         if (data.settings) {
@@ -403,6 +413,11 @@ function AthleteRegistrationContent() {
             ...prev,
             ...data.settings,
           }));
+          if (typeof window !== "undefined") {
+            try {
+              localStorage.setItem("kukkiwon_payment_settings", JSON.stringify(data.settings));
+            } catch {}
+          }
         }
       })
       .catch(() => {});
@@ -694,12 +709,10 @@ function AthleteRegistrationContent() {
   };
 
   // ----------------------------------------------------------------------------
-  // STRICT UTR VALIDATION RULE (UPI 12-Digits or 12-22 char Bank Ref)
+  // STRICT UTR VALIDATION RULE (Strictly 12 Numeric Digits)
   // ----------------------------------------------------------------------------
   const cleanUtr = offlineUtr.trim();
-  const is12DigitUpiUtr = /^\d{12}$/.test(cleanUtr);
-  const isBankAlphaUtr = /^[A-Z0-9]{12,22}$/i.test(cleanUtr);
-  const isStrictUtrValid = is12DigitUpiUtr || isBankAlphaUtr;
+  const isStrictUtrValid = /^\d{12}$/.test(cleanUtr);
 
   // ----------------------------------------------------------------------------
   // PAYMENT COMPLETION (Official Admin QR / UPI / Bank UTR Submission)
@@ -707,7 +720,7 @@ function AthleteRegistrationContent() {
   const handleProcessPayment = async () => {
     if (!isStrictUtrValid) {
       setErrorNotice(
-        "Strict UTR Requirement: Please enter a valid 12-digit UPI UTR number (or 12–22 character alphanumeric bank reference) before submitting."
+        "Strict UTR Requirement: Please enter an exact 12-digit numeric UPI/Bank UTR reference number (e.g. 402918274619) before submitting."
       );
       return;
     }
@@ -757,9 +770,57 @@ function AthleteRegistrationContent() {
         throw new Error(submitResult.error || "Submission failed. Please verify your details and try again.");
       }
 
+      const finalRegNum = submitResult.registrationNumber || registrationNumber || `KKC26-ATH-${Math.floor(100000 + Math.random() * 900000)}`;
+      const finalRegId = submitResult.registrationId || registrationId || `reg-${Date.now()}`;
+
+      // Persist to local client storage so it survives serverless restarts
+      try {
+        if (typeof window !== "undefined") {
+          const storedRaw = localStorage.getItem("kukkiwon_client_registrations");
+          const existingList: any[] = storedRaw ? JSON.parse(storedRaw) : [];
+          const athleteRecord = {
+            id: finalRegId,
+            registrationId: finalRegId,
+            registrationNumber: finalRegNum,
+            athleteId: finalRegNum,
+            athleteName: `${formData.first_name || ""} ${formData.last_name || ""}`.trim() || "Competitor",
+            participantName: `${formData.first_name || ""} ${formData.last_name || ""}`.trim() || "Competitor",
+            participantType: "ATHLETE",
+            email: formData.email,
+            phone: formData.phone,
+            gender: formData.gender,
+            dob: formData.date_of_birth,
+            nationality: formData.nationality || "IND",
+            academyName: formData.academy_name || (formData as any).dojang_name || "Official Dojang",
+            kukkiwonId: formData.kukkiwon_dan_number || (formData as any).kukkiwon_id || "Kukkiwon Dan",
+            photoUrl: photoPreview || formData.photo_url || null,
+            categoryName: formData.weight_category_name || "Official WT Category",
+            discipline: formData.discipline || "KYORUGI",
+            amountInr: feeAmount,
+            amountPaise: feeAmount * 100,
+            amountFormatted: `₹${feeAmount.toLocaleString("en-IN")}`,
+            utrNumber: cleanUtr.toUpperCase(),
+            paymentStatus: "UNDER_REVIEW",
+            status: "SUBMITTED",
+            submittedAt: new Date().toISOString(),
+          };
+
+          const filtered = existingList.filter((item: any) => item.registrationNumber !== finalRegNum && item.id !== finalRegId);
+          filtered.unshift(athleteRecord);
+          localStorage.setItem("kukkiwon_client_registrations", JSON.stringify(filtered));
+
+          // Background sync to server
+          fetch("/api/registrations/sync", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ registrations: filtered }),
+          }).catch(() => {});
+        }
+      } catch {}
+
       setSubmittedData({
         ...submitResult,
-        registrationNumber: submitResult.registrationNumber || registrationNumber || `KKC26-ATH-${Math.floor(100000 + Math.random() * 900000)}`,
+        registrationNumber: finalRegNum,
         paymentStatus: "UNDER_REVIEW",
         amount: feeAmount,
         utrNumber: cleanUtr.toUpperCase(),
@@ -1776,17 +1837,18 @@ function AthleteRegistrationContent() {
                         Enter Bank / UPI UTR Transaction Reference Number <span className="text-red-500">*</span>
                       </label>
                       <span className="text-[11px] font-mono font-bold text-blue-700">
-                        {cleanUtr.length} / 12 characters entered
+                        {cleanUtr.length} / 12 digits entered
                       </span>
                     </div>
 
                     <div className="relative">
                       <input
                         type="text"
-                        maxLength={22}
-                        placeholder="e.g. 402918274619 (Exact 12-digit UPI UTR)"
+                        inputMode="numeric"
+                        maxLength={12}
+                        placeholder="e.g. 402918274619 (Exact 12-digit UTR)"
                         value={offlineUtr}
-                        onChange={(e) => setOfflineUtr(e.target.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 22))}
+                        onChange={(e) => setOfflineUtr(e.target.value.replace(/\D/g, "").slice(0, 12))}
                         className={`flex h-12 w-full rounded-xl border-2 px-4 py-2.5 text-base font-mono tracking-widest bg-white transition-all shadow-xs ${
                           !cleanUtr
                             ? "border-slate-300 text-slate-900 focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
@@ -1815,14 +1877,14 @@ function AthleteRegistrationContent() {
                       <p className="text-[11px] text-rose-600 font-bold flex items-center gap-1.5 pt-0.5 animate-in fade-in">
                         <AlertCircle className="h-4 w-4 shrink-0" />
                         <span>
-                          Strict UTR Rule: Must be exactly 12 numeric digits (e.g. 402918274619) or a 12–22 alphanumeric bank reference. ({cleanUtr.length} chars entered)
+                          Strict UTR Rule: Must be exactly 12 numeric digits (e.g. 402918274619). Current: {cleanUtr.length}/12 digits entered.
                         </span>
                       </p>
                     ) : (
                       <p className="text-[11px] text-emerald-700 font-bold flex items-center gap-1.5 pt-0.5 animate-in fade-in">
                         <CheckCircle2 className="h-4 w-4 shrink-0" />
                         <span>
-                          ✓ Valid 12-digit UTR reference format verified ({cleanUtr.length} digits). Submit button is unlocked!
+                          ✓ Valid 12-digit UTR reference format verified ({cleanUtr.length}/12 digits). Submit button is unlocked!
                         </span>
                       </p>
                     )}
@@ -1869,7 +1931,7 @@ function AthleteRegistrationContent() {
                           : "bg-blue-600 hover:bg-blue-700 shadow-md"
                       }`}
                     >
-                      <span>Submit Registration & Verified UTR</span>
+                      <span>Submit Registration (₹{paymentDetails.feeAmountInr || 2500}) & Verified UTR</span>
                       <ArrowRight className="h-4 w-4 ml-2" />
                     </Button>
                     {!isStrictUtrValid && (
