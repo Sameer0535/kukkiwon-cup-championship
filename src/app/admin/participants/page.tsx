@@ -15,6 +15,7 @@ import {
   Camera,
   Mail,
   ArrowRight,
+  Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
@@ -136,6 +137,66 @@ export default function AdminParticipantsPage() {
     loadParticipants();
   };
 
+  const [actionLoadingId, setActionLoadingId] = React.useState<string | null>(null);
+
+  const handleDeleteParticipant = async (p: ParticipantItem) => {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete participant "${p.fullName}" (${p.publicId})?\n\nThis will permanently erase their athlete profile, registration record, document dossier, and accreditation pass.`
+    );
+    if (!confirmDelete) return;
+
+    const targetId = p.registrationId || p.publicId;
+    setActionLoadingId(targetId);
+
+    try {
+      const res = await fetch(`/api/admin/participants?id=${encodeURIComponent(targetId)}`, {
+        method: "DELETE",
+        headers: getAdminHeaders(),
+        credentials: "include",
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to delete participant.");
+      }
+
+      // Erase from local client persistence so it doesn't reappear
+      if (typeof window !== "undefined") {
+        try {
+          const raw = localStorage.getItem("kukkiwon_client_registrations");
+          if (raw) {
+            const list: any[] = JSON.parse(raw);
+            const filtered = list.filter(
+              (item: any) =>
+                item.id !== p.registrationId &&
+                item.registrationId !== p.registrationId &&
+                item.registrationNumber !== p.publicId &&
+                item.id !== p.publicId &&
+                item.athleteName?.toLowerCase() !== p.fullName.toLowerCase()
+            );
+            localStorage.setItem("kukkiwon_client_registrations", JSON.stringify(filtered));
+
+            // Sync with backend
+            fetch("/api/registrations/sync", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ registrations: filtered }),
+            }).catch(() => {});
+          }
+        } catch {}
+      }
+
+      // Remove from table immediately
+      setParticipants((prev) =>
+        prev.filter((item) => item.publicId !== p.publicId && item.registrationId !== p.registrationId)
+      );
+    } catch (err: any) {
+      alert(err.message || "Failed to delete participant.");
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
   const coachesCount = participants.filter((p) => p.designation === "Coach").length;
   const athletesCount = participants.filter((p) => p.designation === "Athlete").length;
 
@@ -238,20 +299,21 @@ export default function AdminParticipantsPage() {
                 <th className="p-3.5">Academy / Dojang</th>
                 <th className="p-3.5">Kukkiwon Dan ID</th>
                 <th className="p-3.5">Nationality</th>
-                <th className="p-3.5 text-right">Status</th>
+                <th className="p-3.5 text-center">Status</th>
+                <th className="p-3.5 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 text-slate-300">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="p-10 text-center text-slate-400">
+                  <td colSpan={8} className="p-10 text-center text-slate-400">
                     <Loader2 className="h-6 w-6 animate-spin mx-auto text-sky-400 mb-2" />
                     <span>Loading participants directory...</span>
                   </td>
                 </tr>
               ) : participants.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-10 text-center text-slate-400">
+                  <td colSpan={8} className="p-10 text-center text-slate-400">
                     <Users className="h-8 w-8 mx-auto text-slate-600 mb-2" />
                     <p className="font-semibold text-white">No participants found.</p>
                     <p className="text-xs text-slate-500 mt-1">Try adjusting your filters.</p>
@@ -333,7 +395,7 @@ export default function AdminParticipantsPage() {
                         })()}
                       </td>
 
-                      <td className="p-3.5 text-right whitespace-nowrap">
+                      <td className="p-3.5 text-center whitespace-nowrap">
                         <span
                           className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${
                             p.status === "ACTIVE" || p.status === "APPROVED"
@@ -343,6 +405,23 @@ export default function AdminParticipantsPage() {
                         >
                           {p.status}
                         </span>
+                      </td>
+
+                      <td className="p-3.5 text-right whitespace-nowrap">
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteParticipant(p)}
+                          disabled={actionLoadingId === (p.registrationId || p.publicId)}
+                          title={`Permanently delete ${p.fullName}`}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-rose-800/80 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 text-[11px] font-bold uppercase transition disabled:opacity-50 cursor-pointer shadow-2xs"
+                        >
+                          {actionLoadingId === (p.registrationId || p.publicId) ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-3 w-3" />
+                          )}
+                          <span>Delete</span>
+                        </button>
                       </td>
                     </tr>
                   );

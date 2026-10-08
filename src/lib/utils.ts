@@ -144,7 +144,40 @@ export interface WorldTaekwondoCountry {
   code: string; // 3-letter IOC/WT code (e.g. IND, KOR, USA, BAN, SRI, MAS)
   name: string; // Official English country name
   flag: string; // Flag emoji
+  iso2: string; // 2-letter ISO country code for flag image (e.g. in, kr, us, bd)
+  flagUrl: string; // Flag CDN image url
 }
+
+const WT_CODE_TO_ISO2: Record<string, string> = {
+  IND: "in",
+  KOR: "kr",
+  USA: "us",
+  GBR: "gb",
+  NEP: "np",
+  BHU: "bt",
+  BAN: "bd",
+  SRI: "lk",
+  UAE: "ae",
+  SGP: "sg",
+  MAS: "my",
+  THA: "th",
+  VIE: "vn",
+  JPN: "jp",
+  AUS: "au",
+  CAN: "ca",
+  GER: "de",
+  FRA: "fr",
+  ITA: "it",
+  ESP: "es",
+  TUR: "tr",
+  IRI: "ir",
+  UZB: "uz",
+  CHN: "cn",
+  TPE: "tw",
+  PAK: "pk",
+  AFG: "af",
+};
+
 
 const WT_COUNTRY_MAP: Record<string, { code: string; name: string; flag: string }> = {
   // India
@@ -341,21 +374,38 @@ const WT_COUNTRY_MAP: Record<string, { code: string; name: string; flag: string 
 
 export function toWorldTaekwondoCountryCode(val?: string | null): WorldTaekwondoCountry {
   if (!val || !val.trim()) {
-    return { code: "IND", name: "India", flag: "🇮🇳" };
+    return {
+      code: "IND",
+      name: "India",
+      flag: "🇮🇳",
+      iso2: "in",
+      flagUrl: "https://flagcdn.com/w40/in.png",
+    };
   }
   const clean = val.trim().toUpperCase();
+  let matched: { code: string; name: string; flag: string } | null = null;
+
   if (WT_COUNTRY_MAP[clean]) {
-    return WT_COUNTRY_MAP[clean];
-  }
-  // If 3 letters already, return as is with fallback flag
-  if (clean.length === 3) {
-    return { code: clean, name: val.trim(), flag: "🌐" };
-  }
-  // Try substring lookup
-  for (const [key, item] of Object.entries(WT_COUNTRY_MAP)) {
-    if (key.length >= 3 && (clean.includes(key) || key.includes(clean))) {
-      return item;
+    matched = WT_COUNTRY_MAP[clean];
+  } else if (clean.length === 3) {
+    matched = { code: clean, name: val.trim(), flag: "🌐" };
+  } else {
+    for (const [key, item] of Object.entries(WT_COUNTRY_MAP)) {
+      if (key.length >= 3 && (clean.includes(key) || key.includes(clean))) {
+        matched = item;
+        break;
+      }
     }
   }
-  return { code: clean.slice(0, 3).padEnd(3, "X"), name: val.trim(), flag: "🌐" };
+
+  if (!matched) {
+    matched = { code: clean.slice(0, 3).padEnd(3, "X"), name: val.trim(), flag: "🌐" };
+  }
+
+  const iso2 = WT_CODE_TO_ISO2[matched.code] || matched.code.slice(0, 2).toLowerCase();
+  return {
+    ...matched,
+    iso2,
+    flagUrl: `https://flagcdn.com/w40/${iso2}.png`,
+  };
 }

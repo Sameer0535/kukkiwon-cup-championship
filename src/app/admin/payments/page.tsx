@@ -61,7 +61,7 @@ export default function AdminPaymentsPage() {
     branchName: "Indira Gandhi Stadium Complex, New Delhi",
     instructions: "Scan the official QR code or transfer directly to the UPI ID / Bank account. Enter the exact 12-digit UTR transaction reference below to verify and complete athlete registration.",
     qrImageUrl: null as string | null,
-    feeAmountInr: 2500,
+    feeAmountInr: 1500,
   });
 
   const [qrFile, setQrFile] = React.useState<File | null>(null);
@@ -228,7 +228,7 @@ export default function AdminPaymentsPage() {
       formData.append("ifscCode", paymentSettings.ifscCode);
       formData.append("branchName", paymentSettings.branchName);
       formData.append("instructions", paymentSettings.instructions);
-      formData.append("feeAmountInr", String(paymentSettings.feeAmountInr || 2500));
+      formData.append("feeAmountInr", String(paymentSettings.feeAmountInr || 1500));
 
       const headers = getAdminHeaders();
       delete headers["Content-Type"];
@@ -508,9 +508,9 @@ export default function AdminPaymentsPage() {
                     type="number"
                     required
                     min={1}
-                    value={paymentSettings.feeAmountInr || 2500}
+                    value={paymentSettings.feeAmountInr || 1500}
                     onChange={(e) => setPaymentSettings({ ...paymentSettings, feeAmountInr: Number(e.target.value) || 0 })}
-                    placeholder="e.g. 2500"
+                    placeholder="e.g. 1500"
                     className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-amber-500/50 text-amber-300 font-bold text-xs focus:outline-none focus:border-amber-400"
                   />
                 </div>
@@ -850,17 +850,6 @@ export default function AdminPaymentsPage() {
                           >
                             <CheckCircle2 className="h-3 w-3" />
                             <span>Verify Payment</span>
-                          </button>
-                        )}
-
-                        {p.status === "PAID" && (
-                          <button
-                            onClick={() => handleRefund(p.id)}
-                            disabled={actionLoading}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-rose-800/80 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 text-[11px] font-bold uppercase transition disabled:opacity-50"
-                          >
-                            <RotateCcw className="h-3 w-3" />
-                            <span>Refund</span>
                           </button>
                         )}
                       </div>

@@ -183,3 +183,72 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    await requireAdmin(request, [
+      "SUPER_ADMIN",
+      "EVENT_ADMIN",
+      "REGISTRATION_ADMIN",
+    ]);
+
+    const url = new URL(request.url);
+    const body = await request.json().catch(() => ({}));
+    const id = (url.searchParams.get("id") || body.id || body.registrationId || body.publicId || "") as string;
+
+    if (!id || !id.trim()) {
+      return NextResponse.json(
+        { error: "Participant ID or Registration ID is required for deletion." },
+        { status: 400 }
+      );
+    }
+
+    const cleanId = id.trim();
+
+    // 1. Permanently erase from LiveSyncService and fallback stores
+    LiveSyncService.deleteParticipant(cleanId);
+
+    // 2. Erase from Prisma DB if record exists
+    try {
+      const dbReg = await prisma.registration.findFirst({
+        where: {
+          OR: [
+            { id: cleanId },
+            { registration_number: cleanId },
+            { participant_id: cleanId },
+            { participant: { public_id: cleanId } },
+          ],
+        },
+      });
+
+      if (dbReg) {
+        await prisma.idCard.deleteMany({ where: { registration_id: dbReg.id } });
+        await prisma.participantDocument.deleteMany({ where: { registration_id: dbReg.id } });
+        await prisma.paymentOrder.deleteMany({ where: { registration_id: dbReg.id } });
+        await prisma.registration.delete({ where: { id: dbReg.id } });
+        if (dbReg.participant_id) {
+          await prisma.participant.delete({ where: { id: dbReg.participant_id } }).catch(() => {});
+        }
+      }
+    } catch (dbErr) {
+      console.warn("[/api/admin/participants DELETE] DB notice:", dbErr);
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Participant record permanently erased from championship database.",
+      deletedId: cleanId,
+    });
+  } catch (error: any) {
+    if (error instanceof AuthError || error.name === "AuthError") {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.statusCode || 403 }
+      );
+    }
+    return NextResponse.json(
+      { error: error.message || "Failed to delete participant." },
+      { status: 500 }
+    );
+  }
+}

@@ -1039,8 +1039,8 @@ export class AdminService {
             paymentStatus: r.status === "PAID" || r.status === "CONFIRMED" || r.status === "APPROVED" ? "PAID" : "PENDING",
             documentStatus: docStatus,
             idCardStatus: card?.card_status || "NOT_GENERATED",
-            amountPaise: parsedDraft?.fee_amount ? parsedDraft.fee_amount * 100 : 250000,
-            amountInrFormatted: parsedDraft?.fee_amount ? `₹${parsedDraft.fee_amount.toLocaleString("en-IN")}` : "₹2,500",
+            amountPaise: parsedDraft?.fee_amount ? parsedDraft.fee_amount * 100 : 150000,
+            amountInrFormatted: parsedDraft?.fee_amount ? `₹${parsedDraft.fee_amount.toLocaleString("en-IN")}` : "₹1,500",
             registeredAt: r.created_at.toISOString(),
             participant: {
               id: r.participant.id,
@@ -1063,8 +1063,8 @@ export class AdminService {
             },
             payment: {
               status: r.status === "PAID" || r.status === "CONFIRMED" || r.status === "APPROVED" ? "PAID" : "PENDING",
-              amountPaise: parsedDraft?.fee_amount ? parsedDraft.fee_amount * 100 : 250000,
-              amountInrFormatted: parsedDraft?.fee_amount ? `₹${parsedDraft.fee_amount.toLocaleString("en-IN")}` : "₹2,500",
+              amountPaise: parsedDraft?.fee_amount ? parsedDraft.fee_amount * 100 : 150000,
+              amountInrFormatted: parsedDraft?.fee_amount ? `₹${parsedDraft.fee_amount.toLocaleString("en-IN")}` : "₹1,500",
               currency: "INR",
               paidAt: r.invoices[0]?.payment_date?.toISOString() || (r.invoices[0] as any)?.created_at?.toISOString() || null,
               orders: r.payment_orders.map((po: any) => ({
@@ -1657,6 +1657,8 @@ export class AdminService {
           verificationUrl: buildVerificationUrl(c.qr_token),
           photoUrl: c.participant?.photo_url || null,
           kukkiwonId: c.participant?.kukkiwon_id || null,
+          nationality: c.participant?.nationality || "IND",
+          country: c.participant?.nationality || "India",
           generatedAt: c.generated_at?.toISOString() || new Date().toISOString(),
           revokedAt: c.revoked_at?.toISOString() || null,
           revocationReason: c.revocation_reason,

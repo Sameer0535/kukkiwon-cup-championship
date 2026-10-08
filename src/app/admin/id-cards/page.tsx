@@ -726,6 +726,7 @@ export default function AdminIdCardsPage() {
                 status: viewCard.status,
                 version: viewCard.version,
                 registrationId: viewCard.registrationId,
+                nationality: viewCard.nationality || "IND",
               }
             : null
         }

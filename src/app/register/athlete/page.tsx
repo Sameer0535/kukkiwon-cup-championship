@@ -380,7 +380,7 @@ function AthleteRegistrationContent() {
     ifscCode: "SBIN0012345",
     branchName: "Indira Gandhi Stadium Complex, New Delhi",
     qrImageUrl: null as string | null,
-    feeAmountInr: 2500,
+    feeAmountInr: 1500,
     instructions: "Scan the official QR code or transfer directly to the UPI ID / Bank account. Enter the exact 12-digit UTR transaction reference below to complete registration.",
   });
   const [copiedUpi, setCopiedUpi] = React.useState(false);
@@ -391,6 +391,8 @@ function AthleteRegistrationContent() {
   // File input refs
   const photoInputRef = React.useRef<HTMLInputElement>(null);
   const govIdInputRef = React.useRef<HTMLInputElement>(null);
+  const danCertInputRef = React.useRef<HTMLInputElement>(null);
+  const medicalCertInputRef = React.useRef<HTMLInputElement>(null);
   const slipInputRef = React.useRef<HTMLInputElement>(null);
 
   // Fetch admin-configured public payment details (with localStorage backup & no-cache fetch)
@@ -574,6 +576,33 @@ function AthleteRegistrationContent() {
     }));
   };
 
+  const handleSlipUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      setErrorNotice("Payment slip file size must be under 10MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      setOfflineSlip({
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        dataUrl,
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveSlip = () => {
+    setOfflineSlip(null);
+    if (slipInputRef.current) slipInputRef.current.value = "";
+  };
+
   // ----------------------------------------------------------------------------
   // STEP 1 VALIDATION
   // ----------------------------------------------------------------------------
@@ -730,7 +759,7 @@ function AthleteRegistrationContent() {
 
     try {
       const { weight_kg: _unusedWeight, ...cleanFormData } = formData;
-      const feeAmount = paymentDetails.feeAmountInr || 2500;
+      const feeAmount = paymentDetails.feeAmountInr || 1500;
       const payloadDraftData = {
         ...cleanFormData,
         photo_url: photoPreview || formData.photo_url,
@@ -738,6 +767,8 @@ function AthleteRegistrationContent() {
         payment_method: "OFFLINE_UPI",
         offline_utr: cleanUtr.toUpperCase(),
         fee_amount: feeAmount,
+        documents_uploaded: formData.documents_uploaded,
+        offline_slip: offlineSlip,
       };
 
       // 1. Submit directly to API
@@ -802,6 +833,10 @@ function AthleteRegistrationContent() {
             utrNumber: cleanUtr.toUpperCase(),
             paymentStatus: "UNDER_REVIEW",
             status: "SUBMITTED",
+            documents_uploaded: formData.documents_uploaded,
+            documentsUploaded: formData.documents_uploaded,
+            offline_slip: offlineSlip,
+            offlineSlip: offlineSlip,
             submittedAt: new Date().toISOString(),
           };
 
@@ -1561,6 +1596,114 @@ function AthleteRegistrationContent() {
                         </Button>
                       )}
                     </div>
+
+                    {/* DOC 2: Kukkiwon Dan / Belt Certificate */}
+                    <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold uppercase text-slate-900">
+                          2. Kukkiwon Dan / Belt Proof
+                        </span>
+                        <Badge variant={formData.documents_uploaded.kukkiwon_cert ? "success" : "outline"}>
+                          {formData.documents_uploaded.kukkiwon_cert ? "Uploaded" : "Optional"}
+                        </Badge>
+                      </div>
+                      <p className="text-[11px] text-slate-500 leading-snug">
+                        Kukkiwon Dan/Poom Certificate or Color Belt grading card.
+                      </p>
+
+                      <input
+                        ref={danCertInputRef}
+                        type="file"
+                        accept="image/*,application/pdf"
+                        onChange={(e) => handleDocUpload("kukkiwon_cert", e)}
+                        className="hidden"
+                      />
+
+                      {formData.documents_uploaded.kukkiwon_cert ? (
+                        <div className="p-2.5 rounded-lg bg-white border border-slate-200 flex items-center justify-between text-xs">
+                          <div className="truncate pr-2">
+                            <span className="font-semibold text-slate-800 block truncate">
+                              {formData.documents_uploaded.kukkiwon_cert.name}
+                            </span>
+                            <span className="text-[10px] text-slate-400">
+                              {(formData.documents_uploaded.kukkiwon_cert.size / 1024).toFixed(0)} KB
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveDoc("kukkiwon_cert")}
+                            className="text-red-500 hover:text-red-700 p-1"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => danCertInputRef.current?.click()}
+                          className="w-full text-xs font-bold border-dashed border-slate-300 bg-white hover:bg-slate-50 text-blue-600"
+                        >
+                          <Upload className="h-3.5 w-3.5 mr-1.5" />
+                          <span>Upload Dan / Belt Certificate</span>
+                        </Button>
+                      )}
+                    </div>
+
+                    {/* DOC 3: Medical Fitness Certificate */}
+                    <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold uppercase text-slate-900">
+                          3. Medical Fitness Proof
+                        </span>
+                        <Badge variant={formData.documents_uploaded.medical_cert ? "success" : "outline"}>
+                          {formData.documents_uploaded.medical_cert ? "Uploaded" : "Optional"}
+                        </Badge>
+                      </div>
+                      <p className="text-[11px] text-slate-500 leading-snug">
+                        Registered medical practitioner fitness certificate.
+                      </p>
+
+                      <input
+                        ref={medicalCertInputRef}
+                        type="file"
+                        accept="image/*,application/pdf"
+                        onChange={(e) => handleDocUpload("medical_cert", e)}
+                        className="hidden"
+                      />
+
+                      {formData.documents_uploaded.medical_cert ? (
+                        <div className="p-2.5 rounded-lg bg-white border border-slate-200 flex items-center justify-between text-xs">
+                          <div className="truncate pr-2">
+                            <span className="font-semibold text-slate-800 block truncate">
+                              {formData.documents_uploaded.medical_cert.name}
+                            </span>
+                            <span className="text-[10px] text-slate-400">
+                              {(formData.documents_uploaded.medical_cert.size / 1024).toFixed(0)} KB
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveDoc("medical_cert")}
+                            className="text-red-500 hover:text-red-700 p-1"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => medicalCertInputRef.current?.click()}
+                          className="w-full text-xs font-bold border-dashed border-slate-300 bg-white hover:bg-slate-50 text-blue-600"
+                        >
+                          <Upload className="h-3.5 w-3.5 mr-1.5" />
+                          <span>Upload Medical Certificate</span>
+                        </Button>
+                      )}
+                    </div>
                   </div>
 
                   {/* Legal Declarations Checkboxes */}
@@ -1707,7 +1850,7 @@ function AthleteRegistrationContent() {
                 <div className="p-5 rounded-xl border border-blue-200 bg-blue-50/50 space-y-3">
                   <div className="flex items-center justify-between text-xs text-slate-700">
                     <span>Kukkiwon Cup 2026 Athlete Entry Fee</span>
-                    <span className="font-mono font-bold">₹2,500</span>
+                    <span className="font-mono font-bold">₹{(paymentDetails.feeAmountInr || 1500).toLocaleString("en-IN")}</span>
                   </div>
                   <div className="flex items-center justify-between text-xs text-slate-700">
                     <span>Accreditation Pass & Official Kukkiwon Badge</span>
@@ -1722,7 +1865,9 @@ function AthleteRegistrationContent() {
                       <span className="text-sm font-black uppercase text-slate-950 block">Total Amount Payable</span>
                       <span className="text-[11px] text-slate-500">Official championship entry receipt issued upon completion</span>
                     </div>
-                    <span className="text-2xl font-black text-blue-700 font-mono">₹2,500</span>
+                    <span className="text-2xl font-black text-blue-700 font-mono">
+                      ₹{(paymentDetails.feeAmountInr || 1500).toLocaleString("en-IN")}
+                    </span>
                   </div>
                 </div>
 
@@ -1754,7 +1899,7 @@ function AthleteRegistrationContent() {
                         ) : (
                           <div className="w-40 h-40 bg-slate-100 flex flex-col items-center justify-center text-slate-400 p-2 text-center rounded-lg">
                             <QrCode className="h-12 w-12 text-slate-400 mb-2" />
-                            <span className="text-[11px] font-semibold text-slate-600">Scan & Pay ₹{paymentDetails.feeAmountInr || 2500}</span>
+                            <span className="text-[11px] font-semibold text-slate-600">Scan & Pay ₹{paymentDetails.feeAmountInr || 1500}</span>
                             <span className="text-[10px] text-slate-400">Via UPI ID or Bank Details</span>
                           </div>
                         )}
@@ -1870,7 +2015,7 @@ function AthleteRegistrationContent() {
                       <p className="text-[11px] text-slate-600 flex items-center gap-1.5 pt-0.5">
                         <span className="font-bold text-blue-700">ℹ Mandatory:</span>
                         <span>
-                          Submit the ₹{paymentDetails.feeAmountInr || 2500} payment first, then find the 12-digit UTR in your payment app receipt and type it above.
+                          Submit the ₹{paymentDetails.feeAmountInr || 1500} payment first, then find the 12-digit UTR in your payment app receipt and type it above.
                         </span>
                       </p>
                     ) : !isStrictUtrValid ? (
@@ -1884,9 +2029,70 @@ function AthleteRegistrationContent() {
                       <p className="text-[11px] text-emerald-700 font-bold flex items-center gap-1.5 pt-0.5 animate-in fade-in">
                         <CheckCircle2 className="h-4 w-4 shrink-0" />
                         <span>
-                          ✓ Valid 12-digit UTR reference format verified ({cleanUtr.length}/12 digits). Submit button is unlocked!
+                          ✓ Valid 12-digit UTR reference format verified ({cleanUtr.length}/12 digits).
                         </span>
                       </p>
+                    )}
+                  </div>
+
+                  {/* Payment Receipt / Slip Screenshot Upload */}
+                  <div className="p-4 rounded-xl border border-blue-200 bg-white space-y-3 shadow-2xs">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Upload className="h-4 w-4 text-blue-600" />
+                        <span className="text-xs font-bold uppercase text-slate-900">
+                          Upload Payment Screenshot / Slip
+                        </span>
+                      </div>
+                      <Badge variant={offlineSlip ? "success" : "outline"}>
+                        {offlineSlip ? "Slip Attached" : "Recommended"}
+                      </Badge>
+                    </div>
+                    <p className="text-[11px] text-slate-500 leading-snug">
+                      Attach your UPI transaction screenshot or bank transfer receipt for rapid 1-click admin approval. (JPG, PNG, PDF up to 10MB)
+                    </p>
+
+                    <input
+                      ref={slipInputRef}
+                      type="file"
+                      accept="image/*,application/pdf"
+                      onChange={handleSlipUpload}
+                      className="hidden"
+                    />
+
+                    {offlineSlip ? (
+                      <div className="p-2.5 rounded-lg bg-emerald-50/50 border border-emerald-200 flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2 truncate pr-2">
+                          <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                          <div className="truncate">
+                            <span className="font-semibold text-slate-800 block truncate">
+                              {offlineSlip.name}
+                            </span>
+                            <span className="text-[10px] text-slate-400">
+                              {(offlineSlip.size / 1024).toFixed(0)} KB
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleRemoveSlip}
+                          className="text-red-500 hover:text-red-700 p-1"
+                          title="Remove Slip"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => slipInputRef.current?.click()}
+                        className="w-full text-xs font-bold border-dashed border-blue-300 bg-blue-50/30 hover:bg-blue-50 text-blue-700 py-2.5"
+                      >
+                        <Upload className="h-4 w-4 mr-1.5" />
+                        <span>Choose Receipt Screenshot / PDF</span>
+                      </Button>
                     )}
                   </div>
                 </div>
@@ -1931,7 +2137,7 @@ function AthleteRegistrationContent() {
                           : "bg-blue-600 hover:bg-blue-700 shadow-md"
                       }`}
                     >
-                      <span>Submit Registration (₹{paymentDetails.feeAmountInr || 2500}) & Verified UTR</span>
+                      <span>Submit Registration (₹{paymentDetails.feeAmountInr || 1500}) & Verified UTR</span>
                       <ArrowRight className="h-4 w-4 ml-2" />
                     </Button>
                     {!isStrictUtrValid && (

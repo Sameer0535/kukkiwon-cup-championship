@@ -29,7 +29,7 @@ const DEFAULT_SETTINGS: TournamentPaymentSettings = {
   ifscCode: "HDFC0001234",
   branchName: "Connaught Place, New Delhi",
   qrImageUrl: null,
-  feeAmountInr: 2500,
+  feeAmountInr: 1500,
   instructions: "Scan the official tournament QR code or transfer the entry fee using UPI / NetBanking. Enter the 12-digit UTR reference number below to complete your registration.",
   updatedAt: new Date().toISOString(),
 };

@@ -171,9 +171,18 @@ export function AccreditationBadge({
 
           <div className="flex justify-between items-center text-[11px]">
             <span className="text-slate-400">Country:</span>
-            <span className="font-bold text-white">
-              {flagDisplay} {nationalityDisplay}
-            </span>
+            <div className="flex items-center gap-1.5 font-bold text-white">
+              <span className="font-mono text-xs tracking-wider">{nationalityDisplay}</span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={wtCountry.flagUrl || `https://flagcdn.com/w40/${(wtCountry.iso2 || "in").toLowerCase()}.png`}
+                alt={nationalityDisplay}
+                className="w-4 h-3 object-cover rounded-2xs border border-white/30 shadow-xs inline-block"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = "none";
+                }}
+              />
+            </div>
           </div>
         </div>
 

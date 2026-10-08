@@ -14,6 +14,7 @@ import {
 } from "@/lib/qr";
 import { AuditService } from "@/server/services/audit.service";
 import { PersistenceGuard } from "./persistence-guard";
+import { toWorldTaekwondoCountryCode } from "@/lib/utils";
 import {
   AthleteIdCardDetails,
   IdCardEligibilityResult,
@@ -1119,8 +1120,7 @@ export class IdCardService {
       ? `background-image: url('${templateBgUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat; border: 2px solid #D4AF37;`
       : `background: linear-gradient(180deg, #0A192F 0%, #051329 50%, #0A192F 100%); border: 3px solid #D4AF37;`;
 
-    const flagEmoji = this.getCountryFlagEmoji(card.nationality);
-    const countryLabel = card.nationality || "India";
+    const wtCountry = toWorldTaekwondoCountryCode(card.nationality || "IND");
     const isCoach =
       card.discipline === "COACHING" ||
       (card.categoryName && card.categoryName.toLowerCase().includes("coach"));
@@ -1170,7 +1170,10 @@ export class IdCardService {
           </div>
           <div class="detail-row">
             <span class="detail-label">COUNTRY:</span>
-            <span class="detail-value">${flagEmoji} ${countryLabel}</span>
+            <span class="detail-value" style="display: inline-flex; align-items: center; gap: 6px;">
+              <span class="font-mono">${wtCountry.code}</span>
+              <img src="${wtCountry.flagUrl}" alt="${wtCountry.code}" style="width: 18px; height: 12px; object-fit: cover; border-radius: 2px; vertical-align: middle; border: 1px solid rgba(255,255,255,0.4);" />
+            </span>
           </div>
         </div>
 

@@ -243,6 +243,8 @@ export interface AdminIdCardSummary {
   verificationUrl: string;
   photoUrl?: string | null;
   kukkiwonId?: string | null;
+  nationality?: string | null;
+  country?: string | null;
   generatedAt: string;
   revokedAt?: string | null;
   revocationReason?: string | null;

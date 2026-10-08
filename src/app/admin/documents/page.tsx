@@ -426,7 +426,7 @@ export default function AdminPaymentVerificationPage() {
                     {/* Fee Amount */}
                     <td className="p-3.5 whitespace-nowrap">
                       <span className="text-sm font-black text-white">
-                        {item.amountFormatted || "₹2,500"}
+                        {item.amountFormatted || "₹1,500"}
                       </span>
                     </td>
 
@@ -685,7 +685,8 @@ export default function AdminPaymentVerificationPage() {
                   {/* Document 1: Government ID Proof */}
                   {(() => {
                     const doc = selectedDossier.documentsUploaded?.gov_id || selectedDossier.documentsUploaded?.GOVT_ID || selectedDossier.documentsUploaded?.aadhaar;
-                    const preview = doc?.preview_url || doc?.file_url;
+                    const preview = doc?.preview_url || doc?.file_url || doc?.previewUrl || doc?.fileUrl || doc?.dataUrl;
+                    const fileName = doc?.file_name || doc?.name || "Aadhaar / National ID";
                     return (
                       <div className="p-3 rounded-xl border border-slate-800 bg-slate-950/60 flex flex-col justify-between space-y-2">
                         <div className="space-y-1">
@@ -693,13 +694,13 @@ export default function AdminPaymentVerificationPage() {
                             Govt ID Proof (Aadhaar / Passport)
                           </span>
                           <span className="text-[11px] text-slate-400 truncate block">
-                            {doc?.file_name || "Aadhaar / National ID"}
+                            {fileName}
                           </span>
                         </div>
 
                         {preview ? (
                           <div
-                            onClick={() => setPreviewDocModal({ title: "Government ID Proof", url: preview, fileName: doc?.file_name })}
+                            onClick={() => setPreviewDocModal({ title: "Government ID Proof", url: preview, fileName })}
                             className="relative h-24 w-full rounded-lg overflow-hidden border border-slate-800 bg-slate-900 cursor-pointer group"
                           >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -719,7 +720,7 @@ export default function AdminPaymentVerificationPage() {
                             <>
                               <button
                                 type="button"
-                                onClick={() => setPreviewDocModal({ title: "Government ID Proof", url: preview, fileName: doc?.file_name })}
+                                onClick={() => setPreviewDocModal({ title: "Government ID Proof", url: preview, fileName })}
                                 className="text-[10px] font-bold text-sky-400 hover:text-sky-300 inline-flex items-center gap-1 cursor-pointer"
                               >
                                 <Eye className="h-3 w-3" />
@@ -727,7 +728,7 @@ export default function AdminPaymentVerificationPage() {
                               </button>
                               <a
                                 href={preview}
-                                download={doc?.file_name || "gov_id"}
+                                download={fileName}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="text-[10px] font-bold text-amber-400 hover:text-amber-300 inline-flex items-center gap-1"
@@ -747,7 +748,8 @@ export default function AdminPaymentVerificationPage() {
                   {/* Document 2: Kukkiwon Dan Certificate */}
                   {(() => {
                     const doc = selectedDossier.documentsUploaded?.kukkiwon_cert || selectedDossier.documentsUploaded?.KUKKIWON_CERT || selectedDossier.documentsUploaded?.dan_cert;
-                    const preview = doc?.preview_url || doc?.file_url;
+                    const preview = doc?.preview_url || doc?.file_url || doc?.previewUrl || doc?.fileUrl || doc?.dataUrl;
+                    const fileName = doc?.file_name || doc?.name || (selectedDossier.kukkiwonId ? `Dan: ${selectedDossier.kukkiwonId}` : "Certificate Proof");
                     return (
                       <div className="p-3 rounded-xl border border-slate-800 bg-slate-950/60 flex flex-col justify-between space-y-2">
                         <div className="space-y-1">
@@ -755,13 +757,13 @@ export default function AdminPaymentVerificationPage() {
                             Kukkiwon Dan Certificate
                           </span>
                           <span className="text-[11px] text-slate-400 truncate block">
-                            {doc?.file_name || (selectedDossier.kukkiwonId ? `Dan: ${selectedDossier.kukkiwonId}` : "Certificate Proof")}
+                            {fileName}
                           </span>
                         </div>
 
                         {preview ? (
                           <div
-                            onClick={() => setPreviewDocModal({ title: "Kukkiwon Dan Certificate", url: preview, fileName: doc?.file_name })}
+                            onClick={() => setPreviewDocModal({ title: "Kukkiwon Dan Certificate", url: preview, fileName })}
                             className="relative h-24 w-full rounded-lg overflow-hidden border border-slate-800 bg-slate-900 cursor-pointer group"
                           >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -781,7 +783,7 @@ export default function AdminPaymentVerificationPage() {
                             <>
                               <button
                                 type="button"
-                                onClick={() => setPreviewDocModal({ title: "Kukkiwon Dan Certificate", url: preview, fileName: doc?.file_name })}
+                                onClick={() => setPreviewDocModal({ title: "Kukkiwon Dan Certificate", url: preview, fileName })}
                                 className="text-[10px] font-bold text-[#D4AF37] hover:text-amber-300 inline-flex items-center gap-1 cursor-pointer"
                               >
                                 <Eye className="h-3 w-3" />
@@ -789,7 +791,7 @@ export default function AdminPaymentVerificationPage() {
                               </button>
                               <a
                                 href={preview}
-                                download={doc?.file_name || "kukkiwon_cert"}
+                                download={fileName}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="text-[10px] font-bold text-amber-400 hover:text-amber-300 inline-flex items-center gap-1"
@@ -809,7 +811,8 @@ export default function AdminPaymentVerificationPage() {
                   {/* Document 3: Medical Certificate */}
                   {(() => {
                     const doc = selectedDossier.documentsUploaded?.medical_cert || selectedDossier.documentsUploaded?.MEDICAL_CERT;
-                    const preview = doc?.preview_url || doc?.file_url;
+                    const preview = doc?.preview_url || doc?.file_url || doc?.previewUrl || doc?.fileUrl || doc?.dataUrl;
+                    const fileName = doc?.file_name || doc?.name || "Medical Certificate";
                     return (
                       <div className="p-3 rounded-xl border border-slate-800 bg-slate-950/60 flex flex-col justify-between space-y-2">
                         <div className="space-y-1">
@@ -817,13 +820,13 @@ export default function AdminPaymentVerificationPage() {
                             Medical Fitness Proof
                           </span>
                           <span className="text-[11px] text-slate-400 truncate block">
-                            {doc?.file_name || "Medical Certificate"}
+                            {fileName}
                           </span>
                         </div>
 
                         {preview ? (
                           <div
-                            onClick={() => setPreviewDocModal({ title: "Medical Fitness Certificate", url: preview, fileName: doc?.file_name })}
+                            onClick={() => setPreviewDocModal({ title: "Medical Fitness Certificate", url: preview, fileName })}
                             className="relative h-24 w-full rounded-lg overflow-hidden border border-slate-800 bg-slate-900 cursor-pointer group"
                           >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -843,7 +846,7 @@ export default function AdminPaymentVerificationPage() {
                             <>
                               <button
                                 type="button"
-                                onClick={() => setPreviewDocModal({ title: "Medical Fitness Certificate", url: preview, fileName: doc?.file_name })}
+                                onClick={() => setPreviewDocModal({ title: "Medical Fitness Certificate", url: preview, fileName })}
                                 className="text-[10px] font-bold text-emerald-400 hover:text-emerald-300 inline-flex items-center gap-1 cursor-pointer"
                               >
                                 <Eye className="h-3 w-3" />
@@ -851,7 +854,7 @@ export default function AdminPaymentVerificationPage() {
                               </button>
                               <a
                                 href={preview}
-                                download={doc?.file_name || "medical_cert"}
+                                download={fileName}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="text-[10px] font-bold text-amber-400 hover:text-amber-300 inline-flex items-center gap-1"
@@ -871,7 +874,8 @@ export default function AdminPaymentVerificationPage() {
                   {/* Document 4: Offline Payment UTR Slip */}
                   {(() => {
                     const slip = selectedDossier.offlineSlip || selectedDossier.documentsUploaded?.offline_slip || selectedDossier.documentsUploaded?.PAYMENT_RECEIPT;
-                    const preview = slip?.preview_url || slip?.file_url;
+                    const preview = slip?.preview_url || slip?.file_url || slip?.previewUrl || slip?.fileUrl || slip?.dataUrl;
+                    const fileName = slip?.file_name || slip?.name || `UTR: ${selectedDossier.utrNumber || "Manual"}`;
                     return (
                       <div className="p-3 rounded-xl border border-slate-800 bg-slate-950/60 flex flex-col justify-between space-y-2">
                         <div className="space-y-1">
@@ -879,13 +883,13 @@ export default function AdminPaymentVerificationPage() {
                             UTR / Payment Proof
                           </span>
                           <span className="text-[11px] text-slate-400 truncate block">
-                            {slip?.file_name || `UTR: ${selectedDossier.utrNumber || "Manual"}`}
+                            {fileName}
                           </span>
                         </div>
 
                         {preview ? (
                           <div
-                            onClick={() => setPreviewDocModal({ title: "Payment Transaction Slip", url: preview, fileName: slip?.file_name })}
+                            onClick={() => setPreviewDocModal({ title: "Payment Transaction Slip", url: preview, fileName })}
                             className="relative h-24 w-full rounded-lg overflow-hidden border border-slate-800 bg-slate-900 cursor-pointer group"
                           >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -905,7 +909,7 @@ export default function AdminPaymentVerificationPage() {
                             <>
                               <button
                                 type="button"
-                                onClick={() => setPreviewDocModal({ title: "Payment Transaction Slip", url: preview, fileName: slip?.file_name })}
+                                onClick={() => setPreviewDocModal({ title: "Payment Transaction Slip", url: preview, fileName })}
                                 className="text-[10px] font-bold text-emerald-400 hover:text-emerald-300 inline-flex items-center gap-1 cursor-pointer"
                               >
                                 <Eye className="h-3 w-3" />
@@ -913,7 +917,7 @@ export default function AdminPaymentVerificationPage() {
                               </button>
                               <a
                                 href={preview}
-                                download={slip?.file_name || "payment_slip"}
+                                download={fileName}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="text-[10px] font-bold text-amber-400 hover:text-amber-300 inline-flex items-center gap-1"

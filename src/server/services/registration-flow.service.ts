@@ -706,7 +706,7 @@ export class RegistrationFlowService {
       // Record payment order in Prisma for Admin visibility
       if (currentRegId) {
         try {
-          const feeAmount = isCoach ? 0 : ((draftData as any).fee_amount || 2500);
+          const feeAmount = isCoach ? 0 : ((draftData as any).fee_amount || 1500);
           const cleanUtr = isCoach ? "FREE_COACH" : ((draftData as any).offline_utr?.trim() || null);
           const paymentMethod = isCoach ? "FREE_ACCREDITATION" : ((draftData as any).payment_method || "OFFLINE_UPI");
           const poStatus = isCoach ? "PAID" : "PENDING";
@@ -763,7 +763,7 @@ export class RegistrationFlowService {
         weightKg: (draftData as any).weight_kg,
         utrNumber: isCoach ? "FREE_COACH" : (draftData as any).offline_utr,
         paymentMethod: isCoach ? "FREE_ACCREDITATION" : (draftData as any).payment_method,
-        feeAmountInr: isCoach ? 0 : ((draftData as any).fee_amount || 2500),
+        feeAmountInr: isCoach ? 0 : ((draftData as any).fee_amount || 1500),
         documentsUploaded: (draftData as any).documents_uploaded || {},
         offlineSlip: (draftData as any).offline_slip || null,
         rawDraftData: draftData,
@@ -862,7 +862,7 @@ export class RegistrationFlowService {
         weightKg: (draftData as any).weight_kg,
         utrNumber: isCoach ? "FREE_COACH" : (draftData as any).offline_utr,
         paymentMethod: isCoach ? "FREE_ACCREDITATION" : (draftData as any).payment_method,
-        feeAmountInr: isCoach ? 0 : ((draftData as any).fee_amount || 2500),
+        feeAmountInr: isCoach ? 0 : ((draftData as any).fee_amount || 1500),
         documentsUploaded: (draftData as any).documents_uploaded || {},
         offlineSlip: (draftData as any).offline_slip || null,
         rawDraftData: draftData,
