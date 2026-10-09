@@ -259,6 +259,15 @@ export default function AdminCmsPage() {
             // Keep fallback
           }
         }
+
+        // Cache into localStorage
+        if (typeof window !== "undefined") {
+          try {
+            if (json.data.content) localStorage.setItem("kukkiwon_cms_content", JSON.stringify(json.data.content));
+            if (json.data.championship) localStorage.setItem("kukkiwon_cms_championship", JSON.stringify(json.data.championship));
+            if (json.data.dates) localStorage.setItem("kukkiwon_important_dates", JSON.stringify(json.data.dates));
+          } catch {}
+        }
       }
     } catch (err: any) {
       setError(err.message || "Failed to load championship CMS data.");
@@ -346,9 +355,11 @@ export default function AdminCmsPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to save CMS content.");
 
-      // Broadcast and cache dates locally so changes reflect immediately across tabs/sessions
+      // Broadcast and cache CMS content locally so changes reflect immediately live across tabs and sessions
       if (typeof window !== "undefined") {
         try {
+          localStorage.setItem("kukkiwon_cms_content", JSON.stringify(content));
+          localStorage.setItem("kukkiwon_cms_championship", JSON.stringify(championship));
           const stored = {
             startDate: championship.startDate,
             endDate: championship.endDate,
@@ -360,8 +371,15 @@ export default function AdminCmsPage() {
             timestamp: Date.now(),
           };
           localStorage.setItem("kukkiwon_championship_dates", JSON.stringify(stored));
+          window.dispatchEvent(
+            new CustomEvent("kukkiwon_cms_updated", {
+              detail: { championship, content, dates: stored },
+            })
+          );
           window.dispatchEvent(new CustomEvent("kukkiwon_dates_updated", { detail: stored }));
-        } catch {}
+        } catch (err) {
+          console.warn("Could not sync CMS to localStorage:", err);
+        }
       }
 
       triggerNotification("Championship content saved successfully!");

@@ -1,0 +1,622 @@
+"use client";
+
+// ==============================================================================
+// KUKKIWON CUP CHAMPIONSHIP - OFFICIAL PUBLIC HOMEPAGE (CLIENT HYDRATED)
+// Reflects any admin CMS edits LIVE in real-time across tabs and sessions
+// ==============================================================================
+
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { PublicHeader } from "@/components/layout/public-header";
+import { PublicFooter } from "@/components/layout/public-footer";
+import { Button } from "@/components/ui/button";
+import { BRANDING } from "@/config/branding";
+import { SITE_CONFIG } from "@/config/site";
+import { PublicChampionshipContent } from "@/lib/cms";
+import {
+  LiveHeroDatesStrip,
+  LiveImportantDatesCards,
+} from "@/components/public/live-championship-dates";
+import { ChampionshipImportantDateDTO, PublicChampionshipPackage } from "@/types/cms";
+import {
+  ArrowRight,
+  ExternalLink,
+  Mail,
+  Phone,
+  MapPin,
+} from "lucide-react";
+
+interface LiveHomePageProps {
+  initialTournament: PublicChampionshipContent;
+  initialPackage: PublicChampionshipPackage | null;
+  dynamicDates: ChampionshipImportantDateDTO[];
+}
+
+export function LiveHomePage({
+  initialTournament,
+  dynamicDates: serverDates,
+}: LiveHomePageProps) {
+  const [tournament, setTournament] = useState<PublicChampionshipContent>(initialTournament);
+  const [dates, setDates] = useState<ChampionshipImportantDateDTO[]>(serverDates);
+
+  useEffect(() => {
+    // 1. Instant hydration from client localStorage cache
+    try {
+      const rawContent = localStorage.getItem("kukkiwon_cms_content");
+      const rawChamp = localStorage.getItem("kukkiwon_cms_championship");
+      const rawDates = localStorage.getItem("kukkiwon_important_dates");
+      const rawChampDates = localStorage.getItem("kukkiwon_championship_dates");
+
+      if (rawContent || rawChamp || rawChampDates) {
+        const content = rawContent ? JSON.parse(rawContent) : {};
+        const champ = rawChamp ? JSON.parse(rawChamp) : {};
+        const champDates = rawChampDates ? JSON.parse(rawChampDates) : {};
+
+        setTournament((prev) => {
+          let updatedDisciplines = prev.disciplines;
+          if (content.disciplinesJson) {
+            try {
+              const parsed = JSON.parse(content.disciplinesJson);
+              if (Array.isArray(parsed) && parsed.length > 0) updatedDisciplines = parsed;
+            } catch {}
+          }
+          return {
+            ...prev,
+            heroHeadline: content.heroTitle || champ.heroHeadline || prev.heroHeadline,
+            subtitle: content.heroSubtitle || champ.subtitle || prev.subtitle,
+            heroPrimaryCtaText: content.heroPrimaryCtaText || prev.heroPrimaryCtaText,
+            bannerUrl: champ.bannerUrl !== undefined ? champ.bannerUrl : prev.bannerUrl,
+            startDate: champDates.startDate || champ.startDate || prev.startDate,
+            endDate: champDates.endDate || champ.endDate || prev.endDate,
+            registrationOpen: champDates.registrationOpen || champ.registrationOpen || prev.registrationOpen,
+            registrationClose: champDates.registrationClose || champ.registrationClose || prev.registrationClose,
+            venue: champDates.venue || champ.venue || prev.venue,
+            city: champDates.city || champ.city || prev.city,
+            partnershipTagline: content.partnershipTagline || prev.partnershipTagline,
+            partnershipHeading: content.partnershipHeading || prev.partnershipHeading,
+            partnershipDescription: content.partnershipDescription || prev.partnershipDescription,
+            kukkiwonTitle: content.kukkiwonTitle || prev.kukkiwonTitle,
+            kukkiwonBranch: content.kukkiwonBranch || prev.kukkiwonBranch,
+            kukkiwonRole: content.kukkiwonRole || prev.kukkiwonRole,
+            kukkiwonDescription: content.kukkiwonDescription || prev.kukkiwonDescription,
+            kukkiwonUrl: content.kukkiwonUrl || prev.kukkiwonUrl,
+            kukkiwonUrlText: content.kukkiwonUrlText || prev.kukkiwonUrlText,
+            kukkiwonBadge: content.kukkiwonBadge || prev.kukkiwonBadge,
+            kyorixTitle: content.kyorixTitle || prev.kyorixTitle,
+            kyorixSubtitle: content.kyorixSubtitle || prev.kyorixSubtitle,
+            kyorixRole: content.kyorixRole || prev.kyorixRole,
+            kyorixDescription: content.kyorixDescription || prev.kyorixDescription,
+            kyorixBadge: content.kyorixBadge || prev.kyorixBadge,
+            disciplinesTagline: content.disciplinesTagline || prev.disciplinesTagline,
+            disciplinesHeading: content.disciplinesHeading || prev.disciplinesHeading,
+            disciplinesDescription: content.disciplinesDescription || prev.disciplinesDescription,
+            disciplines: updatedDisciplines,
+            datesTagline: content.datesTagline || prev.datesTagline,
+            datesHeading: content.datesHeading || prev.datesHeading,
+            datesDescription: content.datesDescription || prev.datesDescription,
+            ctaTagline: content.ctaTagline || prev.ctaTagline,
+            ctaTitle: content.ctaTitle || prev.ctaTitle,
+            ctaDescription: content.ctaDescription || prev.ctaDescription,
+            ctaPrimaryBtnText: content.ctaPrimaryBtnText || prev.ctaPrimaryBtnText,
+            contactTagline: content.contactTagline || prev.contactTagline,
+            contactHeading: content.contactHeading || prev.contactHeading,
+            contactDescription: content.contactDescription || prev.contactDescription,
+            contactEmail: content.contactEmail || champ.contactEmail || prev.contactEmail,
+            contactPhone: content.contactPhone || champ.contactPhone || prev.contactPhone,
+            contactPhoneHours: content.contactPhoneHours || prev.contactPhoneHours,
+            contactAddress: content.contactAddress || champ.contactAddress || prev.contactAddress,
+            aboutMissionHeading: content.aboutMissionHeading || prev.aboutMissionHeading,
+            aboutMissionText: content.aboutMissionText || prev.aboutMissionText,
+          };
+        });
+      }
+
+      if (rawDates) {
+        const parsed = JSON.parse(rawDates);
+        if (Array.isArray(parsed) && parsed.length > 0) setDates(parsed);
+      }
+    } catch (e) {
+      console.warn("Could not load local CMS cache:", e);
+    }
+
+    // 2. Real-time event listeners for live reflection as admin saves
+    const handleCmsUpdate = (e: any) => {
+      try {
+        const detail = e.detail;
+        if (!detail) return;
+        const { content, championship, dates: newDates } = detail;
+
+        if (content || championship) {
+          setTournament((prev) => {
+            let updatedDisciplines = prev.disciplines;
+            if (content?.disciplinesJson) {
+              try {
+                const parsed = JSON.parse(content.disciplinesJson);
+                if (Array.isArray(parsed) && parsed.length > 0) updatedDisciplines = parsed;
+              } catch {}
+            }
+            return {
+              ...prev,
+              heroHeadline: content?.heroTitle || championship?.heroHeadline || prev.heroHeadline,
+              subtitle: content?.heroSubtitle || championship?.subtitle || prev.subtitle,
+              heroPrimaryCtaText: content?.heroPrimaryCtaText || prev.heroPrimaryCtaText,
+              bannerUrl: championship?.bannerUrl !== undefined ? championship.bannerUrl : prev.bannerUrl,
+              startDate: championship?.startDate || prev.startDate,
+              endDate: championship?.endDate || prev.endDate,
+              registrationOpen: championship?.registrationOpen || prev.registrationOpen,
+              registrationClose: championship?.registrationClose || prev.registrationClose,
+              venue: championship?.venue || prev.venue,
+              city: championship?.city || prev.city,
+              partnershipTagline: content?.partnershipTagline || prev.partnershipTagline,
+              partnershipHeading: content?.partnershipHeading || prev.partnershipHeading,
+              partnershipDescription: content?.partnershipDescription || prev.partnershipDescription,
+              kukkiwonTitle: content?.kukkiwonTitle || prev.kukkiwonTitle,
+              kukkiwonBranch: content?.kukkiwonBranch || prev.kukkiwonBranch,
+              kukkiwonRole: content?.kukkiwonRole || prev.kukkiwonRole,
+              kukkiwonDescription: content?.kukkiwonDescription || prev.kukkiwonDescription,
+              kukkiwonUrl: content?.kukkiwonUrl || prev.kukkiwonUrl,
+              kukkiwonUrlText: content?.kukkiwonUrlText || prev.kukkiwonUrlText,
+              kukkiwonBadge: content?.kukkiwonBadge || prev.kukkiwonBadge,
+              kyorixTitle: content?.kyorixTitle || prev.kyorixTitle,
+              kyorixSubtitle: content?.kyorixSubtitle || prev.kyorixSubtitle,
+              kyorixRole: content?.kyorixRole || prev.kyorixRole,
+              kyorixDescription: content?.kyorixDescription || prev.kyorixDescription,
+              kyorixBadge: content?.kyorixBadge || prev.kyorixBadge,
+              disciplinesTagline: content?.disciplinesTagline || prev.disciplinesTagline,
+              disciplinesHeading: content?.disciplinesHeading || prev.disciplinesHeading,
+              disciplinesDescription: content?.disciplinesDescription || prev.disciplinesDescription,
+              disciplines: updatedDisciplines,
+              datesTagline: content?.datesTagline || prev.datesTagline,
+              datesHeading: content?.datesHeading || prev.datesHeading,
+              datesDescription: content?.datesDescription || prev.datesDescription,
+              ctaTagline: content?.ctaTagline || prev.ctaTagline,
+              ctaTitle: content?.ctaTitle || prev.ctaTitle,
+              ctaDescription: content?.ctaDescription || prev.ctaDescription,
+              ctaPrimaryBtnText: content?.ctaPrimaryBtnText || prev.ctaPrimaryBtnText,
+              contactTagline: content?.contactTagline || prev.contactTagline,
+              contactHeading: content?.contactHeading || prev.contactHeading,
+              contactDescription: content?.contactDescription || prev.contactDescription,
+              contactEmail: content?.contactEmail || championship?.contactEmail || prev.contactEmail,
+              contactPhone: content?.contactPhone || championship?.contactPhone || prev.contactPhone,
+              contactPhoneHours: content?.contactPhoneHours || prev.contactPhoneHours,
+              contactAddress: content?.contactAddress || championship?.contactAddress || prev.contactAddress,
+              aboutMissionHeading: content?.aboutMissionHeading || prev.aboutMissionHeading,
+              aboutMissionText: content?.aboutMissionText || prev.aboutMissionText,
+            };
+          });
+        }
+
+        if (Array.isArray(newDates) && newDates.length > 0) {
+          setDates(newDates);
+        }
+      } catch (err) {
+        console.warn("Could not handle live CMS update event:", err);
+      }
+    };
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "kukkiwon_cms_content" || e.key === "kukkiwon_cms_championship") {
+        try {
+          const rawContent = localStorage.getItem("kukkiwon_cms_content");
+          const rawChamp = localStorage.getItem("kukkiwon_cms_championship");
+          if (rawContent || rawChamp) {
+            handleCmsUpdate({
+              detail: {
+                content: rawContent ? JSON.parse(rawContent) : undefined,
+                championship: rawChamp ? JSON.parse(rawChamp) : undefined,
+              },
+            });
+          }
+        } catch {}
+      }
+      if (e.key === "kukkiwon_important_dates" && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          if (Array.isArray(parsed)) setDates(parsed);
+        } catch {}
+      }
+    };
+
+    window.addEventListener("kukkiwon_cms_updated", handleCmsUpdate);
+    window.addEventListener("storage", handleStorageChange);
+
+    // 3. Background server fetch with no-cache guarantee
+    fetch("/api/public/championship?package=true", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (json?.data?.championship) {
+          const c = json.data.championship;
+          setTournament((prev) => ({
+            ...prev,
+            startDate: c.startDate || prev.startDate,
+            endDate: c.endDate || prev.endDate,
+            registrationOpen: c.registrationOpen || prev.registrationOpen,
+            registrationClose: c.registrationClose || prev.registrationClose,
+            venue: c.venue || prev.venue,
+          }));
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      window.removeEventListener("kukkiwon_cms_updated", handleCmsUpdate);
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
+
+  return (
+    <div className="flex min-h-screen flex-col bg-white text-slate-900 selection:bg-blue-600 selection:text-white font-sans">
+      <PublicHeader />
+
+      <main className="flex-1">
+        {/* =========================================================================
+            1. HERO SECTION (White & Blue Tech Palette)
+            ========================================================================= */}
+        <section className="relative overflow-hidden border-b border-slate-200 bg-gradient-to-b from-blue-50/70 via-white to-white py-14 sm:py-20 lg:py-24">
+          {/* Dynamic Background Image (Editable via Admin Portal) */}
+          {tournament.bannerUrl ? (
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              <Image
+                src={tournament.bannerUrl}
+                alt="Championship Hero Backdrop"
+                fill
+                className="object-cover object-center opacity-25"
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/85 to-white" />
+            </div>
+          ) : (
+            <>
+              {/* Subtle High-Tech Blueprint Grid & Radial Glow fallback */}
+              <div className="absolute inset-0 opacity-[0.04] bg-[linear-gradient(to_right,#0066ff_1px,transparent_1px),linear-gradient(to_bottom,#0066ff_1px,transparent_1px)] bg-[size:3.5rem_3.5rem] pointer-events-none" />
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(0,102,255,0.08),transparent_70%)] pointer-events-none" />
+            </>
+          )}
+
+          <div className="container relative mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl text-center space-y-6">
+            {/* Grand Dual Logos in Hero (Full official branding, transparent background, increased prominent size) */}
+            <div className="flex items-center justify-center gap-6 sm:gap-10 pb-2">
+              <div className="relative h-24 w-36 sm:h-32 sm:w-48 md:h-36 md:w-52 shrink-0 flex items-center justify-center transition-transform hover:scale-105">
+                <Image
+                  src={BRANDING.kukkiwon.logoPath}
+                  alt={BRANDING.kukkiwon.name}
+                  fill
+                  className="object-contain drop-shadow-sm"
+                  priority
+                />
+              </div>
+              <span className="text-3xl sm:text-4xl font-extralight text-slate-300 select-none">×</span>
+              <div className="relative h-24 w-32 sm:h-32 sm:w-44 md:h-36 md:w-48 shrink-0 flex items-center justify-center transition-transform hover:scale-105">
+                <Image
+                  src={BRANDING.kyorix.logoPath}
+                  alt={BRANDING.kyorix.name}
+                  fill
+                  className="object-contain drop-shadow-sm"
+                  priority
+                />
+              </div>
+            </div>
+
+            {/* Main Championship Title */}
+            <div className="space-y-2">
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-slate-950 leading-tight font-sans">
+                {tournament.heroHeadline || tournament.name || "KUKKIWON CUP CHAMPIONSHIP 2026"}
+              </h1>
+              <p className="text-sm sm:text-base text-slate-600 font-medium max-w-xl mx-auto">
+                {tournament.subtitle}
+              </p>
+            </div>
+
+            {/* Championship Core Metadata Strip (Live Synced with Admin Portal) */}
+            <LiveHeroDatesStrip
+              initialData={{
+                startDate: tournament.startDate,
+                endDate: tournament.endDate,
+                registrationClose: tournament.registrationClose,
+                venue: tournament.venue,
+              }}
+            />
+
+            {/* Primary Action Button - Always prominent Register Now button */}
+            <div className="flex items-center justify-center pt-2">
+              <Link href="/register" className="w-full sm:w-auto">
+                <Button
+                  variant="gold"
+                  size="lg"
+                  className="w-full sm:w-auto text-xs uppercase tracking-wider font-extrabold px-9 py-3.5 shadow-lg shadow-blue-500/20"
+                >
+                  <span>{tournament.heroPrimaryCtaText || "Register Now"}</span>
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* =========================================================================
+            2. DUAL ORGANIZATION SECTION (White & Blue Partnership)
+            ========================================================================= */}
+        <section className="py-16 sm:py-20 border-b border-slate-200 bg-slate-50/70">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-12">
+            <div className="text-center space-y-2 max-w-2xl mx-auto">
+              <span className="text-xs font-bold uppercase tracking-widest text-blue-600">
+                {tournament.partnershipTagline || "Collaboration & Leadership"}
+              </span>
+              <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-slate-950">
+                {tournament.partnershipHeading || "Presented in Partnership"}
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600">
+                {tournament.partnershipDescription ||
+                  "A strategic sporting union combining authentic martial arts governance with modern tournament technology."}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Partner 1: Kukkiwon India North Branch */}
+              <div className="p-8 rounded-2xl border border-slate-200 bg-white space-y-5 flex flex-col justify-between shadow-xs">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="relative h-16 w-24 shrink-0 flex items-center justify-center">
+                      <Image
+                        src={BRANDING.kukkiwon.logoPath}
+                        alt={BRANDING.kukkiwon.name}
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-900 uppercase tracking-wide">
+                        {tournament.kukkiwonTitle || BRANDING.kukkiwon.name}
+                      </h3>
+                      <p className="text-xs text-blue-600 font-bold">
+                        {tournament.kukkiwonBranch || BRANDING.kukkiwon.branch}
+                      </p>
+                      <p className="text-[11px] text-slate-500">
+                        {tournament.kukkiwonRole || BRANDING.kukkiwon.title}
+                      </p>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-slate-600 leading-relaxed pt-2">
+                    {tournament.kukkiwonDescription ||
+                      "Established under the authority of World Taekwondo Headquarters Kukkiwon (Seoul, South Korea). The India North Branch is the official governing authority responsible for Dan promotions, black belt certifications, instructor seminars, and sanctioned championships across Northern India."}
+                  </p>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
+                  <span className="text-slate-500 font-medium">
+                    {tournament.kukkiwonBadge || "Sanctioning Body"}
+                  </span>
+                  <a
+                    href={tournament.kukkiwonUrl || "https://kukkiwon-india.org/"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 font-bold text-blue-600 hover:underline"
+                  >
+                    <span>{tournament.kukkiwonUrlText || "Visit Kukkiwon India"}</span>
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+              </div>
+
+              {/* Partner 2: Kyorix Sports Technology */}
+              <div className="p-8 rounded-2xl border border-blue-200 bg-white space-y-5 flex flex-col justify-between shadow-sm shadow-blue-500/5">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="relative h-16 w-22 shrink-0 flex items-center justify-center">
+                      <Image
+                        src={BRANDING.kyorix.logoPath}
+                        alt={BRANDING.kyorix.name}
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-900 uppercase tracking-wide">
+                        {tournament.kyorixTitle || BRANDING.kyorix.name}
+                      </h3>
+                      <p className="text-xs text-cyan-600 font-bold">
+                        {tournament.kyorixSubtitle || BRANDING.kyorix.subtitle}
+                      </p>
+                      <p className="text-[11px] text-slate-500">
+                        {tournament.kyorixRole || "Sports Hardware & Accreditation Partner"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-slate-600 leading-relaxed pt-2">
+                    {tournament.kyorixDescription ||
+                      "Pioneers in martial arts competition electronics, Kyorix Sports Technology engineers wireless electronic chest and head protectors, multi-mat management software, real-time judge scoring consoles, and secure cryptographic accreditation ensuring flawless event execution."}
+                  </p>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
+                  <span className="text-slate-500 font-medium">Official Website</span>
+                  <a
+                    href="https://kyorixsport.in"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1 hover:underline"
+                  >
+                    <span>kyorixsport.in</span>
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* =========================================================================
+            3. CHAMPIONSHIP DETAILS & DISCIPLINES
+            ========================================================================= */}
+        <section id="information" className="py-16 sm:py-20 border-b border-slate-200 bg-white">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-12">
+            <div className="text-center space-y-2 max-w-2xl mx-auto">
+              <span className="text-xs font-bold uppercase tracking-widest text-blue-600">
+                {tournament.disciplinesTagline || "Tournament Structure"}
+              </span>
+              <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-slate-950">
+                {tournament.disciplinesHeading || "Championship Details & Disciplines"}
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600">
+                {tournament.disciplinesDescription ||
+                  "Official competition divisions, category weight brackets, and venue regulations."}
+              </p>
+            </div>
+
+            {/* Disciplines Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {tournament.disciplines &&
+                tournament.disciplines.map((d) => (
+                  <div
+                    key={d.title}
+                    className="p-6 rounded-xl border border-slate-200 bg-slate-50/80 space-y-3 hover:border-blue-300 hover:shadow-sm transition-all"
+                  >
+                    <span className="text-[11px] font-mono text-blue-600 block font-bold uppercase">
+                      {d.category}
+                    </span>
+                    <h3 className="text-base font-bold text-slate-900 uppercase">{d.title}</h3>
+                    <p className="text-xs text-slate-600 leading-relaxed">{d.description}</p>
+                  </div>
+                ))}
+            </div>
+          </div>
+        </section>
+
+        {/* =========================================================================
+            4. IMPORTANT DATES TIMELINE
+            ========================================================================= */}
+        <section id="dates" className="py-16 sm:py-20 border-b border-slate-200 bg-white">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-10">
+            <div className="text-center space-y-2 max-w-2xl mx-auto">
+              <span className="text-xs font-bold uppercase tracking-widest text-blue-600">
+                {tournament.datesTagline || "Key Milestones"}
+              </span>
+              <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-slate-950">
+                {tournament.datesHeading || "Important Championship Dates"}
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600">
+                {tournament.datesDescription ||
+                  "Crucial deadlines for athlete submissions, late registrations, and tournament start dates."}
+              </p>
+            </div>
+
+            {/* Chronological Milestone Cards (Live Synced with Admin Portal) */}
+            <LiveImportantDatesCards
+              initialDates={dates || []}
+              fallbackChampionship={{
+                registrationOpen: tournament.registrationOpen,
+                registrationClose: tournament.registrationClose,
+                startDate: tournament.startDate,
+                endDate: tournament.endDate,
+                venue: tournament.venue,
+                city: tournament.city,
+              }}
+            />
+          </div>
+        </section>
+
+        {/* =========================================================================
+            5. REGISTRATION CALL TO ACTION
+            ========================================================================= */}
+        <section className="py-16 sm:py-24 border-b border-slate-200 bg-gradient-to-b from-blue-50/70 via-white to-white">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl text-center space-y-6">
+            <div className="space-y-3">
+              {tournament.ctaTagline && (
+                <span className="text-xs font-bold uppercase tracking-widest text-blue-600 block">
+                  {tournament.ctaTagline}
+                </span>
+              )}
+              <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-slate-950 font-sans">
+                {tournament.ctaTitle || "Ready to Take Part?"}
+              </h2>
+              <p className="text-sm sm:text-base text-slate-600 max-w-xl mx-auto leading-relaxed">
+                {tournament.ctaDescription ||
+                  "Register for the Kukkiwon Cup Championship. Compete under official Kukkiwon sanction and secure your certified tournament accreditation badge."}
+              </p>
+            </div>
+
+            {/* Primary Action Button - Always prominent Register Now button */}
+            <div className="pt-4 flex items-center justify-center">
+              <Link href="/register" className="w-full sm:w-auto">
+                <Button
+                  variant="gold"
+                  size="lg"
+                  className="w-full sm:w-auto text-xs uppercase tracking-wider font-black px-10 py-4 shadow-xl shadow-blue-500/25"
+                >
+                  <span>{tournament.ctaPrimaryBtnText || "Register Now"}</span>
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* =========================================================================
+            6. CONTACT & SECRETARIAT SECTION
+            ========================================================================= */}
+        <section className="py-16 sm:py-20 bg-slate-50/80">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-10">
+            <div className="text-center space-y-2 max-w-2xl mx-auto">
+              <span className="text-xs font-bold uppercase tracking-widest text-blue-600">
+                {tournament.contactTagline || "Tournament Secretariat"}
+              </span>
+              <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-slate-950">
+                {tournament.contactHeading || "Official Inquiries & Support"}
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600">
+                {tournament.contactDescription ||
+                  "Official communication channels for participating academies, coaches, and delegations."}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+              <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-2 shadow-xs">
+                <Mail className="h-6 w-6 mx-auto text-blue-600" />
+                <h4 className="text-xs uppercase font-bold text-slate-900 tracking-wider">
+                  Email Secretariat
+                </h4>
+                <a
+                  href={`mailto:${tournament.contactEmail || SITE_CONFIG.contact.email}`}
+                  className="text-xs font-semibold text-blue-600 hover:underline block"
+                >
+                  {tournament.contactEmail || SITE_CONFIG.contact.email}
+                </a>
+              </div>
+
+              <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-2 shadow-xs">
+                <Phone className="h-6 w-6 mx-auto text-cyan-600" />
+                <h4 className="text-xs uppercase font-bold text-slate-900 tracking-wider">
+                  Helpline
+                </h4>
+                <span className="text-xs font-semibold text-slate-800 block">
+                  {tournament.contactPhone || SITE_CONFIG.contact.phone}
+                </span>
+                <span className="text-[11px] text-slate-400 block">
+                  {tournament.contactPhoneHours || "Mon – Sat • 9AM – 6PM IST"}
+                </span>
+              </div>
+
+              <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-2 shadow-xs">
+                <MapPin className="h-6 w-6 mx-auto text-emerald-600" />
+                <h4 className="text-xs uppercase font-bold text-slate-900 tracking-wider">
+                  Venue & Secretariat
+                </h4>
+                <span className="text-xs font-semibold text-slate-800 block">
+                  {tournament.venue}
+                </span>
+                <span className="text-[11px] text-slate-500 block">
+                  {tournament.contactAddress || "New Delhi, India"}
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <PublicFooter />
+    </div>
+  );
+}

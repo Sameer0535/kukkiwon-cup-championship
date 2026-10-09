@@ -2186,7 +2186,7 @@ export class CmsService {
       championshipId: champ.id,
       heroTitle: fallback?.hero_title || champ.heroHeadline || "The Pinnacle of Taekwondo Excellence",
       heroSubtitle: fallback?.hero_subtitle || champ.subtitle || "Sanctioned by World Taekwondo Headquarters Kukkiwon India North Branch",
-      heroTagline: fallback?.hero_tagline || "Official National Championship 2026",
+      heroTagline: fallback?.hero_tagline !== undefined ? fallback.hero_tagline : "",
       heroPrimaryCtaText: fallback?.hero_primary_cta_text || "Register Now",
       heroSecondaryCtaText: fallback?.hero_secondary_cta_text || "Contact Secretariat",
       description: champ.description || "",
