@@ -4,6 +4,7 @@
 // ==============================================================================
 
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/server-auth";
 import { CmsService } from "@/server/services/cms.service";
 
@@ -63,6 +64,12 @@ export async function POST(req: NextRequest) {
     }
 
     const created = await CmsService.createDate(body, admin);
+
+    try {
+      revalidatePath("/");
+      revalidatePath("/admin/cms");
+      revalidatePath("/championship/[slug]");
+    } catch {}
 
     return NextResponse.json({
       success: true,

@@ -1,0 +1,486 @@
+{
+  "championships": [
+    [
+      "champ-kukkiwon-2026",
+      {
+        "id": "champ-kukkiwon-2026",
+        "slug": "kukkiwon-cup-2026",
+        "name": "Kukkiwon Cup Championship 2026",
+        "short_name": "Kukkiwon Cup 2026",
+        "edition": "2026",
+        "subtitle": "Sanctioned by World Taekwondo Headquarters Kukkiwon India North Branch",
+        "description": "The official premier Taekwondo championship organized under the sanction of Kukkiwon India North Branch in collaboration with Kyorix Sports Technology. Bringing together accredited athletes, coaches, and international referees across Northern India and partner nations.",
+        "status": "PUBLISHED",
+        "start_date": "2026-11-20T09:00:00Z",
+        "end_date": "2026-11-23T18:00:00Z",
+        "registration_open": "2026-03-01T00:00:00.000Z",
+        "registration_close": "2026-04-30T23:59:59.000Z",
+        "late_registration_deadline": "2026-11-15T23:59:59Z",
+        "venue": "Indira Gandhi Indoor Stadium Complex",
+        "city": "New Delhi",
+        "state": "Delhi",
+        "country": "India",
+        "currency": "INR",
+        "entry_fee_athlete": 1500,
+        "entry_fee_coach": 1000,
+        "entry_fee_official": 0,
+        "banner_url": "/branding/hero-banner.jpg",
+        "poster_url": "/branding/poster.jpg",
+        "rules_document_url": "/documents/kukkiwon-cup-2026-regulations.pdf",
+        "hero_headline": "The Pinnacle of Taekwondo Excellence",
+        "hero_description": "Experience world-class competition, official Kukkiwon Dan accreditation, and electronic scoring precision powered by Kyorix Sports Technology.",
+        "contact_email": "contact@kyorix.com",
+        "contact_phone": "+91 98765 43210",
+        "contact_whatsapp": "+91 98765 43210",
+        "contact_address": "Kyorix Sports Technology Private Limited, New Delhi, India",
+        "social_links": {
+          "instagram": "https://instagram.com/kukkiwoncup",
+          "facebook": "https://facebook.com/kukkiwoncup",
+          "youtube": "https://youtube.com/@kukkiwoncup"
+        },
+        "is_published": true,
+        "updated_at": "2026-10-08T04:52:19.844Z"
+      }
+    ],
+    [
+      "champ-kukkiwon-winter-open-5529-5664",
+      {
+        "id": "champ-kukkiwon-winter-open-5529-5664",
+        "slug": "kukkiwon-winter-open-5529",
+        "name": "Kukkiwon Winter Open 5529",
+        "short_name": "Winter Open 2026",
+        "edition": "2026-W",
+        "subtitle": "Winter Taekwondo Championship Edition",
+        "description": "",
+        "status": "REGISTRATION_OPEN",
+        "start_date": "2026-12-10",
+        "end_date": "2026-12-14",
+        "registration_open": "2026-10-01",
+        "registration_close": "2026-12-01",
+        "late_registration_deadline": null,
+        "venue": "Indira Gandhi Arena Special Hall B",
+        "city": "New Delhi",
+        "state": "Delhi",
+        "country": "India",
+        "currency": "INR",
+        "entry_fee_athlete": 2800,
+        "entry_fee_coach": 0,
+        "entry_fee_official": 0,
+        "banner_url": null,
+        "poster_url": null,
+        "rules_document_url": null,
+        "hero_headline": "Kukkiwon Winter Open 5529",
+        "hero_description": "",
+        "contact_email": "secretariat@kukkiwoncup.org",
+        "contact_phone": "+91 98765 43210",
+        "contact_whatsapp": null,
+        "contact_address": "Kukkiwon India North Branch Secretariat, New Delhi, India",
+        "social_links": {},
+        "is_published": false,
+        "updated_at": "2026-10-07T18:51:55.685Z"
+      }
+    ],
+    [
+      "champ-kukkiwon-winter-open-3727-3765",
+      {
+        "id": "champ-kukkiwon-winter-open-3727-3765",
+        "slug": "kukkiwon-winter-open-3727",
+        "name": "Kukkiwon Winter Open 3727",
+        "short_name": "Winter Open 2026",
+        "edition": "2026-W",
+        "subtitle": "Winter Taekwondo Championship Edition",
+        "description": "",
+        "status": "REGISTRATION_OPEN",
+        "start_date": "2026-12-10",
+        "end_date": "2026-12-14",
+        "registration_open": "2026-10-01",
+        "registration_close": "2026-12-01",
+        "late_registration_deadline": null,
+        "venue": "Indira Gandhi Arena Special Hall B",
+        "city": "New Delhi",
+        "state": "Delhi",
+        "country": "India",
+        "currency": "INR",
+        "entry_fee_athlete": 2800,
+        "entry_fee_coach": 0,
+        "entry_fee_official": 0,
+        "banner_url": null,
+        "poster_url": null,
+        "rules_document_url": null,
+        "hero_headline": "Kukkiwon Winter Open 3727",
+        "hero_description": "",
+        "contact_email": "secretariat@kukkiwoncup.org",
+        "contact_phone": "+91 98765 43210",
+        "contact_whatsapp": null,
+        "contact_address": "Kukkiwon India North Branch Secretariat, New Delhi, India",
+        "social_links": {},
+        "is_published": false,
+        "updated_at": "2026-10-07T18:55:23.785Z"
+      }
+    ]
+  ],
+  "dates": [
+    [
+      "date-001",
+      {
+        "id": "date-001",
+        "championshipId": "champ-kukkiwon-2026",
+        "title": "Online Registration Opens",
+        "description": "Early access for affiliated academies and accredited athletes.",
+        "date": "2026-03-01T00:00:00.000Z",
+        "displayOrder": 1,
+        "isPublished": true,
+        "createdAt": "2026-09-01T00:00:00Z",
+        "updatedAt": "2026-09-01T00:00:00Z"
+      }
+    ],
+    [
+      "date-002",
+      {
+        "id": "date-002",
+        "championshipId": "champ-kukkiwon-2026",
+        "title": "Regular Registration Closes",
+        "description": "Standard entry fee cutoff across all divisions.",
+        "date": "2026-04-30T23:59:59.000Z",
+        "displayOrder": 2,
+        "isPublished": true,
+        "createdAt": "2026-09-01T00:00:00Z",
+        "updatedAt": "2026-09-01T00:00:00Z"
+      }
+    ],
+    [
+      "date-003",
+      {
+        "id": "date-003",
+        "championshipId": "champ-kukkiwon-2026",
+        "title": "Late Registration Deadline",
+        "description": "Final deadline with late registration surcharge. Strictly no walk-ins.",
+        "date": "2026-11-15T23:59:59Z",
+        "displayOrder": 3,
+        "isPublished": true,
+        "createdAt": "2026-09-01T00:00:00Z",
+        "updatedAt": "2026-09-01T00:00:00Z"
+      }
+    ],
+    [
+      "date-004",
+      {
+        "id": "date-004",
+        "championshipId": "champ-kukkiwon-2026",
+        "title": "Championship Opening Ceremony & Day 1",
+        "description": "Assembly, technical meeting, and Sub-Junior / Cadet sparring bouts.",
+        "date": "2026-11-20T09:00:00Z",
+        "displayOrder": 4,
+        "isPublished": true,
+        "createdAt": "2026-09-01T00:00:00Z",
+        "updatedAt": "2026-09-01T00:00:00Z"
+      }
+    ]
+  ],
+  "faqs": [
+    [
+      "faq-001",
+      {
+        "id": "faq-001",
+        "championshipId": "champ-kukkiwon-2026",
+        "question": "Who is eligible to participate in the Kukkiwon Cup 2026?",
+        "answer": "Accredited athletes holding a recognized Taekwondo rank (Poom/Dan or certified color belt) from registered academies in India and partner nations are eligible to compete in their respective age/weight categories.",
+        "displayOrder": 1,
+        "isPublished": true,
+        "createdAt": "2026-09-01T00:00:00Z",
+        "updatedAt": "2026-09-01T00:00:00Z"
+      }
+    ],
+    [
+      "faq-002",
+      {
+        "id": "faq-002",
+        "championshipId": "champ-kukkiwon-2026",
+        "question": "How does the Digital Athlete ID Card and QR verification work?",
+        "answer": "After registration approval and verified fee payment, your official Digital Athlete ID card is issued immediately. You can download or print it. The card includes a cryptographically secure QR code scanned by ring officials for instant accreditation verification.",
+        "displayOrder": 2,
+        "isPublished": true,
+        "createdAt": "2026-09-01T00:00:00Z",
+        "updatedAt": "2026-09-01T00:00:00Z"
+      }
+    ],
+    [
+      "faq-003",
+      {
+        "id": "faq-003",
+        "championshipId": "champ-kukkiwon-2026",
+        "question": "Can I make changes to my category or division after payment?",
+        "answer": "Minor category corrections due to official weight updates must be approved by the Championship Registrar before the technical draw. Please contact the secretariat with your Athlete ID.",
+        "displayOrder": 3,
+        "isPublished": true,
+        "createdAt": "2026-09-01T00:00:00Z",
+        "updatedAt": "2026-09-01T00:00:00Z"
+      }
+    ]
+  ],
+  "announcements": [
+    [
+      "ann-001",
+      {
+        "id": "ann-001",
+        "championshipId": "champ-kukkiwon-2026",
+        "title": "Official Athlete Registration is Now Open",
+        "shortDescription": "Online athlete, coach, and academy registration portal has officially opened for the 2026 edition.",
+        "content": "The Executive Organizing Committee of Kukkiwon India North Branch, in partnership with Kyorix Sports Technology, hereby announces the opening of digital registration for the Kukkiwon Cup Championship 2026. All accredited taekwondo academies and independent practitioners are invited to submit their registrations online.",
+        "publishDate": "2026-09-01T00:00:00Z",
+        "expiryDate": "2026-11-30T23:59:59Z",
+        "status": "PUBLISHED",
+        "displayOrder": 1,
+        "createdAt": "2026-09-01T00:00:00Z",
+        "updatedAt": "2026-09-01T00:00:00Z"
+      }
+    ],
+    [
+      "ann-002",
+      {
+        "id": "ann-002",
+        "championshipId": "champ-kukkiwon-2026",
+        "title": "Electronic Body Protector (PSS) Technical Guidelines",
+        "shortDescription": "Kyorix Gen-3 wireless scoring system will be deployed across all tournament rings.",
+        "content": "Official notice regarding match equipment: Kyorix electronic chest protectors and electronic headgear will be provided on-site. Athletes are required to bring approved sensor socks and personal groin/forearm/shin protection compliant with World Taekwondo standards.",
+        "publishDate": "2026-09-15T00:00:00Z",
+        "expiryDate": null,
+        "status": "PUBLISHED",
+        "displayOrder": 2,
+        "createdAt": "2026-09-15T00:00:00Z",
+        "updatedAt": "2026-09-15T00:00:00Z"
+      }
+    ],
+    [
+      "ann-003",
+      {
+        "id": "ann-003",
+        "championshipId": "champ-kukkiwon-2026",
+        "title": "Internal Draft — Referee Clinic Schedule",
+        "shortDescription": "Draft announcement for technical officials not yet cleared for public release.",
+        "content": "Confidential draft schedule for international referee refresher course.",
+        "publishDate": "2026-10-01T00:00:00Z",
+        "expiryDate": null,
+        "status": "DRAFT",
+        "displayOrder": 3,
+        "createdAt": "2026-10-01T00:00:00Z",
+        "updatedAt": "2026-10-01T00:00:00Z"
+      }
+    ],
+    [
+      "ann-004",
+      {
+        "id": "ann-004",
+        "championshipId": "champ-kukkiwon-2026",
+        "title": "Early Bird Registration Reminder (Expired)",
+        "shortDescription": "Early bird fee tier concluded on September 15.",
+        "content": "This announcement has expired and should be omitted from public active list.",
+        "publishDate": "2026-08-01T00:00:00Z",
+        "expiryDate": "2026-09-15T23:59:59Z",
+        "status": "PUBLISHED",
+        "displayOrder": 4,
+        "createdAt": "2026-08-01T00:00:00Z",
+        "updatedAt": "2026-08-01T00:00:00Z"
+      }
+    ]
+  ],
+  "categories": [
+    [
+      "cat-001",
+      {
+        "id": "cat-001",
+        "championshipId": "champ-kukkiwon-2026",
+        "code": "KY-SEN-M-U58",
+        "name": "Senior Male Under 58kg",
+        "discipline": "KYORUGI",
+        "division": "SENIOR",
+        "gender": "MALE",
+        "minAge": 18,
+        "maxAge": 35,
+        "minWeight": null,
+        "maxWeight": 58,
+        "beltRequirement": "BLACK_BELT",
+        "registrationFee": 1500,
+        "displayOrder": 1,
+        "isActive": true
+      }
+    ],
+    [
+      "cat-002",
+      {
+        "id": "cat-002",
+        "championshipId": "champ-kukkiwon-2026",
+        "code": "KY-SEN-F-U49",
+        "name": "Senior Female Under 49kg",
+        "discipline": "KYORUGI",
+        "division": "SENIOR",
+        "gender": "FEMALE",
+        "minAge": 18,
+        "maxAge": 35,
+        "minWeight": null,
+        "maxWeight": 49,
+        "beltRequirement": "BLACK_BELT",
+        "registrationFee": 1500,
+        "displayOrder": 2,
+        "isActive": true
+      }
+    ],
+    [
+      "cat-003",
+      {
+        "id": "cat-003",
+        "championshipId": "champ-kukkiwon-2026",
+        "code": "PM-IND-SEN-M",
+        "name": "Senior Male Individual Recognized Poomsae",
+        "discipline": "POOMSAE",
+        "division": "SENIOR",
+        "gender": "MALE",
+        "minAge": 18,
+        "maxAge": 35,
+        "minWeight": null,
+        "maxWeight": null,
+        "beltRequirement": "BLACK_BELT",
+        "registrationFee": 1500,
+        "displayOrder": 3,
+        "isActive": true
+      }
+    ],
+    [
+      "cat-004",
+      {
+        "id": "cat-004",
+        "championshipId": "champ-kukkiwon-2026",
+        "code": "DEMO-EXP-OPEN",
+        "name": "Special Experimental Breaking",
+        "discipline": "DEMO",
+        "division": "OPEN",
+        "gender": "OTHER",
+        "minAge": null,
+        "maxAge": null,
+        "minWeight": null,
+        "maxWeight": null,
+        "beltRequirement": null,
+        "registrationFee": 2000,
+        "displayOrder": 4,
+        "isActive": false
+      }
+    ],
+    [
+      "cat-005",
+      {
+        "id": "cat-005",
+        "championshipId": "champ-delhi-open-2026",
+        "code": "DELHI-JUN-M-U45",
+        "name": "Delhi Junior Male Under 45kg",
+        "discipline": "KYORUGI",
+        "division": "JUNIOR",
+        "gender": "MALE",
+        "minAge": 14,
+        "maxAge": 17,
+        "minWeight": null,
+        "maxWeight": 45,
+        "beltRequirement": null,
+        "registrationFee": 1200,
+        "displayOrder": 1,
+        "isActive": true
+      }
+    ]
+  ],
+  "fees": [
+    [
+      "fee-ath-001",
+      {
+        "id": "fee-ath-001",
+        "championshipId": "champ-kukkiwon-2026",
+        "categoryId": null,
+        "categoryName": null,
+        "participantType": "ATHLETE",
+        "name": "Standard Athlete Entry Fee",
+        "baseFeePaise": 150000,
+        "baseFeeFormatted": "₹1,500",
+        "lateFeePaise": 50000,
+        "lateFeeFormatted": "₹500",
+        "currency": "INR",
+        "lateFeeFrom": "2026-11-01T00:00:00Z",
+        "effectiveFrom": "2026-09-01T00:00:00Z",
+        "effectiveUntil": "2026-11-15T23:59:59Z",
+        "isActive": true
+      }
+    ],
+    [
+      "fee-coach-001",
+      {
+        "id": "fee-coach-001",
+        "championshipId": "champ-kukkiwon-2026",
+        "categoryId": null,
+        "categoryName": null,
+        "participantType": "COACH",
+        "name": "Official Coach Accreditation Fee",
+        "baseFeePaise": 100000,
+        "baseFeeFormatted": "₹1,000",
+        "lateFeePaise": 0,
+        "lateFeeFormatted": "₹0",
+        "currency": "INR",
+        "lateFeeFrom": null,
+        "effectiveFrom": "2026-09-01T00:00:00Z",
+        "effectiveUntil": "2026-11-15T23:59:59Z",
+        "isActive": true
+      }
+    ]
+  ],
+  "documents": [
+    [
+      "pdoc-001",
+      {
+        "id": "pdoc-001",
+        "championshipId": "champ-kukkiwon-2026",
+        "title": "Official Tournament Information Prospectus",
+        "documentType": "PROSPECTUS",
+        "description": "Comprehensive guide including championship outline, categories, timetable, and rules.",
+        "fileUrl": "/documents/kukkiwon-cup-2026-prospectus.pdf",
+        "fileName": "kukkiwon-cup-2026-prospectus.pdf",
+        "fileSizeFormatted": "2.4 MB",
+        "publishDate": "2026-09-01T00:00:00Z",
+        "status": "PUBLISHED",
+        "displayOrder": 1
+      }
+    ],
+    [
+      "pdoc-002",
+      {
+        "id": "pdoc-002",
+        "championshipId": "champ-kukkiwon-2026",
+        "title": "Athlete Document & Identity Requirements",
+        "documentType": "REQUIREMENTS",
+        "description": "Mandatory photo, Aadhaar/Passport, and Kukkiwon Dan certificate submission criteria.",
+        "fileUrl": "/documents/athlete-document-guidelines.pdf",
+        "fileName": "athlete-document-guidelines.pdf",
+        "fileSizeFormatted": "850 KB",
+        "publishDate": "2026-09-01T00:00:00Z",
+        "status": "PUBLISHED",
+        "displayOrder": 2
+      }
+    ],
+    [
+      "pdoc-003",
+      {
+        "id": "pdoc-003",
+        "championshipId": "champ-kukkiwon-2026",
+        "title": "Confidential Draft Medical Evacuation Protocol",
+        "documentType": "INTERNAL_PROTOCOL",
+        "description": "Internal safety draft not intended for public distribution.",
+        "fileUrl": "/documents/internal-med-plan.pdf",
+        "fileName": "internal-med-plan.pdf",
+        "fileSizeFormatted": "1.1 MB",
+        "publishDate": "2026-10-01T00:00:00Z",
+        "status": "DRAFT",
+        "displayOrder": 3
+      }
+    ]
+  ],
+  "timestamp": 1791435139844,
+  "deletedChampionships": [
+    "champ-delhi-open-2026",
+    "delhi-open-2026"
+  ]
+}

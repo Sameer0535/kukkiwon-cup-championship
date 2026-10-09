@@ -345,6 +345,25 @@ export default function AdminCmsPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to save CMS content.");
+
+      // Broadcast and cache dates locally so changes reflect immediately across tabs/sessions
+      if (typeof window !== "undefined") {
+        try {
+          const stored = {
+            startDate: championship.startDate,
+            endDate: championship.endDate,
+            registrationOpen: championship.registrationOpen,
+            registrationClose: championship.registrationClose,
+            lateRegistrationDeadline: championship.lateRegistrationDeadline,
+            venue: championship.venue,
+            city: championship.city,
+            timestamp: Date.now(),
+          };
+          localStorage.setItem("kukkiwon_championship_dates", JSON.stringify(stored));
+          window.dispatchEvent(new CustomEvent("kukkiwon_dates_updated", { detail: stored }));
+        } catch {}
+      }
+
       triggerNotification("Championship content saved successfully!");
       fetchData();
     } catch (err: any) {
@@ -421,6 +440,44 @@ export default function AdminCmsPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to save important date.");
+
+      // Synchronize to localStorage
+      if (typeof window !== "undefined") {
+        try {
+          const updatedItem = data.data || { ...dateForm, id: editingDate ? editingDate.id : `date-${Date.now()}` };
+          const updatedDates = editingDate
+            ? dates.map((d) => (d.id === editingDate.id ? { ...d, ...updatedItem } : d))
+            : [...dates, updatedItem];
+          localStorage.setItem("kukkiwon_important_dates", JSON.stringify(updatedDates));
+
+          // Also update parent championship dates if milestone matches
+          const rawChampDates = localStorage.getItem("kukkiwon_championship_dates");
+          const champDates = rawChampDates ? JSON.parse(rawChampDates) : (championship ? {
+            startDate: championship.startDate,
+            endDate: championship.endDate,
+            registrationOpen: championship.registrationOpen,
+            registrationClose: championship.registrationClose,
+            lateRegistrationDeadline: championship.lateRegistrationDeadline,
+            venue: championship.venue,
+          } : {});
+
+          const lowerTitle = (dateForm.title || "").toLowerCase();
+          if (lowerTitle.includes("registration open") || lowerTitle.includes("online registration")) {
+            champDates.registrationOpen = dateForm.date;
+          } else if (lowerTitle.includes("regular registration") || lowerTitle.includes("registration close") || lowerTitle.includes("standard registration")) {
+            champDates.registrationClose = dateForm.date;
+          } else if (lowerTitle.includes("late registration")) {
+            champDates.lateRegistrationDeadline = dateForm.date;
+          } else if (lowerTitle.includes("opening ceremony") || lowerTitle.includes("day 1") || lowerTitle.includes("start")) {
+            champDates.startDate = dateForm.date;
+          }
+          champDates.timestamp = Date.now();
+          localStorage.setItem("kukkiwon_championship_dates", JSON.stringify(champDates));
+
+          window.dispatchEvent(new CustomEvent("kukkiwon_dates_updated", { detail: { dates: updatedDates, championship: champDates } }));
+        } catch {}
+      }
+
       setDateModalOpen(false);
       triggerNotification("Important date saved!");
       fetchData();
@@ -438,6 +495,15 @@ export default function AdminCmsPage() {
         credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to delete date.");
+
+      if (typeof window !== "undefined") {
+        try {
+          const updatedDates = dates.filter((d) => d.id !== id);
+          localStorage.setItem("kukkiwon_important_dates", JSON.stringify(updatedDates));
+          window.dispatchEvent(new CustomEvent("kukkiwon_dates_updated", { detail: { dates: updatedDates } }));
+        } catch {}
+      }
+
       triggerNotification("Important date deleted.");
       fetchData();
     } catch (err: any) {

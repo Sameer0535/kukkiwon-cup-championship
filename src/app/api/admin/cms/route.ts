@@ -4,6 +4,7 @@
 // ==============================================================================
 
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/server-auth";
 import { CmsService } from "@/server/services/cms.service";
 
@@ -101,6 +102,12 @@ export async function PATCH(req: NextRequest) {
     ) {
       await CmsService.updateChampionship(championshipId, body, admin);
     }
+
+    try {
+      revalidatePath("/");
+      revalidatePath("/admin/cms");
+      revalidatePath("/championship/[slug]");
+    } catch {}
 
     return NextResponse.json({
       success: true,

@@ -140,6 +140,7 @@ interface FallbackChampionshipData {
 }
 
 const CMS_LOCAL_STORE_FILE = path.join(process.cwd(), ".data", "cms_data.json");
+const CMS_BUNDLED_STORE_FILE = path.join(process.cwd(), "src", "config", "cms_data.json");
 const CMS_TMP_DATA_DIR = path.join(os.tmpdir(), "kukkiwon_championship_data");
 const CMS_TMP_STORE_FILE = path.join(CMS_TMP_DATA_DIR, "cms-data.json");
 const CMS_DELETED_STORE_FILE = path.join(process.cwd(), ".data", "deleted_championships.json");
@@ -158,6 +159,9 @@ function getCmsDataFilePath(): string {
     }
     return CMS_LOCAL_STORE_FILE;
   } catch {
+    if (fs.existsSync(CMS_BUNDLED_STORE_FILE)) {
+      return CMS_BUNDLED_STORE_FILE;
+    }
     if (!fs.existsSync(CMS_TMP_DATA_DIR)) {
       fs.mkdirSync(CMS_TMP_DATA_DIR, { recursive: true });
     }
@@ -180,8 +184,8 @@ const FALLBACK_CHAMPIONSHIPS: Map<string, FallbackChampionshipData> = new Map([
       status: "PUBLISHED",
       start_date: "2026-11-20T09:00:00Z",
       end_date: "2026-11-23T18:00:00Z",
-      registration_open: "2026-09-01T00:00:00Z",
-      registration_close: "2026-11-10T23:59:59Z",
+      registration_open: "2026-03-01T00:00:00.000Z",
+      registration_close: "2026-04-30T23:59:59.000Z",
       late_registration_deadline: "2026-11-15T23:59:59Z",
       venue: "Indira Gandhi Indoor Stadium Complex",
       city: "New Delhi",
@@ -466,7 +470,7 @@ const FALLBACK_DATES: Map<string, ChampionshipImportantDateDTO> = new Map([
       championshipId: "champ-kukkiwon-2026",
       title: "Online Registration Opens",
       description: "Early access for affiliated academies and accredited athletes.",
-      date: "2026-09-01T00:00:00Z",
+      date: "2026-03-01T00:00:00.000Z",
       displayOrder: 1,
       isPublished: true,
       createdAt: "2026-09-01T00:00:00Z",
@@ -480,7 +484,7 @@ const FALLBACK_DATES: Map<string, ChampionshipImportantDateDTO> = new Map([
       championshipId: "champ-kukkiwon-2026",
       title: "Regular Registration Closes",
       description: "Standard entry fee cutoff across all divisions.",
-      date: "2026-11-10T23:59:59Z",
+      date: "2026-04-30T23:59:59.000Z",
       displayOrder: 2,
       isPublished: true,
       createdAt: "2026-09-01T00:00:00Z",
@@ -590,7 +594,14 @@ function persistCmsDataToFile() {
       console.warn("[CmsService] Could not write to .data/cms_data.json:", e);
     }
 
-    // 2. Also write to os.tmpdir()
+    // 2. Also write to src/config/cms_data.json if writable
+    try {
+      if (fs.existsSync(path.dirname(CMS_BUNDLED_STORE_FILE))) {
+        fs.writeFileSync(CMS_BUNDLED_STORE_FILE, jsonStr, "utf-8");
+      }
+    } catch {}
+
+    // 3. Also write to os.tmpdir()
     try {
       if (!fs.existsSync(CMS_TMP_DATA_DIR)) fs.mkdirSync(CMS_TMP_DATA_DIR, { recursive: true });
       fs.writeFileSync(CMS_TMP_STORE_FILE, jsonStr, "utf-8");
@@ -610,9 +621,16 @@ function loadCmsDataFromFile(force = false) {
       diskMtime = stat.mtimeMs;
       chosenPath = CMS_LOCAL_STORE_FILE;
     }
+    if (fs.existsSync(CMS_BUNDLED_STORE_FILE)) {
+      const stat = fs.statSync(CMS_BUNDLED_STORE_FILE);
+      if (stat.mtimeMs > diskMtime || !chosenPath) {
+        diskMtime = stat.mtimeMs;
+        chosenPath = CMS_BUNDLED_STORE_FILE;
+      }
+    }
     if (fs.existsSync(CMS_TMP_STORE_FILE)) {
       const stat = fs.statSync(CMS_TMP_STORE_FILE);
-      if (stat.mtimeMs > diskMtime) {
+      if (stat.mtimeMs > diskMtime || !chosenPath) {
         diskMtime = stat.mtimeMs;
         chosenPath = CMS_TMP_STORE_FILE;
       }
@@ -1110,15 +1128,23 @@ export class CmsService {
     }
     if (input.registrationClose) {
       for (const [dId, dItem] of FALLBACK_DATES.entries()) {
-        if (dItem.title.toLowerCase().includes("registration close") || dItem.title.toLowerCase().includes("standard registration")) {
+        if (dItem.title.toLowerCase().includes("registration close") || dItem.title.toLowerCase().includes("regular registration") || dItem.title.toLowerCase().includes("standard registration")) {
           dItem.date = input.registrationClose;
+          FALLBACK_DATES.set(dId, dItem);
+        }
+      }
+    }
+    if (input.lateRegistrationDeadline) {
+      for (const [dId, dItem] of FALLBACK_DATES.entries()) {
+        if (dItem.title.toLowerCase().includes("late registration")) {
+          dItem.date = input.lateRegistrationDeadline;
           FALLBACK_DATES.set(dId, dItem);
         }
       }
     }
     if (input.startDate) {
       for (const [dId, dItem] of FALLBACK_DATES.entries()) {
-        if (dItem.title.toLowerCase().includes("championship opening") || dItem.title.toLowerCase().includes("day 1") || dItem.title.toLowerCase().includes("start")) {
+        if (dItem.title.toLowerCase().includes("championship opening") || dItem.title.toLowerCase().includes("day 1") || dItem.title.toLowerCase().includes("start") || dItem.title.toLowerCase().includes("opening ceremony")) {
           dItem.date = input.startDate;
           FALLBACK_DATES.set(dId, dItem);
         }
@@ -2086,11 +2112,12 @@ export class CmsService {
     const championship = await this.getChampionship(slugOrId, false);
     if (!championship) return null;
 
-    const [categories, fees, announcements, documents] = await Promise.all([
+    const [categories, fees, announcements, documents, dates] = await Promise.all([
       this.listCategories(championship.id, false),
       this.listFees(championship.id, false),
       this.listAnnouncements(championship.id, false),
       this.listPublicDocuments(championship.id, false),
+      this.listDates(championship.id, false),
     ]);
 
     return {
@@ -2099,6 +2126,7 @@ export class CmsService {
       fees,
       announcements,
       documents,
+      dates,
     };
   }
 
@@ -2444,6 +2472,24 @@ export class CmsService {
     };
 
     FALLBACK_DATES.set(newId, item);
+
+    // Synchronize to championship dates
+    const champ = FALLBACK_CHAMPIONSHIPS.get(input.championshipId);
+    if (champ && item.date) {
+      const lowerTitle = item.title.toLowerCase();
+      if (lowerTitle.includes("registration open") || lowerTitle.includes("online registration")) {
+        champ.registration_open = item.date;
+      } else if (lowerTitle.includes("regular registration") || lowerTitle.includes("registration close") || lowerTitle.includes("standard registration")) {
+        champ.registration_close = item.date;
+      } else if (lowerTitle.includes("late registration")) {
+        champ.late_registration_deadline = item.date;
+      } else if (lowerTitle.includes("opening ceremony") || lowerTitle.includes("day 1") || lowerTitle.includes("tournament start") || lowerTitle.includes("championship start")) {
+        champ.start_date = item.date;
+      }
+      champ.updated_at = new Date().toISOString();
+      FALLBACK_CHAMPIONSHIPS.set(input.championshipId, champ);
+    }
+
     persistCmsDataToFile();
 
     if (adminSession?.user_id) {
@@ -2489,6 +2535,24 @@ export class CmsService {
     };
 
     FALLBACK_DATES.set(id, updated);
+
+    // Synchronize back to parent championship dates
+    const champ = FALLBACK_CHAMPIONSHIPS.get(current.championshipId);
+    if (champ && updated.date) {
+      const lowerTitle = updated.title.toLowerCase();
+      if (lowerTitle.includes("registration open") || lowerTitle.includes("online registration")) {
+        champ.registration_open = updated.date;
+      } else if (lowerTitle.includes("regular registration") || lowerTitle.includes("registration close") || lowerTitle.includes("standard registration")) {
+        champ.registration_close = updated.date;
+      } else if (lowerTitle.includes("late registration")) {
+        champ.late_registration_deadline = updated.date;
+      } else if (lowerTitle.includes("opening ceremony") || lowerTitle.includes("day 1") || lowerTitle.includes("tournament start") || lowerTitle.includes("championship start")) {
+        champ.start_date = updated.date;
+      }
+      champ.updated_at = new Date().toISOString();
+      FALLBACK_CHAMPIONSHIPS.set(current.championshipId, champ);
+    }
+
     persistCmsDataToFile();
 
     if (adminSession?.user_id) {

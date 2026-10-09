@@ -21,6 +21,10 @@ import { CmsService } from "@/server/services/cms.service";
 import { LiveSyncService } from "@/server/services/live-sync.service";
 import { formatDate } from "@/lib/utils";
 import {
+  LiveHeroDatesStrip,
+  LiveImportantDatesCards,
+} from "@/components/public/live-championship-dates";
+import {
   Calendar,
   MapPin,
   Clock,
@@ -105,11 +109,6 @@ export default async function HomePage() {
 
             {/* Main Championship Title */}
             <div className="space-y-2">
-              {tournament.heroTagline && (
-                <div className="inline-block px-3.5 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold uppercase tracking-wider mb-1">
-                  {tournament.heroTagline}
-                </div>
-              )}
               <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-slate-950 leading-tight font-sans">
                 {tournament.heroHeadline || tournament.name || "KUKKIWON CUP CHAMPIONSHIP 2026"}
               </h1>
@@ -118,56 +117,15 @@ export default async function HomePage() {
               </p>
             </div>
 
-            {/* Championship Core Metadata Strip */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-y border-slate-200 py-4 max-w-2xl mx-auto text-left bg-slate-50/60 rounded-xl px-4">
-              <div className="flex items-start gap-2.5">
-                <Calendar className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
-                    Dates
-                  </span>
-                  <span className="text-xs font-bold text-slate-900">
-                    {formatDate(tournament.startDate)} – {formatDate(tournament.endDate)}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2.5">
-                <MapPin className="h-4 w-4 text-cyan-600 shrink-0 mt-0.5" />
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
-                    Venue
-                  </span>
-                  <span className="text-xs font-bold text-slate-900 truncate block max-w-[180px]">
-                    {tournament.venue}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2.5">
-                <Clock className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
-                    Deadline
-                  </span>
-                  <span className="text-xs font-bold text-slate-900">
-                    {formatDate(tournament.registrationClose)}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Live Synchronized Participation Statistics Pill */}
-            <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-slate-500 pt-1">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50/80 border border-blue-200/60 font-semibold text-blue-700">
-                <Users className="h-3.5 w-3.5 text-blue-600" />
-                <span>{liveMetrics.totalRegistrations} Verified Competitors & Coaches Registered</span>
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 font-semibold text-slate-700">
-                <Shield className="h-3.5 w-3.5 text-emerald-600" />
-                <span>{liveMetrics.totalAcademies} Accredited Academies</span>
-              </span>
-            </div>
+            {/* Championship Core Metadata Strip (Live Synced with Admin Portal) */}
+            <LiveHeroDatesStrip
+              initialData={{
+                startDate: tournament.startDate,
+                endDate: tournament.endDate,
+                registrationClose: tournament.registrationClose,
+                venue: tournament.venue,
+              }}
+            />
 
             {/* Primary & Secondary Action Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2">
@@ -371,73 +329,18 @@ export default async function HomePage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {dynamicDates && dynamicDates.length > 0 ? (
-                dynamicDates.map((d) => (
-                  <div key={d.id} className="p-5 rounded-xl border border-slate-200 bg-slate-50/80 space-y-1.5 hover:border-blue-400 hover:shadow-xs transition-colors">
-                    <span className="text-[10px] uppercase font-bold text-blue-600 tracking-wider block">
-                      {d.title}
-                    </span>
-                    <span className="text-sm font-bold text-slate-900 block">
-                      {formatDate(d.date)}
-                    </span>
-                    <span className="text-[11px] text-slate-500 block line-clamp-2">
-                      {d.description || "Official tournament milestone"}
-                    </span>
-                  </div>
-                ))
-              ) : (
-                <>
-                  <div className="p-5 rounded-xl border border-slate-200 bg-slate-50/80 space-y-1.5">
-                    <span className="text-[10px] uppercase font-bold text-blue-600 tracking-wider block">
-                      Registration Opens
-                    </span>
-                    <span className="text-sm font-bold text-slate-900 block">
-                      {formatDate(tournament.registrationOpen)}
-                    </span>
-                    <span className="text-[11px] text-slate-500 block">
-                      Digital entries portal goes live
-                    </span>
-                  </div>
-
-                  <div className="p-5 rounded-xl border border-slate-200 bg-slate-50/80 space-y-1.5">
-                    <span className="text-[10px] uppercase font-bold text-rose-600 tracking-wider block">
-                      Registration Closes
-                    </span>
-                    <span className="text-sm font-bold text-slate-900 block">
-                      {formatDate(tournament.registrationClose)}
-                    </span>
-                    <span className="text-[11px] text-slate-500 block">
-                      Standard entry deadline
-                    </span>
-                  </div>
-
-                  <div className="p-5 rounded-xl border border-slate-200 bg-slate-50/80 space-y-1.5">
-                    <span className="text-[10px] uppercase font-bold text-amber-600 tracking-wider block">
-                      Late Registration
-                    </span>
-                    <span className="text-sm font-bold text-slate-900 block">
-                      {tournament.startDate ? formatDate(tournament.startDate) : "N/A"}
-                    </span>
-                    <span className="text-[11px] text-slate-500 block">
-                      Late surcharge applies
-                    </span>
-                  </div>
-
-                  <div className="p-5 rounded-xl border border-slate-200 bg-slate-50/80 space-y-1.5">
-                    <span className="text-[10px] uppercase font-bold text-emerald-600 tracking-wider block">
-                      Championship Dates
-                    </span>
-                    <span className="text-sm font-bold text-slate-900 block">
-                      {formatDate(tournament.startDate)} – {formatDate(tournament.endDate)}
-                    </span>
-                    <span className="text-[11px] text-slate-500 block">
-                      {tournament.venue}, {tournament.city}
-                    </span>
-                  </div>
-                </>
-              )}
-            </div>
+            {/* Chronological Milestone Cards (Live Synced with Admin Portal) */}
+            <LiveImportantDatesCards
+              initialDates={dynamicDates || []}
+              fallbackChampionship={{
+                registrationOpen: tournament.registrationOpen,
+                registrationClose: tournament.registrationClose,
+                startDate: tournament.startDate,
+                endDate: tournament.endDate,
+                venue: tournament.venue,
+                city: tournament.city,
+              }}
+            />
           </div>
         </section>
 

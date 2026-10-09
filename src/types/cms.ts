@@ -116,6 +116,7 @@ export interface PublicChampionshipPackage {
   fees: PublicFee[];
   announcements: PublicAnnouncement[];
   documents: PublicDocument[];
+  dates?: ChampionshipImportantDateDTO[];
 }
 
 // ------------------------------------------------------------------------------
