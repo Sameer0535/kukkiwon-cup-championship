@@ -204,27 +204,47 @@ export default function AdminCmsPage() {
     return headers;
   };
 
-  // Safe datetime-local input formatting
+  // Safe datetime-local input formatting in local client timezone
   const formatForInput = (val?: string | null): string => {
     if (!val) return "";
+    const str = String(val).trim();
+    if (!str) return "";
     try {
-      const d = new Date(val);
+      // If already in YYYY-MM-DDTHH:mm format (local input string)
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(str)) {
+        return str.substring(0, 16);
+      }
+      const d = new Date(str);
       if (isNaN(d.getTime())) return "";
-      return d.toISOString().substring(0, 16);
+      const pad = (n: number) => String(n).padStart(2, "0");
+      const year = d.getFullYear();
+      const month = pad(d.getMonth() + 1);
+      const day = pad(d.getDate());
+      const hours = pad(d.getHours());
+      const mins = pad(d.getMinutes());
+      return `${year}-${month}-${day}T${hours}:${mins}`;
     } catch {
       return "";
     }
   };
 
-  const parseFromInput = (val: string, fallback?: string): string => {
-    if (!val) return fallback || new Date().toISOString();
+  const toIso = (val?: string | null): string | null => {
+    if (!val) return null;
+    const str = String(val).trim();
+    if (!str) return null;
     try {
-      const d = new Date(val);
-      if (isNaN(d.getTime())) return fallback || new Date().toISOString();
+      if (str.endsWith("Z")) return str;
+      const d = new Date(str);
+      if (isNaN(d.getTime())) return str;
       return d.toISOString();
     } catch {
-      return fallback || new Date().toISOString();
+      return str;
     }
+  };
+
+  const parseFromInput = (val: string, fallback?: string | null): string => {
+    if (!val) return fallback || new Date().toISOString();
+    return toIso(val) || fallback || new Date().toISOString();
   };
 
   // Load data
@@ -292,6 +312,14 @@ export default function AdminCmsPage() {
     setSaving(true);
     setError(null);
     try {
+      const cleanStartDate = toIso(championship.startDate) || championship.startDate;
+      const cleanEndDate = toIso(championship.endDate) || championship.endDate;
+      const cleanRegOpen = toIso(championship.registrationOpen) || championship.registrationOpen;
+      const cleanRegClose = toIso(championship.registrationClose) || championship.registrationClose;
+      const cleanLateReg = championship.lateRegistrationDeadline
+        ? toIso(championship.lateRegistrationDeadline) || championship.lateRegistrationDeadline
+        : null;
+
       const res = await fetch("/api/admin/cms", {
         method: "PATCH",
         headers: getAdminHeaders(),
@@ -312,11 +340,11 @@ export default function AdminCmsPage() {
           contactPhone: content.contactPhone,
           contactPhoneHours: content.contactPhoneHours,
           contactAddress: content.contactAddress || championship.contactAddress,
-          startDate: championship.startDate,
-          endDate: championship.endDate,
-          registrationOpen: championship.registrationOpen,
-          registrationClose: championship.registrationClose,
-          lateRegistrationDeadline: championship.lateRegistrationDeadline,
+          startDate: cleanStartDate,
+          endDate: cleanEndDate,
+          registrationOpen: cleanRegOpen,
+          registrationClose: cleanRegClose,
+          lateRegistrationDeadline: cleanLateReg,
           bannerUrl: championship.bannerUrl,
           partnershipTagline: content.partnershipTagline,
           partnershipHeading: content.partnershipHeading,
@@ -358,14 +386,22 @@ export default function AdminCmsPage() {
       // Broadcast and cache CMS content locally so changes reflect immediately live across tabs and sessions
       if (typeof window !== "undefined") {
         try {
+          const updatedChamp = {
+            ...championship,
+            startDate: cleanStartDate,
+            endDate: cleanEndDate,
+            registrationOpen: cleanRegOpen,
+            registrationClose: cleanRegClose,
+            lateRegistrationDeadline: cleanLateReg,
+          };
           localStorage.setItem("kukkiwon_cms_content", JSON.stringify(content));
-          localStorage.setItem("kukkiwon_cms_championship", JSON.stringify(championship));
+          localStorage.setItem("kukkiwon_cms_championship", JSON.stringify(updatedChamp));
           const stored = {
-            startDate: championship.startDate,
-            endDate: championship.endDate,
-            registrationOpen: championship.registrationOpen,
-            registrationClose: championship.registrationClose,
-            lateRegistrationDeadline: championship.lateRegistrationDeadline,
+            startDate: cleanStartDate,
+            endDate: cleanEndDate,
+            registrationOpen: cleanRegOpen,
+            registrationClose: cleanRegClose,
+            lateRegistrationDeadline: cleanLateReg,
             venue: championship.venue,
             city: championship.city,
             timestamp: Date.now(),
@@ -454,7 +490,10 @@ export default function AdminCmsPage() {
         method,
         headers: getAdminHeaders(),
         credentials: "include",
-        body: JSON.stringify(dateForm),
+        body: JSON.stringify({
+          ...dateForm,
+          date: toIso(dateForm.date) || dateForm.date,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to save important date.");
@@ -580,6 +619,7 @@ export default function AdminCmsPage() {
         body: JSON.stringify({
           championshipId: "champ-kukkiwon-2026",
           ...annForm,
+          expiryDate: annForm.expiryDate ? toIso(annForm.expiryDate) || annForm.expiryDate : null,
         }),
       });
       const data = await res.json();
@@ -813,7 +853,8 @@ export default function AdminCmsPage() {
                     <Input
                       type="datetime-local"
                       value={formatForInput(championship.registrationOpen)}
-                      onChange={(e) => setChampionship({ ...championship, registrationOpen: parseFromInput(e.target.value, championship.registrationOpen) })}
+                      onChange={(e) => setChampionship({ ...championship, registrationOpen: e.target.value })}
+                      className="bg-slate-900 border-slate-700 text-white [color-scheme:dark] focus:border-amber-400 focus:ring-amber-400"
                       required
                     />
                   </div>
@@ -822,7 +863,8 @@ export default function AdminCmsPage() {
                     <Input
                       type="datetime-local"
                       value={formatForInput(championship.registrationClose)}
-                      onChange={(e) => setChampionship({ ...championship, registrationClose: parseFromInput(e.target.value, championship.registrationClose) })}
+                      onChange={(e) => setChampionship({ ...championship, registrationClose: e.target.value })}
+                      className="bg-slate-900 border-slate-700 text-white [color-scheme:dark] focus:border-amber-400 focus:ring-amber-400"
                       required
                     />
                   </div>
@@ -831,7 +873,8 @@ export default function AdminCmsPage() {
                     <Input
                       type="datetime-local"
                       value={formatForInput(championship.lateRegistrationDeadline)}
-                      onChange={(e) => setChampionship({ ...championship, lateRegistrationDeadline: e.target.value ? parseFromInput(e.target.value) : null })}
+                      onChange={(e) => setChampionship({ ...championship, lateRegistrationDeadline: e.target.value || null })}
+                      className="bg-slate-900 border-slate-700 text-white [color-scheme:dark] focus:border-amber-400 focus:ring-amber-400"
                     />
                   </div>
                 </div>
@@ -842,7 +885,8 @@ export default function AdminCmsPage() {
                     <Input
                       type="datetime-local"
                       value={formatForInput(championship.startDate)}
-                      onChange={(e) => setChampionship({ ...championship, startDate: parseFromInput(e.target.value, championship.startDate) })}
+                      onChange={(e) => setChampionship({ ...championship, startDate: e.target.value })}
+                      className="bg-slate-900 border-slate-700 text-white [color-scheme:dark] focus:border-amber-400 focus:ring-amber-400"
                       required
                     />
                   </div>
@@ -851,7 +895,8 @@ export default function AdminCmsPage() {
                     <Input
                       type="datetime-local"
                       value={formatForInput(championship.endDate)}
-                      onChange={(e) => setChampionship({ ...championship, endDate: parseFromInput(e.target.value, championship.endDate) })}
+                      onChange={(e) => setChampionship({ ...championship, endDate: e.target.value })}
+                      className="bg-slate-900 border-slate-700 text-white [color-scheme:dark] focus:border-amber-400 focus:ring-amber-400"
                       required
                     />
                   </div>
@@ -2014,7 +2059,8 @@ export default function AdminCmsPage() {
                   <Input
                     type="datetime-local"
                     value={formatForInput(dateForm.date)}
-                    onChange={(e) => setDateForm({ ...dateForm, date: parseFromInput(e.target.value, dateForm.date) })}
+                    onChange={(e) => setDateForm({ ...dateForm, date: e.target.value })}
+                    className="bg-slate-900 border-slate-700 text-white [color-scheme:dark] focus:border-amber-400 focus:ring-amber-400"
                     required
                   />
                 </div>
@@ -2157,7 +2203,8 @@ export default function AdminCmsPage() {
                   <Input
                     type="date"
                     value={annForm.expiryDate ? annForm.expiryDate.substring(0, 10) : ""}
-                    onChange={(e) => setAnnForm({ ...annForm, expiryDate: e.target.value ? parseFromInput(e.target.value) : "" })}
+                    onChange={(e) => setAnnForm({ ...annForm, expiryDate: e.target.value })}
+                    className="bg-slate-900 border-slate-700 text-white [color-scheme:dark] focus:border-amber-400 focus:ring-amber-400"
                   />
                 </div>
               </div>

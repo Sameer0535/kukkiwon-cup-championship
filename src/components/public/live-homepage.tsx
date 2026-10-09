@@ -317,20 +317,6 @@ export function LiveHomePage({
                 venue: tournament.venue,
               }}
             />
-
-            {/* Primary Action Button - Always prominent Register Now button */}
-            <div className="flex items-center justify-center pt-2">
-              <Link href="/register" className="w-full sm:w-auto">
-                <Button
-                  variant="gold"
-                  size="lg"
-                  className="w-full sm:w-auto text-xs uppercase tracking-wider font-extrabold px-9 py-3.5 shadow-lg shadow-blue-500/20"
-                >
-                  <span>{tournament.heroPrimaryCtaText || "Register Now"}</span>
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              </Link>
-            </div>
           </div>
         </section>
 
