@@ -68,7 +68,7 @@ export default function TermsPage() {
               <p>
                 Taekwondo is a dynamic, full-contact martial art. Every competitor (and their legal guardian in the
                 case of minors) acknowledges the inherent physical risks associated with sparring, poomsae, and
-                demonstration competition. Competitors certify that they are medically fit to engage in intense physical
+                breaking competition. Competitors certify that they are medically fit to engage in intense physical
                 contests and maintain personal medical/accident insurance.
               </p>
             </div>

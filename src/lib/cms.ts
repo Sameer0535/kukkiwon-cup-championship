@@ -119,7 +119,7 @@ const DEFAULT_CHAMPIONSHIP_DATA: PublicChampionshipContent = {
   kyorixSubtitle: "Electronic Scoring & Accreditation",
   kyorixRole: "Sports Hardware & Accreditation Partner",
   kyorixDescription: "Pioneers in martial arts competition electronics, Kyorix Sports Technology engineers wireless electronic chest and head protectors, multi-mat management software, real-time judge scoring consoles, and secure cryptographic accreditation ensuring flawless event execution.",
-  kyorixBadge: "Electronic Scoring Partner",
+  kyorixBadge: "kyorixsport.in",
   disciplinesTagline: "Tournament Structure",
   disciplinesHeading: "Championship Details & Disciplines",
   disciplinesDescription: "Official competition divisions, category weight brackets, and venue regulations.",
@@ -148,9 +148,9 @@ const DEFAULT_CHAMPIONSHIP_DATA: PublicChampionshipContent = {
       description: "Recognized and Freestyle Poomsae evaluated by certified Kukkiwon North India judges on technical accuracy, power balance, rhythm, and expression.",
     },
     {
-      title: "Demonstration & Breaking",
-      category: "Kyukpa & Creative Team Demo",
-      description: "Technical board breaking, high jump aerial breaking, and synchronized team demonstrations showcasing the athletic essence of traditional and modern Taekwondo.",
+      title: "Breaking",
+      category: "Kyukpa & Power Breaking Divisions",
+      description: "Technical board breaking, high jump aerial breaking, and synchronized breaking demonstrations showcasing the athletic power of traditional and modern Taekwondo.",
     },
   ],
 };

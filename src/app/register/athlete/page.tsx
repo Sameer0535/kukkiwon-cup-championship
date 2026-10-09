@@ -129,7 +129,8 @@ interface WTWeightClass {
 }
 
 const WT_DIVISIONS = [
-  { id: "SUB_JUNIOR", label: "Sub-Junior", ageRange: "Ages 5–11", desc: "Under 12 years" },
+  { id: "CHILDREN", label: "Children", ageRange: "Under 10", desc: "Ages 5–9" },
+  { id: "SUB_JUNIOR", label: "Sub-Junior", ageRange: "Ages 10–11", desc: "Under 12 years" },
   { id: "CADET", label: "Cadet", ageRange: "Ages 12–14", desc: "Cadet World Class" },
   { id: "JUNIOR", label: "Junior", ageRange: "Ages 15–17", desc: "Junior WT Standard" },
   { id: "SENIOR", label: "Senior", ageRange: "Ages 17+", desc: "World Taekwondo Senior" },
@@ -139,52 +140,62 @@ const WT_CATEGORIES: Record<
   string,
   { MALE: WTWeightClass[]; FEMALE: WTWeightClass[] }
 > = {
-  SENIOR: {
+  CHILDREN: {
     MALE: [
-      { code: "KY-SEN-M-U54", name: "Finweight", weightLimit: "Under 54.0 kg", minWeight: 45, maxWeight: 54 },
-      { code: "KY-SEN-M-U58", name: "Flyweight", weightLimit: "Under 58.0 kg", minWeight: 54.1, maxWeight: 58 },
-      { code: "KY-SEN-M-U63", name: "Bantamweight", weightLimit: "Under 63.0 kg", minWeight: 58.1, maxWeight: 63 },
-      { code: "KY-SEN-M-U68", name: "Featherweight", weightLimit: "Under 68.0 kg", minWeight: 63.1, maxWeight: 68 },
-      { code: "KY-SEN-M-U74", name: "Lightweight", weightLimit: "Under 74.0 kg", minWeight: 68.1, maxWeight: 74 },
-      { code: "KY-SEN-M-U80", name: "Welterweight", weightLimit: "Under 80.0 kg", minWeight: 74.1, maxWeight: 80 },
-      { code: "KY-SEN-M-U87", name: "Middleweight", weightLimit: "Under 87.0 kg", minWeight: 80.1, maxWeight: 87 },
-      { code: "KY-SEN-M-O87", name: "Heavyweight", weightLimit: "Over 87.0 kg (+87kg)", minWeight: 87.1, maxWeight: 140 },
+      { code: "KY-CHD-M-U16", name: "Under 16kg", weightLimit: "Under 16.0 kg", minWeight: 10, maxWeight: 16 },
+      { code: "KY-CHD-M-U18", name: "Under 18kg", weightLimit: "Under 18.0 kg", minWeight: 16.1, maxWeight: 18 },
+      { code: "KY-CHD-M-U20", name: "Under 20kg", weightLimit: "Under 20.0 kg", minWeight: 18.1, maxWeight: 20 },
+      { code: "KY-CHD-M-U22", name: "Under 22kg", weightLimit: "Under 22.0 kg", minWeight: 20.1, maxWeight: 22 },
+      { code: "KY-CHD-M-U24", name: "Under 24kg", weightLimit: "Under 24.0 kg", minWeight: 22.1, maxWeight: 24 },
+      { code: "KY-CHD-M-U26", name: "Under 26kg", weightLimit: "Under 26.0 kg", minWeight: 24.1, maxWeight: 26 },
+      { code: "KY-CHD-M-U28", name: "Under 28kg", weightLimit: "Under 28.0 kg", minWeight: 26.1, maxWeight: 28 },
+      { code: "KY-CHD-M-U32", name: "Under 32kg", weightLimit: "Under 32.0 kg", minWeight: 28.1, maxWeight: 32 },
+      { code: "KY-CHD-M-U36", name: "Under 36kg", weightLimit: "Under 36.0 kg", minWeight: 32.1, maxWeight: 36 },
+      { code: "KY-CHD-M-O36", name: "Over 36kg", weightLimit: "Over 36.0 kg (+36kg)", minWeight: 36.1, maxWeight: 60 },
     ],
     FEMALE: [
-      { code: "KY-SEN-F-U46", name: "Finweight", weightLimit: "Under 46.0 kg", minWeight: 38, maxWeight: 46 },
-      { code: "KY-SEN-F-U49", name: "Flyweight", weightLimit: "Under 49.0 kg", minWeight: 46.1, maxWeight: 49 },
-      { code: "KY-SEN-F-U53", name: "Bantamweight", weightLimit: "Under 53.0 kg", minWeight: 49.1, maxWeight: 53 },
-      { code: "KY-SEN-F-U57", name: "Featherweight", weightLimit: "Under 57.0 kg", minWeight: 53.1, maxWeight: 57 },
-      { code: "KY-SEN-F-U62", name: "Lightweight", weightLimit: "Under 62.0 kg", minWeight: 57.1, maxWeight: 62 },
-      { code: "KY-SEN-F-U67", name: "Welterweight", weightLimit: "Under 67.0 kg", minWeight: 62.1, maxWeight: 67 },
-      { code: "KY-SEN-F-U73", name: "Middleweight", weightLimit: "Under 73.0 kg", minWeight: 67.1, maxWeight: 73 },
-      { code: "KY-SEN-F-O73", name: "Heavyweight", weightLimit: "Over 73.0 kg (+73kg)", minWeight: 73.1, maxWeight: 120 },
+      { code: "KY-CHD-F-U14", name: "Under 14kg", weightLimit: "Under 14.0 kg", minWeight: 10, maxWeight: 14 },
+      { code: "KY-CHD-F-U16", name: "Under 16kg", weightLimit: "Under 16.0 kg", minWeight: 14.1, maxWeight: 16 },
+      { code: "KY-CHD-F-U18", name: "Under 18kg", weightLimit: "Under 18.0 kg", minWeight: 16.1, maxWeight: 18 },
+      { code: "KY-CHD-F-U20", name: "Under 20kg", weightLimit: "Under 20.0 kg", minWeight: 18.1, maxWeight: 20 },
+      { code: "KY-CHD-F-U22", name: "Under 22kg", weightLimit: "Under 22.0 kg", minWeight: 20.1, maxWeight: 22 },
+      { code: "KY-CHD-F-U24", name: "Under 24kg", weightLimit: "Under 24.0 kg", minWeight: 22.1, maxWeight: 24 },
+      { code: "KY-CHD-F-U26", name: "Under 26kg", weightLimit: "Under 26.0 kg", minWeight: 24.1, maxWeight: 26 },
+      { code: "KY-CHD-F-U28", name: "Under 28kg", weightLimit: "Under 28.0 kg", minWeight: 26.1, maxWeight: 28 },
+      { code: "KY-CHD-F-U32", name: "Under 32kg", weightLimit: "Under 32.0 kg", minWeight: 28.1, maxWeight: 32 },
+      { code: "KY-CHD-F-O32", name: "Over 32kg", weightLimit: "Over 32.0 kg (+32kg)", minWeight: 32.1, maxWeight: 55 },
     ],
   },
-  JUNIOR: {
+  SUB_JUNIOR: {
     MALE: [
-      { code: "KY-JUN-M-U45", name: "Finweight", weightLimit: "Under 45.0 kg", minWeight: 35, maxWeight: 45 },
-      { code: "KY-JUN-M-U48", name: "Flyweight", weightLimit: "Under 48.0 kg", minWeight: 45.1, maxWeight: 48 },
-      { code: "KY-JUN-M-U51", name: "Bantamweight", weightLimit: "Under 51.0 kg", minWeight: 48.1, maxWeight: 51 },
-      { code: "KY-JUN-M-U55", name: "Featherweight", weightLimit: "Under 55.0 kg", minWeight: 51.1, maxWeight: 55 },
-      { code: "KY-JUN-M-U59", name: "Lightweight", weightLimit: "Under 59.0 kg", minWeight: 55.1, maxWeight: 59 },
-      { code: "KY-JUN-M-U63", name: "Welterweight", weightLimit: "Under 63.0 kg", minWeight: 59.1, maxWeight: 63 },
-      { code: "KY-JUN-M-U68", name: "Light Middle", weightLimit: "Under 68.0 kg", minWeight: 63.1, maxWeight: 68 },
-      { code: "KY-JUN-M-U73", name: "Middleweight", weightLimit: "Under 73.0 kg", minWeight: 68.1, maxWeight: 73 },
-      { code: "KY-JUN-M-U78", name: "Light Heavy", weightLimit: "Under 78.0 kg", minWeight: 73.1, maxWeight: 78 },
-      { code: "KY-JUN-M-O78", name: "Heavyweight", weightLimit: "Over 78.0 kg (+78kg)", minWeight: 78.1, maxWeight: 120 },
+      { code: "KY-SUB-M-U18", name: "Under 18kg", weightLimit: "Under 18.0 kg", minWeight: 12, maxWeight: 18 },
+      { code: "KY-SUB-M-U21", name: "Under 21kg", weightLimit: "Under 21.0 kg", minWeight: 18.1, maxWeight: 21 },
+      { code: "KY-SUB-M-U23", name: "Under 23kg", weightLimit: "Under 23.0 kg", minWeight: 21.1, maxWeight: 23 },
+      { code: "KY-SUB-M-U25", name: "Under 25kg", weightLimit: "Under 25.0 kg", minWeight: 23.1, maxWeight: 25 },
+      { code: "KY-SUB-M-U27", name: "Under 27kg", weightLimit: "Under 27.0 kg", minWeight: 25.1, maxWeight: 27 },
+      { code: "KY-SUB-M-U29", name: "Under 29kg", weightLimit: "Under 29.0 kg", minWeight: 27.1, maxWeight: 29 },
+      { code: "KY-SUB-M-U32", name: "Under 32kg", weightLimit: "Under 32.0 kg", minWeight: 29.1, maxWeight: 32 },
+      { code: "KY-SUB-M-U35", name: "Under 35kg", weightLimit: "Under 35.0 kg", minWeight: 32.1, maxWeight: 35 },
+      { code: "KY-SUB-M-U38", name: "Under 38kg", weightLimit: "Under 38.0 kg", minWeight: 35.1, maxWeight: 38 },
+      { code: "KY-SUB-M-U41", name: "Under 41kg", weightLimit: "Under 41.0 kg", minWeight: 38.1, maxWeight: 41 },
+      { code: "KY-SUB-M-U44", name: "Under 44kg", weightLimit: "Under 44.0 kg", minWeight: 41.1, maxWeight: 44 },
+      { code: "KY-SUB-M-U50", name: "Under 50kg", weightLimit: "Under 50.0 kg", minWeight: 44.1, maxWeight: 50 },
+      { code: "KY-SUB-M-O50", name: "Over 50kg", weightLimit: "Over 50.0 kg (+50kg)", minWeight: 50.1, maxWeight: 80 },
     ],
     FEMALE: [
-      { code: "KY-JUN-F-U42", name: "Finweight", weightLimit: "Under 42.0 kg", minWeight: 32, maxWeight: 42 },
-      { code: "KY-JUN-F-U44", name: "Flyweight", weightLimit: "Under 44.0 kg", minWeight: 42.1, maxWeight: 44 },
-      { code: "KY-JUN-F-U46", name: "Bantamweight", weightLimit: "Under 46.0 kg", minWeight: 44.1, maxWeight: 46 },
-      { code: "KY-JUN-F-U49", name: "Featherweight", weightLimit: "Under 49.0 kg", minWeight: 46.1, maxWeight: 49 },
-      { code: "KY-JUN-F-U52", name: "Lightweight", weightLimit: "Under 52.0 kg", minWeight: 49.1, maxWeight: 52 },
-      { code: "KY-JUN-F-U55", name: "Welterweight", weightLimit: "Under 55.0 kg", minWeight: 52.1, maxWeight: 55 },
-      { code: "KY-JUN-F-U59", name: "Light Middle", weightLimit: "Under 59.0 kg", minWeight: 55.1, maxWeight: 59 },
-      { code: "KY-JUN-F-U63", name: "Middleweight", weightLimit: "Under 63.0 kg", minWeight: 59.1, maxWeight: 63 },
-      { code: "KY-JUN-F-U68", name: "Light Heavy", weightLimit: "Under 68.0 kg", minWeight: 63.1, maxWeight: 68 },
-      { code: "KY-JUN-F-O68", name: "Heavyweight", weightLimit: "Over 68.0 kg (+68kg)", minWeight: 68.1, maxWeight: 105 },
+      { code: "KY-SUB-F-U16", name: "Under 16kg", weightLimit: "Under 16.0 kg", minWeight: 12, maxWeight: 16 },
+      { code: "KY-SUB-F-U18", name: "Under 18kg", weightLimit: "Under 18.0 kg", minWeight: 16.1, maxWeight: 18 },
+      { code: "KY-SUB-F-U20", name: "Under 20kg", weightLimit: "Under 20.0 kg", minWeight: 18.1, maxWeight: 20 },
+      { code: "KY-SUB-F-U22", name: "Under 22kg", weightLimit: "Under 22.0 kg", minWeight: 20.1, maxWeight: 22 },
+      { code: "KY-SUB-F-U24", name: "Under 24kg", weightLimit: "Under 24.0 kg", minWeight: 22.1, maxWeight: 24 },
+      { code: "KY-SUB-F-U26", name: "Under 26kg", weightLimit: "Under 26.0 kg", minWeight: 24.1, maxWeight: 26 },
+      { code: "KY-SUB-F-U29", name: "Under 29kg", weightLimit: "Under 29.0 kg", minWeight: 26.1, maxWeight: 29 },
+      { code: "KY-SUB-F-U32", name: "Under 32kg", weightLimit: "Under 32.0 kg", minWeight: 29.1, maxWeight: 32 },
+      { code: "KY-SUB-F-U35", name: "Under 35kg", weightLimit: "Under 35.0 kg", minWeight: 32.1, maxWeight: 35 },
+      { code: "KY-SUB-F-U38", name: "Under 38kg", weightLimit: "Under 38.0 kg", minWeight: 35.1, maxWeight: 38 },
+      { code: "KY-SUB-F-U41", name: "Under 41kg", weightLimit: "Under 41.0 kg", minWeight: 38.1, maxWeight: 41 },
+      { code: "KY-SUB-F-U47", name: "Under 47kg", weightLimit: "Under 47.0 kg", minWeight: 41.1, maxWeight: 47 },
+      { code: "KY-SUB-F-O47", name: "Over 47kg", weightLimit: "Over 47.0 kg (+47kg)", minWeight: 47.1, maxWeight: 75 },
     ],
   },
   CADET: {
@@ -213,31 +224,93 @@ const WT_CATEGORIES: Record<
       { code: "KY-CAD-F-O59", name: "Heavyweight", weightLimit: "Over 59.0 kg (+59kg)", minWeight: 59.1, maxWeight: 85 },
     ],
   },
-  SUB_JUNIOR: {
+  JUNIOR: {
     MALE: [
-      { code: "KY-SUB-M-U18", name: "Under 18kg", weightLimit: "Under 18.0 kg", minWeight: 12, maxWeight: 18 },
-      { code: "KY-SUB-M-U21", name: "Under 21kg", weightLimit: "Under 21.0 kg", minWeight: 18.1, maxWeight: 21 },
-      { code: "KY-SUB-M-U24", name: "Under 24kg", weightLimit: "Under 24.0 kg", minWeight: 21.1, maxWeight: 24 },
-      { code: "KY-SUB-M-U27", name: "Under 27kg", weightLimit: "Under 27.0 kg", minWeight: 24.1, maxWeight: 27 },
-      { code: "KY-SUB-M-U30", name: "Under 30kg", weightLimit: "Under 30.0 kg", minWeight: 27.1, maxWeight: 30 },
-      { code: "KY-SUB-M-U33", name: "Under 33kg", weightLimit: "Under 33.0 kg", minWeight: 30.1, maxWeight: 33 },
-      { code: "KY-SUB-M-U36", name: "Under 36kg", weightLimit: "Under 36.0 kg", minWeight: 33.1, maxWeight: 36 },
-      { code: "KY-SUB-M-U40", name: "Under 40kg", weightLimit: "Under 40.0 kg", minWeight: 36.1, maxWeight: 40 },
-      { code: "KY-SUB-M-O40", name: "Over 40kg", weightLimit: "Over 40.0 kg (+40kg)", minWeight: 40.1, maxWeight: 70 },
+      { code: "KY-JUN-M-U45", name: "Finweight", weightLimit: "Under 45.0 kg", minWeight: 35, maxWeight: 45 },
+      { code: "KY-JUN-M-U48", name: "Flyweight", weightLimit: "Under 48.0 kg", minWeight: 45.1, maxWeight: 48 },
+      { code: "KY-JUN-M-U51", name: "Bantamweight", weightLimit: "Under 51.0 kg", minWeight: 48.1, maxWeight: 51 },
+      { code: "KY-JUN-M-U55", name: "Featherweight", weightLimit: "Under 55.0 kg", minWeight: 51.1, maxWeight: 55 },
+      { code: "KY-JUN-M-U59", name: "Lightweight", weightLimit: "Under 59.0 kg", minWeight: 55.1, maxWeight: 59 },
+      { code: "KY-JUN-M-U63", name: "Welterweight", weightLimit: "Under 63.0 kg", minWeight: 59.1, maxWeight: 63 },
+      { code: "KY-JUN-M-U68", name: "Light Middle", weightLimit: "Under 68.0 kg", minWeight: 63.1, maxWeight: 68 },
+      { code: "KY-JUN-M-U73", name: "Middleweight", weightLimit: "Under 73.0 kg", minWeight: 68.1, maxWeight: 73 },
+      { code: "KY-JUN-M-U78", name: "Light Heavy", weightLimit: "Under 78.0 kg", minWeight: 73.1, maxWeight: 78 },
+      { code: "KY-JUN-M-O78", name: "Heavyweight", weightLimit: "Over 78.0 kg (+78kg)", minWeight: 78.1, maxWeight: 120 },
     ],
     FEMALE: [
-      { code: "KY-SUB-F-U18", name: "Under 18kg", weightLimit: "Under 18.0 kg", minWeight: 12, maxWeight: 18 },
-      { code: "KY-SUB-F-U21", name: "Under 21kg", weightLimit: "Under 21.0 kg", minWeight: 18.1, maxWeight: 21 },
-      { code: "KY-SUB-F-U24", name: "Under 24kg", weightLimit: "Under 24.0 kg", minWeight: 21.1, maxWeight: 24 },
-      { code: "KY-SUB-F-U27", name: "Under 27kg", weightLimit: "Under 27.0 kg", minWeight: 24.1, maxWeight: 27 },
-      { code: "KY-SUB-F-U30", name: "Under 30kg", weightLimit: "Under 30.0 kg", minWeight: 27.1, maxWeight: 30 },
-      { code: "KY-SUB-F-U33", name: "Under 33kg", weightLimit: "Under 33.0 kg", minWeight: 30.1, maxWeight: 33 },
-      { code: "KY-SUB-F-U36", name: "Under 36kg", weightLimit: "Under 36.0 kg", minWeight: 33.1, maxWeight: 36 },
-      { code: "KY-SUB-F-U40", name: "Under 40kg", weightLimit: "Under 40.0 kg", minWeight: 36.1, maxWeight: 40 },
-      { code: "KY-SUB-F-O40", name: "Over 40kg", weightLimit: "Over 40.0 kg (+40kg)", minWeight: 40.1, maxWeight: 70 },
+      { code: "KY-JUN-F-U42", name: "Finweight", weightLimit: "Under 42.0 kg", minWeight: 32, maxWeight: 42 },
+      { code: "KY-JUN-F-U44", name: "Flyweight", weightLimit: "Under 44.0 kg", minWeight: 42.1, maxWeight: 44 },
+      { code: "KY-JUN-F-U46", name: "Bantamweight", weightLimit: "Under 46.0 kg", minWeight: 44.1, maxWeight: 46 },
+      { code: "KY-JUN-F-U49", name: "Featherweight", weightLimit: "Under 49.0 kg", minWeight: 46.1, maxWeight: 49 },
+      { code: "KY-JUN-F-U52", name: "Lightweight", weightLimit: "Under 52.0 kg", minWeight: 49.1, maxWeight: 52 },
+      { code: "KY-JUN-F-U55", name: "Welterweight", weightLimit: "Under 55.0 kg", minWeight: 52.1, maxWeight: 55 },
+      { code: "KY-JUN-F-U59", name: "Light Middle", weightLimit: "Under 59.0 kg", minWeight: 55.1, maxWeight: 59 },
+      { code: "KY-JUN-F-U63", name: "Middleweight", weightLimit: "Under 63.0 kg", minWeight: 59.1, maxWeight: 63 },
+      { code: "KY-JUN-F-U68", name: "Light Heavy", weightLimit: "Under 68.0 kg", minWeight: 63.1, maxWeight: 68 },
+      { code: "KY-JUN-F-O68", name: "Heavyweight", weightLimit: "Over 68.0 kg (+68kg)", minWeight: 68.1, maxWeight: 105 },
+    ],
+  },
+  SENIOR: {
+    MALE: [
+      { code: "KY-SEN-M-U54", name: "Finweight", weightLimit: "Under 54.0 kg", minWeight: 45, maxWeight: 54 },
+      { code: "KY-SEN-M-U58", name: "Flyweight", weightLimit: "Under 58.0 kg", minWeight: 54.1, maxWeight: 58 },
+      { code: "KY-SEN-M-U63", name: "Bantamweight", weightLimit: "Under 63.0 kg", minWeight: 58.1, maxWeight: 63 },
+      { code: "KY-SEN-M-U68", name: "Featherweight", weightLimit: "Under 68.0 kg", minWeight: 63.1, maxWeight: 68 },
+      { code: "KY-SEN-M-U74", name: "Lightweight", weightLimit: "Under 74.0 kg", minWeight: 68.1, maxWeight: 74 },
+      { code: "KY-SEN-M-U80", name: "Welterweight", weightLimit: "Under 80.0 kg", minWeight: 74.1, maxWeight: 80 },
+      { code: "KY-SEN-M-U87", name: "Middleweight", weightLimit: "Under 87.0 kg", minWeight: 80.1, maxWeight: 87 },
+      { code: "KY-SEN-M-O87", name: "Heavyweight", weightLimit: "Over 87.0 kg (+87kg)", minWeight: 87.1, maxWeight: 140 },
+    ],
+    FEMALE: [
+      { code: "KY-SEN-F-U46", name: "Finweight", weightLimit: "Under 46.0 kg", minWeight: 38, maxWeight: 46 },
+      { code: "KY-SEN-F-U49", name: "Flyweight", weightLimit: "Under 49.0 kg", minWeight: 46.1, maxWeight: 49 },
+      { code: "KY-SEN-F-U53", name: "Bantamweight", weightLimit: "Under 53.0 kg", minWeight: 49.1, maxWeight: 53 },
+      { code: "KY-SEN-F-U57", name: "Featherweight", weightLimit: "Under 57.0 kg", minWeight: 53.1, maxWeight: 57 },
+      { code: "KY-SEN-F-U62", name: "Lightweight", weightLimit: "Under 62.0 kg", minWeight: 57.1, maxWeight: 62 },
+      { code: "KY-SEN-F-U67", name: "Welterweight", weightLimit: "Under 67.0 kg", minWeight: 62.1, maxWeight: 67 },
+      { code: "KY-SEN-F-U73", name: "Middleweight", weightLimit: "Under 73.0 kg", minWeight: 67.1, maxWeight: 73 },
+      { code: "KY-SEN-F-O73", name: "Heavyweight", weightLimit: "Over 73.0 kg (+73kg)", minWeight: 73.1, maxWeight: 120 },
     ],
   },
 };
+
+// ------------------------------------------------------------------------------
+// OFFICIAL POOMSAE CLASSIFICATION CATEGORIES (Without Designated Poomsae)
+// ------------------------------------------------------------------------------
+interface PoomsaeCategory {
+  code: string;
+  name: string;
+  ageRange: string;
+}
+
+const POOMSAE_INDIVIDUAL_CATEGORIES: PoomsaeCategory[] = [
+  { code: "PO-IND-JUN1", name: "Junior I", ageRange: "Under 12 Years" },
+  { code: "PO-IND-JUN23", name: "Junior II · III", ageRange: "Ages 13 To 18" },
+  { code: "PO-IND-SEN1", name: "Senior I", ageRange: "Under 29 (18–29)" },
+  { code: "PO-IND-SEN2", name: "Senior II", ageRange: "Under 39 (30–39)" },
+  { code: "PO-IND-SEN3", name: "Senior III", ageRange: "Under 49 Years (40–49 Years)" },
+  { code: "PO-IND-SEN4", name: "Senior IV", ageRange: "Under 59 Years (50–59 Years)" },
+  { code: "PO-IND-MAS", name: "Master I · II", ageRange: "60 Years And Over (Aged 60 Or Older)" },
+];
+
+const POOMSAE_GROUP_CATEGORIES: PoomsaeCategory[] = [
+  { code: "PO-GRP-JUN1", name: "Junior I (Group)", ageRange: "Under 12 (–12 Years)" },
+  { code: "PO-GRP-JUN2", name: "Junior II (Group)", ageRange: "Under 18 (13–18 Years)" },
+  { code: "PO-GRP-SEN1", name: "Senior I (Group)", ageRange: "Under 29 (19–29 Years)" },
+  { code: "PO-GRP-SEN23", name: "Senior II · III (Group)", ageRange: "30 Years And Over" },
+];
+
+interface BreakingCategory {
+  code: string;
+  name: string;
+  desc: string;
+}
+
+const BREAKING_CATEGORIES: BreakingCategory[] = [
+  { code: "BRK-HIGH-KYUKPA", name: "High Jump & Kyukpa Power Breaking", desc: "Technical wood breaking & jumping impact techniques" },
+  { code: "BRK-TEAM-DEMO", name: "Championship Team Breaking", desc: "Synchronized and coordinated team breaking demonstration" },
+  { code: "BRK-TECH-IND", name: "Individual Technical Breaking", desc: "Precision aerial speed and multi-target breaking" },
+];
 
 // Document upload file payload
 interface UploadedFileRecord {
@@ -345,7 +418,7 @@ function AthleteRegistrationContent() {
       | { name: string; country: string; state: string; city: string; head_coach: string }
       | undefined,
 
-    discipline: "KYORUGI" as "KYORUGI" | "POOMSAE" | "DEMO",
+    discipline: "KYORUGI" as "KYORUGI" | "POOMSAE" | "BREAKING" | "DEMO",
     division: "SENIOR",
     category_id: "KY-SEN-M-U58",
     weight_category_name: "Under 58.0 kg",
@@ -363,6 +436,8 @@ function AthleteRegistrationContent() {
     declaration_terms: true,
     declaration_rules: true,
   });
+
+  const [poomsaeType, setPoomsaeType] = React.useState<"INDIVIDUAL" | "GROUP">("INDIVIDUAL");
 
   // UI state
   const [photoPreview, setPhotoPreview] = React.useState<string | null>(null);
@@ -469,30 +544,102 @@ function AthleteRegistrationContent() {
     }
   };
 
+  // Handle Discipline Switch
+  const handleDisciplineSelect = (discId: "KYORUGI" | "POOMSAE" | "BREAKING") => {
+    if (discId === "KYORUGI") {
+      const defaultDiv = formData.division || "SENIOR";
+      const cats = WT_CATEGORIES[defaultDiv]?.[formData.gender] || [];
+      const firstCat = cats[0];
+      setFormData((prev) => ({
+        ...prev,
+        discipline: "KYORUGI",
+        division: defaultDiv,
+        category_id: firstCat?.code || prev.category_id,
+        weight_category_name: firstCat ? firstCat.weightLimit : prev.weight_category_name,
+      }));
+    } else if (discId === "POOMSAE") {
+      const age = formData.date_of_birth ? calculateAge(formData.date_of_birth) : 20;
+      const list = poomsaeType === "INDIVIDUAL" ? POOMSAE_INDIVIDUAL_CATEGORIES : POOMSAE_GROUP_CATEGORIES;
+      let selectedCat = list[0];
+      if (poomsaeType === "INDIVIDUAL") {
+        if (age < 12) selectedCat = list[0];
+        else if (age <= 18) selectedCat = list[1];
+        else if (age <= 29) selectedCat = list[2];
+        else if (age <= 39) selectedCat = list[3];
+        else if (age <= 49) selectedCat = list[4];
+        else if (age <= 59) selectedCat = list[5];
+        else selectedCat = list[6];
+      } else {
+        if (age <= 12) selectedCat = list[0];
+        else if (age <= 18) selectedCat = list[1];
+        else if (age <= 29) selectedCat = list[2];
+        else selectedCat = list[3];
+      }
+      setFormData((prev) => ({
+        ...prev,
+        discipline: "POOMSAE",
+        category_id: selectedCat.code,
+        weight_category_name: `${selectedCat.name} (${selectedCat.ageRange})`,
+      }));
+    } else {
+      // BREAKING
+      const first = BREAKING_CATEGORIES[0];
+      setFormData((prev) => ({
+        ...prev,
+        discipline: "BREAKING",
+        category_id: first.code,
+        weight_category_name: first.name,
+      }));
+    }
+  };
+
   // Live Auto-Suggestion for Division based on DOB
   React.useEffect(() => {
     if (formData.date_of_birth) {
       const age = calculateAge(formData.date_of_birth);
-      let suggestedDivision = "SENIOR";
-      if (age < 12) suggestedDivision = "SUB_JUNIOR";
-      else if (age >= 12 && age <= 14) suggestedDivision = "CADET";
-      else if (age >= 15 && age <= 17) suggestedDivision = "JUNIOR";
-      else suggestedDivision = "SENIOR";
+      if (formData.discipline === "KYORUGI") {
+        let suggestedDivision = "SENIOR";
+        if (age < 10) suggestedDivision = "CHILDREN";
+        else if (age >= 10 && age <= 11) suggestedDivision = "SUB_JUNIOR";
+        else if (age >= 12 && age <= 14) suggestedDivision = "CADET";
+        else if (age >= 15 && age <= 17) suggestedDivision = "JUNIOR";
+        else suggestedDivision = "SENIOR";
 
-      // If user hasn't explicitly set a different division or initial match
-      setFormData((prev) => {
-        // Keep current division if valid or switch to suggested
-        const currentCats = WT_CATEGORIES[suggestedDivision]?.[prev.gender] || [];
-        const firstCat = currentCats[0];
-        return {
+        setFormData((prev) => {
+          const currentCats = WT_CATEGORIES[suggestedDivision]?.[prev.gender] || [];
+          const firstCat = currentCats[0];
+          return {
+            ...prev,
+            division: suggestedDivision,
+            category_id: firstCat?.code || prev.category_id,
+            weight_category_name: firstCat ? firstCat.weightLimit : prev.weight_category_name,
+          };
+        });
+      } else if (formData.discipline === "POOMSAE") {
+        const list = poomsaeType === "INDIVIDUAL" ? POOMSAE_INDIVIDUAL_CATEGORIES : POOMSAE_GROUP_CATEGORIES;
+        let selectedCat = list[0];
+        if (poomsaeType === "INDIVIDUAL") {
+          if (age < 12) selectedCat = list[0];
+          else if (age <= 18) selectedCat = list[1];
+          else if (age <= 29) selectedCat = list[2];
+          else if (age <= 39) selectedCat = list[3];
+          else if (age <= 49) selectedCat = list[4];
+          else if (age <= 59) selectedCat = list[5];
+          else selectedCat = list[6];
+        } else {
+          if (age <= 12) selectedCat = list[0];
+          else if (age <= 18) selectedCat = list[1];
+          else if (age <= 29) selectedCat = list[2];
+          else selectedCat = list[3];
+        }
+        setFormData((prev) => ({
           ...prev,
-          division: suggestedDivision,
-          category_id: firstCat?.code || prev.category_id,
-          weight_category_name: firstCat ? firstCat.weightLimit : prev.weight_category_name,
-        };
-      });
+          category_id: selectedCat.code,
+          weight_category_name: `${selectedCat.name} (${selectedCat.ageRange})`,
+        }));
+      }
     }
-  }, [formData.date_of_birth, formData.gender]);
+  }, [formData.date_of_birth, formData.gender, formData.discipline, poomsaeType]);
 
   // Helper field updater
   const updateField = (field: string, value: any) => {
@@ -1336,16 +1483,16 @@ function AthleteRegistrationContent() {
                   </div>
                 </div>
 
-                {/* 1.4 WT DIVISION & WEIGHT CATEGORIES (DIRECTLY BELOW ACADEMY) */}
-                <div className="space-y-5 pt-4 border-t border-slate-200">
+                {/* 1.4 DISCIPLINE & CATEGORY SELECTION */}
+                <div className="space-y-6 pt-4 border-t border-slate-200">
                   <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                     <div>
                       <h3 className="text-base font-bold text-slate-950 uppercase flex items-center gap-2">
                         <Award className="h-4 w-4 text-blue-600" />
-                        <span>3. World Taekwondo Division & Weight Category</span>
+                        <span>3. Competition Discipline & Official Category</span>
                       </h3>
                       <p className="text-xs text-slate-500 mt-0.5">
-                        Official World Taekwondo weight divisions matched to DOB ({calculatedAge ? `${calculatedAge} yrs` : "N/A"}) and gender ({formData.gender}).
+                        Matched to competitor DOB ({calculatedAge ? `${calculatedAge} yrs` : "N/A"}) and gender ({formData.gender}).
                       </p>
                     </div>
                   </div>
@@ -1359,13 +1506,15 @@ function AthleteRegistrationContent() {
                       {[
                         { id: "KYORUGI", title: "Kyorugi (Sparring)" },
                         { id: "POOMSAE", title: "Poomsae" },
-                        { id: "DEMO", title: "Demonstration" },
+                        { id: "BREAKING", title: "Breaking" },
                       ].map((disc) => {
-                        const isSelected = formData.discipline === disc.id;
+                        const isSelected =
+                          formData.discipline === disc.id ||
+                          (disc.id === "BREAKING" && (formData.discipline as any) === "DEMO");
                         return (
                           <div
                             key={disc.id}
-                            onClick={() => updateField("discipline", disc.id)}
+                            onClick={() => handleDisciplineSelect(disc.id as any)}
                             className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
                               isSelected
                                 ? "border-blue-600 bg-blue-50/60 shadow-xs ring-1 ring-blue-600"
@@ -1388,46 +1537,7 @@ function AthleteRegistrationContent() {
                     </div>
                   </div>
 
-                  {/* Division Selection (Sub-Junior, Cadet, Junior, Senior) */}
-                  <div className="space-y-2">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                      Age Division *
-                    </label>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      {WT_DIVISIONS.map((div) => {
-                        const isSelected = formData.division === div.id;
-                        return (
-                          <div
-                            key={div.id}
-                            onClick={() => {
-                              const cats = WT_CATEGORIES[div.id]?.[formData.gender] || [];
-                              const first = cats[0];
-                              setFormData((prev) => ({
-                                ...prev,
-                                division: div.id,
-                                category_id: first?.code || prev.category_id,
-                                weight_category_name: first ? first.weightLimit : prev.weight_category_name,
-                              }));
-                            }}
-                            className={`p-3.5 rounded-xl border cursor-pointer transition-all text-center ${
-                              isSelected
-                                ? "border-blue-600 bg-blue-50/70 shadow-xs ring-1 ring-blue-600"
-                                : "border-slate-200 bg-white hover:border-slate-300"
-                            }`}
-                          >
-                            <span className="text-xs font-bold uppercase text-slate-900 block">
-                              {div.label}
-                            </span>
-                            <span className="text-[11px] text-blue-600 font-semibold block mt-0.5">
-                              {div.ageRange}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Kukkiwon ID (Strict Mandatory) */}
+                  {/* Kukkiwon ID Input (Strict Mandatory) */}
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
                       <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
@@ -1477,58 +1587,257 @@ function AthleteRegistrationContent() {
                     </p>
                   </div>
 
-                  {/* WORLD TAEKWONDO WEIGHT CATEGORY CARDS */}
-                  <div className="space-y-3 pt-2">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold uppercase tracking-wider text-slate-800 block">
-                        Select World Taekwondo Weight Class ({formData.gender}) *
-                      </label>
-                      <span className="text-[11px] text-slate-500 font-mono">
-                        {currentWTCategories.length} Official Categories
-                      </span>
-                    </div>
+                  {/* KYORUGI BRANCH: Age Division & Weight Categories */}
+                  {formData.discipline === "KYORUGI" && (
+                    <div className="space-y-5 pt-2">
+                      <div className="space-y-2">
+                        <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                          Kyorugi Age Division *
+                        </label>
+                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+                          {WT_DIVISIONS.map((div) => {
+                            const isSelected = formData.division === div.id;
+                            return (
+                              <div
+                                key={div.id}
+                                onClick={() => {
+                                  const cats = WT_CATEGORIES[div.id]?.[formData.gender] || [];
+                                  const first = cats[0];
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    division: div.id,
+                                    category_id: first?.code || prev.category_id,
+                                    weight_category_name: first ? first.weightLimit : prev.weight_category_name,
+                                  }));
+                                }}
+                                className={`p-3 rounded-xl border cursor-pointer transition-all text-center ${
+                                  isSelected
+                                    ? "border-blue-600 bg-blue-50/70 shadow-xs ring-1 ring-blue-600"
+                                    : "border-slate-200 bg-white hover:border-slate-300"
+                                }`}
+                              >
+                                <span className="text-xs font-bold uppercase text-slate-900 block truncate">
+                                  {div.label}
+                                </span>
+                                <span className="text-[10px] text-blue-600 font-semibold block mt-0.5">
+                                  {div.ageRange}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      {currentWTCategories.map((cat) => {
-                        const isSelected = formData.category_id === cat.code;
-                        return (
-                          <div
-                            key={cat.code}
+                      {/* Weight Category Cards */}
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold uppercase tracking-wider text-slate-800 block">
+                            Select Weight Class ({formData.gender}) *
+                          </label>
+                          <span className="text-[11px] text-slate-500 font-mono">
+                            {currentWTCategories.length} Official Categories
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-2.5">
+                          {currentWTCategories.map((cat) => {
+                            const isSelected = formData.category_id === cat.code;
+                            return (
+                              <div
+                                key={cat.code}
+                                onClick={() => {
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    category_id: cat.code,
+                                    weight_category_name: cat.weightLimit,
+                                  }));
+                                }}
+                                className={`p-3 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
+                                  isSelected
+                                    ? "border-blue-600 bg-blue-50/80 shadow-xs ring-2 ring-blue-600/30"
+                                    : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
+                                }`}
+                              >
+                                <span
+                                  className={`text-xs font-bold font-mono truncate ${
+                                    isSelected ? "text-blue-700" : "text-slate-800"
+                                  }`}
+                                >
+                                  {cat.weightLimit}
+                                </span>
+                                <div
+                                  className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0 ml-1.5 ${
+                                    isSelected ? "bg-blue-600 border-blue-600 text-white" : "border-slate-300 bg-white"
+                                  }`}
+                                >
+                                  {isSelected && <Check className="h-2 w-2 stroke-[3]" />}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* POOMSAE BRANCH: Classification Category (NO designated poomsae) */}
+                  {formData.discipline === "POOMSAE" && (
+                    <div className="space-y-5 pt-2">
+                      {/* Poomsae Type Selector (Individual / Group) */}
+                      <div className="flex items-center gap-3">
+                        <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                          Poomsae Event Type:
+                        </label>
+                        <div className="inline-flex rounded-lg border border-slate-200 bg-slate-100 p-1">
+                          <button
+                            type="button"
                             onClick={() => {
+                              setPoomsaeType("INDIVIDUAL");
+                              const cat = POOMSAE_INDIVIDUAL_CATEGORIES[0];
                               setFormData((prev) => ({
                                 ...prev,
                                 category_id: cat.code,
-                                weight_category_name: cat.weightLimit,
+                                weight_category_name: `${cat.name} (${cat.ageRange})`,
                               }));
                             }}
-                            className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
-                              isSelected
-                                ? "border-blue-600 bg-blue-50/80 shadow-xs ring-2 ring-blue-600/30"
-                                : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
+                            className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${
+                              poomsaeType === "INDIVIDUAL"
+                                ? "bg-white text-blue-600 shadow-xs"
+                                : "text-slate-600 hover:text-slate-900"
                             }`}
                           >
-                            <span
-                              className={`text-xs sm:text-sm font-bold font-mono ${
-                                isSelected ? "text-blue-700" : "text-slate-800"
-                              }`}
-                            >
-                              {cat.weightLimit}
-                            </span>
-                            <div
-                              className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ml-2 ${
-                                isSelected ? "bg-blue-600 border-blue-600 text-white" : "border-slate-300 bg-white"
-                              }`}
-                            >
-                              {isSelected && <Check className="h-2.5 w-2.5 stroke-[3]" />}
-                            </div>
-                          </div>
-                        );
-                      })}
+                            Individual Poomsae
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPoomsaeType("GROUP");
+                              const cat = POOMSAE_GROUP_CATEGORIES[0];
+                              setFormData((prev) => ({
+                                ...prev,
+                                category_id: cat.code,
+                                weight_category_name: `${cat.name} (${cat.ageRange})`,
+                              }));
+                            }}
+                            className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${
+                              poomsaeType === "GROUP"
+                                ? "bg-white text-blue-600 shadow-xs"
+                                : "text-slate-600 hover:text-slate-900"
+                            }`}
+                          >
+                            Group Poomsae
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Official Categories List */}
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold uppercase tracking-wider text-slate-800 block">
+                            Select {poomsaeType === "INDIVIDUAL" ? "Individual" : "Group"} Poomsae Category *
+                          </label>
+                          <span className="text-[11px] text-slate-500 font-mono">
+                            {poomsaeType === "INDIVIDUAL" ? POOMSAE_INDIVIDUAL_CATEGORIES.length : POOMSAE_GROUP_CATEGORIES.length} Categories
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                          {(poomsaeType === "INDIVIDUAL" ? POOMSAE_INDIVIDUAL_CATEGORIES : POOMSAE_GROUP_CATEGORIES).map((cat) => {
+                            const isSelected = formData.category_id === cat.code;
+                            return (
+                              <div
+                                key={cat.code}
+                                onClick={() => {
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    category_id: cat.code,
+                                    weight_category_name: `${cat.name} (${cat.ageRange})`,
+                                  }));
+                                }}
+                                className={`p-4 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
+                                  isSelected
+                                    ? "border-blue-600 bg-blue-50/80 shadow-xs ring-2 ring-blue-600/30"
+                                    : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
+                                }`}
+                              >
+                                <div>
+                                  <span className={`text-sm font-bold block ${isSelected ? "text-blue-700" : "text-slate-900"}`}>
+                                    {cat.name}
+                                  </span>
+                                  <span className="text-xs text-slate-500 block mt-0.5">
+                                    {cat.ageRange}
+                                  </span>
+                                </div>
+                                <div
+                                  className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ml-2 ${
+                                    isSelected ? "bg-blue-600 border-blue-600 text-white" : "border-slate-300 bg-white"
+                                  }`}
+                                >
+                                  {isSelected && <Check className="h-2.5 w-2.5 stroke-[3]" />}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  )}
+
+                  {/* BREAKING BRANCH */}
+                  {(formData.discipline === "BREAKING" || (formData.discipline as any) === "DEMO") && (
+                    <div className="space-y-3 pt-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold uppercase tracking-wider text-slate-800 block">
+                          Select Breaking Division Category *
+                        </label>
+                        <span className="text-[11px] text-slate-500 font-mono">
+                          {BREAKING_CATEGORIES.length} Categories
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {BREAKING_CATEGORIES.map((cat) => {
+                          const isSelected = formData.category_id === cat.code;
+                          return (
+                            <div
+                              key={cat.code}
+                              onClick={() => {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  category_id: cat.code,
+                                  weight_category_name: cat.name,
+                                }));
+                              }}
+                              className={`p-4 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
+                                isSelected
+                                  ? "border-blue-600 bg-blue-50/80 shadow-xs ring-2 ring-blue-600/30"
+                                  : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
+                              }`}
+                            >
+                              <div>
+                                <span className={`text-sm font-bold block ${isSelected ? "text-blue-700" : "text-slate-900"}`}>
+                                  {cat.name}
+                                </span>
+                                <span className="text-xs text-slate-500 block mt-0.5">
+                                  {cat.desc}
+                                </span>
+                              </div>
+                              <div
+                                className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ml-2 ${
+                                  isSelected ? "bg-blue-600 border-blue-600 text-white" : "border-slate-300 bg-white"
+                                }`}
+                              >
+                                {isSelected && <Check className="h-2.5 w-2.5 stroke-[3]" />}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                {/* 1.5 REAL DOCUMENT UPLOADS */}
+                {/* 1.5 REAL DOCUMENT UPLOAD (ONLY 1 DOCUMENT: GOV ID) */}
                 <div className="space-y-5 pt-4 border-t border-slate-200">
                   <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                     <div>
@@ -1537,24 +1846,24 @@ function AthleteRegistrationContent() {
                         <span>4. Mandatory Document Upload</span>
                       </h3>
                       <p className="text-xs text-slate-500 mt-0.5">
-                        Upload digital proof files for tournament accreditation verification.
+                        Upload digital proof file for tournament accreditation verification.
                       </p>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {/* DOC 1: Government ID / Age Proof */}
-                    <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-3">
+                  <div className="max-w-xl">
+                    {/* DOC: Government ID / Age Proof */}
+                    <div className="p-4 sm:p-5 rounded-xl border border-slate-200 bg-slate-50/70 space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold uppercase text-slate-900">
-                          1. Government ID / Age Proof *
+                        <span className="text-xs sm:text-sm font-bold uppercase text-slate-900">
+                          Government ID / Age Proof *
                         </span>
                         <Badge variant={formData.documents_uploaded.gov_id ? "success" : "danger"}>
                           {formData.documents_uploaded.gov_id ? "Uploaded" : "Required"}
                         </Badge>
                       </div>
-                      <p className="text-[11px] text-slate-500 leading-snug">
-                        Aadhaar, Passport, or Municipal Birth Certificate.
+                      <p className="text-xs text-slate-500 leading-snug">
+                        Aadhaar, Passport, or Municipal Birth Certificate (PDF or Image, max 10MB).
                       </p>
 
                       <input
@@ -1566,7 +1875,7 @@ function AthleteRegistrationContent() {
                       />
 
                       {formData.documents_uploaded.gov_id ? (
-                        <div className="p-2.5 rounded-lg bg-white border border-slate-200 flex items-center justify-between text-xs">
+                        <div className="p-3 rounded-lg bg-white border border-slate-200 flex items-center justify-between text-xs">
                           <div className="truncate pr-2">
                             <span className="font-semibold text-slate-800 block truncate">
                               {formData.documents_uploaded.gov_id.name}
@@ -1589,122 +1898,15 @@ function AthleteRegistrationContent() {
                           variant="outline"
                           size="sm"
                           onClick={() => govIdInputRef.current?.click()}
-                          className="w-full text-xs font-bold border-dashed border-slate-300 bg-white hover:bg-slate-50 text-blue-600"
+                          className="w-full text-xs font-bold border-dashed border-slate-300 bg-white hover:bg-slate-50 text-blue-600 py-3"
                         >
                           <Upload className="h-3.5 w-3.5 mr-1.5" />
                           <span>Upload ID / DOB Proof</span>
                         </Button>
                       )}
                     </div>
-
-                    {/* DOC 2: Kukkiwon Dan / Belt Certificate */}
-                    <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold uppercase text-slate-900">
-                          2. Kukkiwon Dan / Belt Proof
-                        </span>
-                        <Badge variant={formData.documents_uploaded.kukkiwon_cert ? "success" : "outline"}>
-                          {formData.documents_uploaded.kukkiwon_cert ? "Uploaded" : "Optional"}
-                        </Badge>
-                      </div>
-                      <p className="text-[11px] text-slate-500 leading-snug">
-                        Kukkiwon Dan/Poom Certificate or Color Belt grading card.
-                      </p>
-
-                      <input
-                        ref={danCertInputRef}
-                        type="file"
-                        accept="image/*,application/pdf"
-                        onChange={(e) => handleDocUpload("kukkiwon_cert", e)}
-                        className="hidden"
-                      />
-
-                      {formData.documents_uploaded.kukkiwon_cert ? (
-                        <div className="p-2.5 rounded-lg bg-white border border-slate-200 flex items-center justify-between text-xs">
-                          <div className="truncate pr-2">
-                            <span className="font-semibold text-slate-800 block truncate">
-                              {formData.documents_uploaded.kukkiwon_cert.name}
-                            </span>
-                            <span className="text-[10px] text-slate-400">
-                              {(formData.documents_uploaded.kukkiwon_cert.size / 1024).toFixed(0)} KB
-                            </span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveDoc("kukkiwon_cert")}
-                            className="text-red-500 hover:text-red-700 p-1"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      ) : (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => danCertInputRef.current?.click()}
-                          className="w-full text-xs font-bold border-dashed border-slate-300 bg-white hover:bg-slate-50 text-blue-600"
-                        >
-                          <Upload className="h-3.5 w-3.5 mr-1.5" />
-                          <span>Upload Dan / Belt Certificate</span>
-                        </Button>
-                      )}
-                    </div>
-
-                    {/* DOC 3: Medical Fitness Certificate */}
-                    <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold uppercase text-slate-900">
-                          3. Medical Fitness Proof
-                        </span>
-                        <Badge variant={formData.documents_uploaded.medical_cert ? "success" : "outline"}>
-                          {formData.documents_uploaded.medical_cert ? "Uploaded" : "Optional"}
-                        </Badge>
-                      </div>
-                      <p className="text-[11px] text-slate-500 leading-snug">
-                        Registered medical practitioner fitness certificate.
-                      </p>
-
-                      <input
-                        ref={medicalCertInputRef}
-                        type="file"
-                        accept="image/*,application/pdf"
-                        onChange={(e) => handleDocUpload("medical_cert", e)}
-                        className="hidden"
-                      />
-
-                      {formData.documents_uploaded.medical_cert ? (
-                        <div className="p-2.5 rounded-lg bg-white border border-slate-200 flex items-center justify-between text-xs">
-                          <div className="truncate pr-2">
-                            <span className="font-semibold text-slate-800 block truncate">
-                              {formData.documents_uploaded.medical_cert.name}
-                            </span>
-                            <span className="text-[10px] text-slate-400">
-                              {(formData.documents_uploaded.medical_cert.size / 1024).toFixed(0)} KB
-                            </span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveDoc("medical_cert")}
-                            className="text-red-500 hover:text-red-700 p-1"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      ) : (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => medicalCertInputRef.current?.click()}
-                          className="w-full text-xs font-bold border-dashed border-slate-300 bg-white hover:bg-slate-50 text-blue-600"
-                        >
-                          <Upload className="h-3.5 w-3.5 mr-1.5" />
-                          <span>Upload Medical Certificate</span>
-                        </Button>
-                      )}
-                    </div>
                   </div>
+                </div>
 
                   {/* Legal Declarations Checkboxes */}
                   <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2.5 text-xs text-slate-700">
@@ -1731,7 +1933,6 @@ function AthleteRegistrationContent() {
                       </span>
                     </label>
                   </div>
-                </div>
 
                 {/* BOTTOM ACTION BAR FOR STEP 1 */}
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200 pt-6">
@@ -1846,29 +2047,15 @@ function AthleteRegistrationContent() {
                   </div>
                 </div>
 
-                {/* Championship Fee Calculation */}
-                <div className="p-5 rounded-xl border border-blue-200 bg-blue-50/50 space-y-3">
-                  <div className="flex items-center justify-between text-xs text-slate-700">
-                    <span>Kukkiwon Cup 2026 Athlete Entry Fee</span>
-                    <span className="font-mono font-bold">₹{(paymentDetails.feeAmountInr || 1500).toLocaleString("en-IN")}</span>
+                {/* Official Fee Payable */}
+                <div className="p-5 rounded-xl border border-blue-200 bg-blue-50/50 flex items-center justify-between">
+                  <div>
+                    <span className="text-sm font-black uppercase text-slate-950 block">Total Official Entry Fee</span>
+                    <span className="text-[11px] text-slate-500">Official championship entry receipt issued upon completion</span>
                   </div>
-                  <div className="flex items-center justify-between text-xs text-slate-700">
-                    <span>Accreditation Pass & Official Kukkiwon Badge</span>
-                    <span className="text-emerald-700 font-semibold uppercase text-[11px]">Included</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-slate-700">
-                    <span>Electronic Scoring / Court Scheduling</span>
-                    <span className="text-emerald-700 font-semibold uppercase text-[11px]">Included</span>
-                  </div>
-                  <div className="border-t border-blue-200 pt-3 flex items-center justify-between">
-                    <div>
-                      <span className="text-sm font-black uppercase text-slate-950 block">Total Amount Payable</span>
-                      <span className="text-[11px] text-slate-500">Official championship entry receipt issued upon completion</span>
-                    </div>
-                    <span className="text-2xl font-black text-blue-700 font-mono">
-                      ₹{(paymentDetails.feeAmountInr || 1500).toLocaleString("en-IN")}
-                    </span>
-                  </div>
+                  <span className="text-2xl font-black text-blue-700 font-mono">
+                    ₹{(paymentDetails.feeAmountInr || 1500).toLocaleString("en-IN")}
+                  </span>
                 </div>
 
                 {/* Official Tournament Fee Payment Details (Direct QR / UPI / Bank) */}

@@ -2188,7 +2188,7 @@ export class CmsService {
       kyorixSubtitle: fallback?.kyorix_subtitle || "Advanced Electronic Scoring & Accreditation",
       kyorixRole: fallback?.kyorix_role || "Sports Hardware & Accreditation Partner",
       kyorixDescription: fallback?.kyorix_description || "Pioneers in martial arts competition electronics, Kyorix Sports Technology engineers wireless electronic chest and head protectors, multi-mat management software, real-time judge scoring consoles, and secure cryptographic accreditation ensuring flawless event execution.",
-      kyorixBadge: fallback?.kyorix_badge || "Electronic Scoring Partner",
+      kyorixBadge: fallback?.kyorix_badge || "kyorixsport.in",
       disciplinesTagline: fallback?.disciplines_tagline || "Tournament Structure",
       disciplinesHeading: fallback?.disciplines_heading || "Championship Details & Disciplines",
       disciplinesDescription: fallback?.disciplines_description || "Official competition divisions, category weight brackets, and venue regulations.",

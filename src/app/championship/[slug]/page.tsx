@@ -39,7 +39,7 @@ export default async function ChampionshipDetailsPage({
     { day: "Day 1", date: "Friday, 20 Nov 2026", activity: "Official Delegations Arrival, Weight Weigh-In & Head of Team Technical Meeting" },
     { day: "Day 2", date: "Saturday, 21 Nov 2026", activity: "Poomsae (Individual & Team Divisions), Cadet & Sub-Junior Kyorugi Matches" },
     { day: "Day 3", date: "Sunday, 22 Nov 2026", activity: "Junior & Senior Kyorugi Preliminary & Semi-Final Elimination Rounds" },
-    { day: "Day 4", date: "Monday, 23 Nov 2026", activity: "Championship Finals, Demonstration Showcase, Medal Ceremonies & Closing" },
+    { day: "Day 4", date: "Monday, 23 Nov 2026", activity: "Championship Finals, Breaking Showcase, Medal Ceremonies & Closing" },
   ];
 
   const divisions = [

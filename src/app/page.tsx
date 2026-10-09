@@ -302,10 +302,16 @@ export default async function HomePage() {
                 </div>
 
                 <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
-                  <span className="text-slate-500 font-medium">Technology & Accreditation</span>
-                  <span className="text-blue-600 font-bold">
-                    {tournament.kyorixBadge || "Electronic Scoring Partner"}
-                  </span>
+                  <span className="text-slate-500 font-medium">Official Website</span>
+                  <a
+                    href="https://kyorixsport.in"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1 hover:underline"
+                  >
+                    <span>kyorixsport.in</span>
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
                 </div>
               </div>
             </div>

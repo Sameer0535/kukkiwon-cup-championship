@@ -87,9 +87,9 @@ const DEFAULT_DISCIPLINE_CARDS: DisciplineCard[] = [
     description: "Recognized WTF poomsae judging evaluating technical accuracy, balance, speed, presentation, and martial art discipline.",
   },
   {
-    title: "Kyukpa (Breaking & Demo)",
+    title: "Kyukpa (Breaking)",
     category: "Speed, Power & Special Tech",
-    description: "Official demonstration and wood breaking divisions demonstrating precision impact force, jumping techniques, and technical mastery.",
+    description: "Official wood breaking divisions demonstrating precision impact force, jumping techniques, and technical mastery.",
   },
 ];
 

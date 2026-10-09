@@ -466,11 +466,11 @@ export const INITIAL_CATEGORIES: Omit<Category, "id" | "championship_id">[] = [
   },
 
   // ----------------------------------------------------------------------------
-  // DEMO (DEMONSTRATION & KYUKPA)
+  // BREAKING (KYUKPA & POWER BREAKING)
   // ----------------------------------------------------------------------------
   {
     code: "DM-TEAM-OPEN",
-    name: "Championship Team Demonstration (Open)",
+    name: "Championship Team Breaking (Open)",
     discipline: "DEMO",
     division: "OPEN",
     gender: "OTHER",
