@@ -129,8 +129,7 @@ interface WTWeightClass {
 }
 
 const WT_DIVISIONS = [
-  { id: "CHILDREN", label: "Children", ageRange: "Under 10", desc: "Ages 5–9" },
-  { id: "SUB_JUNIOR", label: "Sub-Junior", ageRange: "Ages 10–11", desc: "Under 12 years" },
+  { id: "SUB_JUNIOR", label: "Sub-Junior", ageRange: "Ages 5–11", desc: "Under 12 years" },
   { id: "CADET", label: "Cadet", ageRange: "Ages 12–14", desc: "Cadet World Class" },
   { id: "JUNIOR", label: "Junior", ageRange: "Ages 15–17", desc: "Junior WT Standard" },
   { id: "SENIOR", label: "Senior", ageRange: "Ages 17+", desc: "World Taekwondo Senior" },
@@ -140,62 +139,28 @@ const WT_CATEGORIES: Record<
   string,
   { MALE: WTWeightClass[]; FEMALE: WTWeightClass[] }
 > = {
-  CHILDREN: {
-    MALE: [
-      { code: "KY-CHD-M-U16", name: "Under 16kg", weightLimit: "Under 16.0 kg", minWeight: 10, maxWeight: 16 },
-      { code: "KY-CHD-M-U18", name: "Under 18kg", weightLimit: "Under 18.0 kg", minWeight: 16.1, maxWeight: 18 },
-      { code: "KY-CHD-M-U20", name: "Under 20kg", weightLimit: "Under 20.0 kg", minWeight: 18.1, maxWeight: 20 },
-      { code: "KY-CHD-M-U22", name: "Under 22kg", weightLimit: "Under 22.0 kg", minWeight: 20.1, maxWeight: 22 },
-      { code: "KY-CHD-M-U24", name: "Under 24kg", weightLimit: "Under 24.0 kg", minWeight: 22.1, maxWeight: 24 },
-      { code: "KY-CHD-M-U26", name: "Under 26kg", weightLimit: "Under 26.0 kg", minWeight: 24.1, maxWeight: 26 },
-      { code: "KY-CHD-M-U28", name: "Under 28kg", weightLimit: "Under 28.0 kg", minWeight: 26.1, maxWeight: 28 },
-      { code: "KY-CHD-M-U32", name: "Under 32kg", weightLimit: "Under 32.0 kg", minWeight: 28.1, maxWeight: 32 },
-      { code: "KY-CHD-M-U36", name: "Under 36kg", weightLimit: "Under 36.0 kg", minWeight: 32.1, maxWeight: 36 },
-      { code: "KY-CHD-M-O36", name: "Over 36kg", weightLimit: "Over 36.0 kg (+36kg)", minWeight: 36.1, maxWeight: 60 },
-    ],
-    FEMALE: [
-      { code: "KY-CHD-F-U14", name: "Under 14kg", weightLimit: "Under 14.0 kg", minWeight: 10, maxWeight: 14 },
-      { code: "KY-CHD-F-U16", name: "Under 16kg", weightLimit: "Under 16.0 kg", minWeight: 14.1, maxWeight: 16 },
-      { code: "KY-CHD-F-U18", name: "Under 18kg", weightLimit: "Under 18.0 kg", minWeight: 16.1, maxWeight: 18 },
-      { code: "KY-CHD-F-U20", name: "Under 20kg", weightLimit: "Under 20.0 kg", minWeight: 18.1, maxWeight: 20 },
-      { code: "KY-CHD-F-U22", name: "Under 22kg", weightLimit: "Under 22.0 kg", minWeight: 20.1, maxWeight: 22 },
-      { code: "KY-CHD-F-U24", name: "Under 24kg", weightLimit: "Under 24.0 kg", minWeight: 22.1, maxWeight: 24 },
-      { code: "KY-CHD-F-U26", name: "Under 26kg", weightLimit: "Under 26.0 kg", minWeight: 24.1, maxWeight: 26 },
-      { code: "KY-CHD-F-U28", name: "Under 28kg", weightLimit: "Under 28.0 kg", minWeight: 26.1, maxWeight: 28 },
-      { code: "KY-CHD-F-U32", name: "Under 32kg", weightLimit: "Under 32.0 kg", minWeight: 28.1, maxWeight: 32 },
-      { code: "KY-CHD-F-O32", name: "Over 32kg", weightLimit: "Over 32.0 kg (+32kg)", minWeight: 32.1, maxWeight: 55 },
-    ],
-  },
   SUB_JUNIOR: {
     MALE: [
       { code: "KY-SUB-M-U18", name: "Under 18kg", weightLimit: "Under 18.0 kg", minWeight: 12, maxWeight: 18 },
       { code: "KY-SUB-M-U21", name: "Under 21kg", weightLimit: "Under 21.0 kg", minWeight: 18.1, maxWeight: 21 },
-      { code: "KY-SUB-M-U23", name: "Under 23kg", weightLimit: "Under 23.0 kg", minWeight: 21.1, maxWeight: 23 },
-      { code: "KY-SUB-M-U25", name: "Under 25kg", weightLimit: "Under 25.0 kg", minWeight: 23.1, maxWeight: 25 },
-      { code: "KY-SUB-M-U27", name: "Under 27kg", weightLimit: "Under 27.0 kg", minWeight: 25.1, maxWeight: 27 },
-      { code: "KY-SUB-M-U29", name: "Under 29kg", weightLimit: "Under 29.0 kg", minWeight: 27.1, maxWeight: 29 },
-      { code: "KY-SUB-M-U32", name: "Under 32kg", weightLimit: "Under 32.0 kg", minWeight: 29.1, maxWeight: 32 },
-      { code: "KY-SUB-M-U35", name: "Under 35kg", weightLimit: "Under 35.0 kg", minWeight: 32.1, maxWeight: 35 },
-      { code: "KY-SUB-M-U38", name: "Under 38kg", weightLimit: "Under 38.0 kg", minWeight: 35.1, maxWeight: 38 },
-      { code: "KY-SUB-M-U41", name: "Under 41kg", weightLimit: "Under 41.0 kg", minWeight: 38.1, maxWeight: 41 },
-      { code: "KY-SUB-M-U44", name: "Under 44kg", weightLimit: "Under 44.0 kg", minWeight: 41.1, maxWeight: 44 },
-      { code: "KY-SUB-M-U50", name: "Under 50kg", weightLimit: "Under 50.0 kg", minWeight: 44.1, maxWeight: 50 },
-      { code: "KY-SUB-M-O50", name: "Over 50kg", weightLimit: "Over 50.0 kg (+50kg)", minWeight: 50.1, maxWeight: 80 },
+      { code: "KY-SUB-M-U24", name: "Under 24kg", weightLimit: "Under 24.0 kg", minWeight: 21.1, maxWeight: 24 },
+      { code: "KY-SUB-M-U27", name: "Under 27kg", weightLimit: "Under 27.0 kg", minWeight: 24.1, maxWeight: 27 },
+      { code: "KY-SUB-M-U30", name: "Under 30kg", weightLimit: "Under 30.0 kg", minWeight: 27.1, maxWeight: 30 },
+      { code: "KY-SUB-M-U33", name: "Under 33kg", weightLimit: "Under 33.0 kg", minWeight: 30.1, maxWeight: 33 },
+      { code: "KY-SUB-M-U36", name: "Under 36kg", weightLimit: "Under 36.0 kg", minWeight: 33.1, maxWeight: 36 },
+      { code: "KY-SUB-M-U40", name: "Under 40kg", weightLimit: "Under 40.0 kg", minWeight: 36.1, maxWeight: 40 },
+      { code: "KY-SUB-M-O40", name: "Over 40kg", weightLimit: "Over 40.0 kg (+40kg)", minWeight: 40.1, maxWeight: 70 },
     ],
     FEMALE: [
-      { code: "KY-SUB-F-U16", name: "Under 16kg", weightLimit: "Under 16.0 kg", minWeight: 12, maxWeight: 16 },
-      { code: "KY-SUB-F-U18", name: "Under 18kg", weightLimit: "Under 18.0 kg", minWeight: 16.1, maxWeight: 18 },
-      { code: "KY-SUB-F-U20", name: "Under 20kg", weightLimit: "Under 20.0 kg", minWeight: 18.1, maxWeight: 20 },
-      { code: "KY-SUB-F-U22", name: "Under 22kg", weightLimit: "Under 22.0 kg", minWeight: 20.1, maxWeight: 22 },
-      { code: "KY-SUB-F-U24", name: "Under 24kg", weightLimit: "Under 24.0 kg", minWeight: 22.1, maxWeight: 24 },
-      { code: "KY-SUB-F-U26", name: "Under 26kg", weightLimit: "Under 26.0 kg", minWeight: 24.1, maxWeight: 26 },
-      { code: "KY-SUB-F-U29", name: "Under 29kg", weightLimit: "Under 29.0 kg", minWeight: 26.1, maxWeight: 29 },
-      { code: "KY-SUB-F-U32", name: "Under 32kg", weightLimit: "Under 32.0 kg", minWeight: 29.1, maxWeight: 32 },
-      { code: "KY-SUB-F-U35", name: "Under 35kg", weightLimit: "Under 35.0 kg", minWeight: 32.1, maxWeight: 35 },
-      { code: "KY-SUB-F-U38", name: "Under 38kg", weightLimit: "Under 38.0 kg", minWeight: 35.1, maxWeight: 38 },
-      { code: "KY-SUB-F-U41", name: "Under 41kg", weightLimit: "Under 41.0 kg", minWeight: 38.1, maxWeight: 41 },
-      { code: "KY-SUB-F-U47", name: "Under 47kg", weightLimit: "Under 47.0 kg", minWeight: 41.1, maxWeight: 47 },
-      { code: "KY-SUB-F-O47", name: "Over 47kg", weightLimit: "Over 47.0 kg (+47kg)", minWeight: 47.1, maxWeight: 75 },
+      { code: "KY-SUB-F-U18", name: "Under 18kg", weightLimit: "Under 18.0 kg", minWeight: 12, maxWeight: 18 },
+      { code: "KY-SUB-F-U21", name: "Under 21kg", weightLimit: "Under 21.0 kg", minWeight: 18.1, maxWeight: 21 },
+      { code: "KY-SUB-F-U24", name: "Under 24kg", weightLimit: "Under 24.0 kg", minWeight: 21.1, maxWeight: 24 },
+      { code: "KY-SUB-F-U27", name: "Under 27kg", weightLimit: "Under 27.0 kg", minWeight: 24.1, maxWeight: 27 },
+      { code: "KY-SUB-F-U30", name: "Under 30kg", weightLimit: "Under 30.0 kg", minWeight: 27.1, maxWeight: 30 },
+      { code: "KY-SUB-F-U33", name: "Under 33kg", weightLimit: "Under 33.0 kg", minWeight: 30.1, maxWeight: 33 },
+      { code: "KY-SUB-F-U36", name: "Under 36kg", weightLimit: "Under 36.0 kg", minWeight: 33.1, maxWeight: 36 },
+      { code: "KY-SUB-F-U40", name: "Under 40kg", weightLimit: "Under 40.0 kg", minWeight: 36.1, maxWeight: 40 },
+      { code: "KY-SUB-F-O40", name: "Over 40kg", weightLimit: "Over 40.0 kg (+40kg)", minWeight: 40.1, maxWeight: 70 },
     ],
   },
   CADET: {
@@ -599,8 +564,7 @@ function AthleteRegistrationContent() {
       const age = calculateAge(formData.date_of_birth);
       if (formData.discipline === "KYORUGI") {
         let suggestedDivision = "SENIOR";
-        if (age < 10) suggestedDivision = "CHILDREN";
-        else if (age >= 10 && age <= 11) suggestedDivision = "SUB_JUNIOR";
+        if (age < 12) suggestedDivision = "SUB_JUNIOR";
         else if (age >= 12 && age <= 14) suggestedDivision = "CADET";
         else if (age >= 15 && age <= 17) suggestedDivision = "JUNIOR";
         else suggestedDivision = "SENIOR";
