@@ -96,17 +96,17 @@ export default function AdminContentHubPage() {
             <Globe className="h-3 w-3" />
             <span>Public Website CMS</span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white flex items-center gap-2.5">
+          <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-slate-900 flex items-center gap-2.5">
             <span>Championship Content & Live Publishing</span>
           </h2>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             Configure public tournament details, manage categories, entry fees, and broadcast announcements without redeploying code.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <Link href="/admin/cms">
-            <Button size="sm" className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold flex items-center gap-1.5 text-xs">
+            <Button size="sm" className="bg-[#0066FF] hover:bg-blue-700 text-white font-bold flex items-center gap-1.5 text-xs shadow-xs cursor-pointer">
               <Globe className="h-3.5 w-3.5" />
               <span>Full CMS Workspace</span>
             </Button>
@@ -114,7 +114,7 @@ export default function AdminContentHubPage() {
           <Link
             href="/"
             target="_blank"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-900 text-xs font-semibold text-slate-200 hover:text-white hover:border-slate-500 transition-colors shadow-sm"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-colors shadow-2xs"
           >
             <span>Preview Public Site</span>
             <ExternalLink className="h-3.5 w-3.5" />
@@ -123,27 +123,27 @@ export default function AdminContentHubPage() {
       </div>
 
       {/* Live Publishing Status Banner */}
-      <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/80 backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="p-4 rounded-xl border border-slate-200 bg-white shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0">
-            <Sparkles className="h-5 w-5 text-emerald-400" />
+          <div className="h-10 w-10 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center shrink-0">
+            <Sparkles className="h-5 w-5 text-emerald-600" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-white uppercase tracking-wider">
+              <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
                 Live Publishing Active
               </span>
               <Badge variant="success">IN PRODUCTION</Badge>
             </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">
+            <p className="text-[11px] text-slate-500 mt-0.5">
               Changes saved in this CMS immediately update the public tournament pages and registration engine.
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 text-xs">
-          <span className="text-slate-400">Current Edition:</span>
-          <span className="font-bold text-amber-400">Kukkiwon Cup 2026</span>
+          <span className="text-slate-500">Current Edition:</span>
+          <span className="font-bold text-blue-700">Kukkiwon Cup 2026</span>
         </div>
       </div>
 
@@ -155,25 +155,25 @@ export default function AdminContentHubPage() {
             <Link
               key={sec.href}
               href={sec.href}
-              className="group block rounded-2xl border border-slate-800/80 bg-slate-900/60 p-6 hover:bg-slate-900 hover:border-slate-700 transition-all shadow-md relative"
+              className="group block rounded-2xl border border-slate-200 bg-white p-6 hover:shadow-md hover:border-blue-300 transition-all shadow-xs relative cursor-pointer"
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="h-11 w-11 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-center group-hover:scale-105 group-hover:border-amber-400/40 transition-all">
-                  <Icon className="h-5 w-5 text-amber-400" />
+                <div className="h-11 w-11 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center group-hover:scale-105 group-hover:border-blue-200 transition-all">
+                  <Icon className="h-5 w-5 text-blue-600" />
                 </div>
                 <Badge variant={sec.badgeVariant}>{sec.badge}</Badge>
               </div>
 
-              <h3 className="text-sm font-bold text-white uppercase tracking-wide group-hover:text-amber-300 transition-colors">
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide group-hover:text-blue-600 transition-colors">
                 {sec.title}
               </h3>
-              <p className="text-xs text-slate-400 mt-1.5 line-clamp-3 leading-relaxed">
+              <p className="text-xs text-slate-500 mt-1.5 line-clamp-3 leading-relaxed">
                 {sec.description}
               </p>
 
-              <div className="mt-5 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
-                <span className="text-slate-300 font-medium">{sec.count}</span>
-                <span className="text-amber-400 inline-flex items-center gap-1 font-semibold group-hover:translate-x-0.5 transition-transform">
+              <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                <span className="text-slate-600 font-medium">{sec.count}</span>
+                <span className="text-blue-600 inline-flex items-center gap-1 font-semibold group-hover:translate-x-0.5 transition-transform">
                   <span>Manage</span>
                   <ArrowRight className="h-3 w-3" />
                 </span>

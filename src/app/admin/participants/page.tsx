@@ -205,11 +205,11 @@ export default function AdminParticipantsPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white flex items-center gap-2.5">
-            <Users className="h-6 w-6 text-sky-400" />
+          <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-slate-900 flex items-center gap-2.5">
+            <Users className="h-6 w-6 text-blue-600" />
             <span>Master Participants & Coaches Directory</span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             Authoritative directory for all accredited Coaches and Athletes with instant ID Card generation.
           </p>
         </div>
@@ -217,70 +217,70 @@ export default function AdminParticipantsPage() {
         <button
           onClick={() => loadParticipants()}
           disabled={loading}
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs font-semibold text-slate-200 hover:bg-slate-800 transition disabled:opacity-50 self-start sm:self-auto"
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-2xs disabled:opacity-50 self-start sm:self-auto cursor-pointer"
         >
-          <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+          <RefreshCw className={`h-3.5 w-3.5 text-slate-500 ${loading ? "animate-spin" : ""}`} />
           <span>Refresh Directory</span>
         </button>
       </div>
 
       {/* Filter Tabs & Search Bar */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 space-y-3">
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3 shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-3">
           {/* Designation Filter Buttons */}
-          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-950 border border-slate-800 text-xs">
+          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 border border-slate-200 text-xs">
             <button
               onClick={() => setFilterDesignation("")}
-              className={`px-3 py-1.5 rounded-lg font-bold uppercase transition ${
+              className={`px-3 py-1.5 rounded-lg font-bold uppercase transition cursor-pointer ${
                 filterDesignation === ""
-                  ? "bg-slate-800 text-white shadow-xs"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-white text-slate-900 shadow-xs border border-slate-200/60"
+                  : "text-slate-600 hover:text-slate-900"
               }`}
             >
               All Participants ({participants.length})
             </button>
             <button
               onClick={() => setFilterDesignation("Coach")}
-              className={`px-3 py-1.5 rounded-lg font-bold uppercase transition ${
+              className={`px-3 py-1.5 rounded-lg font-bold uppercase transition cursor-pointer ${
                 filterDesignation === "Coach"
                   ? "bg-blue-600 text-white shadow-xs"
-                  : "text-slate-400 hover:text-white"
+                  : "text-slate-600 hover:text-slate-900"
               }`}
             >
               Coaches Only ({coachesCount})
             </button>
             <button
               onClick={() => setFilterDesignation("Athlete")}
-              className={`px-3 py-1.5 rounded-lg font-bold uppercase transition ${
+              className={`px-3 py-1.5 rounded-lg font-bold uppercase transition cursor-pointer ${
                 filterDesignation === "Athlete"
-                  ? "bg-amber-600 text-white shadow-xs"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-blue-600 text-white shadow-xs"
+                  : "text-slate-600 hover:text-slate-900"
               }`}
             >
               Athletes Only ({athletesCount})
             </button>
           </div>
 
-          <div className="text-xs font-mono text-slate-400">
-            Total Records: <strong className="text-white">{participants.length}</strong>
+          <div className="text-xs font-mono text-slate-500">
+            Total Records: <strong className="text-slate-900">{participants.length}</strong>
           </div>
         </div>
 
         {/* Search Input */}
         <form onSubmit={handleSearchSubmit} className="flex flex-col sm:flex-row gap-2.5 pt-1">
           <div className="relative flex-1">
-            <Search className="h-4 w-4 text-slate-500 absolute left-3 top-3 pointer-events-none" />
+            <Search className="h-4 w-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by Full Name, Public ID, Academy, or Kukkiwon ID..."
-              className="w-full pl-9 pr-3.5 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400"
+              className="w-full pl-9 pr-3.5 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition"
             />
           </div>
           <button
             type="submit"
-            className="px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold uppercase tracking-wider transition shrink-0"
+            className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold uppercase tracking-wider transition shrink-0 cursor-pointer shadow-xs"
           >
             Search
           </button>
@@ -288,10 +288,10 @@ export default function AdminParticipantsPage() {
       </div>
 
       {/* Participants Table */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 overflow-hidden shadow-2xl">
+      <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="border-b border-slate-800 bg-slate-950/80 text-[11px] uppercase tracking-wider text-slate-400 font-bold">
+            <thead className="border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-wider text-slate-500 font-bold">
               <tr>
                 <th className="p-3.5">Public ID</th>
                 <th className="p-3.5">Participant Name</th>
@@ -303,19 +303,19 @@ export default function AdminParticipantsPage() {
                 <th className="p-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 text-slate-300">
+            <tbody className="divide-y divide-slate-100 text-slate-700">
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="p-10 text-center text-slate-400">
-                    <Loader2 className="h-6 w-6 animate-spin mx-auto text-sky-400 mb-2" />
+                  <td colSpan={8} className="p-10 text-center text-slate-500">
+                    <Loader2 className="h-6 w-6 animate-spin mx-auto text-blue-600 mb-2" />
                     <span>Loading participants directory...</span>
                   </td>
                 </tr>
               ) : participants.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="p-10 text-center text-slate-400">
-                    <Users className="h-8 w-8 mx-auto text-slate-600 mb-2" />
-                    <p className="font-semibold text-white">No participants found.</p>
+                  <td colSpan={8} className="p-10 text-center text-slate-500">
+                    <Users className="h-8 w-8 mx-auto text-slate-300 mb-2" />
+                    <p className="font-semibold text-slate-900">No participants found.</p>
                     <p className="text-xs text-slate-500 mt-1">Try adjusting your filters.</p>
                   </td>
                 </tr>
@@ -323,9 +323,9 @@ export default function AdminParticipantsPage() {
                 participants.map((p) => {
                   const isCoach = p.designation === "Coach";
                   return (
-                    <tr key={p.publicId} className="hover:bg-slate-800/40 transition-colors">
+                    <tr key={p.publicId} className="hover:bg-slate-50/80 transition-colors">
                       <td className="p-3.5 whitespace-nowrap">
-                        <code className="text-xs font-mono font-bold text-sky-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
+                        <code className="text-xs font-mono font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
                           {p.publicId}
                         </code>
                       </td>
@@ -333,26 +333,26 @@ export default function AdminParticipantsPage() {
                       <td className="p-3.5">
                         <div className="flex items-center gap-2.5">
                           {p.photoUrl ? (
-                            <div className="relative w-8 h-10 rounded-md overflow-hidden border border-slate-700 bg-slate-950 shrink-0">
+                            <div className="relative w-8 h-10 rounded-md overflow-hidden border border-slate-200 bg-slate-100 shrink-0">
                               {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img src={p.photoUrl} alt={p.fullName} className="w-full h-full object-cover" />
                             </div>
                           ) : (
-                            <div className="w-8 h-10 rounded-md border border-dashed border-slate-700 bg-slate-950 flex items-center justify-center text-slate-600 shrink-0">
+                            <div className="w-8 h-10 rounded-md border border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-slate-400 shrink-0">
                               <Camera className="h-3.5 w-3.5" />
                             </div>
                           )}
                           <div>
-                            <div className="font-bold text-white uppercase text-xs">
+                            <div className="font-bold text-slate-900 uppercase text-xs">
                               {p.fullName}
                             </div>
                             {p.email && (
-                              <div className="text-[10px] text-amber-400 font-mono flex items-center gap-1 mt-0.5 lowercase">
+                              <div className="text-[10px] text-slate-500 font-mono flex items-center gap-1 mt-0.5 lowercase">
                                 <Mail className="h-2.5 w-2.5 text-slate-400 shrink-0" />
                                 <span className="truncate max-w-[190px]">{p.email}</span>
                               </div>
                             )}
-                            <div className="text-[10px] text-slate-400 mt-0.5">
+                            <div className="text-[10px] text-slate-500 mt-0.5">
                               {isCoach ? (p.coachRole || "Accredited Coach") : (p.categoryName || "Competitor")}
                             </div>
                           </div>
@@ -363,23 +363,23 @@ export default function AdminParticipantsPage() {
                         <span
                           className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${
                             isCoach
-                              ? "bg-blue-500/10 text-blue-400 border border-blue-500/30"
-                              : "bg-amber-500/10 text-amber-400 border border-amber-500/30"
+                              ? "bg-blue-50 text-blue-700 border border-blue-200"
+                              : "bg-amber-50 text-amber-700 border border-amber-200"
                           }`}
                         >
                           {p.designation}
                         </span>
                       </td>
 
-                      <td className="p-3.5 text-slate-300 whitespace-nowrap">
+                      <td className="p-3.5 text-slate-700 whitespace-nowrap">
                         <div className="flex items-center gap-1">
-                          <Building2 className="h-3 w-3 text-slate-500" />
+                          <Building2 className="h-3 w-3 text-slate-400" />
                           <span>{p.academy}</span>
                         </div>
                       </td>
 
                       <td className="p-3.5 whitespace-nowrap">
-                        <span className="font-mono text-xs text-emerald-400 font-bold">
+                        <span className="font-mono text-xs text-slate-700 font-bold">
                           {p.kukkiwonId}
                         </span>
                       </td>
@@ -388,7 +388,7 @@ export default function AdminParticipantsPage() {
                         {(() => {
                           const wt = toWorldTaekwondoCountryCode(p.nationality);
                           return (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-black tracking-wider bg-sky-950/80 text-sky-400 border border-sky-500/30">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-bold tracking-wider bg-slate-100 text-slate-700 border border-slate-200">
                               {wt.code}
                             </span>
                           );
@@ -399,8 +399,8 @@ export default function AdminParticipantsPage() {
                         <span
                           className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${
                             p.status === "ACTIVE" || p.status === "APPROVED"
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                              : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                              : "bg-amber-50 text-amber-700 border border-amber-200"
                           }`}
                         >
                           {p.status}
@@ -413,7 +413,7 @@ export default function AdminParticipantsPage() {
                           onClick={() => handleDeleteParticipant(p)}
                           disabled={actionLoadingId === (p.registrationId || p.publicId)}
                           title={`Permanently delete ${p.fullName}`}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-rose-800/80 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 text-[11px] font-bold uppercase transition disabled:opacity-50 cursor-pointer shadow-2xs"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold uppercase transition disabled:opacity-50 cursor-pointer shadow-2xs"
                         >
                           {actionLoadingId === (p.registrationId || p.publicId) ? (
                             <Loader2 className="h-3 w-3 animate-spin" />
