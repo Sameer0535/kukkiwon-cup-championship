@@ -107,20 +107,20 @@ export default function FeeManagerPage() {
   return (
     <div className="space-y-6 max-w-6xl">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div className="flex items-center gap-3">
           <Link
             href="/admin/content"
-            className="h-9 w-9 rounded-lg border border-slate-800 bg-slate-900 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+            className="h-9 w-9 rounded-lg border border-slate-200 bg-white shadow-xs flex items-center justify-center text-slate-500 hover:text-slate-900 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
           </Link>
           <div>
-            <h2 className="text-xl font-bold uppercase tracking-wide text-white flex items-center gap-2">
-              <CreditCard className="h-5 w-5 text-amber-400" />
+            <h2 className="text-xl font-bold uppercase tracking-wide text-slate-900 flex items-center gap-2">
+              <CreditCard className="h-5 w-5 text-blue-600" />
               <span>Registration Fee Architecture</span>
             </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-500 mt-0.5">
               Authoritative server-side fee calculation rules. Modifying fees does not alter existing paid or pending orders.
             </p>
           </div>
@@ -155,13 +155,13 @@ export default function FeeManagerPage() {
       )}
 
       {/* Safety Notice Card (Requirement 9) */}
-      <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/60 flex items-start gap-3">
+      <div className="p-4 rounded-xl border border-slate-200 bg-white shadow-xs flex items-start gap-3">
         <ShieldCheck className="h-5 w-5 text-emerald-400 shrink-0 mt-0.5" />
         <div className="text-xs space-y-1">
-          <div className="font-bold text-white uppercase tracking-wider">
+          <div className="font-bold text-slate-900 uppercase tracking-wider">
             Immutable Fee Snapshot Architecture (Phase 5 Protection)
           </div>
-          <p className="text-slate-400 leading-relaxed">
+          <p className="text-slate-500 leading-relaxed">
             Every payment order generates a cryptographically signed, immutable fee snapshot at order creation. 
             Modifications made here affect future registrations only and will never alter historical financial records or pending payment orders.
           </p>
@@ -169,7 +169,7 @@ export default function FeeManagerPage() {
       </div>
 
       {/* Fees Table */}
-      <Card className="border-slate-800 bg-slate-900/60 p-0 overflow-hidden">
+      <Card className="border-slate-200 bg-white shadow-xs p-0 overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
@@ -186,14 +186,14 @@ export default function FeeManagerPage() {
             {fees.map((f) => (
               <TableRow key={f.id}>
                 <TableCell>
-                  <div className="font-bold text-white text-xs">{f.name}</div>
-                  <div className="text-[10px] text-slate-400">{f.currency} Standard Tier</div>
+                  <div className="font-bold text-slate-900 text-xs">{f.name}</div>
+                  <div className="text-[10px] text-slate-500">{f.currency} Standard Tier</div>
                 </TableCell>
                 <TableCell>
                   <Badge variant="outline">{f.participantType}</Badge>
                 </TableCell>
                 <TableCell>
-                  <span className="font-mono font-bold text-amber-400 text-xs">
+                  <span className="font-mono font-bold text-blue-600 text-xs">
                     {f.baseFeeFormatted}
                   </span>
                 </TableCell>
@@ -202,7 +202,7 @@ export default function FeeManagerPage() {
                     {f.lateFeePaise > 0 ? `+${f.lateFeeFormatted}` : "None"}
                   </span>
                 </TableCell>
-                <TableCell className="text-xs text-slate-300">
+                <TableCell className="text-xs text-slate-700">
                   {f.lateFeeFrom ? new Date(f.lateFeeFrom).toLocaleDateString() : "—"}
                 </TableCell>
                 <TableCell>
@@ -215,7 +215,7 @@ export default function FeeManagerPage() {
                     variant="ghost"
                     size="sm"
                     onClick={() => openEditModal(f)}
-                    className="text-xs text-slate-300 hover:text-white"
+                    className="text-xs text-slate-700 hover:text-slate-900"
                   >
                     <Edit2 className="h-3.5 w-3.5 mr-1" />
                     <span>Edit</span>
@@ -230,15 +230,15 @@ export default function FeeManagerPage() {
       {/* Create / Edit Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-white flex items-center gap-2">
-                <Coins className="h-4 w-4 text-amber-400" />
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                <Coins className="h-4 w-4 text-blue-600" />
                 <span>{editingFee ? "Edit Fee Rule" : "Create Registration Fee Rule"}</span>
               </h3>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="text-slate-400 hover:text-white text-xs"
+                className="text-slate-500 hover:text-slate-900 text-xs"
               >
                 Cancel
               </button>
@@ -254,13 +254,13 @@ export default function FeeManagerPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
                     Participant Type
                   </label>
                   <select
                     value={form.participantType}
                     onChange={(e) => setForm({ ...form, participantType: e.target.value })}
-                    className="w-full h-10 rounded-lg border border-slate-800 bg-slate-950 px-3 text-xs text-white"
+                    className="w-full h-10 rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900"
                   >
                     <option value="ATHLETE">Athlete</option>
                     <option value="COACH">Coach</option>
@@ -292,7 +292,7 @@ export default function FeeManagerPage() {
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
                 <Button variant="secondary" type="button" onClick={() => setShowCreateModal(false)}>
                   Cancel
                 </Button>

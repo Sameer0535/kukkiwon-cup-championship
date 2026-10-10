@@ -115,20 +115,20 @@ export default function AnnouncementsManagerPage() {
   return (
     <div className="space-y-6 max-w-6xl">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div className="flex items-center gap-3">
           <Link
             href="/admin/content"
-            className="h-9 w-9 rounded-lg border border-slate-800 bg-slate-900 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+            className="h-9 w-9 rounded-lg border border-slate-200 bg-white shadow-xs flex items-center justify-center text-slate-500 hover:text-slate-900 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
           </Link>
           <div>
-            <h2 className="text-xl font-bold uppercase tracking-wide text-white flex items-center gap-2">
-              <Bell className="h-5 w-5 text-amber-400" />
+            <h2 className="text-xl font-bold uppercase tracking-wide text-slate-900 flex items-center gap-2">
+              <Bell className="h-5 w-5 text-blue-600" />
               <span>Official Announcements</span>
             </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-500 mt-0.5">
               Broadcast official tournament notices. Only published announcements appear on public pages.
             </p>
           </div>
@@ -162,7 +162,7 @@ export default function AnnouncementsManagerPage() {
       )}
 
       {/* Announcements Table */}
-      <Card className="border-slate-800 bg-slate-900/60 p-0 overflow-hidden">
+      <Card className="border-slate-200 bg-white shadow-xs p-0 overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
@@ -177,15 +177,15 @@ export default function AnnouncementsManagerPage() {
             {announcements.map((a) => (
               <TableRow key={a.id}>
                 <TableCell>
-                  <div className="font-bold text-white text-xs">{a.title}</div>
-                  <div className="text-[11px] text-slate-400 line-clamp-1 max-w-md">
+                  <div className="font-bold text-slate-900 text-xs">{a.title}</div>
+                  <div className="text-[11px] text-slate-500 line-clamp-1 max-w-md">
                     {a.shortDescription}
                   </div>
                 </TableCell>
-                <TableCell className="text-xs text-slate-300">
+                <TableCell className="text-xs text-slate-700">
                   {new Date(a.publishDate).toLocaleDateString()}
                 </TableCell>
-                <TableCell className="text-xs text-slate-400">
+                <TableCell className="text-xs text-slate-500">
                   {a.expiryDate ? new Date(a.expiryDate).toLocaleDateString() : "Never"}
                 </TableCell>
                 <TableCell>
@@ -199,7 +199,7 @@ export default function AnnouncementsManagerPage() {
                       variant="ghost"
                       size="sm"
                       onClick={() => openEditModal(a)}
-                      className="text-xs text-slate-300 hover:text-white"
+                      className="text-xs text-slate-700 hover:text-slate-900"
                     >
                       <Edit3 className="h-3.5 w-3.5" />
                     </Button>
@@ -229,15 +229,15 @@ export default function AnnouncementsManagerPage() {
       {/* Create / Edit Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-white flex items-center gap-2">
-                <Bell className="h-4 w-4 text-amber-400" />
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                <Bell className="h-4 w-4 text-blue-600" />
                 <span>{editingAnn ? "Edit Notice" : "Create Official Announcement"}</span>
               </h3>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="text-slate-400 hover:text-white text-xs"
+                className="text-slate-500 hover:text-slate-900 text-xs"
               >
                 Cancel
               </button>
@@ -259,7 +259,7 @@ export default function AnnouncementsManagerPage() {
               />
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
                   Full Announcement Content
                 </label>
                 <textarea
@@ -267,7 +267,7 @@ export default function AnnouncementsManagerPage() {
                   onChange={(e) => setForm({ ...form, content: e.target.value })}
                   rows={4}
                   required
-                  className="w-full rounded-lg border border-slate-800 bg-slate-950 p-3 text-xs text-white"
+                  className="w-full rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-900"
                 />
               </div>
 
@@ -287,13 +287,13 @@ export default function AnnouncementsManagerPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
                   Publishing State
                 </label>
                 <select
                   value={form.status}
                   onChange={(e) => setForm({ ...form, status: e.target.value })}
-                  className="w-full h-10 rounded-lg border border-slate-800 bg-slate-950 px-3 text-xs text-white"
+                  className="w-full h-10 rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900"
                 >
                   <option value="PUBLISHED">PUBLISHED (Live on Website)</option>
                   <option value="DRAFT">DRAFT (Hidden)</option>
@@ -301,7 +301,7 @@ export default function AnnouncementsManagerPage() {
                 </select>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
                 <Button variant="secondary" type="button" onClick={() => setShowCreateModal(false)}>
                   Cancel
                 </Button>

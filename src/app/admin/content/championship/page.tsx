@@ -120,20 +120,20 @@ export default function ChampionshipEditorPage() {
   return (
     <div className="space-y-6 max-w-5xl">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div className="flex items-center gap-3">
           <Link
             href="/admin/content"
-            className="h-9 w-9 rounded-lg border border-slate-800 bg-slate-900 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+            className="h-9 w-9 rounded-lg border border-slate-200 bg-white shadow-xs flex items-center justify-center text-slate-500 hover:text-slate-900 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
           </Link>
           <div>
-            <h2 className="text-xl font-bold uppercase tracking-wide text-white flex items-center gap-2">
-              <Trophy className="h-5 w-5 text-amber-400" />
+            <h2 className="text-xl font-bold uppercase tracking-wide text-slate-900 flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-blue-600" />
               <span>Championship Configuration</span>
             </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-500 mt-0.5">
               Edit public tournament identity, schedule, contact information, and publication status.
             </p>
           </div>
@@ -160,10 +160,10 @@ export default function ChampionshipEditorPage() {
 
       <form onSubmit={handleSave} className="space-y-6">
         {/* Section 1: Tournament Identity */}
-        <Card className="border-slate-800 bg-slate-900/60 p-6 space-y-4">
-          <div className="border-b border-slate-800 pb-3">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-              <Trophy className="h-4 w-4 text-amber-400" />
+        <Card className="border-slate-200 bg-white shadow-xs p-6 space-y-4">
+          <div className="border-b border-slate-200 pb-3">
+            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <Trophy className="h-4 w-4 text-blue-600" />
               <span>Championship Identity & Overview</span>
             </h3>
           </div>
@@ -195,13 +195,13 @@ export default function ChampionshipEditorPage() {
               required
             />
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
                 Publication Status
               </label>
               <select
                 value={form.status}
                 onChange={(e) => handleChange("status", e.target.value)}
-                className="w-full h-10 rounded-lg border border-slate-800 bg-slate-950 px-3 text-xs text-white focus:outline-none focus:border-amber-400"
+                className="w-full h-10 rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900 focus:outline-none focus:border-amber-400"
               >
                 <option value="DRAFT">DRAFT (Hidden from Public Website)</option>
                 <option value="PUBLISHED">PUBLISHED (Live on Public Website)</option>
@@ -219,26 +219,26 @@ export default function ChampionshipEditorPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
               Championship Description & Scope
             </label>
             <textarea
               value={form.description}
               onChange={(e) => handleChange("description", e.target.value)}
               rows={3}
-              className="w-full rounded-lg border border-slate-800 bg-slate-950 p-3 text-xs text-white focus:outline-none focus:border-amber-400"
+              className="w-full rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-900 focus:outline-none focus:border-amber-400"
             />
           </div>
         </Card>
 
         {/* Section: Hero Background Image & Theme */}
-        <Card className="border-slate-800 bg-slate-900/60 p-6 space-y-4">
-          <div className="border-b border-slate-800 pb-3">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+        <Card className="border-slate-200 bg-white shadow-xs p-6 space-y-4">
+          <div className="border-b border-slate-200 pb-3">
+            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
               <ImageIcon className="h-4 w-4 text-cyan-400" />
               <span>Hero Background Image / Banner</span>
             </h3>
-            <p className="text-[11px] text-slate-400 mt-0.5">
+            <p className="text-[11px] text-slate-500 mt-0.5">
               Customize the backdrop image displayed behind the championship hero section on the homepage.
             </p>
           </div>
@@ -257,13 +257,13 @@ export default function ChampionshipEditorPage() {
             </div>
 
             <div>
-              <span className="text-xs font-semibold text-slate-400 block mb-2">Preset Quick Actions:</span>
+              <span className="text-xs font-semibold text-slate-500 block mb-2">Preset Quick Actions:</span>
               <div className="flex flex-wrap items-center gap-2">
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="text-xs border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200"
+                  className="text-xs border-slate-200 bg-slate-800 hover:bg-slate-700 text-slate-200"
                   onClick={() => handleChange("bannerUrl", "/branding/hero-banner.jpg")}
                 >
                   🏟️ Stadium Arena Banner
@@ -272,7 +272,7 @@ export default function ChampionshipEditorPage() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="text-xs border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200"
+                  className="text-xs border-slate-200 bg-slate-800 hover:bg-slate-700 text-slate-200"
                   onClick={() => handleChange("bannerUrl", "")}
                 >
                   ⚪ Clean Minimalist (No Image)
@@ -282,8 +282,8 @@ export default function ChampionshipEditorPage() {
 
             {form.bannerUrl && (
               <div className="space-y-1.5 pt-2">
-                <span className="text-xs font-semibold text-slate-400 block">Current Preview:</span>
-                <div className="relative w-full h-44 rounded-xl overflow-hidden border border-slate-700 bg-slate-950">
+                <span className="text-xs font-semibold text-slate-500 block">Current Preview:</span>
+                <div className="relative w-full h-44 rounded-xl overflow-hidden border border-slate-200 bg-slate-50">
                   <Image
                     src={form.bannerUrl}
                     alt="Hero Background Preview"
@@ -303,13 +303,13 @@ export default function ChampionshipEditorPage() {
         </Card>
 
         {/* Section 2: Important Dates & Server-Side Availability */}
-        <Card className="border-slate-800 bg-slate-900/60 p-6 space-y-4">
-          <div className="border-b border-slate-800 pb-3">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-amber-400" />
+        <Card className="border-slate-200 bg-white shadow-xs p-6 space-y-4">
+          <div className="border-b border-slate-200 pb-3">
+            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-blue-600" />
               <span>Championship Dates & Registration Windows</span>
             </h3>
-            <p className="text-[11px] text-slate-400 mt-0.5">
+            <p className="text-[11px] text-slate-500 mt-0.5">
               These dates are enforced server-side. Once registration closes, new submissions will be rejected by the backend.
             </p>
           </div>
@@ -356,10 +356,10 @@ export default function ChampionshipEditorPage() {
         </Card>
 
         {/* Section 3: Location & Venue */}
-        <Card className="border-slate-800 bg-slate-900/60 p-6 space-y-4">
-          <div className="border-b border-slate-800 pb-3">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-amber-400" />
+        <Card className="border-slate-200 bg-white shadow-xs p-6 space-y-4">
+          <div className="border-b border-slate-200 pb-3">
+            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-blue-600" />
               <span>Venue & Location Information</span>
             </h3>
           </div>
@@ -389,10 +389,10 @@ export default function ChampionshipEditorPage() {
         </Card>
 
         {/* Section 4: Public Contact Information */}
-        <Card className="border-slate-800 bg-slate-900/60 p-6 space-y-4">
-          <div className="border-b border-slate-800 pb-3">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-              <Mail className="h-4 w-4 text-amber-400" />
+        <Card className="border-slate-200 bg-white shadow-xs p-6 space-y-4">
+          <div className="border-b border-slate-200 pb-3">
+            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <Mail className="h-4 w-4 text-blue-600" />
               <span>Official Public Contact Coordinates</span>
             </h3>
           </div>

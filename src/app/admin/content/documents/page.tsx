@@ -103,20 +103,20 @@ export default function PublicDocumentsManagerPage() {
   return (
     <div className="space-y-6 max-w-6xl">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div className="flex items-center gap-3">
           <Link
             href="/admin/content"
-            className="h-9 w-9 rounded-lg border border-slate-800 bg-slate-900 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+            className="h-9 w-9 rounded-lg border border-slate-200 bg-white shadow-xs flex items-center justify-center text-slate-500 hover:text-slate-900 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
           </Link>
           <div>
-            <h2 className="text-xl font-bold uppercase tracking-wide text-white flex items-center gap-2">
-              <FileDown className="h-5 w-5 text-amber-400" />
+            <h2 className="text-xl font-bold uppercase tracking-wide text-slate-900 flex items-center gap-2">
+              <FileDown className="h-5 w-5 text-blue-600" />
               <span>Public Documents Repository</span>
             </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-500 mt-0.5">
               Publish official downloadable PDFs for athletes, coaches, and academies.
             </p>
           </div>
@@ -139,7 +139,7 @@ export default function PublicDocumentsManagerPage() {
       )}
 
       {/* Documents Table */}
-      <Card className="border-slate-800 bg-slate-900/60 p-0 overflow-hidden">
+      <Card className="border-slate-200 bg-white shadow-xs p-0 overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
@@ -154,8 +154,8 @@ export default function PublicDocumentsManagerPage() {
             {documents.map((d) => (
               <TableRow key={d.id}>
                 <TableCell>
-                  <div className="font-bold text-white text-xs">{d.title}</div>
-                  <div className="text-[11px] text-slate-400 line-clamp-1 max-w-md">
+                  <div className="font-bold text-slate-900 text-xs">{d.title}</div>
+                  <div className="text-[11px] text-slate-500 line-clamp-1 max-w-md">
                     {d.description}
                   </div>
                 </TableCell>
@@ -163,8 +163,8 @@ export default function PublicDocumentsManagerPage() {
                   <Badge variant="outline">{d.documentType}</Badge>
                 </TableCell>
                 <TableCell>
-                  <div className="text-xs text-slate-300 font-mono">{d.fileName}</div>
-                  <div className="text-[10px] text-slate-400">{d.fileSizeFormatted}</div>
+                  <div className="text-xs text-slate-700 font-mono">{d.fileName}</div>
+                  <div className="text-[10px] text-slate-500">{d.fileSizeFormatted}</div>
                 </TableCell>
                 <TableCell>
                   <Badge variant={d.status === "PUBLISHED" ? "success" : "warning"}>
@@ -177,7 +177,7 @@ export default function PublicDocumentsManagerPage() {
                       href={d.fileUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-1.5 rounded text-slate-400 hover:text-white transition-colors"
+                      className="p-1.5 rounded text-slate-500 hover:text-slate-900 transition-colors"
                       title="Preview Document"
                     >
                       <ExternalLink className="h-3.5 w-3.5" />
@@ -208,15 +208,15 @@ export default function PublicDocumentsManagerPage() {
       {/* Publish Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-white flex items-center gap-2">
-                <FileDown className="h-4 w-4 text-amber-400" />
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                <FileDown className="h-4 w-4 text-blue-600" />
                 <span>Publish Official Document</span>
               </h3>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="text-slate-400 hover:text-white text-xs"
+                className="text-slate-500 hover:text-slate-900 text-xs"
               >
                 Cancel
               </button>
@@ -232,13 +232,13 @@ export default function PublicDocumentsManagerPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
                     Document Type
                   </label>
                   <select
                     value={form.documentType}
                     onChange={(e) => setForm({ ...form, documentType: e.target.value })}
-                    className="w-full h-10 rounded-lg border border-slate-800 bg-slate-950 px-3 text-xs text-white"
+                    className="w-full h-10 rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900"
                   >
                     <option value="PROSPECTUS">Prospectus / Handbook</option>
                     <option value="REQUIREMENTS">Athlete Guidelines</option>
@@ -273,7 +273,7 @@ export default function PublicDocumentsManagerPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
                   Brief Description
                 </label>
                 <textarea
@@ -281,25 +281,25 @@ export default function PublicDocumentsManagerPage() {
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                   rows={3}
                   required
-                  className="w-full rounded-lg border border-slate-800 bg-slate-950 p-3 text-xs text-white"
+                  className="w-full rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-900"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
                   Publication State
                 </label>
                 <select
                   value={form.status}
                   onChange={(e) => setForm({ ...form, status: e.target.value })}
-                  className="w-full h-10 rounded-lg border border-slate-800 bg-slate-950 px-3 text-xs text-white"
+                  className="w-full h-10 rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900"
                 >
                   <option value="PUBLISHED">PUBLISHED (Available to Public)</option>
                   <option value="DRAFT">DRAFT (Hidden)</option>
                 </select>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
                 <Button variant="secondary" type="button" onClick={() => setShowCreateModal(false)}>
                   Cancel
                 </Button>

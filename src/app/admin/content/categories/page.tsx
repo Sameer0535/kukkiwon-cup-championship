@@ -127,20 +127,20 @@ export default function CategoryManagerPage() {
   return (
     <div className="space-y-6 max-w-6xl">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div className="flex items-center gap-3">
           <Link
             href="/admin/content"
-            className="h-9 w-9 rounded-lg border border-slate-800 bg-slate-900 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+            className="h-9 w-9 rounded-lg border border-slate-200 bg-white shadow-xs flex items-center justify-center text-slate-500 hover:text-slate-900 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
           </Link>
           <div>
-            <h2 className="text-xl font-bold uppercase tracking-wide text-white flex items-center gap-2">
-              <Tag className="h-5 w-5 text-amber-400" />
+            <h2 className="text-xl font-bold uppercase tracking-wide text-slate-900 flex items-center gap-2">
+              <Tag className="h-5 w-5 text-blue-600" />
               <span>Category Management</span>
             </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-500 mt-0.5">
               Manage eligible competition categories. Inactive categories cannot be selected by new registrants.
             </p>
           </div>
@@ -159,10 +159,10 @@ export default function CategoryManagerPage() {
       )}
 
       {/* Filter Strip */}
-      <div className="flex items-center justify-between bg-slate-900/60 p-3 rounded-xl border border-slate-800 text-xs">
+      <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-200 text-xs">
         <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-slate-400" />
-          <span className="text-slate-400 uppercase font-semibold text-[11px]">Discipline:</span>
+          <Filter className="h-4 w-4 text-slate-500" />
+          <span className="text-slate-500 uppercase font-semibold text-[11px]">Discipline:</span>
           {["ALL", "KYORUGI", "POOMSAE", "DEMO"].map((d) => (
             <button
               key={d}
@@ -170,7 +170,7 @@ export default function CategoryManagerPage() {
               className={`px-2.5 py-1 rounded text-[11px] font-bold tracking-wider transition-colors ${
                 disciplineFilter === d
                   ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
-                  : "text-slate-400 hover:text-slate-200"
+                  : "text-slate-500 hover:text-slate-200"
               }`}
             >
               {d}
@@ -178,13 +178,13 @@ export default function CategoryManagerPage() {
           ))}
         </div>
 
-        <span className="text-slate-400 font-medium">
+        <span className="text-slate-500 font-medium">
           Showing {filteredCategories.length} categories
         </span>
       </div>
 
       {/* Categories Table */}
-      <Card className="border-slate-800 bg-slate-900/60 p-0 overflow-hidden">
+      <Card className="border-slate-200 bg-white shadow-xs p-0 overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
@@ -201,19 +201,19 @@ export default function CategoryManagerPage() {
             {filteredCategories.map((c) => (
               <TableRow key={c.id}>
                 <TableCell>
-                  <code className="text-xs font-mono font-bold text-sky-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
+                  <code className="text-xs font-mono font-bold text-sky-400 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
                     {c.code}
                   </code>
                 </TableCell>
                 <TableCell>
-                  <div className="font-bold text-white text-xs">{c.name}</div>
-                  <div className="text-[10px] text-slate-400 uppercase">{c.division}</div>
+                  <div className="font-bold text-slate-900 text-xs">{c.name}</div>
+                  <div className="text-[10px] text-slate-500 uppercase">{c.division}</div>
                 </TableCell>
                 <TableCell>
                   <Badge variant="outline">{c.discipline}</Badge>
                 </TableCell>
-                <TableCell className="text-xs text-slate-300">{c.gender}</TableCell>
-                <TableCell className="text-xs text-slate-300">
+                <TableCell className="text-xs text-slate-700">{c.gender}</TableCell>
+                <TableCell className="text-xs text-slate-700">
                   {c.minAge || c.maxAge ? `${c.minAge || 0}-${c.maxAge || "∞"} yrs` : "Any age"}
                   {c.maxWeight ? ` / ≤${c.maxWeight} kg` : ""}
                 </TableCell>
@@ -227,10 +227,10 @@ export default function CategoryManagerPage() {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleToggleActive(c)}
-                    className="text-xs text-slate-300 hover:text-white"
+                    className="text-xs text-slate-700 hover:text-slate-900"
                   >
                     {c.isActive ? (
-                      <span className="text-amber-400 flex items-center gap-1">
+                      <span className="text-blue-600 flex items-center gap-1">
                         <ToggleRight className="h-4 w-4" /> Deactivate
                       </span>
                     ) : (
@@ -256,15 +256,15 @@ export default function CategoryManagerPage() {
       {/* Create Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-white flex items-center gap-2">
-                <Plus className="h-4 w-4 text-amber-400" />
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                <Plus className="h-4 w-4 text-blue-600" />
                 <span>Add Competition Category</span>
               </h3>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="text-slate-400 hover:text-white text-xs"
+                className="text-slate-500 hover:text-slate-900 text-xs"
               >
                 Cancel
               </button>
@@ -279,13 +279,13 @@ export default function CategoryManagerPage() {
                   required
                 />
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
                     Discipline
                   </label>
                   <select
                     value={newCat.discipline}
                     onChange={(e) => setNewCat({ ...newCat, discipline: e.target.value })}
-                    className="w-full h-10 rounded-lg border border-slate-800 bg-slate-950 px-3 text-xs text-white"
+                    className="w-full h-10 rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900"
                   >
                     <option value="KYORUGI">KYORUGI (Sparring)</option>
                     <option value="POOMSAE">POOMSAE (Forms)</option>
@@ -303,13 +303,13 @@ export default function CategoryManagerPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
                     Division
                   </label>
                   <select
                     value={newCat.division}
                     onChange={(e) => setNewCat({ ...newCat, division: e.target.value })}
-                    className="w-full h-10 rounded-lg border border-slate-800 bg-slate-950 px-3 text-xs text-white"
+                    className="w-full h-10 rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900"
                   >
                     <option value="SENIOR">SENIOR (18+)</option>
                     <option value="JUNIOR">JUNIOR (15-17)</option>
@@ -319,13 +319,13 @@ export default function CategoryManagerPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
                     Gender
                   </label>
                   <select
                     value={newCat.gender}
                     onChange={(e) => setNewCat({ ...newCat, gender: e.target.value as any })}
-                    className="w-full h-10 rounded-lg border border-slate-800 bg-slate-950 px-3 text-xs text-white"
+                    className="w-full h-10 rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900"
                   >
                     <option value="MALE">Male</option>
                     <option value="FEMALE">Female</option>
@@ -356,7 +356,7 @@ export default function CategoryManagerPage() {
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
                 <Button variant="secondary" type="button" onClick={() => setShowCreateModal(false)}>
                   Cancel
                 </Button>

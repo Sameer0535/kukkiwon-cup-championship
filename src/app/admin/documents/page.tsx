@@ -308,7 +308,7 @@ export default function AdminPaymentVerificationPage() {
       {/* Filter Bar */}
       <div className="rounded-2xl border border-slate-200 bg-white p-4 flex flex-wrap items-center justify-between gap-3 shadow-xs">
         <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-slate-400" />
+          <Filter className="h-4 w-4 text-slate-500" />
           <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
             Verification Status:
           </span>
@@ -385,7 +385,7 @@ export default function AdminPaymentVerificationPage() {
                         ) : (
                           <div
                             onClick={() => setSelectedDossier(item)}
-                            className="w-10 h-12 rounded-lg border border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-slate-400 shrink-0 cursor-pointer hover:border-blue-600 transition"
+                            className="w-10 h-12 rounded-lg border border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-slate-500 shrink-0 cursor-pointer hover:border-blue-600 transition"
                             title="Click to inspect athlete dossier"
                           >
                             <Camera className="h-4 w-4" />
@@ -436,7 +436,7 @@ export default function AdminPaymentVerificationPage() {
                         {item.categoryName}
                       </div>
                       <div className="text-[11px] text-slate-500 flex items-center gap-1">
-                        <Building2 className="h-3 w-3 text-slate-400" />
+                        <Building2 className="h-3 w-3 text-slate-500" />
                         <span>{item.academyName}</span>
                       </div>
                     </td>
@@ -522,16 +522,16 @@ export default function AdminPaymentVerificationPage() {
 
       {/* QUICK DOSSIER REVIEW MODAL */}
       {selectedDossier && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in">
-          <div className="relative w-full max-w-4xl rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-50/50 backdrop-blur-xs animate-in fade-in">
+          <div className="relative w-full max-w-4xl rounded-2xl border border-slate-200 bg-white shadow-2xl flex flex-col max-h-[92vh] overflow-hidden">
             {/* Modal Header */}
-            <div className="p-5 border-b border-slate-800 flex items-center justify-between shrink-0 bg-slate-950/60">
+            <div className="p-5 border-b border-slate-200 flex items-center justify-between shrink-0 bg-slate-50">
               <div className="flex items-center gap-3">
                 <div className="h-9 w-9 rounded-xl bg-[#D4AF37]/15 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37]">
                   <ShieldCheck className="h-5 w-5" />
                 </div>
                 <div>
-                  <h2 className="text-base font-black uppercase text-white tracking-tight flex items-center gap-2">
+                  <h2 className="text-base font-black uppercase text-slate-900 tracking-tight flex items-center gap-2">
                     <span>{selectedDossier.athleteName}</span>
                     <span
                       className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${
@@ -545,8 +545,8 @@ export default function AdminPaymentVerificationPage() {
                       {selectedDossier.status === "UNDER_REVIEW" ? "PENDING REVIEW" : selectedDossier.status}
                     </span>
                   </h2>
-                  <div className="text-xs text-slate-400 font-mono mt-0.5">
-                    Reg ID: <strong className="text-white">{selectedDossier.registrationNumber}</strong> • Athlete ID: <strong className="text-[#D4AF37]">{selectedDossier.athleteId}</strong>
+                  <div className="text-xs text-slate-500 font-mono mt-0.5">
+                    Reg ID: <strong className="text-slate-900">{selectedDossier.registrationNumber}</strong> • Athlete ID: <strong className="text-[#D4AF37]">{selectedDossier.athleteId}</strong>
                   </div>
                 </div>
               </div>
@@ -554,23 +554,23 @@ export default function AdminPaymentVerificationPage() {
               <button
                 type="button"
                 onClick={() => setSelectedDossier(null)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+                className="p-1.5 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             {/* Modal Body (Scrollable) */}
-            <div className="p-6 overflow-y-auto space-y-6 text-xs text-slate-300">
+            <div className="p-6 overflow-y-auto space-y-6 text-xs text-slate-700">
               {/* Profile & Vital Details */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5 p-4 rounded-xl bg-slate-950/70 border border-slate-800">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5 p-4 rounded-xl bg-slate-50 border border-slate-200">
                 {/* Photo & Quick Badges */}
-                <div className="flex flex-col items-center justify-center text-center p-2 border-b md:border-b-0 md:border-r border-slate-800/80">
+                <div className="flex flex-col items-center justify-center text-center p-2 border-b md:border-b-0 md:border-r border-slate-200">
                   <div
                     onClick={() => {
                       if (selectedDossier.photoUrl) setPreviewPhotoModal(selectedDossier.photoUrl);
                     }}
-                    className={`relative w-28 h-36 rounded-xl border-2 border-[#D4AF37] bg-slate-900 overflow-hidden shrink-0 shadow-lg ${
+                    className={`relative w-28 h-36 rounded-xl border-2 border-[#D4AF37] bg-slate-50 overflow-hidden shrink-0 shadow-lg ${
                       selectedDossier.photoUrl ? "cursor-pointer group" : ""
                     }`}
                   >
@@ -593,7 +593,7 @@ export default function AdminPaymentVerificationPage() {
                       </div>
                     )}
                   </div>
-                  <span className="text-[10px] text-slate-400 mt-2 font-mono">
+                  <span className="text-[10px] text-slate-500 mt-2 font-mono">
                     {selectedDossier.participantType || "ATHLETE"}
                   </span>
                 </div>
@@ -630,14 +630,14 @@ export default function AdminPaymentVerificationPage() {
                   <div>
                     <span className="text-[10px] text-slate-500 uppercase block font-bold">Affiliated Academy / Dojang</span>
                     <span className="font-semibold text-slate-200 flex items-center gap-1.5 mt-0.5">
-                      <Building2 className="h-3.5 w-3.5 text-slate-400" />
+                      <Building2 className="h-3.5 w-3.5 text-slate-500" />
                       <span>{selectedDossier.academyName || "Independent"}</span>
                     </span>
                   </div>
                 </div>
 
                 {/* Contact & Payment Summary */}
-                <div className="space-y-2.5 border-t md:border-t-0 md:border-l border-slate-800/80 md:pl-4">
+                <div className="space-y-2.5 border-t md:border-t-0 md:border-l border-slate-200 md:pl-4">
                   <span className="text-[10px] uppercase font-black text-emerald-400 tracking-wider block">
                     Verification & Payment
                   </span>
@@ -647,11 +647,11 @@ export default function AdminPaymentVerificationPage() {
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-500 uppercase block font-bold">Submitted UTR Reference</span>
-                    <span className="font-mono text-xs font-bold text-emerald-400 bg-slate-900 px-2 py-0.5 rounded border border-emerald-500/30 inline-block mt-0.5">
+                    <span className="font-mono text-xs font-bold text-emerald-400 bg-slate-50 px-2 py-0.5 rounded border border-emerald-500/30 inline-block mt-0.5">
                       {selectedDossier.utrNumber || "OFFLINE-MANUAL"}
                     </span>
                   </div>
-                  <div className="space-y-1 pt-1 border-t border-slate-800">
+                  <div className="space-y-1 pt-1 border-t border-slate-200">
                     <span className="text-[10px] text-slate-500 uppercase block font-bold">Contact</span>
                     <div className="text-[11px] text-slate-300 flex items-center gap-1.5 truncate">
                       <Mail className="h-3 w-3 text-sky-400 shrink-0" />
@@ -661,7 +661,7 @@ export default function AdminPaymentVerificationPage() {
                       <Phone className="h-3 w-3 text-emerald-400 shrink-0" />
                       <span>{selectedDossier.phone || "—"}</span>
                     </div>
-                    <div className="text-[11px] text-slate-400 flex items-center gap-1.5">
+                    <div className="text-[11px] text-slate-500 flex items-center gap-1.5">
                       <MapPin className="h-3 w-3 text-amber-400 shrink-0" />
                       <span>{[selectedDossier.city, selectedDossier.state, selectedDossier.nationality].filter(Boolean).join(", ") || "India"}</span>
                     </div>
@@ -676,7 +676,7 @@ export default function AdminPaymentVerificationPage() {
                     <FileText className="h-4 w-4 text-sky-400" />
                     <span>Uploaded Mandatory Documents & Proofs</span>
                   </h3>
-                  <span className="text-[10px] text-slate-400">
+                  <span className="text-[10px] text-slate-500">
                     Inspect all athlete submitted proofs before approving
                   </span>
                 </div>
@@ -688,12 +688,12 @@ export default function AdminPaymentVerificationPage() {
                     const preview = doc?.preview_url || doc?.file_url || doc?.previewUrl || doc?.fileUrl || doc?.dataUrl;
                     const fileName = doc?.file_name || doc?.name || "Aadhaar / National ID";
                     return (
-                      <div className="p-3 rounded-xl border border-slate-800 bg-slate-950/60 flex flex-col justify-between space-y-2">
+                      <div className="p-3 rounded-xl border border-slate-200 bg-slate-950/60 flex flex-col justify-between space-y-2">
                         <div className="space-y-1">
                           <span className="text-[10px] uppercase font-bold text-sky-400 block">
                             Govt ID Proof (Aadhaar / Passport)
                           </span>
-                          <span className="text-[11px] text-slate-400 truncate block">
+                          <span className="text-[11px] text-slate-500 truncate block">
                             {fileName}
                           </span>
                         </div>
@@ -701,7 +701,7 @@ export default function AdminPaymentVerificationPage() {
                         {preview ? (
                           <div
                             onClick={() => setPreviewDocModal({ title: "Government ID Proof", url: preview, fileName })}
-                            className="relative h-24 w-full rounded-lg overflow-hidden border border-slate-800 bg-slate-900 cursor-pointer group"
+                            className="relative h-24 w-full rounded-lg overflow-hidden border border-slate-200 bg-slate-50 cursor-pointer group"
                           >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={preview} alt="Govt ID Proof" className="w-full h-full object-cover group-hover:scale-105 transition" />
@@ -710,7 +710,7 @@ export default function AdminPaymentVerificationPage() {
                             </div>
                           </div>
                         ) : (
-                          <div className="h-24 w-full rounded-lg border border-dashed border-slate-800 bg-slate-900/40 flex items-center justify-center text-slate-600 text-[10px]">
+                          <div className="h-24 w-full rounded-lg border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-slate-600 text-[10px]">
                             Not uploaded
                           </div>
                         )}
@@ -751,12 +751,12 @@ export default function AdminPaymentVerificationPage() {
                     const preview = doc?.preview_url || doc?.file_url || doc?.previewUrl || doc?.fileUrl || doc?.dataUrl;
                     const fileName = doc?.file_name || doc?.name || (selectedDossier.kukkiwonId ? `Dan: ${selectedDossier.kukkiwonId}` : "Certificate Proof");
                     return (
-                      <div className="p-3 rounded-xl border border-slate-800 bg-slate-950/60 flex flex-col justify-between space-y-2">
+                      <div className="p-3 rounded-xl border border-slate-200 bg-slate-950/60 flex flex-col justify-between space-y-2">
                         <div className="space-y-1">
                           <span className="text-[10px] uppercase font-bold text-[#D4AF37] block">
                             Kukkiwon Dan Certificate
                           </span>
-                          <span className="text-[11px] text-slate-400 truncate block">
+                          <span className="text-[11px] text-slate-500 truncate block">
                             {fileName}
                           </span>
                         </div>
@@ -764,7 +764,7 @@ export default function AdminPaymentVerificationPage() {
                         {preview ? (
                           <div
                             onClick={() => setPreviewDocModal({ title: "Kukkiwon Dan Certificate", url: preview, fileName })}
-                            className="relative h-24 w-full rounded-lg overflow-hidden border border-slate-800 bg-slate-900 cursor-pointer group"
+                            className="relative h-24 w-full rounded-lg overflow-hidden border border-slate-200 bg-slate-50 cursor-pointer group"
                           >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={preview} alt="Kukkiwon Dan Certificate" className="w-full h-full object-cover group-hover:scale-105 transition" />
@@ -773,7 +773,7 @@ export default function AdminPaymentVerificationPage() {
                             </div>
                           </div>
                         ) : (
-                          <div className="h-24 w-full rounded-lg border border-dashed border-slate-800 bg-slate-900/40 flex items-center justify-center text-slate-600 text-[10px]">
+                          <div className="h-24 w-full rounded-lg border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-slate-600 text-[10px]">
                             {selectedDossier.kukkiwonId ? `Dan ID: ${selectedDossier.kukkiwonId}` : "Not uploaded"}
                           </div>
                         )}
@@ -814,12 +814,12 @@ export default function AdminPaymentVerificationPage() {
                     const preview = doc?.preview_url || doc?.file_url || doc?.previewUrl || doc?.fileUrl || doc?.dataUrl;
                     const fileName = doc?.file_name || doc?.name || "Medical Certificate";
                     return (
-                      <div className="p-3 rounded-xl border border-slate-800 bg-slate-950/60 flex flex-col justify-between space-y-2">
+                      <div className="p-3 rounded-xl border border-slate-200 bg-slate-950/60 flex flex-col justify-between space-y-2">
                         <div className="space-y-1">
                           <span className="text-[10px] uppercase font-bold text-emerald-400 block">
                             Medical Fitness Proof
                           </span>
-                          <span className="text-[11px] text-slate-400 truncate block">
+                          <span className="text-[11px] text-slate-500 truncate block">
                             {fileName}
                           </span>
                         </div>
@@ -827,7 +827,7 @@ export default function AdminPaymentVerificationPage() {
                         {preview ? (
                           <div
                             onClick={() => setPreviewDocModal({ title: "Medical Fitness Certificate", url: preview, fileName })}
-                            className="relative h-24 w-full rounded-lg overflow-hidden border border-slate-800 bg-slate-900 cursor-pointer group"
+                            className="relative h-24 w-full rounded-lg overflow-hidden border border-slate-200 bg-slate-50 cursor-pointer group"
                           >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={preview} alt="Medical Certificate" className="w-full h-full object-cover group-hover:scale-105 transition" />
@@ -836,7 +836,7 @@ export default function AdminPaymentVerificationPage() {
                             </div>
                           </div>
                         ) : (
-                          <div className="h-24 w-full rounded-lg border border-dashed border-slate-800 bg-slate-900/40 flex items-center justify-center text-slate-600 text-[10px]">
+                          <div className="h-24 w-full rounded-lg border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-slate-600 text-[10px]">
                             Not uploaded
                           </div>
                         )}
@@ -877,12 +877,12 @@ export default function AdminPaymentVerificationPage() {
                     const preview = slip?.preview_url || slip?.file_url || slip?.previewUrl || slip?.fileUrl || slip?.dataUrl;
                     const fileName = slip?.file_name || slip?.name || `UTR: ${selectedDossier.utrNumber || "Manual"}`;
                     return (
-                      <div className="p-3 rounded-xl border border-slate-800 bg-slate-950/60 flex flex-col justify-between space-y-2">
+                      <div className="p-3 rounded-xl border border-slate-200 bg-slate-950/60 flex flex-col justify-between space-y-2">
                         <div className="space-y-1">
                           <span className="text-[10px] uppercase font-bold text-emerald-400 block">
                             UTR / Payment Proof
                           </span>
-                          <span className="text-[11px] text-slate-400 truncate block">
+                          <span className="text-[11px] text-slate-500 truncate block">
                             {fileName}
                           </span>
                         </div>
@@ -890,7 +890,7 @@ export default function AdminPaymentVerificationPage() {
                         {preview ? (
                           <div
                             onClick={() => setPreviewDocModal({ title: "Payment Transaction Slip", url: preview, fileName })}
-                            className="relative h-24 w-full rounded-lg overflow-hidden border border-slate-800 bg-slate-900 cursor-pointer group"
+                            className="relative h-24 w-full rounded-lg overflow-hidden border border-slate-200 bg-slate-50 cursor-pointer group"
                           >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={preview} alt="Payment Receipt" className="w-full h-full object-cover group-hover:scale-105 transition" />
@@ -899,7 +899,7 @@ export default function AdminPaymentVerificationPage() {
                             </div>
                           </div>
                         ) : (
-                          <div className="h-24 w-full rounded-lg border border-dashed border-slate-800 bg-slate-900/40 flex items-center justify-center text-slate-500 text-[10px] font-mono text-center p-2">
+                          <div className="h-24 w-full rounded-lg border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-slate-500 text-[10px] font-mono text-center p-2">
                             UTR: {selectedDossier.utrNumber || "Verified via gateway"}
                           </div>
                         )}
@@ -938,10 +938,10 @@ export default function AdminPaymentVerificationPage() {
             </div>
 
             {/* Modal Footer Controls */}
-            <div className="p-4 border-t border-slate-800 bg-slate-950/80 flex items-center justify-between gap-3 shrink-0">
+            <div className="p-4 border-t border-slate-200 bg-slate-950/80 flex items-center justify-between gap-3 shrink-0">
               <Link
                 href={`/admin/registrations/${selectedDossier.registrationId}`}
-                className="text-xs text-slate-400 hover:text-white inline-flex items-center gap-1.5 transition underline underline-offset-2"
+                className="text-xs text-slate-500 hover:text-white inline-flex items-center gap-1.5 transition underline underline-offset-2"
               >
                 <span>Open Full Registration Page</span>
                 <ExternalLink className="h-3.5 w-3.5" />
@@ -995,17 +995,17 @@ export default function AdminPaymentVerificationPage() {
       {/* DOCUMENT PREVIEW LIGHTBOX MODAL */}
       {previewDocModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md animate-in fade-in">
-          <div className="relative w-full max-w-3xl rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl flex flex-col max-h-[90vh]">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800 shrink-0">
+          <div className="relative w-full max-w-3xl rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-200 shrink-0">
               <div>
                 <h3 className="text-base font-bold text-white">{previewDocModal.title}</h3>
                 {previewDocModal.fileName && (
-                  <p className="text-xs text-slate-400 mt-0.5">{previewDocModal.fileName}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{previewDocModal.fileName}</p>
                 )}
               </div>
               <button
                 onClick={() => setPreviewDocModal(null)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer"
+                className="p-1.5 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -1020,7 +1020,7 @@ export default function AdminPaymentVerificationPage() {
               />
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-800 shrink-0">
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 shrink-0">
               <a
                 href={previewDocModal.url}
                 download={previewDocModal.fileName || "document"}
@@ -1049,7 +1049,7 @@ export default function AdminPaymentVerificationPage() {
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md animate-in fade-in cursor-pointer"
         >
           <div
-            className="relative max-w-md p-2 bg-slate-900 border border-[#D4AF37] rounded-2xl shadow-2xl"
+            className="relative max-w-md p-2 bg-slate-50 border border-[#D4AF37] rounded-2xl shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}

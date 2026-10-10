@@ -657,7 +657,7 @@ export default function AdminCmsPage() {
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-16">
       {/* Top Banner & Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900/60 p-6 rounded-2xl border border-slate-800 backdrop-blur-md">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
         <div>
           <div className="flex items-center gap-2 mb-2">
             <Badge variant="gold">Production CMS Engine</Badge>
@@ -668,8 +668,8 @@ export default function AdminCmsPage() {
               REGISTRATION: {regState}
             </Badge>
           </div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-            <Globe className="w-8 h-8 text-amber-400" />
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+            <Globe className="w-8 h-8 text-blue-600" />
             Championship CMS & Live Publishing
           </h1>
           <p className="text-slate-400 text-sm mt-1">
@@ -746,7 +746,7 @@ export default function AdminCmsPage() {
       )}
 
       {/* Navigation Tabs */}
-      <div className="flex overflow-x-auto pb-2 gap-2 border-b border-slate-800">
+      <div className="flex overflow-x-auto pb-2 gap-2 border-b border-slate-200">
         {[
           { key: "info", label: "Championship Info", icon: FileText },
           { key: "hero", label: "Hero & Banner", icon: Sparkles },
@@ -765,14 +765,14 @@ export default function AdminCmsPage() {
               onClick={() => setActiveTab(tab.key as TabKey)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${
                 isActive
-                  ? "bg-amber-400/15 text-amber-300 border border-amber-400/30"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+                  ? "bg-blue-50 text-blue-700 border border-blue-200 font-bold shadow-2xs"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
               }`}
             >
               <Icon className="w-4 h-4" />
               {tab.label}
               {tab.badge !== undefined && (
-                <span className="ml-1 px-1.5 py-0.2 text-[11px] rounded-full bg-slate-800 text-slate-300">
+                <span className="ml-1 px-1.5 py-0.2 text-[11px] rounded-full bg-slate-100 text-slate-600 border border-slate-200">
                   {tab.badge}
                 </span>
               )}
@@ -785,10 +785,10 @@ export default function AdminCmsPage() {
           Tab 1: Championship Information
           ========================================================================= */}
       {activeTab === "info" && championship && content && (
-        <Card className="bg-slate-900/60 border-slate-800">
+        <Card className="bg-white border-slate-200 shadow-xs">
           <CardHeader>
-            <CardTitle className="text-white text-xl">Championship Identity & Details</CardTitle>
-            <CardDescription className="text-slate-400">
+            <CardTitle className="text-slate-900 text-xl">Championship Identity & Details</CardTitle>
+            <CardDescription className="text-slate-500">
               Update official tournament title, description, venue location, and registration window dates.
             </CardDescription>
           </CardHeader>
@@ -796,7 +796,7 @@ export default function AdminCmsPage() {
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Official Name</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Official Name</label>
                   <Input
                     value={championship.name}
                     onChange={(e) => setChampionship({ ...championship, name: e.target.value })}
@@ -804,7 +804,7 @@ export default function AdminCmsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Short Display Name</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Short Display Name</label>
                   <Input
                     value={championship.shortName}
                     onChange={(e) => setChampionship({ ...championship, shortName: e.target.value })}
@@ -814,7 +814,7 @@ export default function AdminCmsPage() {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">Championship Description</label>
+                <label className="text-xs font-semibold text-slate-700 block mb-1">Championship Description</label>
                 <Textarea
                   rows={4}
                   value={championship.description}
@@ -825,7 +825,7 @@ export default function AdminCmsPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Venue Stadium</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Venue Stadium</label>
                   <Input
                     value={championship.venue}
                     onChange={(e) => setChampionship({ ...championship, venue: e.target.value })}
@@ -833,7 +833,7 @@ export default function AdminCmsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Location / City / Country</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Location / City / Country</label>
                   <Input
                     value={content.location || ""}
                     onChange={(e) => setContent({ ...content, location: e.target.value })}
@@ -843,68 +843,68 @@ export default function AdminCmsPage() {
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-4">
-                <h3 className="text-sm font-bold text-amber-300 uppercase tracking-wider flex items-center gap-2">
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-4">
+                <h3 className="text-sm font-bold text-blue-700 uppercase tracking-wider flex items-center gap-2">
                   <Calendar className="w-4 h-4" /> Registration & Tournament Timeline
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">Registration Opens</label>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">Registration Opens</label>
                     <Input
                       type="datetime-local"
                       value={formatForInput(championship.registrationOpen)}
                       onChange={(e) => setChampionship({ ...championship, registrationOpen: e.target.value })}
-                      className="bg-slate-900 border-slate-700 text-white [color-scheme:dark] focus:border-amber-400 focus:ring-amber-400"
+                      className="bg-white border-slate-200 text-slate-900 [color-scheme:light] focus:border-blue-500 focus:ring-blue-500"
                       required
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">Regular Deadline</label>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">Regular Deadline</label>
                     <Input
                       type="datetime-local"
                       value={formatForInput(championship.registrationClose)}
                       onChange={(e) => setChampionship({ ...championship, registrationClose: e.target.value })}
-                      className="bg-slate-900 border-slate-700 text-white [color-scheme:dark] focus:border-amber-400 focus:ring-amber-400"
+                      className="bg-white border-slate-200 text-slate-900 [color-scheme:light] focus:border-blue-500 focus:ring-blue-500"
                       required
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">Late Registration Cutoff</label>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">Late Registration Cutoff</label>
                     <Input
                       type="datetime-local"
                       value={formatForInput(championship.lateRegistrationDeadline)}
                       onChange={(e) => setChampionship({ ...championship, lateRegistrationDeadline: e.target.value || null })}
-                      className="bg-slate-900 border-slate-700 text-white [color-scheme:dark] focus:border-amber-400 focus:ring-amber-400"
+                      className="bg-white border-slate-200 text-slate-900 [color-scheme:light] focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                   <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">Tournament Start Date</label>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">Tournament Start Date</label>
                     <Input
                       type="datetime-local"
                       value={formatForInput(championship.startDate)}
                       onChange={(e) => setChampionship({ ...championship, startDate: e.target.value })}
-                      className="bg-slate-900 border-slate-700 text-white [color-scheme:dark] focus:border-amber-400 focus:ring-amber-400"
+                      className="bg-white border-slate-200 text-slate-900 [color-scheme:light] focus:border-blue-500 focus:ring-blue-500"
                       required
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">Tournament End Date</label>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">Tournament End Date</label>
                     <Input
                       type="datetime-local"
                       value={formatForInput(championship.endDate)}
                       onChange={(e) => setChampionship({ ...championship, endDate: e.target.value })}
-                      className="bg-slate-900 border-slate-700 text-white [color-scheme:dark] focus:border-amber-400 focus:ring-amber-400"
+                      className="bg-white border-slate-200 text-slate-900 [color-scheme:light] focus:border-blue-500 focus:ring-blue-500"
                       required
                     />
                   </div>
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="flex justify-end border-t border-slate-800 pt-4">
-              <Button type="submit" disabled={saving} className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold flex items-center gap-2">
+            <CardFooter className="flex justify-end border-t border-slate-100 pt-4">
+              <Button type="submit" disabled={saving} className="bg-[#0066FF] hover:bg-blue-700 text-white font-bold shadow-xs cursor-pointer flex items-center gap-2">
                 <Save className="w-4 h-4" />
                 {saving ? "Saving..." : "Save Championship Info"}
               </Button>
@@ -917,10 +917,10 @@ export default function AdminCmsPage() {
           Tab 2: Hero & Banner Section
           ========================================================================= */}
       {activeTab === "hero" && content && championship && (
-        <Card className="bg-slate-900/60 border-slate-800">
+        <Card className="bg-white border-slate-200 shadow-xs">
           <CardHeader>
-            <CardTitle className="text-white text-xl">Hero & Banner Configuration</CardTitle>
-            <CardDescription className="text-slate-400">
+            <CardTitle className="text-slate-900 text-xl">Hero & Banner Configuration</CardTitle>
+            <CardDescription className="text-slate-500">
               Customize the landing page headline, tagline badge, sub-headline, CTA buttons, and backdrop photo.
             </CardDescription>
           </CardHeader>
@@ -928,7 +928,7 @@ export default function AdminCmsPage() {
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="md:col-span-2">
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Hero Main Headline</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Hero Main Headline</label>
                   <Input
                     value={content.heroTitle}
                     onChange={(e) => setContent({ ...content, heroTitle: e.target.value })}
@@ -937,7 +937,7 @@ export default function AdminCmsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Tagline Badge (Top Pill)</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Tagline Badge (Top Pill)</label>
                   <Input
                     value={content.heroTagline || ""}
                     onChange={(e) => setContent({ ...content, heroTagline: e.target.value })}
@@ -947,7 +947,7 @@ export default function AdminCmsPage() {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">Hero Subtitle</label>
+                <label className="text-xs font-semibold text-slate-700 block mb-1">Hero Subtitle</label>
                 <Input
                   value={content.heroSubtitle || ""}
                   onChange={(e) => setContent({ ...content, heroSubtitle: e.target.value })}
@@ -955,13 +955,13 @@ export default function AdminCmsPage() {
                 />
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-4">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-400">
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-4">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600">
                   Hero Call-to-Action Buttons
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">Primary CTA Button Label</label>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">Primary CTA Button Label</label>
                     <Input
                       value={content.heroPrimaryCtaText || "Register Now"}
                       onChange={(e) => setContent({ ...content, heroPrimaryCtaText: e.target.value })}
@@ -972,7 +972,7 @@ export default function AdminCmsPage() {
                     </span>
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">Secondary CTA Button Label</label>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">Secondary CTA Button Label</label>
                     <Input
                       value={content.heroSecondaryCtaText || "Contact Secretariat"}
                       onChange={(e) => setContent({ ...content, heroSecondaryCtaText: e.target.value })}
@@ -986,10 +986,10 @@ export default function AdminCmsPage() {
               </div>
 
               {/* Championship Banner Upload & Preview */}
-              <div className="p-5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-4">
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-amber-400 block">
+                    <label className="text-xs font-bold uppercase tracking-wider text-blue-600 block">
                       Hero Championship Banner
                     </label>
                     <p className="text-[11px] text-slate-400 mt-0.5">
@@ -1014,8 +1014,8 @@ export default function AdminCmsPage() {
 
                 {/* Live Banner Preview Box */}
                 {championship.bannerUrl ? (
-                  <div className="relative rounded-xl overflow-hidden border border-slate-700/80 bg-slate-900 group">
-                    <div className="relative w-full h-48 sm:h-64 bg-slate-950">
+                  <div className="relative rounded-xl overflow-hidden border border-slate-200 bg-white group">
+                    <div className="relative w-full h-48 sm:h-64 bg-slate-100">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={championship.bannerUrl}
@@ -1023,20 +1023,20 @@ export default function AdminCmsPage() {
                         className="w-full h-full object-cover object-center"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent flex items-end p-4">
-                        <div className="text-xs text-white font-mono truncate max-w-md">
+                        <div className="text-xs text-slate-900 font-mono truncate max-w-md">
                           {championship.bannerUrl.startsWith("data:") ? "Uploaded Local Image (Data URL)" : championship.bannerUrl}
                         </div>
                       </div>
                     </div>
 
-                    <div className="p-3 bg-slate-900/95 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2">
+                    <div className="p-3 bg-white border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <Button
                           type="button"
                           size="sm"
                           disabled={bannerUploading}
                           onClick={() => bannerInputRef.current?.click()}
-                          className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs flex items-center gap-1.5"
+                          className="bg-[#0066FF] hover:bg-blue-700 text-white font-bold shadow-xs cursor-pointer text-xs flex items-center gap-1.5"
                         >
                           {bannerUploading ? (
                             <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -1051,7 +1051,7 @@ export default function AdminCmsPage() {
                           variant="outline"
                           size="sm"
                           onClick={() => setChampionship((prev) => prev ? { ...prev, bannerUrl: "/branding/hero-banner.jpg" } : null)}
-                          className="text-xs border-slate-700 bg-slate-800 text-slate-300 hover:text-white"
+                          className="text-xs border-slate-200 bg-slate-100 text-slate-700 hover:text-slate-900"
                         >
                           Arena Preset
                         </Button>
@@ -1076,11 +1076,11 @@ export default function AdminCmsPage() {
                     className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all ${
                       bannerUploading
                         ? "border-amber-400/50 bg-amber-400/5"
-                        : "border-slate-700 hover:border-amber-400/80 bg-slate-900/50 hover:bg-slate-900/80"
+                        : "border-slate-200 hover:border-amber-400/80 bg-slate-50 hover:bg-white"
                     }`}
                   >
                     <div className="flex flex-col items-center justify-center space-y-3">
-                      <div className="p-3 rounded-full bg-amber-400/10 text-amber-400 border border-amber-400/20">
+                      <div className="p-3 rounded-full bg-amber-400/10 text-blue-600 border border-amber-400/20">
                         {bannerUploading ? (
                           <Loader2 className="w-6 h-6 animate-spin" />
                         ) : (
@@ -1088,7 +1088,7 @@ export default function AdminCmsPage() {
                         )}
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-white">
+                        <p className="text-sm font-bold text-slate-900">
                           {bannerUploading ? "Uploading Banner Image..." : "Click to Upload Banner Image"}
                         </p>
                         <p className="text-xs text-slate-400 mt-1">
@@ -1101,7 +1101,7 @@ export default function AdminCmsPage() {
                           variant="outline"
                           size="sm"
                           onClick={() => setChampionship((prev) => prev ? { ...prev, bannerUrl: "/branding/hero-banner.jpg" } : null)}
-                          className="text-xs border-slate-700 bg-slate-800 text-slate-300 hover:text-white"
+                          className="text-xs border-slate-200 bg-slate-100 text-slate-700 hover:text-slate-900"
                         >
                           Use Arena Preset
                         </Button>
@@ -1112,7 +1112,7 @@ export default function AdminCmsPage() {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">Registration Instructions (Markdown / Plain)</label>
+                <label className="text-xs font-semibold text-slate-700 block mb-1">Registration Instructions (Markdown / Plain)</label>
                 <Textarea
                   rows={4}
                   value={content.registrationInstructions || ""}
@@ -1121,8 +1121,8 @@ export default function AdminCmsPage() {
                 />
               </div>
             </CardContent>
-            <CardFooter className="flex justify-end border-t border-slate-800 pt-4">
-              <Button type="submit" disabled={saving} className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold flex items-center gap-2">
+            <CardFooter className="flex justify-end border-t border-slate-100 pt-4">
+              <Button type="submit" disabled={saving} className="bg-[#0066FF] hover:bg-blue-700 text-white font-bold shadow-xs cursor-pointer flex items-center gap-2">
                 <Save className="w-4 h-4" />
                 {saving ? "Saving..." : "Save Hero Settings"}
               </Button>
@@ -1137,20 +1137,20 @@ export default function AdminCmsPage() {
       {activeTab === "sections" && content && (
         <div className="space-y-8">
           {/* Section 1: Partnership & Organization Section */}
-          <Card className="bg-slate-900/60 border-slate-800">
+          <Card className="bg-white border-slate-200 shadow-xs">
             <CardHeader>
-              <CardTitle className="text-white text-xl flex items-center gap-2">
-                <Building className="w-5 h-5 text-amber-400" />
+              <CardTitle className="text-slate-900 text-xl flex items-center gap-2">
+                <Building className="w-5 h-5 text-blue-600" />
                 1. Partnership & Organization Section
               </CardTitle>
-              <CardDescription className="text-slate-400">
+              <CardDescription className="text-slate-500">
                 Institutional presentation for Kukkiwon India North Branch World Taekwondo Headquarters.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Section Tagline (Small Pill)</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Section Tagline (Small Pill)</label>
                   <Input
                     value={content.partnershipTagline || "Collaboration & Leadership"}
                     onChange={(e) => setContent({ ...content, partnershipTagline: e.target.value })}
@@ -1158,7 +1158,7 @@ export default function AdminCmsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Section Main Heading</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Section Main Heading</label>
                   <Input
                     value={content.partnershipHeading || "Presented in Partnership"}
                     onChange={(e) => setContent({ ...content, partnershipHeading: e.target.value })}
@@ -1169,7 +1169,7 @@ export default function AdminCmsPage() {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">Partnership Section Description</label>
+                <label className="text-xs font-semibold text-slate-700 block mb-1">Partnership Section Description</label>
                 <Input
                   value={content.partnershipDescription || "A strategic sporting union combining authentic martial arts governance with modern tournament technology."}
                   onChange={(e) => setContent({ ...content, partnershipDescription: e.target.value })}
@@ -1178,51 +1178,51 @@ export default function AdminCmsPage() {
               </div>
 
               {/* Kukkiwon Card Config */}
-              <div className="p-5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-4">
+              <div className="p-5 rounded-xl bg-slate-50 border border-slate-200 space-y-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-amber-400">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600">
                     Kukkiwon Card Configuration
                   </h4>
                   <Badge variant="gold">Governing Authority</Badge>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">Institution Title</label>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">Institution Title</label>
                     <Input
                       value={content.kukkiwonTitle || "World Taekwondo Headquarters Kukkiwon"}
                       onChange={(e) => setContent({ ...content, kukkiwonTitle: e.target.value })}
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">Branch Name</label>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">Branch Name</label>
                     <Input
                       value={content.kukkiwonBranch || "India North Branch"}
                       onChange={(e) => setContent({ ...content, kukkiwonBranch: e.target.value })}
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">Role / Function</label>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">Role / Function</label>
                     <Input
                       value={content.kukkiwonRole || "Official Governing Authority"}
                       onChange={(e) => setContent({ ...content, kukkiwonRole: e.target.value })}
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">Badge Text</label>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">Badge Text</label>
                     <Input
                       value={content.kukkiwonBadge || "Sanctioning Body"}
                       onChange={(e) => setContent({ ...content, kukkiwonBadge: e.target.value })}
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">Official Portal URL</label>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">Official Portal URL</label>
                     <Input
                       value={content.kukkiwonUrl || "https://kukkiwon-india.org/"}
                       onChange={(e) => setContent({ ...content, kukkiwonUrl: e.target.value })}
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">Portal Link Text</label>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">Portal Link Text</label>
                     <Input
                       value={content.kukkiwonUrlText || "Visit Kukkiwon India"}
                       onChange={(e) => setContent({ ...content, kukkiwonUrlText: e.target.value })}
@@ -1230,7 +1230,7 @@ export default function AdminCmsPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Kukkiwon Detailed Description</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Kukkiwon Detailed Description</label>
                   <Textarea
                     rows={3}
                     value={content.kukkiwonDescription || ""}
@@ -1241,8 +1241,8 @@ export default function AdminCmsPage() {
               </div>
 
             </CardContent>
-            <CardFooter className="flex justify-end border-t border-slate-800 pt-4">
-              <Button onClick={() => handleSaveInfo()} disabled={saving} className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold flex items-center gap-2">
+            <CardFooter className="flex justify-end border-t border-slate-100 pt-4">
+              <Button onClick={() => handleSaveInfo()} disabled={saving} className="bg-[#0066FF] hover:bg-blue-700 text-white font-bold shadow-xs cursor-pointer flex items-center gap-2">
                 <Save className="w-4 h-4" />
                 {saving ? "Saving..." : "Save Partnership Section"}
               </Button>
@@ -1250,14 +1250,14 @@ export default function AdminCmsPage() {
           </Card>
 
           {/* Section 2: Tournament Disciplines & Structure */}
-          <Card className="bg-slate-900/60 border-slate-800">
+          <Card className="bg-white border-slate-200 shadow-xs">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle className="text-white text-xl flex items-center gap-2">
+                <CardTitle className="text-slate-900 text-xl flex items-center gap-2">
                   <Layers className="w-5 h-5 text-emerald-400" />
                   2. Tournament Disciplines & Divisions
                 </CardTitle>
-                <CardDescription className="text-slate-400">
+                <CardDescription className="text-slate-500">
                   Manage the official competition categories and divisions displayed on the homepage.
                 </CardDescription>
               </div>
@@ -1276,7 +1276,7 @@ export default function AdminCmsPage() {
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Section Tagline</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Section Tagline</label>
                   <Input
                     value={content.disciplinesTagline || "Tournament Structure"}
                     onChange={(e) => setContent({ ...content, disciplinesTagline: e.target.value })}
@@ -1284,7 +1284,7 @@ export default function AdminCmsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Section Heading</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Section Heading</label>
                   <Input
                     value={content.disciplinesHeading || "Championship Details & Disciplines"}
                     onChange={(e) => setContent({ ...content, disciplinesHeading: e.target.value })}
@@ -1294,7 +1294,7 @@ export default function AdminCmsPage() {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">Section Description</label>
+                <label className="text-xs font-semibold text-slate-700 block mb-1">Section Description</label>
                 <Input
                   value={content.disciplinesDescription || "Official competition divisions, category weight brackets, and venue regulations."}
                   onChange={(e) => setContent({ ...content, disciplinesDescription: e.target.value })}
@@ -1305,13 +1305,13 @@ export default function AdminCmsPage() {
               {/* Visual Disciplines Cards Grid */}
               <div className="space-y-3 pt-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                  <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Configured Discipline Cards ({disciplineCards.length})
                   </span>
                   <button
                     type="button"
                     onClick={() => setShowRawDisciplinesJson(!showRawDisciplinesJson)}
-                    className="text-xs text-amber-400 hover:underline flex items-center gap-1"
+                    className="text-xs text-blue-600 hover:underline flex items-center gap-1"
                   >
                     <Code className="w-3.5 h-3.5" />
                     {showRawDisciplinesJson ? "Hide Raw JSON" : "Advanced: Edit Raw JSON"}
@@ -1322,7 +1322,7 @@ export default function AdminCmsPage() {
                   {disciplineCards.map((card, idx) => (
                     <div
                       key={idx}
-                      className="p-5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2 relative group hover:border-slate-700 transition-all"
+                      className="p-5 rounded-xl bg-slate-50 border border-slate-200 space-y-2 relative group hover:border-slate-200 transition-all"
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-[11px] font-mono text-emerald-400 font-bold uppercase">
@@ -1332,7 +1332,7 @@ export default function AdminCmsPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-7 w-7 p-0 text-slate-400 hover:text-white"
+                            className="h-7 w-7 p-0 text-slate-400 hover:text-slate-900"
                             onClick={() => {
                               setEditingDisciplineIndex(idx);
                               setDisciplineForm({ ...card });
@@ -1351,14 +1351,14 @@ export default function AdminCmsPage() {
                           </Button>
                         </div>
                       </div>
-                      <h4 className="text-sm font-bold text-white uppercase">{card.title}</h4>
+                      <h4 className="text-sm font-bold text-slate-900 uppercase">{card.title}</h4>
                       <p className="text-xs text-slate-400 leading-relaxed line-clamp-3">{card.description}</p>
                     </div>
                   ))}
                 </div>
 
                 {showRawDisciplinesJson && (
-                  <div className="mt-4 p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+                  <div className="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
                     <label className="text-xs font-mono text-slate-400 block">Disciplines JSON String</label>
                     <Textarea
                       rows={5}
@@ -1372,14 +1372,14 @@ export default function AdminCmsPage() {
                           // Invalid JSON typing
                         }
                       }}
-                      className="font-mono text-xs text-emerald-400 bg-slate-900"
+                      className="font-mono text-xs text-emerald-400 bg-white"
                     />
                   </div>
                 )}
               </div>
             </CardContent>
-            <CardFooter className="flex justify-end border-t border-slate-800 pt-4">
-              <Button onClick={() => handleSaveInfo()} disabled={saving} className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold flex items-center gap-2">
+            <CardFooter className="flex justify-end border-t border-slate-100 pt-4">
+              <Button onClick={() => handleSaveInfo()} disabled={saving} className="bg-[#0066FF] hover:bg-blue-700 text-white font-bold shadow-xs cursor-pointer flex items-center gap-2">
                 <Save className="w-4 h-4" />
                 {saving ? "Saving..." : "Save Disciplines Section"}
               </Button>
@@ -1387,20 +1387,20 @@ export default function AdminCmsPage() {
           </Card>
 
           {/* Section 3: Registration CTA Section */}
-          <Card className="bg-slate-900/60 border-slate-800">
+          <Card className="bg-white border-slate-200 shadow-xs">
             <CardHeader>
-              <CardTitle className="text-white text-xl flex items-center gap-2">
+              <CardTitle className="text-slate-900 text-xl flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-blue-400" />
                 3. Registration Call-to-Action (CTA) Section
               </CardTitle>
-              <CardDescription className="text-slate-400">
+              <CardDescription className="text-slate-500">
                 Call to action prompt displayed above footer motivating academies and athletes to enroll.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">CTA Tagline (Pill)</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">CTA Tagline (Pill)</label>
                   <Input
                     value={content.ctaTagline || "Accreditation & Badges"}
                     onChange={(e) => setContent({ ...content, ctaTagline: e.target.value })}
@@ -1408,7 +1408,7 @@ export default function AdminCmsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">CTA Main Headline</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">CTA Main Headline</label>
                   <Input
                     value={content.ctaTitle || "Ready to Take Part?"}
                     onChange={(e) => setContent({ ...content, ctaTitle: e.target.value })}
@@ -1418,7 +1418,7 @@ export default function AdminCmsPage() {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">CTA Description Paragraph</label>
+                <label className="text-xs font-semibold text-slate-700 block mb-1">CTA Description Paragraph</label>
                 <Textarea
                   rows={2}
                   value={content.ctaDescription || ""}
@@ -1429,7 +1429,7 @@ export default function AdminCmsPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Primary Button Label</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Primary Button Label</label>
                   <Input
                     value={content.ctaPrimaryBtnText || "Register Now"}
                     onChange={(e) => setContent({ ...content, ctaPrimaryBtnText: e.target.value })}
@@ -1437,7 +1437,7 @@ export default function AdminCmsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Secondary Button Label</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Secondary Button Label</label>
                   <Input
                     value={content.ctaSecondaryBtnText || "Contact Secretariat"}
                     onChange={(e) => setContent({ ...content, ctaSecondaryBtnText: e.target.value })}
@@ -1446,8 +1446,8 @@ export default function AdminCmsPage() {
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="flex justify-end border-t border-slate-800 pt-4">
-              <Button onClick={() => handleSaveInfo()} disabled={saving} className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold flex items-center gap-2">
+            <CardFooter className="flex justify-end border-t border-slate-100 pt-4">
+              <Button onClick={() => handleSaveInfo()} disabled={saving} className="bg-[#0066FF] hover:bg-blue-700 text-white font-bold shadow-xs cursor-pointer flex items-center gap-2">
                 <Save className="w-4 h-4" />
                 {saving ? "Saving..." : "Save CTA Section"}
               </Button>
@@ -1455,19 +1455,19 @@ export default function AdminCmsPage() {
           </Card>
 
           {/* Section 4: About Page Mission & Standards */}
-          <Card className="bg-slate-900/60 border-slate-800">
+          <Card className="bg-white border-slate-200 shadow-xs">
             <CardHeader>
-              <CardTitle className="text-white text-xl flex items-center gap-2">
+              <CardTitle className="text-slate-900 text-xl flex items-center gap-2">
                 <Target className="w-5 h-5 text-rose-400" />
                 4. About Page: Standards & Mission Section
               </CardTitle>
-              <CardDescription className="text-slate-400">
+              <CardDescription className="text-slate-500">
                 Participation standards, ethics, and accreditation mission displayed on /about.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">Mission / Standards Heading</label>
+                <label className="text-xs font-semibold text-slate-700 block mb-1">Mission / Standards Heading</label>
                 <Input
                   value={content.aboutMissionHeading || "Participation Standards & Ethics"}
                   onChange={(e) => setContent({ ...content, aboutMissionHeading: e.target.value })}
@@ -1475,7 +1475,7 @@ export default function AdminCmsPage() {
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">Mission / Subtitle Text</label>
+                <label className="text-xs font-semibold text-slate-700 block mb-1">Mission / Subtitle Text</label>
                 <Textarea
                   rows={2}
                   value={content.aboutMissionText || ""}
@@ -1484,8 +1484,8 @@ export default function AdminCmsPage() {
                 />
               </div>
             </CardContent>
-            <CardFooter className="flex justify-end border-t border-slate-800 pt-4">
-              <Button onClick={() => handleSaveInfo()} disabled={saving} className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold flex items-center gap-2">
+            <CardFooter className="flex justify-end border-t border-slate-100 pt-4">
+              <Button onClick={() => handleSaveInfo()} disabled={saving} className="bg-[#0066FF] hover:bg-blue-700 text-white font-bold shadow-xs cursor-pointer flex items-center gap-2">
                 <Save className="w-4 h-4" />
                 {saving ? "Saving..." : "Save About Page Mission"}
               </Button>
@@ -1500,17 +1500,17 @@ export default function AdminCmsPage() {
       {activeTab === "dates" && content && (
         <div className="space-y-8">
           {/* Important Dates Section Headers */}
-          <Card className="bg-slate-900/60 border-slate-800">
+          <Card className="bg-white border-slate-200 shadow-xs">
             <CardHeader>
-              <CardTitle className="text-white text-xl">Dates Section Presentation Headers</CardTitle>
-              <CardDescription className="text-slate-400">
+              <CardTitle className="text-slate-900 text-xl">Dates Section Presentation Headers</CardTitle>
+              <CardDescription className="text-slate-500">
                 Customize the headline and description displayed for this section on the public homepage.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Section Tagline</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Section Tagline</label>
                   <Input
                     value={content.datesTagline || "Key Milestones"}
                     onChange={(e) => setContent({ ...content, datesTagline: e.target.value })}
@@ -1518,7 +1518,7 @@ export default function AdminCmsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Section Heading</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Section Heading</label>
                   <Input
                     value={content.datesHeading || "Important Championship Dates"}
                     onChange={(e) => setContent({ ...content, datesHeading: e.target.value })}
@@ -1527,7 +1527,7 @@ export default function AdminCmsPage() {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">Section Description</label>
+                <label className="text-xs font-semibold text-slate-700 block mb-1">Section Description</label>
                 <Input
                   value={content.datesDescription || "Crucial deadlines for athlete submissions, late registrations, and tournament start dates."}
                   onChange={(e) => setContent({ ...content, datesDescription: e.target.value })}
@@ -1535,8 +1535,8 @@ export default function AdminCmsPage() {
                 />
               </div>
             </CardContent>
-            <CardFooter className="flex justify-end border-t border-slate-800 pt-4">
-              <Button onClick={() => handleSaveInfo()} disabled={saving} className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold flex items-center gap-2">
+            <CardFooter className="flex justify-end border-t border-slate-100 pt-4">
+              <Button onClick={() => handleSaveInfo()} disabled={saving} className="bg-[#0066FF] hover:bg-blue-700 text-white font-bold shadow-xs cursor-pointer flex items-center gap-2">
                 <Save className="w-4 h-4" />
                 {saving ? "Saving..." : "Save Dates Section Headers"}
               </Button>
@@ -1544,11 +1544,11 @@ export default function AdminCmsPage() {
           </Card>
 
           {/* Important Dates Milestones CRUD Table */}
-          <Card className="bg-slate-900/60 border-slate-800">
+          <Card className="bg-white border-slate-200 shadow-xs">
             <CardHeader className="flex flex-row justify-between items-center">
               <div>
-                <CardTitle className="text-white text-xl">Tournament Schedule & Milestones</CardTitle>
-                <CardDescription className="text-slate-400">
+                <CardTitle className="text-slate-900 text-xl">Tournament Schedule & Milestones</CardTitle>
+                <CardDescription className="text-slate-500">
                   Manage individual chronological deadlines displayed in the Important Dates section on the public site.
                 </CardDescription>
               </div>
@@ -1559,7 +1559,7 @@ export default function AdminCmsPage() {
                   setDateForm({ title: "", description: "", date: new Date().toISOString(), displayOrder: dates.length + 1, isPublished: true });
                   setDateModalOpen(true);
                 }}
-                className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold flex items-center gap-1.5"
+                className="bg-[#0066FF] hover:bg-blue-700 text-white font-bold shadow-xs cursor-pointer flex items-center gap-1.5"
               >
                 <Plus className="w-4 h-4" /> Add Date
               </Button>
@@ -1580,10 +1580,10 @@ export default function AdminCmsPage() {
                     <TableRow key={d.id}>
                       <TableCell className="font-mono text-slate-400">#{d.displayOrder}</TableCell>
                       <TableCell>
-                        <div className="font-bold text-white text-sm">{d.title}</div>
+                        <div className="font-bold text-slate-900 text-sm">{d.title}</div>
                         {d.description && <div className="text-xs text-slate-400">{d.description}</div>}
                       </TableCell>
-                      <TableCell className="text-xs text-amber-400 font-mono">
+                      <TableCell className="text-xs text-blue-600 font-mono">
                         {new Date(d.date).toLocaleDateString("en-US", {
                           weekday: "short",
                           month: "short",
@@ -1631,11 +1631,11 @@ export default function AdminCmsPage() {
           Tab 5: Announcements CRUD
           ========================================================================= */}
       {activeTab === "announcements" && (
-        <Card className="bg-slate-900/60 border-slate-800">
+        <Card className="bg-white border-slate-200 shadow-xs">
           <CardHeader className="flex flex-row justify-between items-center">
             <div>
-              <CardTitle className="text-white text-xl">Championship Announcements</CardTitle>
-              <CardDescription className="text-slate-400">
+              <CardTitle className="text-slate-900 text-xl">Championship Announcements</CardTitle>
+              <CardDescription className="text-slate-500">
                 Broadcast official circulars, reminders, and alerts with automatic expiration filtering.
               </CardDescription>
             </div>
@@ -1646,7 +1646,7 @@ export default function AdminCmsPage() {
                 setAnnForm({ title: "", shortDescription: "", content: "", expiryDate: "", status: "PUBLISHED" });
                 setAnnModalOpen(true);
               }}
-              className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold flex items-center gap-1.5"
+              className="bg-[#0066FF] hover:bg-blue-700 text-white font-bold shadow-xs cursor-pointer flex items-center gap-1.5"
             >
               <Plus className="w-4 h-4" /> New Announcement
             </Button>
@@ -1665,7 +1665,7 @@ export default function AdminCmsPage() {
                 {announcements.map((a) => (
                   <TableRow key={a.id}>
                     <TableCell>
-                      <div className="font-bold text-white text-sm">{a.title}</div>
+                      <div className="font-bold text-slate-900 text-sm">{a.title}</div>
                       <div className="text-xs text-slate-400">{a.shortDescription}</div>
                     </TableCell>
                     <TableCell>
@@ -1710,11 +1710,11 @@ export default function AdminCmsPage() {
           Tab 6: FAQ CRUD
           ========================================================================= */}
       {activeTab === "faqs" && (
-        <Card className="bg-slate-900/60 border-slate-800">
+        <Card className="bg-white border-slate-200 shadow-xs">
           <CardHeader className="flex flex-row justify-between items-center">
             <div>
-              <CardTitle className="text-white text-xl">Frequently Asked Questions (FAQ)</CardTitle>
-              <CardDescription className="text-slate-400">
+              <CardTitle className="text-slate-900 text-xl">Frequently Asked Questions (FAQ)</CardTitle>
+              <CardDescription className="text-slate-500">
                 Institutional answers for athlete registration, eligibility, accreditation, and rules.
               </CardDescription>
             </div>
@@ -1725,7 +1725,7 @@ export default function AdminCmsPage() {
                 setFaqForm({ question: "", answer: "", displayOrder: faqs.length + 1, isPublished: true });
                 setFaqModalOpen(true);
               }}
-              className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold flex items-center gap-1.5"
+              className="bg-[#0066FF] hover:bg-blue-700 text-white font-bold shadow-xs cursor-pointer flex items-center gap-1.5"
             >
               <Plus className="w-4 h-4" /> Add FAQ
             </Button>
@@ -1733,16 +1733,16 @@ export default function AdminCmsPage() {
           <CardContent>
             <div className="space-y-4">
               {faqs.map((f) => (
-                <div key={f.id} className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 flex justify-between items-start gap-4">
+                <div key={f.id} className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex justify-between items-start gap-4">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono text-amber-400 font-bold">Q#{f.displayOrder}</span>
-                      <h4 className="text-white font-bold text-sm">{f.question}</h4>
+                      <span className="text-xs font-mono text-blue-600 font-bold">Q#{f.displayOrder}</span>
+                      <h4 className="text-slate-900 font-bold text-sm">{f.question}</h4>
                       <Badge variant={f.isPublished ? "success" : "default"} className="text-[10px]">
                         {f.isPublished ? "LIVE" : "DRAFT"}
                       </Badge>
                     </div>
-                    <p className="text-xs text-slate-300 pl-7">{f.answer}</p>
+                    <p className="text-xs text-slate-700 pl-7">{f.answer}</p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <Button
@@ -1771,22 +1771,22 @@ export default function AdminCmsPage() {
           Tab 7: Contact & Secretariat Information
           ========================================================================= */}
       {activeTab === "contact" && content && championship && (
-        <Card className="bg-slate-900/60 border-slate-800">
+        <Card className="bg-white border-slate-200 shadow-xs">
           <CardHeader>
-            <CardTitle className="text-white text-xl">Official Secretariat & Contact Channels</CardTitle>
-            <CardDescription className="text-slate-400">
+            <CardTitle className="text-slate-900 text-xl">Official Secretariat & Contact Channels</CardTitle>
+            <CardDescription className="text-slate-500">
               Secretariat email, phone helpline, operating hours, venue address, and verified social media links.
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleSaveInfo}>
             <CardContent className="space-y-6">
-              <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-4">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-400">
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-4">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600">
                   Homepage Secretariat Section Headers
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">Section Tagline</label>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">Section Tagline</label>
                     <Input
                       value={content.contactTagline || "Tournament Secretariat"}
                       onChange={(e) => setContent({ ...content, contactTagline: e.target.value })}
@@ -1794,7 +1794,7 @@ export default function AdminCmsPage() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">Section Heading</label>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">Section Heading</label>
                     <Input
                       value={content.contactHeading || "Official Inquiries & Support"}
                       onChange={(e) => setContent({ ...content, contactHeading: e.target.value })}
@@ -1803,7 +1803,7 @@ export default function AdminCmsPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Section Subtitle / Description</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Section Subtitle / Description</label>
                   <Input
                     value={content.contactDescription || "Official communication channels for participating academies, coaches, and delegations."}
                     onChange={(e) => setContent({ ...content, contactDescription: e.target.value })}
@@ -1814,7 +1814,7 @@ export default function AdminCmsPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Official Email</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Official Email</label>
                   <Input
                     type="email"
                     value={content.contactEmail || ""}
@@ -1823,7 +1823,7 @@ export default function AdminCmsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Helpline Phone</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Helpline Phone</label>
                   <Input
                     value={content.contactPhone || ""}
                     onChange={(e) => setContent({ ...content, contactPhone: e.target.value })}
@@ -1831,7 +1831,7 @@ export default function AdminCmsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Support Operating Hours</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Support Operating Hours</label>
                   <Input
                     value={content.contactPhoneHours || "Monday to Saturday • 9:00 AM – 6:00 PM IST"}
                     onChange={(e) => setContent({ ...content, contactPhoneHours: e.target.value })}
@@ -1841,7 +1841,7 @@ export default function AdminCmsPage() {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">Secretariat Physical Address / Venue</label>
+                <label className="text-xs font-semibold text-slate-700 block mb-1">Secretariat Physical Address / Venue</label>
                 <Input
                   value={content.contactAddress || championship.contactAddress || ""}
                   onChange={(e) => {
@@ -1854,7 +1854,7 @@ export default function AdminCmsPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Instagram URL</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Instagram URL</label>
                   <Input
                     value={championship.socialLinks?.instagram || ""}
                     onChange={(e) => setChampionship({
@@ -1864,7 +1864,7 @@ export default function AdminCmsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Facebook URL</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Facebook URL</label>
                   <Input
                     value={championship.socialLinks?.facebook || ""}
                     onChange={(e) => setChampionship({
@@ -1874,7 +1874,7 @@ export default function AdminCmsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">YouTube Channel</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">YouTube Channel</label>
                   <Input
                     value={championship.socialLinks?.youtube || ""}
                     onChange={(e) => setChampionship({
@@ -1885,8 +1885,8 @@ export default function AdminCmsPage() {
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="flex justify-end border-t border-slate-800 pt-4">
-              <Button type="submit" disabled={saving} className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold flex items-center gap-2">
+            <CardFooter className="flex justify-end border-t border-slate-100 pt-4">
+              <Button type="submit" disabled={saving} className="bg-[#0066FF] hover:bg-blue-700 text-white font-bold shadow-xs cursor-pointer flex items-center gap-2">
                 <Save className="w-4 h-4" />
                 {saving ? "Saving..." : "Save Contact Info"}
               </Button>
@@ -1899,41 +1899,41 @@ export default function AdminCmsPage() {
           Tab 8: Publishing State
           ========================================================================= */}
       {activeTab === "publishing" && content && (
-        <Card className="bg-slate-900/60 border-slate-800">
+        <Card className="bg-white border-slate-200 shadow-xs">
           <CardHeader>
-            <CardTitle className="text-white text-xl">Championship Publication & Versioning</CardTitle>
-            <CardDescription className="text-slate-400">
+            <CardTitle className="text-slate-900 text-xl">Championship Publication & Versioning</CardTitle>
+            <CardDescription className="text-slate-500">
               Audit status, verify live visibility, and toggle public accessibility.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
                 <div className="text-xs text-slate-400 uppercase font-semibold mb-1">Current CMS Status</div>
-                <div className="text-xl font-bold text-white flex items-center gap-2">
+                <div className="text-xl font-bold text-slate-900 flex items-center gap-2">
                   <Badge variant={statusVariant(content.websiteStatus)} className="text-sm px-3 py-1">
                     {content.websiteStatus}
                   </Badge>
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
                 <div className="text-xs text-slate-400 uppercase font-semibold mb-1">Registration State</div>
-                <div className="text-xl font-bold text-white flex items-center gap-2">
+                <div className="text-xl font-bold text-slate-900 flex items-center gap-2">
                   <Badge variant={statusVariant(regState)} className="text-sm px-3 py-1">
                     {regState}
                   </Badge>
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
                 <div className="text-xs text-slate-400 uppercase font-semibold mb-1">Last Published Timestamp</div>
-                <div className="text-xs font-mono text-amber-400 mt-2">
+                <div className="text-xs font-mono text-blue-600 mt-2">
                   {content.publishedAt ? new Date(content.publishedAt).toLocaleString() : "Never Published"}
                 </div>
                 {content.updatedBy && (
                   <div className="text-[11px] text-slate-400 mt-1">
-                    By: <span className="text-slate-300 font-semibold">{content.updatedBy}</span>
+                    By: <span className="text-slate-700 font-semibold">{content.updatedBy}</span>
                   </div>
                 )}
               </div>
@@ -1941,10 +1941,10 @@ export default function AdminCmsPage() {
 
             <div className="p-6 rounded-2xl bg-amber-400/5 border border-amber-400/20 space-y-4">
               <h3 className="text-base font-bold text-amber-300 flex items-center gap-2">
-                <Shield className="w-5 h-5 text-amber-400" />
+                <Shield className="w-5 h-5 text-blue-600" />
                 Live Publication Controls
               </h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
+              <p className="text-xs text-slate-700 leading-relaxed">
                 When published, the public website dynamically queries and displays your latest configured dates,
                 categories, fees, and announcements. Unpublished drafts are strictly hidden from participants.
               </p>
@@ -1981,15 +1981,15 @@ export default function AdminCmsPage() {
 
       {/* Discipline Card Modal */}
       {disciplineModalOpen && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+        <div className="fixed inset-0 bg-slate-50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl">
+            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <Layers className="w-5 h-5 text-emerald-400" />
               {editingDisciplineIndex !== null ? "Edit Discipline Card" : "Add Discipline Card"}
             </h3>
             <form onSubmit={handleSaveDisciplineModal} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">Discipline Title</label>
+                <label className="text-xs font-semibold text-slate-700 block mb-1">Discipline Title</label>
                 <Input
                   value={disciplineForm.title}
                   onChange={(e) => setDisciplineForm({ ...disciplineForm, title: e.target.value })}
@@ -1998,7 +1998,7 @@ export default function AdminCmsPage() {
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">Category / Divisions</label>
+                <label className="text-xs font-semibold text-slate-700 block mb-1">Category / Divisions</label>
                 <Input
                   value={disciplineForm.category}
                   onChange={(e) => setDisciplineForm({ ...disciplineForm, category: e.target.value })}
@@ -2007,7 +2007,7 @@ export default function AdminCmsPage() {
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">Detailed Description</label>
+                <label className="text-xs font-semibold text-slate-700 block mb-1">Detailed Description</label>
                 <Textarea
                   rows={4}
                   value={disciplineForm.description}
@@ -2017,7 +2017,7 @@ export default function AdminCmsPage() {
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
                 <Button variant="ghost" type="button" onClick={() => setDisciplineModalOpen(false)}>Cancel</Button>
                 <Button type="submit" className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold">
                   {editingDisciplineIndex !== null ? "Update Card" : "Add Card"}
@@ -2030,14 +2030,14 @@ export default function AdminCmsPage() {
 
       {/* Date Modal */}
       {dateModalOpen && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl">
-            <h3 className="text-lg font-bold text-white">
+        <div className="fixed inset-0 bg-slate-50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl">
+            <h3 className="text-lg font-bold text-slate-900">
               {editingDate ? "Edit Important Date" : "Add Important Date"}
             </h3>
             <form onSubmit={handleSaveDate} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">Title</label>
+                <label className="text-xs font-semibold text-slate-700 block mb-1">Title</label>
                 <Input
                   value={dateForm.title}
                   onChange={(e) => setDateForm({ ...dateForm, title: e.target.value })}
@@ -2046,7 +2046,7 @@ export default function AdminCmsPage() {
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">Description (Optional)</label>
+                <label className="text-xs font-semibold text-slate-700 block mb-1">Description (Optional)</label>
                 <Input
                   value={dateForm.description}
                   onChange={(e) => setDateForm({ ...dateForm, description: e.target.value })}
@@ -2055,17 +2055,17 @@ export default function AdminCmsPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Date</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Date</label>
                   <Input
                     type="datetime-local"
                     value={formatForInput(dateForm.date)}
                     onChange={(e) => setDateForm({ ...dateForm, date: e.target.value })}
-                    className="bg-slate-900 border-slate-700 text-white [color-scheme:dark] focus:border-amber-400 focus:ring-amber-400"
+                    className="bg-white border-slate-200 text-slate-900 [color-scheme:light] focus:border-blue-500 focus:ring-blue-500"
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Display Order</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Display Order</label>
                   <Input
                     type="number"
                     value={dateForm.displayOrder}
@@ -2080,14 +2080,14 @@ export default function AdminCmsPage() {
                   id="datePublished"
                   checked={dateForm.isPublished}
                   onChange={(e) => setDateForm({ ...dateForm, isPublished: e.target.checked })}
-                  className="rounded border-slate-700 bg-slate-950 text-amber-500"
+                  className="rounded border-slate-200 bg-slate-100 text-blue-600"
                 />
-                <label htmlFor="datePublished" className="text-xs text-slate-300">Publish on public website</label>
+                <label htmlFor="datePublished" className="text-xs text-slate-700">Publish on public website</label>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
                 <Button variant="ghost" type="button" onClick={() => setDateModalOpen(false)}>Cancel</Button>
-                <Button type="submit" className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold">Save Date</Button>
+                <Button type="submit" className="bg-[#0066FF] hover:bg-blue-700 text-white font-bold shadow-xs cursor-pointer">Save Date</Button>
               </div>
             </form>
           </div>
@@ -2096,14 +2096,14 @@ export default function AdminCmsPage() {
 
       {/* FAQ Modal */}
       {faqModalOpen && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl">
-            <h3 className="text-lg font-bold text-white">
+        <div className="fixed inset-0 bg-slate-50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl">
+            <h3 className="text-lg font-bold text-slate-900">
               {editingFaq ? "Edit FAQ" : "Add FAQ"}
             </h3>
             <form onSubmit={handleSaveFaq} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">Question</label>
+                <label className="text-xs font-semibold text-slate-700 block mb-1">Question</label>
                 <Input
                   value={faqForm.question}
                   onChange={(e) => setFaqForm({ ...faqForm, question: e.target.value })}
@@ -2112,7 +2112,7 @@ export default function AdminCmsPage() {
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">Answer</label>
+                <label className="text-xs font-semibold text-slate-700 block mb-1">Answer</label>
                 <Textarea
                   rows={4}
                   value={faqForm.answer}
@@ -2123,7 +2123,7 @@ export default function AdminCmsPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Display Order</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Display Order</label>
                   <Input
                     type="number"
                     value={faqForm.displayOrder}
@@ -2137,15 +2137,15 @@ export default function AdminCmsPage() {
                     id="faqPublished"
                     checked={faqForm.isPublished}
                     onChange={(e) => setFaqForm({ ...faqForm, isPublished: e.target.checked })}
-                    className="rounded border-slate-700 bg-slate-950 text-amber-500"
+                    className="rounded border-slate-200 bg-slate-100 text-blue-600"
                   />
-                  <label htmlFor="faqPublished" className="text-xs text-slate-300">Live on Public Site</label>
+                  <label htmlFor="faqPublished" className="text-xs text-slate-700">Live on Public Site</label>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
                 <Button variant="ghost" type="button" onClick={() => setFaqModalOpen(false)}>Cancel</Button>
-                <Button type="submit" className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold">Save FAQ</Button>
+                <Button type="submit" className="bg-[#0066FF] hover:bg-blue-700 text-white font-bold shadow-xs cursor-pointer">Save FAQ</Button>
               </div>
             </form>
           </div>
@@ -2154,14 +2154,14 @@ export default function AdminCmsPage() {
 
       {/* Announcement Modal */}
       {annModalOpen && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl">
-            <h3 className="text-lg font-bold text-white">
+        <div className="fixed inset-0 bg-slate-50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl">
+            <h3 className="text-lg font-bold text-slate-900">
               {editingAnn ? "Edit Announcement" : "Create Announcement"}
             </h3>
             <form onSubmit={handleSaveAnn} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">Title</label>
+                <label className="text-xs font-semibold text-slate-700 block mb-1">Title</label>
                 <Input
                   value={annForm.title}
                   onChange={(e) => setAnnForm({ ...annForm, title: e.target.value })}
@@ -2169,7 +2169,7 @@ export default function AdminCmsPage() {
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">Short Description</label>
+                <label className="text-xs font-semibold text-slate-700 block mb-1">Short Description</label>
                 <Input
                   value={annForm.shortDescription}
                   onChange={(e) => setAnnForm({ ...annForm, shortDescription: e.target.value })}
@@ -2177,7 +2177,7 @@ export default function AdminCmsPage() {
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">Full Content</label>
+                <label className="text-xs font-semibold text-slate-700 block mb-1">Full Content</label>
                 <Textarea
                   rows={4}
                   value={annForm.content}
@@ -2187,11 +2187,11 @@ export default function AdminCmsPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Status</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Status</label>
                   <select
                     value={annForm.status}
                     onChange={(e) => setAnnForm({ ...annForm, status: e.target.value as any })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-md px-3 py-2 text-xs text-white"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs text-slate-900"
                   >
                     <option value="PUBLISHED">PUBLISHED</option>
                     <option value="DRAFT">DRAFT</option>
@@ -2199,19 +2199,19 @@ export default function AdminCmsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Expiry Date (Optional)</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Expiry Date (Optional)</label>
                   <Input
                     type="date"
                     value={annForm.expiryDate ? annForm.expiryDate.substring(0, 10) : ""}
                     onChange={(e) => setAnnForm({ ...annForm, expiryDate: e.target.value })}
-                    className="bg-slate-900 border-slate-700 text-white [color-scheme:dark] focus:border-amber-400 focus:ring-amber-400"
+                    className="bg-white border-slate-200 text-slate-900 [color-scheme:light] focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
                 <Button variant="ghost" type="button" onClick={() => setAnnModalOpen(false)}>Cancel</Button>
-                <Button type="submit" className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold">Save Announcement</Button>
+                <Button type="submit" className="bg-[#0066FF] hover:bg-blue-700 text-white font-bold shadow-xs cursor-pointer">Save Announcement</Button>
               </div>
             </form>
           </div>

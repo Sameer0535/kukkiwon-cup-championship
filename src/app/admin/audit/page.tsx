@@ -70,11 +70,11 @@ export default function AdminAuditLogsPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white flex items-center gap-2.5">
+          <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-slate-900 flex items-center gap-2.5">
             <ShieldAlert className="h-6 w-6 text-purple-400" />
             <span>Immutable Administrative Audit Trail</span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             Complete cryptographic audit trail of logins, document verifications, status approvals, card revocations, and financial actions
           </p>
         </div>
@@ -88,7 +88,7 @@ export default function AdminAuditLogsPage() {
           <button
             onClick={() => loadAuditLogs()}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs font-semibold text-slate-200 hover:bg-slate-800 transition disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-200 hover:bg-slate-800 transition disabled:opacity-50"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
             <span>Refresh</span>
@@ -97,10 +97,10 @@ export default function AdminAuditLogsPage() {
       </div>
 
       {/* Filter Bar */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-xs p-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-slate-400" />
-          <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+          <Filter className="h-4 w-4 text-slate-500" />
+          <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
             Filter Action:
           </span>
           <select
@@ -109,7 +109,7 @@ export default function AdminAuditLogsPage() {
               setActionFilter(e.target.value);
               setPage(1);
             }}
-            className="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-amber-400"
+            className="px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-amber-400"
           >
             <option value="">All Security Events</option>
             <option value="ADMIN_LOGIN">ADMIN_LOGIN</option>
@@ -126,16 +126,16 @@ export default function AdminAuditLogsPage() {
           </select>
         </div>
 
-        <div className="text-xs font-mono text-slate-400">
-          Recorded Audit Events: <strong className="text-white">{total}</strong>
+        <div className="text-xs font-mono text-slate-500">
+          Recorded Audit Events: <strong className="text-slate-900">{total}</strong>
         </div>
       </div>
 
       {/* Main Audit Table */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 overflow-hidden shadow-2xl">
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-xs overflow-hidden shadow-2xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="border-b border-slate-800 bg-slate-950/80 text-[11px] uppercase tracking-wider text-slate-400 font-bold">
+            <thead className="border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-wider text-slate-500 font-bold">
               <tr>
                 <th className="p-3.5">Timestamp</th>
                 <th className="p-3.5">Admin User</th>
@@ -146,27 +146,27 @@ export default function AdminAuditLogsPage() {
                 <th className="p-3.5 text-right">IP / Client</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 text-slate-300">
+            <tbody className="divide-y divide-slate-800/60 text-slate-700">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-400">
+                  <td colSpan={7} className="p-8 text-center text-slate-500">
                     <Loader2 className="h-6 w-6 animate-spin mx-auto text-purple-400 mb-2" />
                     <span>Loading immutable audit ledger...</span>
                   </td>
                 </tr>
               ) : logs.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-400">
-                    <p className="font-semibold text-white">No audit events match your search.</p>
+                  <td colSpan={7} className="p-8 text-center text-slate-500">
+                    <p className="font-semibold text-slate-900">No audit events match your search.</p>
                   </td>
                 </tr>
               ) : (
                 logs.map((log) => (
                   <tr key={log.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="p-3.5 whitespace-nowrap font-mono text-[11px] text-slate-400">
+                    <td className="p-3.5 whitespace-nowrap font-mono text-[11px] text-slate-500">
                       {new Date(log.createdAt).toLocaleString()}
                     </td>
-                    <td className="p-3.5 whitespace-nowrap font-semibold text-white">
+                    <td className="p-3.5 whitespace-nowrap font-semibold text-slate-900">
                       <div>{log.adminName || "System Admin"}</div>
                       <div className="text-[10px] font-mono text-slate-500">{log.adminRole || "SUPER_ADMIN"}</div>
                     </td>
@@ -175,13 +175,13 @@ export default function AdminAuditLogsPage() {
                         {log.action}
                       </span>
                     </td>
-                    <td className="p-3.5 whitespace-nowrap font-medium text-slate-300">
+                    <td className="p-3.5 whitespace-nowrap font-medium text-slate-700">
                       {log.entityType}
                     </td>
                     <td className="p-3.5 whitespace-nowrap font-mono text-[11px] text-[#D4AF37]">
                       {log.entityId}
                     </td>
-                    <td className="p-3.5 max-w-xs truncate font-mono text-[10px] text-slate-400">
+                    <td className="p-3.5 max-w-xs truncate font-mono text-[10px] text-slate-500">
                       {log.newValue || log.oldValue || "—"}
                     </td>
                     <td className="p-3.5 text-right whitespace-nowrap font-mono text-[10px] text-slate-500">
@@ -195,27 +195,27 @@ export default function AdminAuditLogsPage() {
         </div>
 
         {/* Server-Side Pagination Bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between p-4 border-t border-slate-800 text-xs text-slate-400 gap-3">
+        <div className="flex flex-col sm:flex-row items-center justify-between p-4 border-t border-slate-200 text-xs text-slate-500 gap-3">
           <div>
-            Showing <strong className="text-white">{logs.length}</strong> of{" "}
-            <strong className="text-white">{total}</strong> audit entries
+            Showing <strong className="text-slate-900">{logs.length}</strong> of{" "}
+            <strong className="text-slate-900">{total}</strong> audit entries
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1 || loading}
-              className="p-1.5 rounded border border-slate-700 bg-slate-900 text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-800"
+              className="p-1.5 rounded border border-slate-200 bg-white text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-800"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <span className="px-2 font-mono text-white">
+            <span className="px-2 font-mono text-slate-900">
               Page {page} of {totalPages}
             </span>
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page >= totalPages || loading}
-              className="p-1.5 rounded border border-slate-700 bg-slate-900 text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-800"
+              className="p-1.5 rounded border border-slate-200 bg-white text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-800"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
