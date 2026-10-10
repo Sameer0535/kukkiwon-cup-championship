@@ -270,11 +270,11 @@ export default function AdminPaymentVerificationPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white flex items-center gap-2.5">
-            <CreditCard className="h-6 w-6 text-emerald-400" />
+          <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-slate-900 flex items-center gap-2.5">
+            <CreditCard className="h-6 w-6 text-blue-600" />
             <span>Payment Verification Queue</span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             Authoritative verification of tournament fees (₹2,500) and submitted UTR / UPI transaction references.
           </p>
         </div>
@@ -282,7 +282,7 @@ export default function AdminPaymentVerificationPage() {
         <button
           onClick={() => loadQueue()}
           disabled={loading}
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs font-semibold text-slate-200 hover:bg-slate-800 transition disabled:opacity-50 self-start sm:self-auto"
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-100 transition disabled:opacity-50 self-start sm:self-auto shadow-xs"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
           <span>Refresh Queue</span>
@@ -291,14 +291,14 @@ export default function AdminPaymentVerificationPage() {
 
       {/* Success Notification Alert */}
       {successBanner && (
-        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-medium flex items-center justify-between gap-3 animate-in fade-in">
+        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-center justify-between gap-3 shadow-xs">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+            <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
             <span>{successBanner}</span>
           </div>
           <button
             onClick={() => setSuccessBanner(null)}
-            className="text-emerald-400 hover:text-white text-xs font-bold"
+            className="text-emerald-700 hover:text-emerald-900 text-xs font-bold"
           >
             Dismiss
           </button>
@@ -306,16 +306,16 @@ export default function AdminPaymentVerificationPage() {
       )}
 
       {/* Filter Bar */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 flex flex-wrap items-center justify-between gap-3 shadow-xs">
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-slate-400" />
-          <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+          <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
             Verification Status:
           </span>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-emerald-400"
+            className="px-3 py-1.5 rounded-lg bg-white border border-slate-300 text-xs text-slate-800 focus:outline-none focus:border-blue-600"
           >
             <option value="">All Verification Requests</option>
             <option value="UNDER_REVIEW">UNDER REVIEW (Pending)</option>
@@ -324,16 +324,16 @@ export default function AdminPaymentVerificationPage() {
           </select>
         </div>
 
-        <div className="text-xs font-mono text-slate-400">
-          Queue Total: <strong className="text-white">{items.length}</strong>
+        <div className="text-xs font-mono text-slate-500">
+          Queue Total: <strong className="text-slate-900">{items.length}</strong>
         </div>
       </div>
 
       {/* Main Payment Verification Table */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 overflow-hidden shadow-2xl">
+      <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="border-b border-slate-800 bg-slate-950/80 text-[11px] uppercase tracking-wider text-slate-400 font-bold">
+            <thead className="border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-wider text-slate-600 font-bold">
               <tr>
                 <th className="p-3.5">Participant</th>
                 <th className="p-3.5">Submitted UTR Reference</th>
@@ -344,32 +344,32 @@ export default function AdminPaymentVerificationPage() {
                 <th className="p-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 text-slate-300">
+            <tbody className="divide-y divide-slate-100 text-slate-700">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="p-10 text-center text-slate-400">
-                    <Loader2 className="h-6 w-6 animate-spin mx-auto text-emerald-400 mb-2" />
+                  <td colSpan={7} className="p-10 text-center text-slate-500">
+                    <Loader2 className="h-6 w-6 animate-spin mx-auto text-blue-600 mb-2" />
                     <span>Loading payment verification queue...</span>
                   </td>
                 </tr>
               ) : items.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-10 text-center text-slate-400">
-                    <CheckCircle2 className="h-8 w-8 mx-auto text-emerald-500/60 mb-2" />
-                    <p className="font-semibold text-white">All payments verified.</p>
+                  <td colSpan={7} className="p-10 text-center text-slate-500">
+                    <CheckCircle2 className="h-8 w-8 mx-auto text-emerald-600 mb-2" />
+                    <p className="font-semibold text-slate-900">All payments verified.</p>
                     <p className="text-xs text-slate-500 mt-1">No pending transaction verification requests at this time.</p>
                   </td>
                 </tr>
               ) : (
                 items.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-800/40 transition-colors">
+                  <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
                     {/* Participant Details */}
                     <td className="p-3.5">
                       <div className="flex items-center gap-3">
                         {item.photoUrl ? (
                           <div
                             onClick={() => setSelectedDossier(item)}
-                            className="relative w-10 h-12 rounded-lg overflow-hidden border border-slate-700 bg-slate-950 shrink-0 cursor-pointer hover:border-[#D4AF37] transition group"
+                            className="relative w-10 h-12 rounded-lg overflow-hidden border border-slate-200 bg-slate-100 shrink-0 cursor-pointer hover:border-blue-600 transition group"
                             title="Click to inspect athlete dossier"
                           >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -385,7 +385,7 @@ export default function AdminPaymentVerificationPage() {
                         ) : (
                           <div
                             onClick={() => setSelectedDossier(item)}
-                            className="w-10 h-12 rounded-lg border border-dashed border-slate-700 bg-slate-950 flex items-center justify-center text-slate-600 shrink-0 cursor-pointer hover:border-[#D4AF37] transition"
+                            className="w-10 h-12 rounded-lg border border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-slate-400 shrink-0 cursor-pointer hover:border-blue-600 transition"
                             title="Click to inspect athlete dossier"
                           >
                             <Camera className="h-4 w-4" />
@@ -394,16 +394,16 @@ export default function AdminPaymentVerificationPage() {
                         <div>
                           <div
                             onClick={() => setSelectedDossier(item)}
-                            className="font-bold text-white uppercase text-xs cursor-pointer hover:text-[#D4AF37] transition"
+                            className="font-bold text-slate-900 uppercase text-xs cursor-pointer hover:text-blue-600 transition"
                             title="Click to inspect athlete dossier"
                           >
                             {item.athleteName}
                           </div>
-                          <div className="text-[10px] font-mono text-[#D4AF37]">
+                          <div className="text-[10px] font-mono text-blue-700 font-bold">
                             {item.athleteId || item.registrationNumber}
                           </div>
                           {item.kukkiwonId && (
-                            <div className="text-[10px] font-mono text-slate-400">
+                            <div className="text-[10px] font-mono text-slate-500">
                               {item.kukkiwonId}
                             </div>
                           )}
@@ -414,10 +414,10 @@ export default function AdminPaymentVerificationPage() {
                     {/* Submitted UTR Reference */}
                     <td className="p-3.5">
                       <div className="space-y-0.5">
-                        <span className="font-mono text-xs font-bold text-emerald-400 bg-slate-950 px-2 py-0.5 rounded border border-emerald-500/30 inline-block tracking-wider">
+                        <span className="font-mono text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 inline-block tracking-wider">
                           {item.utrNumber || "OFFLINE-MANUAL"}
                         </span>
-                        <div className="text-[10px] text-slate-400">
+                        <div className="text-[10px] text-slate-500">
                           {item.participantType === "COACH" ? "Coach Accreditation" : "UPI / Net Banking"}
                         </div>
                       </div>
@@ -425,18 +425,18 @@ export default function AdminPaymentVerificationPage() {
 
                     {/* Fee Amount */}
                     <td className="p-3.5 whitespace-nowrap">
-                      <span className="text-sm font-black text-white">
+                      <span className="text-sm font-black text-slate-900">
                         {item.amountFormatted || "₹1,500"}
                       </span>
                     </td>
 
                     {/* Division / Academy */}
                     <td className="p-3.5">
-                      <div className="text-xs text-slate-200 font-medium">
+                      <div className="text-xs text-slate-800 font-medium">
                         {item.categoryName}
                       </div>
-                      <div className="text-[11px] text-slate-400 flex items-center gap-1">
-                        <Building2 className="h-3 w-3 text-slate-500" />
+                      <div className="text-[11px] text-slate-500 flex items-center gap-1">
+                        <Building2 className="h-3 w-3 text-slate-400" />
                         <span>{item.academyName}</span>
                       </div>
                     </td>
@@ -446,10 +446,10 @@ export default function AdminPaymentVerificationPage() {
                       <span
                         className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${
                           item.status === "VERIFIED"
-                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                             : item.status === "REJECTED"
-                            ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-                            : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                            ? "bg-rose-50 text-rose-700 border border-rose-200"
+                            : "bg-amber-50 text-amber-700 border border-amber-200"
                         }`}
                       >
                         {item.status === "UNDER_REVIEW" ? "PENDING VERIFICATION" : item.status}
@@ -457,7 +457,7 @@ export default function AdminPaymentVerificationPage() {
                     </td>
 
                     {/* Submitted Date */}
-                    <td className="p-3.5 whitespace-nowrap text-slate-400 font-mono text-[11px]">
+                    <td className="p-3.5 whitespace-nowrap text-slate-500 font-mono text-[11px]">
                       {new Date(item.submittedAt || item.uploadedAt).toLocaleDateString("en-IN", {
                         day: "numeric",
                         month: "short",
@@ -471,7 +471,7 @@ export default function AdminPaymentVerificationPage() {
                         <button
                           type="button"
                           onClick={() => setSelectedDossier(item)}
-                          className="px-2.5 py-1 rounded bg-[#D4AF37]/15 hover:bg-[#D4AF37]/25 text-[#D4AF37] border border-[#D4AF37]/30 text-[11px] font-bold transition inline-flex items-center gap-1 shadow-sm cursor-pointer"
+                          className="px-2.5 py-1 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-[11px] font-bold transition inline-flex items-center gap-1 shadow-xs cursor-pointer"
                           title="Quick inspect athlete photo, Govt ID, Kukkiwon cert & details"
                         >
                           <Eye className="h-3 w-3" />
@@ -480,7 +480,7 @@ export default function AdminPaymentVerificationPage() {
 
                         <Link
                           href={`/admin/registrations/${item.registrationId}`}
-                          className="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-semibold transition inline-flex items-center gap-1"
+                          className="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-[11px] font-semibold transition inline-flex items-center gap-1"
                         >
                           <span>Full</span>
                           <ExternalLink className="h-2.5 w-2.5" />
@@ -490,7 +490,7 @@ export default function AdminPaymentVerificationPage() {
                           <button
                             onClick={() => handleApprove(item.id, item.athleteName)}
                             disabled={actionLoadingId === item.id}
-                            className="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold uppercase transition inline-flex items-center gap-1 shadow-sm disabled:opacity-50"
+                            className="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold uppercase transition inline-flex items-center gap-1 shadow-xs disabled:opacity-50"
                           >
                             {actionLoadingId === item.id ? (
                               <Loader2 className="h-3 w-3 animate-spin" />
@@ -505,7 +505,7 @@ export default function AdminPaymentVerificationPage() {
                           <button
                             onClick={() => handleReject(item.id, item.athleteName)}
                             disabled={actionLoadingId === item.id}
-                            className="px-2 py-1 rounded border border-rose-800/80 bg-rose-950/40 hover:bg-rose-900 text-rose-300 text-[11px] font-bold uppercase transition disabled:opacity-50"
+                            className="px-2 py-1 rounded border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold uppercase transition disabled:opacity-50"
                           >
                             Reject
                           </button>

@@ -70,17 +70,19 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-8 max-w-7xl">
       {/* Welcome Banner */}
-      <div className="rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-950 via-[#0A192F] to-slate-950 p-6 sm:p-8 space-y-3">
+      <div className="rounded-2xl border border-blue-900/20 bg-gradient-to-r from-blue-950 via-[#0F3E8C] to-blue-900 p-6 sm:p-8 space-y-3 shadow-md text-white">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <Badge variant="gold">Official Championship Operations</Badge>
-          <span className="text-xs font-mono text-slate-400">
-            Kukkiwon Cup 2026 Registry • <strong className="text-emerald-400">ACTIVE</strong>
+          <span className="px-2.5 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider bg-white/10 text-white border border-white/20">
+            Official Championship Operations
+          </span>
+          <span className="text-xs font-mono text-blue-200">
+            Kukkiwon Cup 2026 Registry • <strong className="text-emerald-300">ACTIVE</strong>
           </span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight uppercase">
           Tournament Administration Overview
         </h1>
-        <p className="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
+        <p className="text-xs sm:text-sm text-blue-100/90 max-w-3xl leading-relaxed">
           Real-time monitoring and administrative workflow management for athlete registration intake, fee reconciliation, document verification, and accreditation credential issuance.
         </p>
       </div>
@@ -91,9 +93,9 @@ export default async function AdminDashboardPage() {
           const Icon = c.icon;
           return (
             <Link key={c.title} href={c.href} className="group">
-              <Card className={`border ${c.borderColor} bg-slate-900/60 p-5 group-hover:border-slate-600 transition-all h-full flex flex-col justify-between`}>
+              <Card className="border border-slate-200 bg-white p-5 group-hover:border-blue-400 group-hover:shadow-md transition-all h-full flex flex-col justify-between shadow-xs">
                 <div className="flex items-center justify-between pb-3">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">
                     {c.title}
                   </span>
                   <div className={`p-2.5 rounded-xl ${c.bgColor} ${c.color}`}>
@@ -101,10 +103,10 @@ export default async function AdminDashboardPage() {
                   </div>
                 </div>
                 <div>
-                  <div className="text-3xl font-black text-white tracking-tight font-mono">
+                  <div className="text-3xl font-black text-slate-900 tracking-tight font-mono">
                     {c.value}
                   </div>
-                  <div className="text-xs text-slate-400 mt-1 font-medium">
+                  <div className="text-xs text-slate-500 mt-1 font-medium">
                     {c.subtitle}
                   </div>
                 </div>
@@ -117,17 +119,17 @@ export default async function AdminDashboardPage() {
       {/* Grid: Recent Registrations & Audit Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Registrations Table */}
-        <div className="lg:col-span-2 rounded-2xl border border-slate-800 bg-slate-900/50 p-6 space-y-4">
+        <div className="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6 space-y-4 shadow-xs">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-base font-bold uppercase tracking-wider text-white">
+              <h2 className="text-base font-bold uppercase tracking-wider text-slate-900">
                 Recent Athlete Registrations
               </h2>
-              <p className="text-xs text-slate-400">Latest entries received across categories</p>
+              <p className="text-xs text-slate-500">Latest entries received across categories</p>
             </div>
             <Link
               href="/admin/registrations"
-              className="inline-flex items-center gap-1 text-xs font-bold text-[#D4AF37] hover:text-amber-300 transition"
+              className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-800 transition"
             >
               <span>View All</span>
               <ArrowRight className="h-3.5 w-3.5" />
@@ -136,49 +138,49 @@ export default async function AdminDashboardPage() {
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="border-b border-slate-800 text-[11px] uppercase tracking-wider text-slate-400 font-bold">
+              <thead className="border-b border-slate-200 bg-slate-50/60 text-[11px] uppercase tracking-wider text-slate-500 font-bold">
                 <tr>
-                  <th className="pb-3">Athlete</th>
-                  <th className="pb-3">Category</th>
-                  <th className="pb-3">Status</th>
-                  <th className="pb-3">Payment</th>
-                  <th className="pb-3 text-right">Action</th>
+                  <th className="py-3 px-2">Athlete</th>
+                  <th className="py-3 px-2">Category</th>
+                  <th className="py-3 px-2">Status</th>
+                  <th className="py-3 px-2">Payment</th>
+                  <th className="py-3 px-2 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 text-slate-300">
+              <tbody className="divide-y divide-slate-100 text-slate-700">
                 {(metrics.recentRegistrations || []).map((reg) => (
-                  <tr key={reg.id} className="hover:bg-slate-800/30 transition-colors">
-                    <td className="py-3">
-                      <div className="font-bold text-white uppercase">{reg.athleteName}</div>
-                      <div className="text-[10px] font-mono text-slate-400">{reg.athleteId}</div>
+                  <tr key={reg.id} className="hover:bg-slate-50/70 transition-colors">
+                    <td className="py-3 px-2">
+                      <div className="font-bold text-slate-900 uppercase">{reg.athleteName}</div>
+                      <div className="text-[10px] font-mono text-slate-500">{reg.athleteId}</div>
                     </td>
-                    <td className="py-3">
-                      <span className="text-slate-300 font-medium">{reg.categoryName}</span>
+                    <td className="py-3 px-2">
+                      <span className="text-slate-600 font-medium">{reg.categoryName}</span>
                     </td>
-                    <td className="py-3">
+                    <td className="py-3 px-2">
                       <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${
                         reg.registrationStatus === "APPROVED" || reg.registrationStatus === "CONFIRMED"
-                          ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                          ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                           : reg.registrationStatus === "SUBMITTED"
-                          ? "bg-sky-500/10 text-sky-400 border border-sky-500/20"
-                          : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                          ? "bg-blue-50 text-blue-700 border border-blue-200"
+                          : "bg-amber-50 text-amber-700 border border-amber-200"
                       }`}>
                         {reg.registrationStatus}
                       </span>
                     </td>
-                    <td className="py-3">
+                    <td className="py-3 px-2">
                       <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${
                         reg.paymentStatus === "PAID"
-                          ? "bg-emerald-500/10 text-emerald-400"
-                          : "bg-amber-500/10 text-amber-400"
+                          ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                          : "bg-amber-50 text-amber-700 border border-amber-200"
                       }`}>
                         {reg.paymentStatus}
                       </span>
                     </td>
-                    <td className="py-3 text-right">
+                    <td className="py-3 px-2 text-right">
                       <Link
                         href={`/admin/registrations/${reg.id}`}
-                        className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-semibold transition"
+                        className="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-[11px] font-semibold transition shadow-xs"
                       >
                         Inspect
                       </Link>
@@ -198,17 +200,17 @@ export default async function AdminDashboardPage() {
         </div>
 
         {/* Security & Audit Trail Feed */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-6 space-y-4">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 space-y-4 shadow-xs">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-base font-bold uppercase tracking-wider text-white">
+              <h2 className="text-base font-bold uppercase tracking-wider text-slate-900">
                 Recent Audit Trail
               </h2>
-              <p className="text-xs text-slate-400">Security event traceability</p>
+              <p className="text-xs text-slate-500">Security event traceability</p>
             </div>
             <Link
               href="/admin/audit"
-              className="inline-flex items-center gap-1 text-xs font-bold text-[#D4AF37] hover:text-amber-300 transition"
+              className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-800 transition"
             >
               <span>View Logs</span>
               <ArrowRight className="h-3.5 w-3.5" />
@@ -219,20 +221,20 @@ export default async function AdminDashboardPage() {
             {(metrics.recentAuditLogs || []).map((log) => (
               <div
                 key={log.id}
-                className="p-3 rounded-xl border border-slate-800/80 bg-slate-950/40 text-xs space-y-1"
+                className="p-3 rounded-xl border border-slate-200 bg-slate-50/70 text-xs space-y-1"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-[10px] font-bold text-sky-400">
+                  <span className="font-mono text-[10px] font-bold text-blue-700">
                     {log.action}
                   </span>
-                  <span className="text-[10px] text-slate-500 font-mono">
+                  <span className="text-[10px] text-slate-400 font-mono">
                     {new Date(log.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                   </span>
                 </div>
-                <div className="text-[11px] text-slate-300 font-medium">
+                <div className="text-[11px] text-slate-800 font-medium">
                   {log.adminName || "System Admin"} ({log.adminRole || "SUPER_ADMIN"})
                 </div>
-                <div className="text-[10px] text-slate-400 font-mono truncate">
+                <div className="text-[10px] text-slate-500 font-mono truncate">
                   {log.entityType}: {log.entityId}
                 </div>
               </div>

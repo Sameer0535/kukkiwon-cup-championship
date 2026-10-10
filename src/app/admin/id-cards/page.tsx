@@ -353,11 +353,11 @@ export default function AdminIdCardsPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white flex items-center gap-2.5">
-            <IdCard className="h-6 w-6 text-[#D4AF37]" />
+          <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-slate-900 flex items-center gap-2.5">
+            <IdCard className="h-6 w-6 text-blue-600" />
             <span>Digital ID Cards & Accreditation</span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             Institutional badge generation, background template uploads, and verified bulk printing
           </p>
         </div>
@@ -365,7 +365,7 @@ export default function AdminIdCardsPage() {
         <div className="flex flex-wrap items-center gap-2.5">
           <button
             onClick={() => setGenModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold uppercase transition"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold uppercase transition shadow-xs"
           >
             <PlusCircle className="h-3.5 w-3.5" />
             <span>Generate ID Card</span>
@@ -375,7 +375,7 @@ export default function AdminIdCardsPage() {
             href="/api/admin/id-cards/bulk-download"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase transition"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold uppercase transition border border-slate-200"
           >
             <Download className="h-3.5 w-3.5" />
             <span>Bulk Download / Print All</span>
@@ -384,7 +384,7 @@ export default function AdminIdCardsPage() {
           <button
             onClick={() => loadCards()}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs font-semibold text-slate-200 hover:bg-slate-800 transition disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-100 transition disabled:opacity-50 shadow-xs"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
             <span>Refresh</span>
@@ -393,14 +393,14 @@ export default function AdminIdCardsPage() {
       </div>
 
       {/* Template Management Card */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 space-y-4">
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4 shadow-xs">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="space-y-1">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-              <ImageIcon className="h-4 w-4 text-[#D4AF37]" />
+            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <ImageIcon className="h-4 w-4 text-blue-600" />
               <span>ID Card Background Template</span>
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500">
               Upload a custom tournament graphic template (PNG/JPG 100mm × 150mm). The 5 mandatory fields (Photo, Name, Academy, Athlete ID, Kukkiwon ID) will be rendered over it.
             </p>
           </div>
@@ -416,7 +416,7 @@ export default function AdminIdCardsPage() {
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={templateLoading}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-xs font-bold text-amber-300 uppercase transition disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-blue-200 bg-blue-50 hover:bg-blue-100 text-xs font-bold text-blue-700 uppercase transition disabled:opacity-50"
             >
               <Upload className="h-3.5 w-3.5" />
               <span>{templateUrl ? "Replace Template" : "Upload Template"}</span>
@@ -426,7 +426,7 @@ export default function AdminIdCardsPage() {
               <button
                 onClick={handleRemoveTemplate}
                 disabled={templateLoading}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-rose-900/60 bg-rose-950/30 hover:bg-rose-900 text-xs font-bold text-rose-300 uppercase transition disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 text-xs font-bold text-rose-700 uppercase transition disabled:opacity-50"
               >
                 <Trash2 className="h-3.5 w-3.5" />
                 <span>Remove</span>
@@ -436,8 +436,8 @@ export default function AdminIdCardsPage() {
         </div>
 
         {templateUrl ? (
-          <div className="flex items-center gap-4 p-3 rounded-xl bg-slate-950/80 border border-slate-800">
-            <div className="relative w-16 h-24 rounded-lg overflow-hidden border border-amber-500/30 bg-slate-900 shrink-0">
+          <div className="flex items-center gap-4 p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <div className="relative w-16 h-24 rounded-lg overflow-hidden border border-blue-200 bg-white shrink-0 shadow-xs">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={templateUrl}
@@ -446,27 +446,27 @@ export default function AdminIdCardsPage() {
               />
             </div>
             <div className="space-y-0.5 text-xs">
-              <div className="font-bold text-emerald-400 flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5" />
+              <div className="font-bold text-emerald-700 flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
                 <span>Custom ID Card Template Active</span>
               </div>
-              <p className="text-slate-400">
+              <p className="text-slate-500">
                 All single downloads and bulk print batches will render with this background design.
               </p>
             </div>
           </div>
         ) : (
-          <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 text-xs text-slate-400">
+          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-500">
             No custom template uploaded. Badges are currently rendered using the standard Kukkiwon Cup navy & gold corporate frame.
           </div>
         )}
       </div>
 
       {/* Filter Bar */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 flex flex-wrap items-center justify-between gap-3 shadow-xs">
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-slate-400" />
-          <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+          <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
             Card Status:
           </span>
           <select
@@ -475,7 +475,7 @@ export default function AdminIdCardsPage() {
               setStatusFilter(e.target.value);
               setPage(1);
             }}
-            className="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-amber-400"
+            className="px-3 py-1.5 rounded-lg bg-white border border-slate-300 text-xs text-slate-800 focus:outline-none focus:border-blue-600"
           >
             <option value="">All Card Statuses</option>
             <option value="GENERATED">GENERATED</option>
@@ -486,16 +486,16 @@ export default function AdminIdCardsPage() {
           </select>
         </div>
 
-        <div className="text-xs font-mono text-slate-400">
-          Total Cards: <strong className="text-white">{total}</strong>
+        <div className="text-xs font-mono text-slate-500">
+          Total Cards: <strong className="text-slate-900">{total}</strong>
         </div>
       </div>
 
       {/* Main ID Card Table */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 overflow-hidden shadow-2xl">
+      <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="border-b border-slate-800 bg-slate-950/80 text-[11px] uppercase tracking-wider text-slate-400 font-bold">
+            <thead className="border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-wider text-slate-600 font-bold">
               <tr>
                 <th className="p-3.5">Athlete ID</th>
                 <th className="p-3.5">Athlete Name</th>
@@ -506,18 +506,18 @@ export default function AdminIdCardsPage() {
                 <th className="p-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 text-slate-300">
+            <tbody className="divide-y divide-slate-100 text-slate-700">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-400">
-                    <Loader2 className="h-6 w-6 animate-spin mx-auto text-[#D4AF37] mb-2" />
+                  <td colSpan={7} className="p-8 text-center text-slate-500">
+                    <Loader2 className="h-6 w-6 animate-spin mx-auto text-blue-600 mb-2" />
                     <span>Loading athlete ID cards...</span>
                   </td>
                 </tr>
               ) : cards.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-400">
-                    <p className="font-semibold text-white">No ID cards found.</p>
+                  <td colSpan={7} className="p-8 text-center text-slate-500">
+                    <p className="font-semibold text-slate-900">No ID cards found.</p>
                     <p className="text-xs text-slate-500 mt-1">
                       Click &ldquo;Generate ID Card&rdquo; above to generate cards for verified/paid registrations.
                     </p>
@@ -525,37 +525,37 @@ export default function AdminIdCardsPage() {
                 </tr>
               ) : (
                 cards.map((c) => (
-                  <tr key={c.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="p-3.5 font-mono font-bold text-[#D4AF37] whitespace-nowrap">
+                  <tr key={c.id} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="p-3.5 font-mono font-bold text-blue-700 whitespace-nowrap">
                       {c.athleteId}
                     </td>
                     <td className="p-3.5 whitespace-nowrap">
-                      <div className="font-bold text-white uppercase">{c.athleteName}</div>
-                      <div className="text-[11px] text-amber-400 font-mono flex items-center gap-1 mt-0.5 lowercase">
+                      <div className="font-bold text-slate-900 uppercase">{c.athleteName}</div>
+                      <div className="text-[11px] text-slate-500 font-mono flex items-center gap-1 mt-0.5 lowercase">
                         <Mail className="h-3 w-3 text-slate-400 shrink-0" />
                         <span className="truncate max-w-[200px]">{c.athleteEmail || "No email on record"}</span>
                       </div>
                     </td>
-                    <td className="p-3.5 text-slate-300 whitespace-nowrap">
+                    <td className="p-3.5 text-slate-600 whitespace-nowrap">
                       {c.academyName}
                     </td>
-                    <td className="p-3.5 font-mono text-white font-bold whitespace-nowrap">
+                    <td className="p-3.5 font-mono text-slate-900 font-bold whitespace-nowrap">
                       v{c.version}
                     </td>
                     <td className="p-3.5 whitespace-nowrap">
                       <span
                         className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${
                           c.status === "GENERATED" || c.status === "REISSUED"
-                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                             : c.status === "REVOKED"
-                            ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-                            : "bg-slate-800 text-slate-400"
+                            ? "bg-rose-50 text-rose-700 border border-rose-200"
+                            : "bg-slate-100 text-slate-600 border border-slate-200"
                         }`}
                       >
                         {c.status}
                       </span>
                     </td>
-                    <td className="p-3.5 whitespace-nowrap text-slate-400 font-mono text-[11px]">
+                    <td className="p-3.5 whitespace-nowrap text-slate-500 font-mono text-[11px]">
                       {new Date(c.generatedAt).toLocaleDateString()}
                     </td>
                     <td className="p-3.5 text-right whitespace-nowrap">
@@ -566,7 +566,7 @@ export default function AdminIdCardsPage() {
                             setViewModalOpen(true);
                           }}
                           title="View / Preview Athlete ID Card"
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold uppercase transition"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-[10px] font-bold uppercase transition"
                         >
                           <Eye className="h-3 w-3" />
                           <span>View</span>
@@ -577,7 +577,7 @@ export default function AdminIdCardsPage() {
                           target="_blank"
                           rel="noopener noreferrer"
                           title="Print / Download Single Card"
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[10px] font-bold uppercase transition"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-[10px] font-bold uppercase transition"
                         >
                           <Download className="h-3 w-3" />
                           <span>Download</span>
@@ -588,7 +588,7 @@ export default function AdminIdCardsPage() {
                             onClick={() => handleRevoke(c.athleteId)}
                             disabled={actionLoading}
                             title="Revoke Card"
-                            className="px-2 py-1 rounded border border-rose-900/60 bg-rose-950/30 hover:bg-rose-900 text-rose-300 text-[10px] font-bold uppercase transition"
+                            className="px-2 py-1 rounded border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-[10px] font-bold uppercase transition"
                           >
                             Revoke
                           </button>
@@ -597,7 +597,7 @@ export default function AdminIdCardsPage() {
                             onClick={() => handleReissue(c.athleteId)}
                             disabled={actionLoading}
                             title="Reissue Card"
-                            className="px-2 py-1 rounded border border-emerald-900/60 bg-emerald-950/30 hover:bg-emerald-900 text-emerald-300 text-[10px] font-bold uppercase transition"
+                            className="px-2 py-1 rounded border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase transition"
                           >
                             Reissue
                           </button>
@@ -612,27 +612,27 @@ export default function AdminIdCardsPage() {
         </div>
 
         {/* Server-Side Pagination Bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between p-4 border-t border-slate-800 text-xs text-slate-400 gap-3">
+        <div className="flex flex-col sm:flex-row items-center justify-between p-4 border-t border-slate-200 text-xs text-slate-600 gap-3 bg-slate-50/50">
           <div>
-            Showing <strong className="text-white">{cards.length}</strong> of{" "}
-            <strong className="text-white">{total}</strong> accreditation cards
+            Showing <strong className="text-slate-900">{cards.length}</strong> of{" "}
+            <strong className="text-slate-900">{total}</strong> accreditation cards
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1 || loading}
-              className="p-1.5 rounded border border-slate-700 bg-slate-900 text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-800"
+              className="p-1.5 rounded border border-slate-200 bg-white text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 shadow-xs"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <span className="px-2 font-mono text-white">
+            <span className="px-2 font-mono text-slate-900">
               Page {page} of {totalPages}
             </span>
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page >= totalPages || loading}
-              className="p-1.5 rounded border border-slate-700 bg-slate-900 text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-800"
+              className="p-1.5 rounded border border-slate-200 bg-white text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 shadow-xs"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
@@ -642,27 +642,27 @@ export default function AdminIdCardsPage() {
 
       {/* Manual Generation Modal */}
       {genModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 text-white space-y-5 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 text-slate-900 space-y-5 shadow-2xl">
             <div className="space-y-1">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <IdCard className="h-5 w-5 text-amber-400" />
+              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <IdCard className="h-5 w-5 text-blue-600" />
                 <span>Generate Athlete ID Card</span>
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-500">
                 Only registrations with verified payments can be issued an institutional ID card.
               </p>
             </div>
 
             {genError && (
-              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
                 <AlertCircle className="h-4 w-4 shrink-0" />
                 <span>{genError}</span>
               </div>
             )}
 
             {genSuccess && (
-              <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
+              <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 shrink-0" />
                 <span>{genSuccess}</span>
               </div>
@@ -670,7 +670,7 @@ export default function AdminIdCardsPage() {
 
             <form onSubmit={handleGenerateCard} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
                   Registration ID *
                 </label>
                 <input
@@ -679,7 +679,7 @@ export default function AdminIdCardsPage() {
                   value={genRegId}
                   onChange={(e) => setGenRegId(e.target.value)}
                   required
-                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
+                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600"
                 />
               </div>
 
@@ -691,14 +691,14 @@ export default function AdminIdCardsPage() {
                     setGenError(null);
                     setGenSuccess(null);
                   }}
-                  className="px-4 py-2 rounded-xl border border-slate-700 text-xs font-semibold text-slate-300 hover:bg-slate-800"
+                  className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-100 bg-white"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={genLoading}
-                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold uppercase transition disabled:opacity-50"
+                  className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold uppercase transition disabled:opacity-50"
                 >
                   {genLoading ? "Generating..." : "Generate Card"}
                 </button>

@@ -185,7 +185,7 @@ const FALLBACK_CHAMPIONSHIPS: Map<string, FallbackChampionshipData> = new Map([
       start_date: "2026-11-20T09:00:00Z",
       end_date: "2026-11-23T18:00:00Z",
       registration_open: "2026-03-01T00:00:00.000Z",
-      registration_close: "2026-04-30T23:59:59.000Z",
+      registration_close: "2026-11-10T23:59:59.000Z",
       late_registration_deadline: "2026-11-15T23:59:59Z",
       venue: "Indira Gandhi Indoor Stadium Complex",
       city: "New Delhi",
@@ -484,7 +484,7 @@ const FALLBACK_DATES: Map<string, ChampionshipImportantDateDTO> = new Map([
       championshipId: "champ-kukkiwon-2026",
       title: "Regular Registration Closes",
       description: "Standard entry fee cutoff across all divisions.",
-      date: "2026-04-30T23:59:59.000Z",
+      date: "2026-11-10T23:59:59.000Z",
       displayOrder: 2,
       isPublished: true,
       createdAt: "2026-09-01T00:00:00Z",
@@ -782,7 +782,9 @@ export class CmsService {
           const availability = this.calculateRegistrationAvailability(
             effectiveRegOpen,
             effectiveRegClose,
-            fb?.status || champ.status
+            fb?.status || champ.status,
+            new Date(),
+            fb?.late_registration_deadline || null
           );
 
           return {
@@ -844,7 +846,9 @@ export class CmsService {
     const availability = this.calculateRegistrationAvailability(
       new Date(champ.registration_open),
       new Date(champ.registration_close),
-      champ.status
+      champ.status,
+      new Date(),
+      champ.late_registration_deadline || null
     );
 
     return {
@@ -1251,20 +1255,24 @@ export class CmsService {
     regOpen: Date | string,
     regClose: Date | string,
     status: string,
-    now: Date = new Date()
+    now: Date = new Date(),
+    lateDeadline?: Date | string | null
   ): RegistrationAvailability {
-    if (status === "DRAFT" || status === "ARCHIVED" || status === "COMPLETED") {
+    if (status === "DRAFT" || status === "ARCHIVED" || status === "COMPLETED" || status === "REGISTRATION_CLOSED") {
       return "CLOSED";
     }
 
     const openTime = new Date(regOpen).getTime();
     const closeTime = new Date(regClose).getTime();
     const currentTime = now.getTime();
+    const effectiveCloseTime = lateDeadline
+      ? Math.max(closeTime, new Date(lateDeadline).getTime())
+      : closeTime;
 
     if (currentTime < openTime) {
       return "COMING_SOON";
     }
-    if (currentTime > closeTime) {
+    if (currentTime > effectiveCloseTime) {
       return "CLOSED";
     }
     return "OPEN";
@@ -1302,7 +1310,8 @@ export class CmsService {
       champ.registrationOpen,
       champ.registrationClose,
       champ.status,
-      checkDate
+      checkDate,
+      champ.lateRegistrationDeadline
     );
 
     const currentTime = checkDate.getTime();

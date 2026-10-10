@@ -357,11 +357,11 @@ export default function AdminChampionshipsPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold uppercase tracking-wide text-white flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-amber-400" />
+          <h2 className="text-xl font-bold uppercase tracking-wide text-slate-900 flex items-center gap-2">
+            <Trophy className="h-5 w-5 text-blue-600" />
             <span>Championship Editions</span>
           </h2>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             Tournament configuration & live venue, date, and fee controls.
           </p>
         </div>
@@ -372,17 +372,16 @@ export default function AdminChampionshipsPage() {
             size="sm"
             onClick={loadChampionships}
             disabled={loading}
-            className="border-slate-700 text-slate-300 hover:bg-slate-800 text-xs"
+            className="border-slate-200 text-slate-700 hover:bg-slate-100 bg-white text-xs shadow-xs"
           >
             <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${loading ? "animate-spin" : ""}`} />
             <span>Refresh</span>
           </Button>
 
           <Button
-            variant="gold"
             size="sm"
             onClick={handleOpenCreate}
-            className="text-xs font-bold"
+            className="text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs"
           >
             <Plus className="h-4 w-4 mr-1.5" />
             <span>New Championship</span>
@@ -392,14 +391,14 @@ export default function AdminChampionshipsPage() {
 
       {/* Success Notification */}
       {successBanner && (
-        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-medium flex items-center justify-between gap-3 animate-in fade-in">
+        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-center justify-between gap-3 shadow-xs">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+            <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
             <span>{successBanner}</span>
           </div>
           <button
             onClick={() => setSuccessBanner(null)}
-            className="text-emerald-400 hover:text-white text-xs font-bold"
+            className="text-emerald-700 hover:text-emerald-900 text-xs font-bold"
           >
             Dismiss
           </button>
@@ -407,46 +406,46 @@ export default function AdminChampionshipsPage() {
       )}
 
       {/* Championships Table */}
-      <Card className="border-slate-800 bg-slate-900/60 p-0 overflow-hidden shadow-2xl">
+      <Card className="border-slate-200 bg-white p-0 overflow-hidden shadow-xs">
         <Table>
           <TableHeader>
-            <TableRow className="border-b border-slate-800 bg-slate-950/80">
-              <TableHead className="text-slate-400 uppercase text-[11px] font-bold">Edition / Name</TableHead>
-              <TableHead className="text-slate-400 uppercase text-[11px] font-bold">URL Slug</TableHead>
-              <TableHead className="text-slate-400 uppercase text-[11px] font-bold">Dates & Venue</TableHead>
-              <TableHead className="text-slate-400 uppercase text-[11px] font-bold">Entry Fees</TableHead>
-              <TableHead className="text-slate-400 uppercase text-[11px] font-bold">Status</TableHead>
-              <TableHead className="text-right text-slate-400 uppercase text-[11px] font-bold">Actions</TableHead>
+            <TableRow className="border-b border-slate-200 bg-slate-50">
+              <TableHead className="text-slate-600 uppercase text-[11px] font-bold">Edition / Name</TableHead>
+              <TableHead className="text-slate-600 uppercase text-[11px] font-bold">URL Slug</TableHead>
+              <TableHead className="text-slate-600 uppercase text-[11px] font-bold">Dates & Venue</TableHead>
+              <TableHead className="text-slate-600 uppercase text-[11px] font-bold">Entry Fees</TableHead>
+              <TableHead className="text-slate-600 uppercase text-[11px] font-bold">Status</TableHead>
+              <TableHead className="text-right text-slate-600 uppercase text-[11px] font-bold">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {championships.map((c) => (
-              <TableRow key={c.id} className="hover:bg-slate-800/40 border-b border-slate-800/60 transition-colors">
+              <TableRow key={c.id} className="hover:bg-slate-50/80 border-b border-slate-100 transition-colors">
                 <TableCell>
-                  <div className="font-bold text-white text-xs">{c.name}</div>
-                  <div className="text-[10px] text-slate-400">
+                  <div className="font-bold text-slate-900 text-xs">{c.name}</div>
+                  <div className="text-[10px] text-slate-500">
                     Edition {c.edition || "2026"} • {c.short_name || c.name}
                   </div>
                 </TableCell>
                 <TableCell>
-                  <code className="text-xs text-sky-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
+                  <code className="text-xs text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-150">
                     /{c.slug}
                   </code>
                 </TableCell>
                 <TableCell>
-                  <div className="text-xs text-slate-300 font-medium">
+                  <div className="text-xs text-slate-800 font-medium">
                     {c.start_date} to {c.end_date}
                   </div>
-                  <div className="text-[10px] text-slate-400 truncate max-w-xs flex items-center gap-1 mt-0.5">
-                    <MapPin className="h-3 w-3 text-amber-400 shrink-0" />
+                  <div className="text-[10px] text-slate-500 truncate max-w-xs flex items-center gap-1 mt-0.5">
+                    <MapPin className="h-3 w-3 text-blue-600 shrink-0" />
                     <span>{c.venue}, {c.city}</span>
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className="text-xs font-semibold text-emerald-400">
+                  <div className="text-xs font-semibold text-emerald-700">
                     Athlete: ₹{Number(c.entry_fee_athlete || 2500).toLocaleString("en-IN")}
                   </div>
-                  <div className="text-[10px] text-sky-400 font-bold flex items-center gap-1 mt-0.5">
+                  <div className="text-[10px] text-blue-600 font-bold flex items-center gap-1 mt-0.5">
                     <ShieldCheck className="h-3 w-3" />
                     <span>Coach: Official Accreditation</span>
                   </div>
@@ -470,7 +469,7 @@ export default function AdminChampionshipsPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleOpenEdit(c)}
-                      className="border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-xs font-bold"
+                      className="border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold"
                     >
                       <Edit className="h-3.5 w-3.5 mr-1" />
                       <span>Edit</span>
@@ -480,7 +479,7 @@ export default function AdminChampionshipsPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleOpenDelete(c)}
-                      className="border-rose-500/40 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-bold"
+                      className="border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold"
                     >
                       <Trash2 className="h-3.5 w-3.5 mr-1" />
                       <span>Delete</span>
@@ -489,7 +488,7 @@ export default function AdminChampionshipsPage() {
                     <Link
                       href={`/championship/${c.slug}`}
                       target="_blank"
-                      className="inline-flex items-center gap-1 text-xs text-sky-400 hover:text-sky-300 hover:underline px-2 py-1 rounded bg-slate-800/60"
+                      className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 hover:underline px-2 py-1 rounded bg-slate-100"
                     >
                       <span>Public</span>
                       <ExternalLink className="h-3 w-3" />
@@ -516,7 +515,7 @@ export default function AdminChampionshipsPage() {
       >
         <form onSubmit={handleSaveEdit} className="space-y-4 text-xs">
           {errorBanner && (
-            <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+            <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
               <AlertCircle className="h-4 w-4 shrink-0" />
               <span>{errorBanner}</span>
             </div>
@@ -525,7 +524,7 @@ export default function AdminChampionshipsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Championship Name */}
             <div className="space-y-1">
-              <label className="text-[11px] uppercase font-bold text-slate-300 block">
+              <label className="text-[11px] uppercase font-bold text-slate-700 block">
                 Championship Official Name *
               </label>
               <input
@@ -533,13 +532,13 @@ export default function AdminChampionshipsPage() {
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-amber-400"
+                className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
               />
             </div>
 
             {/* Short Name */}
             <div className="space-y-1">
-              <label className="text-[11px] uppercase font-bold text-slate-300 block">
+              <label className="text-[11px] uppercase font-bold text-slate-700 block">
                 Short Name / Badge Label *
               </label>
               <input
@@ -547,13 +546,13 @@ export default function AdminChampionshipsPage() {
                 required
                 value={formData.short_name}
                 onChange={(e) => setFormData({ ...formData, short_name: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-amber-400"
+                className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
               />
             </div>
 
             {/* Edition */}
             <div className="space-y-1">
-              <label className="text-[11px] uppercase font-bold text-slate-300 block">
+              <label className="text-[11px] uppercase font-bold text-slate-700 block">
                 Edition (Year) *
               </label>
               <input
@@ -561,19 +560,19 @@ export default function AdminChampionshipsPage() {
                 required
                 value={formData.edition}
                 onChange={(e) => setFormData({ ...formData, edition: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-amber-400"
+                className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
               />
             </div>
 
             {/* Status */}
             <div className="space-y-1">
-              <label className="text-[11px] uppercase font-bold text-slate-300 block">
+              <label className="text-[11px] uppercase font-bold text-slate-700 block">
                 Championship Status *
               </label>
               <select
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-amber-400"
+                className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
               >
                 <option value="REGISTRATION_OPEN">REGISTRATION_OPEN (Enrollment Active)</option>
                 <option value="UPCOMING">UPCOMING (Announced, Not Yet Open)</option>
@@ -586,21 +585,21 @@ export default function AdminChampionshipsPage() {
 
             {/* Subtitle */}
             <div className="space-y-1 md:col-span-2">
-              <label className="text-[11px] uppercase font-bold text-slate-300 block">
+              <label className="text-[11px] uppercase font-bold text-slate-700 block">
                 Subtitle / Championship Headline
               </label>
               <input
                 type="text"
                 value={formData.subtitle}
                 onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-amber-400"
+                className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
                 placeholder="The Pinnacle of Taekwondo Excellence"
               />
             </div>
 
             {/* Venue Name */}
             <div className="space-y-1 md:col-span-2">
-              <label className="text-[11px] uppercase font-bold text-slate-300 block">
+              <label className="text-[11px] uppercase font-bold text-slate-700 block">
                 Venue Name / Complex *
               </label>
               <input
@@ -608,13 +607,13 @@ export default function AdminChampionshipsPage() {
                 required
                 value={formData.venue}
                 onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-amber-400"
+                className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
               />
             </div>
 
             {/* City */}
             <div className="space-y-1">
-              <label className="text-[11px] uppercase font-bold text-slate-300 block">
+              <label className="text-[11px] uppercase font-bold text-slate-700 block">
                 City *
               </label>
               <input
@@ -622,13 +621,13 @@ export default function AdminChampionshipsPage() {
                 required
                 value={formData.city}
                 onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-amber-400"
+                className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
               />
             </div>
 
             {/* State */}
             <div className="space-y-1">
-              <label className="text-[11px] uppercase font-bold text-slate-300 block">
+              <label className="text-[11px] uppercase font-bold text-slate-700 block">
                 State *
               </label>
               <input
@@ -636,13 +635,13 @@ export default function AdminChampionshipsPage() {
                 required
                 value={formData.state}
                 onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-amber-400"
+                className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
               />
             </div>
 
             {/* Start Date */}
             <div className="space-y-1">
-              <label className="text-[11px] uppercase font-bold text-slate-300 block">
+              <label className="text-[11px] uppercase font-bold text-slate-700 block">
                 Tournament Start Date *
               </label>
               <input
@@ -650,13 +649,13 @@ export default function AdminChampionshipsPage() {
                 required
                 value={formData.start_date}
                 onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-amber-400"
+                className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
               />
             </div>
 
             {/* End Date */}
             <div className="space-y-1">
-              <label className="text-[11px] uppercase font-bold text-slate-300 block">
+              <label className="text-[11px] uppercase font-bold text-slate-700 block">
                 Tournament End Date *
               </label>
               <input
@@ -664,39 +663,39 @@ export default function AdminChampionshipsPage() {
                 required
                 value={formData.end_date}
                 onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-amber-400"
+                className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
               />
             </div>
 
             {/* Registration Open */}
             <div className="space-y-1">
-              <label className="text-[11px] uppercase font-bold text-slate-300 block">
+              <label className="text-[11px] uppercase font-bold text-slate-700 block">
                 Registration Opens Date
               </label>
               <input
                 type="date"
                 value={formData.registration_open}
                 onChange={(e) => setFormData({ ...formData, registration_open: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-amber-400"
+                className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
               />
             </div>
 
             {/* Registration Close */}
             <div className="space-y-1">
-              <label className="text-[11px] uppercase font-bold text-slate-300 block">
+              <label className="text-[11px] uppercase font-bold text-slate-700 block">
                 Registration Closes Date
               </label>
               <input
                 type="date"
                 value={formData.registration_close}
                 onChange={(e) => setFormData({ ...formData, registration_close: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-amber-400"
+                className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
               />
             </div>
 
             {/* Entry Fee Athlete */}
             <div className="space-y-1">
-              <label className="text-[11px] uppercase font-bold text-slate-300 block">
+              <label className="text-[11px] uppercase font-bold text-slate-700 block">
                 Athlete Entry Fee (INR)
               </label>
               <div className="relative">
@@ -707,14 +706,14 @@ export default function AdminChampionshipsPage() {
                   step="50"
                   value={formData.entry_fee_athlete}
                   onChange={(e) => setFormData({ ...formData, entry_fee_athlete: Number(e.target.value) })}
-                  className="w-full pl-7 pr-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-amber-400"
+                  className="w-full pl-7 pr-3 py-2 rounded-lg bg-white border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
                 />
               </div>
             </div>
 
             {/* Entry Fee Coach */}
             <div className="space-y-1">
-              <label className="text-[11px] uppercase font-bold text-slate-300 block">
+              <label className="text-[11px] uppercase font-bold text-slate-700 block">
                 Coach Entry Fee (INR)
               </label>
               <div className="relative">
@@ -723,32 +722,31 @@ export default function AdminChampionshipsPage() {
                   type="number"
                   disabled
                   value={0}
-                  className="w-full pl-7 pr-3 py-2 rounded-lg bg-slate-950/60 border border-slate-800 text-slate-400 text-xs cursor-not-allowed"
+                  className="w-full pl-7 pr-3 py-2 rounded-lg bg-slate-100 border border-slate-200 text-slate-500 text-xs cursor-not-allowed"
                 />
               </div>
-              <p className="text-[10px] text-sky-400 mt-1">
+              <p className="text-[10px] text-blue-600 mt-1">
                 ✓ Coach accreditation requires no participant fee.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={() => setEditModalOpen(false)}
-              className="border-slate-700 text-slate-300 hover:bg-slate-800"
+              className="border-slate-200 text-slate-700 hover:bg-slate-100 bg-white"
             >
               Cancel
             </Button>
 
             <Button
               type="submit"
-              variant="gold"
               size="sm"
               disabled={isSaving}
-              className="min-w-[120px]"
+              className="min-w-[120px] bg-blue-600 hover:bg-blue-700 text-white font-bold"
             >
               {isSaving ? (
                 <>
@@ -778,18 +776,18 @@ export default function AdminChampionshipsPage() {
         title="Confirm Championship Deletion"
         description="This action will permanently delete the championship edition and cannot be undone."
       >
-        <div className="space-y-4 pt-2 text-white">
-          <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 shrink-0 text-rose-400 mt-0.5" />
+        <div className="space-y-4 pt-2 text-slate-800">
+          <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 shrink-0 text-rose-600 mt-0.5" />
             <div className="space-y-1">
-              <span className="font-bold block text-rose-200">Permanent Deletion Warning</span>
+              <span className="font-bold block text-rose-900">Permanent Deletion Warning</span>
               <span>
                 You are about to delete <strong>{deletingItem?.name}</strong> ({deletingItem?.edition}). All linked configurations for this tournament edition will be removed.
               </span>
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200">
             <Button
               type="button"
               variant="outline"
@@ -799,7 +797,7 @@ export default function AdminChampionshipsPage() {
                 setDeleteModalOpen(false);
                 setDeletingItem(null);
               }}
-              className="border-slate-700 text-slate-300 hover:bg-slate-800"
+              className="border-slate-200 text-slate-700 hover:bg-slate-100 bg-white"
             >
               Cancel
             </Button>

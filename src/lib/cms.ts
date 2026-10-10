@@ -83,7 +83,7 @@ const DEFAULT_CHAMPIONSHIP_DATA: PublicChampionshipContent = {
   startDate: "2026-11-20T09:00:00Z",
   endDate: "2026-11-23T18:00:00Z",
   registrationOpen: "2026-03-01T00:00:00.000Z",
-  registrationClose: "2026-04-30T23:59:59.000Z",
+  registrationClose: "2026-11-10T23:59:59.000Z",
   venue: "Indira Gandhi Indoor Stadium Complex",
   city: "New Delhi",
   state: "Delhi",

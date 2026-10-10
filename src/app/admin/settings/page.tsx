@@ -151,11 +151,11 @@ export default function AdminSettingsPage() {
     <div className="space-y-8 max-w-5xl">
       {/* Page Header */}
       <div>
-        <h2 className="text-xl font-bold uppercase tracking-wide text-white flex items-center gap-2">
-          <Settings className="h-5 w-5 text-sky-400" />
+        <h2 className="text-xl font-bold uppercase tracking-wide text-slate-900 flex items-center gap-2">
+          <Settings className="h-5 w-5 text-blue-600" />
           <span>Admin Portal Settings & Account Security</span>
         </h2>
-        <p className="text-xs text-slate-400 mt-1">
+        <p className="text-xs text-slate-500 mt-1">
           Manage administrative credentials, change password, and verify zero-credential public exposure audit.
         </p>
       </div>
@@ -163,25 +163,25 @@ export default function AdminSettingsPage() {
       {/* =========================================================================
           1. ADMIN PORTAL ID & PASSWORD MANAGEMENT CARD
           ========================================================================= */}
-      <Card className="border-slate-800 bg-slate-900/60 p-6 space-y-6">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-          <CardTitle className="text-sm font-bold flex items-center gap-2 text-white">
-            <Lock className="h-4 w-4 text-amber-400" />
+      <Card className="border-slate-200 bg-white p-6 space-y-6 shadow-xs">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+          <CardTitle className="text-sm font-bold flex items-center gap-2 text-slate-900">
+            <Lock className="h-4 w-4 text-blue-600" />
             <span>Admin Portal Login Credentials</span>
           </CardTitle>
-          <Badge variant="warning">Administrative Access</Badge>
+          <Badge variant="warning" className="bg-amber-50 text-amber-800 border-amber-200">Administrative Access</Badge>
         </div>
 
         {errorNotice && (
-          <div className="p-3.5 rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-400 text-xs flex items-center gap-2.5">
-            <AlertCircle className="h-4 w-4 shrink-0" />
+          <div className="p-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 text-xs flex items-center gap-2.5">
+            <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
             <span>{errorNotice}</span>
           </div>
         )}
 
         {successNotice && (
-          <div className="p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-xs flex items-center gap-2.5">
-            <CheckCircle2 className="h-4 w-4 shrink-0" />
+          <div className="p-3.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-800 text-xs flex items-center gap-2.5">
+            <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
             <span>{successNotice}</span>
           </div>
         )}
@@ -190,7 +190,7 @@ export default function AdminSettingsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {/* Current Admin ID / Email */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
                 Current Admin ID / Email
               </label>
               <div className="relative">
@@ -198,9 +198,9 @@ export default function AdminSettingsPage() {
                   type="text"
                   value={currentAdminId}
                   disabled
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400 cursor-not-allowed font-mono"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-xs text-slate-500 cursor-not-allowed font-mono"
                 />
-                <User className="h-4 w-4 text-slate-600 absolute right-3 top-3" />
+                <User className="h-4 w-4 text-slate-400 absolute right-3 top-3" />
               </div>
               <p className="text-[11px] text-slate-500 mt-1">
                 Your currently active administrative login username.
@@ -209,8 +209,8 @@ export default function AdminSettingsPage() {
 
             {/* Current Password (Required for verification) */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
-                Current Password <span className="text-amber-400">*</span>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                Current Password <span className="text-blue-600">*</span>
               </label>
               <div className="relative">
                 <input
@@ -219,31 +219,31 @@ export default function AdminSettingsPage() {
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
                   required
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 pr-10 font-mono"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 pr-10 font-mono"
                 />
                 <button
                   type="button"
                   onClick={() => setShowCurrentPass(!showCurrentPass)}
-                  className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-200"
+                  className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600"
                 >
                   {showCurrentPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              <p className="text-[11px] text-slate-400 mt-1">
+              <p className="text-[11px] text-slate-500 mt-1">
                 Required to verify and authorize any credential change.
               </p>
             </div>
           </div>
 
-          <div className="pt-2 border-t border-slate-800/80">
-            <span className="text-xs font-bold text-sky-400 uppercase tracking-wider block mb-3">
+          <div className="pt-2 border-t border-slate-100">
+            <span className="text-xs font-bold text-blue-700 uppercase tracking-wider block mb-3">
               New Credentials (Change ID or Password)
             </span>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {/* New Admin ID / Email */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
                   New Admin ID / Email
                 </label>
                 <input
@@ -251,16 +251,16 @@ export default function AdminSettingsPage() {
                   placeholder="e.g. director or admin@kukkiwoncup.org"
                   value={newAdminId}
                   onChange={(e) => setNewAdminId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 font-mono"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 font-mono"
                 />
-                <p className="text-[11px] text-slate-400 mt-1">
+                <p className="text-[11px] text-slate-500 mt-1">
                   You can set any custom Admin ID or email.
                 </p>
               </div>
 
               {/* New Password */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
                   New Password (Optional)
                 </label>
                 <div className="relative">
@@ -269,22 +269,22 @@ export default function AdminSettingsPage() {
                     placeholder="Leave blank to keep current"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 pr-10 font-mono"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 pr-10 font-mono"
                   />
                   <button
                     type="button"
                     onClick={() => setShowNewPass(!showNewPass)}
-                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-200"
+                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600"
                   >
                     {showNewPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
-                <p className="text-[11px] text-slate-400 mt-1">Minimum 6 characters.</p>
+                <p className="text-[11px] text-slate-500 mt-1">Minimum 6 characters.</p>
               </div>
 
               {/* Confirm New Password */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
                   Confirm New Password
                 </label>
                 <input
@@ -293,9 +293,9 @@ export default function AdminSettingsPage() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   disabled={!newPassword}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 font-mono disabled:opacity-50"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 font-mono disabled:opacity-50"
                 />
-                <p className="text-[11px] text-slate-400 mt-1">Must match new password.</p>
+                <p className="text-[11px] text-slate-500 mt-1">Must match new password.</p>
               </div>
             </div>
           </div>
@@ -304,7 +304,7 @@ export default function AdminSettingsPage() {
             <Button
               type="submit"
               disabled={saving}
-              className="bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold uppercase tracking-wider px-6 py-2.5"
+              className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold uppercase tracking-wider px-6 py-2.5 shadow-xs"
             >
               {saving ? (
                 <>
@@ -325,35 +325,35 @@ export default function AdminSettingsPage() {
       {/* =========================================================================
           2. SECURITY POSTURE SUMMARY CARD
           ========================================================================= */}
-      <Card className="border-slate-800 bg-slate-900/60 p-6 space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-          <CardTitle className="text-sm font-bold flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4 text-emerald-400" />
+      <Card className="border-slate-200 bg-white p-6 space-y-4 shadow-xs">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+          <CardTitle className="text-sm font-bold flex items-center gap-2 text-slate-900">
+            <ShieldCheck className="h-4 w-4 text-emerald-600" />
             <span>Zero-Credential Exposure Audit</span>
           </CardTitle>
           <Badge variant="success">Security Verified</Badge>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-300">
-          <div className="p-3 rounded-lg bg-slate-950 border border-slate-800">
-            <div className="text-slate-400 text-[11px]">Database Access</div>
-            <div className="font-semibold text-white mt-1">Parameterized ORM (Prisma v6)</div>
-            <div className="text-slate-400 text-[10px] mt-0.5">Zero raw client SQL injection risk</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-700">
+          <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
+            <div className="text-slate-500 text-[11px]">Database Access</div>
+            <div className="font-semibold text-slate-900 mt-1">Parameterized ORM (Prisma v6)</div>
+            <div className="text-slate-500 text-[10px] mt-0.5">Zero raw client SQL injection risk</div>
           </div>
-          <div className="p-3 rounded-lg bg-slate-950 border border-slate-800">
-            <div className="text-slate-400 text-[11px]">Document Privacy</div>
-            <div className="font-semibold text-white mt-1">HMAC-Signed URLs (300s TTL)</div>
-            <div className="text-slate-400 text-[10px] mt-0.5">Participant documents never public</div>
+          <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
+            <div className="text-slate-500 text-[11px]">Document Privacy</div>
+            <div className="font-semibold text-slate-900 mt-1">HMAC-Signed URLs (300s TTL)</div>
+            <div className="text-slate-500 text-[10px] mt-0.5">Participant documents never public</div>
           </div>
-          <div className="p-3 rounded-lg bg-slate-950 border border-slate-800">
-            <div className="text-slate-400 text-[11px]">QR Accreditation</div>
-            <div className="font-semibold text-white mt-1">Decoupled Token Resolution</div>
-            <div className="text-slate-400 text-[10px] mt-0.5">No raw PII stored in QR matrices</div>
+          <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
+            <div className="text-slate-500 text-[11px]">QR Accreditation</div>
+            <div className="font-semibold text-slate-900 mt-1">Decoupled Token Resolution</div>
+            <div className="text-slate-500 text-[10px] mt-0.5">No raw PII stored in QR matrices</div>
           </div>
-          <div className="p-3 rounded-lg bg-slate-950 border border-slate-800">
-            <div className="text-slate-400 text-[11px]">Credentials Store</div>
-            <div className="font-semibold text-emerald-400 mt-1">PBKDF2 Salted Hashes & File Disk Persistence</div>
-            <div className="text-slate-400 text-[10px] mt-0.5">Safe against restarts and cold starts</div>
+          <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
+            <div className="text-slate-500 text-[11px]">Credentials Store</div>
+            <div className="font-semibold text-emerald-700 mt-1">PBKDF2 Salted Hashes & File Disk Persistence</div>
+            <div className="text-slate-500 text-[10px] mt-0.5">Safe against restarts and cold starts</div>
           </div>
         </div>
       </Card>
@@ -361,10 +361,10 @@ export default function AdminSettingsPage() {
       {/* =========================================================================
           3. ENVIRONMENT VARIABLES AUDIT
           ========================================================================= */}
-      <Card className="border-slate-800 bg-slate-900/60 p-6 space-y-4">
-        <div className="border-b border-slate-800 pb-3">
-          <CardTitle className="text-sm font-bold flex items-center gap-2">
-            <Key className="h-4 w-4 text-amber-400" />
+      <Card className="border-slate-200 bg-white p-6 space-y-4 shadow-xs">
+        <div className="border-b border-slate-200 pb-3">
+          <CardTitle className="text-sm font-bold flex items-center gap-2 text-slate-900">
+            <Key className="h-4 w-4 text-blue-600" />
             <span>Environment Variable Isolation</span>
           </CardTitle>
         </div>
@@ -373,19 +373,19 @@ export default function AdminSettingsPage() {
           {envConfig.map((env) => (
             <div
               key={env.key}
-              className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border border-slate-800/80 bg-slate-950/70 text-xs gap-2"
+              className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border border-slate-200 bg-slate-50 text-xs gap-2"
             >
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2">
-                  <code className="font-mono font-bold text-sky-400">{env.key}</code>
+                  <code className="font-mono font-bold text-blue-700">{env.key}</code>
                   <Badge variant={env.scope === "PUBLIC" ? "info" : "default"}>
                     {env.scope}
                   </Badge>
                 </div>
-                <div className="text-[11px] text-slate-400">{env.desc}</div>
+                <div className="text-[11px] text-slate-500">{env.desc}</div>
               </div>
               <div>
-                <span className="font-mono text-[11px] font-semibold text-emerald-400">
+                <span className="font-mono text-[11px] font-semibold text-emerald-700">
                   {env.status}
                 </span>
               </div>
