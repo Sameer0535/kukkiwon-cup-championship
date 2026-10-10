@@ -11,9 +11,9 @@ export function Table({
   ...props
 }: React.HTMLAttributes<HTMLTableElement>) {
   return (
-    <div className="relative w-full overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/60 shadow-md">
+    <div className="relative w-full overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-xs">
       <table
-        className={cn("w-full caption-bottom text-sm text-slate-200", className)}
+        className={cn("w-full caption-bottom text-sm text-slate-900", className)}
         {...props}
       />
     </div>
@@ -26,7 +26,7 @@ export function TableHeader({
 }: React.HTMLAttributes<HTMLTableSectionElement>) {
   return (
     <thead
-      className={cn("border-b border-slate-800 bg-slate-950/70 text-xs uppercase font-bold tracking-wider text-slate-400", className)}
+      className={cn("border-b border-slate-200 bg-slate-50 text-xs uppercase font-bold tracking-wider text-slate-500", className)}
       {...props}
     />
   );
@@ -38,7 +38,7 @@ export function TableBody({
 }: React.HTMLAttributes<HTMLTableSectionElement>) {
   return (
     <tbody
-      className={cn("[&_tr:last-child]:border-0 divide-y divide-slate-800/60", className)}
+      className={cn("[&_tr:last-child]:border-0 divide-y divide-slate-100 bg-white", className)}
       {...props}
     />
   );
@@ -51,7 +51,7 @@ export function TableRow({
   return (
     <tr
       className={cn(
-        "transition-colors hover:bg-slate-800/40 data-[state=selected]:bg-slate-800",
+        "transition-colors hover:bg-slate-50/80 data-[state=selected]:bg-slate-50",
         className
       )}
       {...props}
@@ -66,7 +66,7 @@ export function TableHead({
   return (
     <th
       className={cn(
-        "h-11 px-4 text-left align-middle font-bold text-slate-300 [&:has([role=checkbox])]:pr-0",
+        "h-11 px-4 text-left align-middle font-bold text-slate-600 [&:has([role=checkbox])]:pr-0",
         className
       )}
       {...props}
@@ -80,7 +80,7 @@ export function TableCell({
 }: React.TdHTMLAttributes<HTMLTableCellElement>) {
   return (
     <td
-      className={cn("p-4 align-middle text-xs [&:has([role=checkbox])]:pr-0", className)}
+      className={cn("p-4 align-middle text-xs text-slate-700 [&:has([role=checkbox])]:pr-0", className)}
       {...props}
     />
   );
